@@ -1,0 +1,13 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: AG Tele Eclipse UI
+Bundle-SymbolicName: de.tud.et.ifa.agtele.eclipse.commons.ui;singleton:=true
+Bundle-Version: 0.1.0.qualifier
+Bundle-Vendor: AG Tele
+Require-Bundle: org.eclipse.ui,
+ org.eclipse.emf.common,
+ org.eclipse.emf.common.ui,
+ org.eclipse.core.runtime
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Bundle-ActivationPolicy: lazy
+Bundle-Activator: de.tud.et.ifa.agtele.ui.AgteleUIPlugin$Implementation
