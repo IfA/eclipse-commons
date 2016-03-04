@@ -76,11 +76,15 @@ public class EMFModelHelpView extends ViewPart implements IPersistable {
 	@Override
 	public void createPartControl(Composite parent) {
 		browser = new Browser(parent, SWT.NONE);
-		currentText = AgteleUIPlugin.getPlugin().getDialogSettings().get("browserText");
-		browser.setText(currentText);
-		
+
 		makeActions();
 		contributeToActionBars();
+		
+		currentText = AgteleUIPlugin.getPlugin().getDialogSettings().get("browserText");
+		browser.setText(currentText);
+		if (linkEditor) {
+			show();
+		}
 	}
 
 	/**
@@ -130,10 +134,6 @@ public class EMFModelHelpView extends ViewPart implements IPersistable {
 		linkAction.setChecked(linkEditor);
 	}
 
-	private Browser getBrowser() {
-		return browser;
-	}
-
 	/**
 	 * Opens the view and shows help based on the current selection
 	 */
@@ -162,7 +162,7 @@ public class EMFModelHelpView extends ViewPart implements IPersistable {
 		try {
 			EMFModelHelpView helpView = (EMFModelHelpView) PlatformUI.getWorkbench().getActiveWorkbenchWindow()
 					.getActivePage().showView(ID, null, IWorkbenchPage.VIEW_VISIBLE);
-			helpView.getBrowser().setText(text);
+			helpView.browser.setText(text);
 			helpView.currentText = text;
 		} catch (PartInitException e) {
 			// TODO Auto-generated catch block

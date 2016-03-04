@@ -10,7 +10,7 @@
       <view
             category="de.tud.et.ifa.agtele.ui.views.category"
             class="de.tud.et.ifa.agtele.ui.views.EMFModelHelpView"
-            icon="icons/sample.gif"
+            icon="icons/help_view.gif"
             id="de.tud.et.ifa.agtele.ui.views.EMFModelHelpView"
             name="%_UI_EMFModelHelpView_Name">
       </view>
