@@ -10,24 +10,21 @@ import de.tud.et.ifa.agtele.ui.AgteleUIPlugin;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 
 import org.eclipse.emf.ecore.EAttribute;
-import org.eclipse.emf.ecore.EClass;
-import org.eclipse.emf.ecore.EModelElement;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.EReference;
 import org.eclipse.emf.ecore.EStructuralFeature;
 import org.eclipse.emf.ecore.util.EcoreUtil;
 import org.eclipse.emf.edit.command.CommandParameter;
 import org.eclipse.emf.edit.provider.IItemPropertyDescriptor;
-import org.eclipse.emf.edit.provider.ItemPropertyDescriptor;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IToolBarManager;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.StructuredSelection;
-import org.eclipse.osgi.internal.loader.ModuleClassLoader.GenerationProtectionDomain;
 import org.eclipse.ui.*;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.browser.Browser;
@@ -47,6 +44,8 @@ public class EMFModelHelpView extends ViewPart implements IPersistable {
 	private Browser browser;
 	private Action linkAction;
 
+	private String currentText;
+	
 	private ISelectionListener selectionListener;
 
 	private Boolean linkEditor;
@@ -77,7 +76,9 @@ public class EMFModelHelpView extends ViewPart implements IPersistable {
 	@Override
 	public void createPartControl(Composite parent) {
 		browser = new Browser(parent, SWT.NONE);
-
+		currentText = AgteleUIPlugin.getPlugin().getDialogSettings().get("browserText");
+		browser.setText(currentText);
+		
 		makeActions();
 		contributeToActionBars();
 	}
@@ -95,6 +96,9 @@ public class EMFModelHelpView extends ViewPart implements IPersistable {
 		PlatformUI.getWorkbench().getActiveWorkbenchWindow().getSelectionService()
 				.removeSelectionListener(selectionListener);
 		AgteleUIPlugin.getPlugin().getDialogSettings().put("link", linkEditor);
+		
+		AgteleUIPlugin.getPlugin().getDialogSettings().put("browserText", currentText);
+		
 		super.dispose();
 	}
 
@@ -159,6 +163,7 @@ public class EMFModelHelpView extends ViewPart implements IPersistable {
 			EMFModelHelpView helpView = (EMFModelHelpView) PlatformUI.getWorkbench().getActiveWorkbenchWindow()
 					.getActivePage().showView(ID, null, IWorkbenchPage.VIEW_VISIBLE);
 			helpView.getBrowser().setText(text);
+			helpView.currentText = text;
 		} catch (PartInitException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -170,7 +175,7 @@ public class EMFModelHelpView extends ViewPart implements IPersistable {
 	 */
 	public static void showIndex() {
 		// TODO create index.html that explains how to use this help
-		showText("AMINO UI Help Index");
+		showText("EMF Model Help Index");
 	}
 
 	/**
@@ -182,11 +187,23 @@ public class EMFModelHelpView extends ViewPart implements IPersistable {
 	private static void showHelp(ISelection selection) {
 		if (selection instanceof StructuredSelection) {
 			StructuredSelection structuredSelection = (StructuredSelection) selection;
+			// show Help if one EObject is selected
 			if (structuredSelection.size() == 1) {
 				if (structuredSelection.getFirstElement() instanceof EObject) {
 					EMFModelHelpView.showHelp((EObject) structuredSelection.getFirstElement());
-				} else {
-					EMFModelHelpView.showIndex();
+				}
+			}
+			// else show nothing new
+			else {
+				Iterator<?> it = structuredSelection.iterator();
+				while (it.hasNext()) {
+					Object type = it.next();
+					if (!(type instanceof EObject)) {
+						return;
+					}
+				}
+				if (!structuredSelection.isEmpty()) {
+					EMFModelHelpView.showText(AgteleUIPlugin.getPlugin().getString("_UI_EMFModelHelpView_TooManyElementsSelected"));
 				}
 			}
 		}
@@ -201,40 +218,31 @@ public class EMFModelHelpView extends ViewPart implements IPersistable {
 	private static String getHtml(EObject eObject) {
 		String html = "<HTML><BODY>";
 
-		if (((EObject) eObject).eClass() instanceof EModelElement) {
-			EModelElement eModelElement = (EModelElement) ((EObject) eObject).eClass();
-			// EClass Name
-			html += eObject.eClass().getName();
-
-			// EClass Documentation
-			if (EcoreUtil.getDocumentation(eModelElement) != null) {
-				html += "<br/><br/>" + EcoreUtil.getDocumentation(eModelElement);
-			}
-			
-			html += getPropertyHelp(eObject);
-			
-			// Containment reference and possible targets documentation
-			if (!AgteleEcoreUtil.getEditingDomainFor(eObject).getNewChildDescriptors(eObject, null).isEmpty()) {
-				LinkedHashMap<EStructuralFeature, List<EObject>> childDescriptors = sortChildDescriptors(
-						AgteleEcoreUtil.getEditingDomainFor(eObject).getNewChildDescriptors(eObject, null));
-				html += "<br/><br/>Containment-References and possible children";
-
-				for (EStructuralFeature reference : childDescriptors.keySet()) {
-					html += "<br/><br/>" + reference.getName();
-					for (EObject eValue : childDescriptors.get(reference)) {
-						html += "<br/>" + eValue.eClass().getName();
-						if (EcoreUtil.getDocumentation(eValue.eClass()) != null)
-							html += "<br/>" + EcoreUtil.getDocumentation(eValue.eClass()) + "<br/>";
-					}
-				}
-
-			}
-		} else
-			html += "No help text available!";
+		html += getEClassHelp(eObject);
+		html += getPropertyHelp(eObject);
+		html += getContainmentReferenceHelp(eObject);
 
 		html += "</BODY></HTML>";
 
 		return html;
+	}
+	
+	/**
+	 * Generates the Documentation of the EClass of a given {@link EObject}
+	 * 
+	 * @param eObject
+	 * @return
+	 */
+	private static String getEClassHelp(EObject eObject) {
+		String eClassHelp = "";
+		// EClass Name
+		eClassHelp += eObject.eClass().getName();
+
+		// EClass Documentation
+		if (EcoreUtil.getDocumentation(eObject.eClass()) != null) {
+			eClassHelp += "<br/><br/>" + EcoreUtil.getDocumentation(eObject.eClass());
+		}
+		return eClassHelp;
 	}
 	
 	/**
@@ -276,6 +284,36 @@ public class EMFModelHelpView extends ViewPart implements IPersistable {
 		return propertyHelp;
 	}
 
+	/**
+	 * Generates the Documentation of the {@link EReference Containment
+	 * References} and the possible Children of a given {@link EObject}
+	 * 
+	 * @param eObject
+	 * @return
+	 */
+	private static String getContainmentReferenceHelp(EObject eObject) {
+		String eClassHelp = "";
+		// Containment reference and possible targets documentation
+		if (!AgteleEcoreUtil.getEditingDomainFor(eObject).getNewChildDescriptors(eObject, null).isEmpty()) {
+			LinkedHashMap<EStructuralFeature, List<EObject>> childDescriptors = sortChildDescriptors(
+					AgteleEcoreUtil.getEditingDomainFor(eObject).getNewChildDescriptors(eObject, null));
+			eClassHelp += "<br/><br/>Containment-References and possible children";
+			
+			for (EStructuralFeature reference : childDescriptors.keySet()) {
+				// EReference documentation
+				eClassHelp += "<br/><br/>" + reference.getName();
+				eClassHelp += EcoreUtil.getDocumentation(reference) != null ? "<br/>" + EcoreUtil.getDocumentation(reference) : "";
+				for (EObject eValue : childDescriptors.get(reference)) {
+					// Children Documentation
+					eClassHelp += "<br/><br/>" + eValue.eClass().getName();
+					eClassHelp += EcoreUtil.getDocumentation(eValue.eClass()) != null ? "<br/>" + EcoreUtil.getDocumentation(eValue.eClass()) : "";
+				}
+			}
+
+		}
+		return eClassHelp;
+	}
+	
 	/**
 	 * Sorts {@link CommandParameter}s of the getNewChildDescriptors method of
 	 * an EObject into a {@link HashMap} in such way, that each child (
