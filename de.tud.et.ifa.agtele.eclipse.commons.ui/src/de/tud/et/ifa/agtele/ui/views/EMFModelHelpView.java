@@ -32,6 +32,7 @@ import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.ui.*;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.browser.Browser;
+import org.eclipse.swt.events.HelpListener;
 
 
 /**
@@ -317,5 +318,11 @@ public class EMFModelHelpView extends ViewPart implements IPersistable {
 		return null;
 	}
 	
-	
+	public static class HelpListener implements HelpListener {
+
+		@Override
+		public void helpRequested(HelpEvent e) {
+			show();
+		}
+	}
 }
