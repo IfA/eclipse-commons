@@ -14,6 +14,11 @@ import org.eclipse.emf.common.util.ResourceLocator;
  */
 public final class AgteleUIPlugin extends EMFPlugin {
 	/**
+	 * The Plugin ID
+	 */
+	public static final String PLUGIN_ID = "de.tud.et.ifa.agtele.eclipse.commons.ui";
+	
+	/**
 	 * Keep track of the singleton.
 	 * <!-- begin-user-doc -->
 	 * <!-- end-user-doc -->
