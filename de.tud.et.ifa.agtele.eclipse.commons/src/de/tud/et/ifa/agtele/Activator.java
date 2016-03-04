@@ -1,4 +1,4 @@
-package de.tud.et.ifa.agtele.eclipse.commons;
+package de.tud.et.ifa.agtele;
 
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;

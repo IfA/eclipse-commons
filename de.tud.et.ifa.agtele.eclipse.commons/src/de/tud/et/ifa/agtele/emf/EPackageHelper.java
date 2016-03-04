@@ -1,4 +1,4 @@
-package de.tud.et.ifa.agtele.eclipse.commons.emf;
+package de.tud.et.ifa.agtele.emf;
 
 import java.util.HashMap;
 import java.util.HashSet;

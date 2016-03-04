@@ -3,7 +3,7 @@ Bundle-ManifestVersion: 2
 Bundle-Name: Eclipse Commons
 Bundle-SymbolicName: de.tud.et.ifa.agtele.eclipse.commons
 Bundle-Version: 0.1.0.qualifier
-Bundle-Activator: de.tud.et.ifa.agtele.eclipse.commons.Activator
+Bundle-Activator: de.tud.et.ifa.agtele.Activator
 Bundle-Vendor: AG Tele
 Require-Bundle: org.eclipse.core.runtime,
  org.eclipse.swt,
@@ -13,4 +13,6 @@ Require-Bundle: org.eclipse.core.runtime,
  org.eclipse.xsd;bundle-version="2.11.0"
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ActivationPolicy: lazy
-Export-Package: de.tud.et.ifa.agtele.eclipse.commons
+Export-Package: de.tud.et.ifa.agtele,
+ de.tud.et.ifa.agtele.emf,
+ de.tud.et.ifa.agtele.resources

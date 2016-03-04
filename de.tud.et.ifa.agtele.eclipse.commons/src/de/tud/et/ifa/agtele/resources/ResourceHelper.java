@@ -1,4 +1,4 @@
-package de.tud.et.ifa.agtele.eclipse.commons;
+package de.tud.et.ifa.agtele.resources;
 
 import java.io.BufferedInputStream;
 import java.io.File;
