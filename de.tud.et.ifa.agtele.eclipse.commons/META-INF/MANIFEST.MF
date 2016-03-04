@@ -1,0 +1,10 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Eclipse Commons
+Bundle-SymbolicName: de.tud.et.ifa.agtele.eclipse.commons
+Bundle-Version: 0.1.0.qualifier
+Bundle-Activator: de.tud.et.ifa.agtele.eclipse.commons.Activator
+Bundle-Vendor: AG Tele
+Require-Bundle: org.eclipse.core.runtime
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Bundle-ActivationPolicy: lazy
