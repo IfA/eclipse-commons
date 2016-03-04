@@ -8,3 +8,4 @@ Bundle-Vendor: AG Tele
 Require-Bundle: org.eclipse.core.runtime
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ActivationPolicy: lazy
+Export-Package: de.tud.et.ifa.agtele.eclipse.commons
