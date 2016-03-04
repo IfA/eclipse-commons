@@ -1,6 +1,6 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
-Bundle-Name: AG Tele Eclipse UI
+Bundle-Name: Eclipse Commons UI
 Bundle-SymbolicName: de.tud.et.ifa.agtele.eclipse.commons.ui;singleton:=true
 Bundle-Version: 0.1.0.qualifier
 Bundle-Vendor: AG Tele
