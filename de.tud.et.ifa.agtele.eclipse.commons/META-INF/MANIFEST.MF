@@ -5,7 +5,9 @@ Bundle-SymbolicName: de.tud.et.ifa.agtele.eclipse.commons
 Bundle-Version: 0.1.0.qualifier
 Bundle-Activator: de.tud.et.ifa.agtele.eclipse.commons.Activator
 Bundle-Vendor: AG Tele
-Require-Bundle: org.eclipse.core.runtime
+Require-Bundle: org.eclipse.core.runtime,
+ org.eclipse.swt,
+ org.eclipse.jface
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ActivationPolicy: lazy
 Export-Package: de.tud.et.ifa.agtele.eclipse.commons
