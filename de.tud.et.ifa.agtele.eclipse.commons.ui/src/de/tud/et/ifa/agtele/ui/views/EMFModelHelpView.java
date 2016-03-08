@@ -269,8 +269,11 @@ public class EMFModelHelpView extends ViewPart implements IPersistable {
 				// Non-Containment References
 				else if (itemPropertyDescriptor.getFeature(null) instanceof EReference) {
 					EReference nonContainmentReference = (EReference) itemPropertyDescriptor.getFeature(null);
-					nonContainmentReferenceHtml += "<br/><br/>" + nonContainmentReference.getName() + " : " + nonContainmentReference.getEGenericType().getEClassifier().getName();
-					nonContainmentReferenceHtml += EcoreUtil.getDocumentation(nonContainmentReference) != null ? "<br/>"+EcoreUtil.getDocumentation(nonContainmentReference) : "";
+					// display Non-Containment References only if a type is bound to it
+					if (nonContainmentReference.getEGenericType().getEClassifier() != null) {
+						nonContainmentReferenceHtml += "<br/><br/>" + nonContainmentReference.getName() + " : " + nonContainmentReference.getEGenericType().getEClassifier().getName();
+						nonContainmentReferenceHtml += EcoreUtil.getDocumentation(nonContainmentReference) != null ? "<br/>"+EcoreUtil.getDocumentation(nonContainmentReference) : "";
+					}
 				}
 			}
 			// add the attribute and reference documentation to the actual documentation
