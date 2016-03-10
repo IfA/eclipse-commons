@@ -12,19 +12,11 @@ import org.eclipse.emf.ecore.EReference;
  * @author martin
  *
  */
-public class HelpItemData {
+public abstract class HelpItemData {
 	private String name;
 	private String documentation;
 	private String dataType;
-	private EObject eObject;
-
-	public HelpItemData() {
-	}
-
-	public HelpItemData(EObject eObject) {
-		this.eObject = eObject;
-	}
-
+	
 	/**
 	 * @return the name of the element to be described
 	 */
@@ -63,17 +55,5 @@ public class HelpItemData {
 
 	public void setDataType(String dataType) {
 		this.dataType = dataType;
-	}
-
-	/**
-	 * 
-	 * @return the {@link EObject} this item describes
-	 */
-	public EObject getEObject() {
-		return eObject;
-	}
-
-	public void setEObject(EObject eObject) {
-		this.eObject = eObject;
 	}
 }

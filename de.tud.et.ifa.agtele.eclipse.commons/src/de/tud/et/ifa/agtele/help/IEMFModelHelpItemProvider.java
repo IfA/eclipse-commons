@@ -1,9 +1,17 @@
 package de.tud.et.ifa.agtele.help;
 
+import java.util.List;
+
 import org.eclipse.emf.ecore.EAttribute;
 import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.EReference;
+import org.eclipse.emf.ecore.EStructuralFeature;
+import org.eclipse.emf.edit.command.CommandParameter;
+import org.eclipse.emf.edit.provider.AdapterFactoryItemDelegator;
+import org.eclipse.emf.edit.provider.IItemPropertyDescriptor;
+
+import de.tud.et.ifa.agtele.emf.AgteleEcoreUtil;
 
 /**
  * This interface may be implemented to provide a help text.
@@ -23,17 +31,32 @@ public interface IEMFModelHelpItemProvider {
 	 *            relevant for the rendering of a help page
 	 * @return the help text to be displayed (as HTML)
 	 */
-	public String render(HelpItemDescription helpItemDescription);
+	default public String render(HelpItemDescription helpItemDescription) {
+		return "";
+	}
 
 	/**
-	 * Returns all relevant {@link HelpItemDescription help data} of an {@link EObject} by
-	 * gathering {@link HelpItemData} for the {@link EClass},
-	 * {@link EAttribute EAttributes} and {@link EReference non-containtment and
-	 * containment References} and their possible {@link EClass child elements}
+	 * Returns all relevant {@link HelpItemDescription help data} of an
+	 * {@link EObject} by gathering {@link HelpItemData} for the {@link EClass},
+	 * {@link EAttribute EAttributes}, {@link EReference containment References}
+	 * including their possible {@link EClass child elements}, and
+	 * {@link EReference non-containment References} including their possible
+	 * targets in the model that the eObject originates from.
 	 * 
 	 * @param eObject
 	 * @return all relevant {@link HelpItemDescription}
 	 */
-	public HelpItemDescription getHelpItemDescription(EObject eObject);
+	@SuppressWarnings("unchecked")
+	default public HelpItemDescription getHelpItemDescription(EObject eObject) {
+		HelpItemDescription helpItemDescription = new HelpItemDescription(eObject);
+
+		/**
+		 * Generates the Documentation of the properties of a given
+		 * {@link EObject}
+		 */
+		helpItemDescription.setEClassDescription(new EClassHelpItemData(eObject.eClass()));
+
+		return helpItemDescription;
+	}
 
 }
