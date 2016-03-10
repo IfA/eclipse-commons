@@ -56,6 +56,23 @@ public interface IEMFModelHelpItemProvider {
 		 */
 		helpItemDescription.setEClassDescription(new EClassHelpItemData(eObject.eClass()));
 
+		
+		if (AgteleEcoreUtil.getAdapterFactoryItemDelegatorFor(eObject) != null) {
+			AdapterFactoryItemDelegator afid = AgteleEcoreUtil.getAdapterFactoryItemDelegatorFor(eObject);
+			/**
+			 * Generates the Documentation of the {@link EReference Containment
+			 * References} and the possible Children of a given {@link EObject}
+			 */
+			List<IItemPropertyDescriptor> propertyDescriptors = afid.getPropertyDescriptors(eObject);
+
+			for (IItemPropertyDescriptor itemPropertyDescriptor : propertyDescriptors) {
+				// EAttribute
+				if (itemPropertyDescriptor.getFeature(null) instanceof EAttribute) {
+					EAttribute attr = (EAttribute) itemPropertyDescriptor.getFeature(null);
+					
+					helpItemDescription.addAttributeDescription(new EAttributeHelpItemData(attr));
+				}
+		}
 		return helpItemDescription;
 	}
 
