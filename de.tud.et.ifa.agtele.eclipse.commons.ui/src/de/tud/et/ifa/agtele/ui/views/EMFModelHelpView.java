@@ -4,23 +4,14 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.ui.part.*;
 
 import de.tud.et.ifa.agtele.emf.AgteleEcoreUtil;
+import de.tud.et.ifa.agtele.help.IEMFModelHelpItemProvider;
 import de.tud.et.ifa.agtele.resources.BundleContentHelper;
 import de.tud.et.ifa.agtele.ui.AgteleUIPlugin;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
 import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.List;
-
-import org.eclipse.emf.ecore.EAttribute;
+import org.eclipse.emf.common.notify.Adapter;
 import org.eclipse.emf.ecore.EObject;
-import org.eclipse.emf.ecore.EReference;
-import org.eclipse.emf.ecore.EStructuralFeature;
-import org.eclipse.emf.ecore.util.EcoreUtil;
-import org.eclipse.emf.edit.command.CommandParameter;
-import org.eclipse.emf.edit.provider.IItemPropertyDescriptor;
+import org.eclipse.emf.edit.provider.IEditingDomainItemProvider;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IToolBarManager;
 import org.eclipse.jface.viewers.ISelection;
@@ -162,10 +153,13 @@ public class EMFModelHelpView extends ViewPart implements IPersistable {
 		try {
 			EMFModelHelpView helpView = (EMFModelHelpView) PlatformUI.getWorkbench().getActiveWorkbenchWindow()
 					.getActivePage().showView(ID, null, IWorkbenchPage.VIEW_VISIBLE);
-			helpView.browser.setText(text);
-			helpView.currentText = text;
+			
+			if (!text.equals(helpView.currentText)) {
+				helpView.browser.setText(text);
+				helpView.currentText = text;				
+			}
+			else return;
 		} catch (PartInitException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
@@ -210,140 +204,36 @@ public class EMFModelHelpView extends ViewPart implements IPersistable {
 	}
 
 	/**
-	 * Generates the documentation page of an eObject
+	 * Generates the documentation page of an {@link EObject} based on the {@link IEMFModelHelpItemProvider} matching the element
 	 * 
 	 * @param eObject
 	 * @return
 	 */
 	private static String getHtml(EObject eObject) {
-		String html = "<HTML><BODY>";
-
-		html += getEClassHelp(eObject);
-		html += getPropertyHelp(eObject);
-		html += getContainmentReferenceHelp(eObject);
-
-		html += "</BODY></HTML>";
-
-		return html;
-	}
-	
-	/**
-	 * Generates the Documentation of the EClass of a given {@link EObject}
-	 * 
-	 * @param eObject
-	 * @return
-	 */
-	private static String getEClassHelp(EObject eObject) {
-		String eClassHelp = "";
-		// EClass Name
-		eClassHelp += eObject.eClass().getName();
-
-		// EClass Documentation
-		if (EcoreUtil.getDocumentation(eObject.eClass()) != null) {
-			eClassHelp += "<br/><br/>" + EcoreUtil.getDocumentation(eObject.eClass());
+		IEMFModelHelpItemProvider iEMFModelHelpItemProvider;
+		// Try finding the IEMFModelHelpItemProvider using the AdapterFactory
+		Adapter adapter = AgteleEcoreUtil.getAdapterFactoryItemDelegatorFor(eObject).getAdapterFactory().adapt(eObject, IEMFModelHelpItemProvider.class);
+		// If it's not found, try it again using a different ItemProvider, like the IEditingDomainItemProvider that should alway be there
+		if (adapter == null) {
+			adapter = AgteleEcoreUtil.getAdapterFactoryItemDelegatorFor(eObject).getAdapterFactory().adapt(eObject, IEditingDomainItemProvider.class);
 		}
-		return eClassHelp;
-	}
-	
-	/**
-	 * Generates the Documentation of the properties of a given {@link EObject}
-	 * 
-	 * @param eObject
-	 * @return
-	 */
-	private static String getPropertyHelp(EObject eObject) {
-		String propertyHelp = "";
-		// Non-containment reference and attribute documentation
-		if (AgteleEcoreUtil.getAdapterFactoryItemDelegatorFor(eObject) != null) {
-			List<IItemPropertyDescriptor> propertyDescriptors = AgteleEcoreUtil.getAdapterFactoryItemDelegatorFor(eObject).getPropertyDescriptors(eObject);
-			String attributeHtml = "";
-			String nonContainmentReferenceHtml = "";
-			
-			for (IItemPropertyDescriptor itemPropertyDescriptor : propertyDescriptors) {
-				// EAttribute
-				if (itemPropertyDescriptor.getFeature(null) instanceof EAttribute) {
-					EAttribute attr = (EAttribute) itemPropertyDescriptor.getFeature(null);
-					attributeHtml += "<br/><br/>" + attr.getName() + " : " + attr.getEAttributeType().getName();
-					attributeHtml += EcoreUtil.getDocumentation(attr) != null ? "<br/>"+EcoreUtil.getDocumentation(attr) : "";
-				}
-				// Non-Containment References
-				else if (itemPropertyDescriptor.getFeature(null) instanceof EReference) {
-					EReference nonContainmentReference = (EReference) itemPropertyDescriptor.getFeature(null);
-					// display Non-Containment References only if a type is bound to it
-					if (nonContainmentReference.getEGenericType().getEClassifier() != null) {
-						nonContainmentReferenceHtml += "<br/><br/>" + nonContainmentReference.getName() + " : " + nonContainmentReference.getEGenericType().getEClassifier().getName();
-						nonContainmentReferenceHtml += EcoreUtil.getDocumentation(nonContainmentReference) != null ? "<br/>"+EcoreUtil.getDocumentation(nonContainmentReference) : "";
-					}
-				}
-			}
-			// add the attribute and reference documentation to the actual documentation
-			if (!attributeHtml.isEmpty()) {
-				propertyHelp += "<br/><br/>Attributes" + attributeHtml;
-			}
-			if (!nonContainmentReferenceHtml.isEmpty()) {
-				propertyHelp += "<br/><br/>Non-containment References" + nonContainmentReferenceHtml;
-			}
+		// Now check if the adapter that was found implements its own IEMFModelHelpItemProvider
+		if (adapter instanceof IEMFModelHelpItemProvider) {
+			iEMFModelHelpItemProvider = (IEMFModelHelpItemProvider) adapter;
 		}
-		return propertyHelp;
+		// if it doesn't use the default implementation provided by the IEMFModelHelpItemProvider
+		else {
+			iEMFModelHelpItemProvider = new IEMFModelHelpItemProvider() { };
+		}
+		return iEMFModelHelpItemProvider.render(iEMFModelHelpItemProvider.getHelpItemDescription(eObject));
 	}
 
 	/**
-	 * Generates the Documentation of the {@link EReference Containment
-	 * References} and the possible Children of a given {@link EObject}
+	 * Adding this listener will show the {@link EMFModelHelpView} when pressing F1
 	 * 
-	 * @param eObject
-	 * @return
+	 * @author martin
+	 *
 	 */
-	private static String getContainmentReferenceHelp(EObject eObject) {
-		String eClassHelp = "";
-		// Containment reference and possible targets documentation
-		if (!AgteleEcoreUtil.getEditingDomainFor(eObject).getNewChildDescriptors(eObject, null).isEmpty()) {
-			LinkedHashMap<EStructuralFeature, List<EObject>> childDescriptors = sortChildDescriptors(
-					AgteleEcoreUtil.getEditingDomainFor(eObject).getNewChildDescriptors(eObject, null));
-			eClassHelp += "<br/><br/>Containment-References and possible children";
-			
-			for (EStructuralFeature reference : childDescriptors.keySet()) {
-				// EReference documentation
-				eClassHelp += "<br/><br/>" + reference.getName();
-				eClassHelp += EcoreUtil.getDocumentation(reference) != null ? "<br/>" + EcoreUtil.getDocumentation(reference) : "";
-				for (EObject eValue : childDescriptors.get(reference)) {
-					// Children Documentation
-					eClassHelp += "<br/><br/>" + eValue.eClass().getName();
-					eClassHelp += EcoreUtil.getDocumentation(eValue.eClass()) != null ? "<br/>" + EcoreUtil.getDocumentation(eValue.eClass()) : "";
-				}
-			}
-
-		}
-		return eClassHelp;
-	}
-	
-	/**
-	 * Sorts {@link CommandParameter}s of the getNewChildDescriptors method of
-	 * an EObject into a {@link HashMap} in such way, that each child (
-	 * {@link EObject}) is matched with its {@link EStructuralFeature}
-	 * 
-	 * @param childDescriptors
-	 *            Collection of CommandParameters (ChildDescriptors)
-	 * @return Sorted HashMap
-	 */
-	private static LinkedHashMap<EStructuralFeature, List<EObject>> sortChildDescriptors(Collection<?> childDescriptors) {
-		LinkedHashMap<EStructuralFeature, List<EObject>> children = new LinkedHashMap<EStructuralFeature, List<EObject>>();
-
-		for (Object childDescriptor : childDescriptors) {
-			if (childDescriptor instanceof CommandParameter) {
-				EStructuralFeature feature = ((CommandParameter) childDescriptor).getEStructuralFeature();
-				if (children.containsKey(feature)) {
-					children.get(feature).add(((CommandParameter) childDescriptor).getEValue());
-				} else {
-					ArrayList<EObject> objects = new ArrayList<>();
-					objects.add(((CommandParameter) childDescriptor).getEValue());
-					children.put(feature, objects);
-				}
-			}
-		}
-		return children;
-	}
-
 	public static class HelpListener implements org.eclipse.swt.events.HelpListener {
 
 		@Override
