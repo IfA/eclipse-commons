@@ -1,6 +1,8 @@
 package de.tud.et.ifa.agtele.help;
 
+import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.eclipse.emf.ecore.EAttribute;
 import org.eclipse.emf.ecore.EClass;
@@ -82,8 +84,27 @@ public interface IEMFModelHelpItemProvider {
 					}
 				}
 			}
+			// Containment References
+			for (Object cd : afid.getNewChildDescriptors(eObject, AgteleEcoreUtil.getEditingDomainFor(eObject), null)) {
+				if (cd instanceof CommandParameter) {
+					EStructuralFeature feature = ((CommandParameter) cd).getEStructuralFeature();
+					EClass target = ((CommandParameter) cd).getEValue().eClass();
+						List<EReferenceHelpItemData> matchingDesc = helpItemDescription.getContainmentReferenceDescription().stream().filter(cRD -> cRD.getEReference().equals((EReference)feature)).collect(Collectors.toList());
+						if (matchingDesc.isEmpty()) {
+							helpItemDescription.addContainmentReferenceDescription(new EReferenceHelpItemData((EReference)feature, Arrays.asList(target)));
+						}
+						else {
+							// if the description already exist add the child element to it
+							// therefore remove the old version of it first
+							helpItemDescription.removeContainmentReferenceDescription(matchingDesc.get(0));
+							// add a child description
+							matchingDesc.get(0).addChildData(new EClassHelpItemData(target));
+							// and add it again
+							helpItemDescription.addContainmentReferenceDescription(matchingDesc.get(0));
+						}
+				}
+			}
 		}
 		return helpItemDescription;
 	}
-
 }

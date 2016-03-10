@@ -30,21 +30,22 @@ public class EReferenceHelpItemData extends HelpItemData {
 		// Name
 		setName(eReference.getName());
 		// DataType
-		setDataType(eReference.getEGenericType().getEClassifier().getName());
+		if (eReference.getEGenericType().getEClassifier() == null) {
+			setDataType("?");
+		}
+		else
+			setDataType(eReference.getEGenericType().getEClassifier().getName());
 		// Documentation
 		if (EcoreUtil.getDocumentation(eReference) != null)
 			setDocumentation(EcoreUtil.getDocumentation(eReference));
 		else
 			setDocumentation("");
 		
-		System.out.println("Ref:"+this.getName());
-		
 		// Child elements
 		childrenData = new ArrayList<EClassHelpItemData>();
 		if (children != null) {
 			for (EObject child : children) {
 				if (child != null) {
-					System.out.println(child.eClass());
 					childrenData.add(new EClassHelpItemData(child.eClass()));
 				}
 			}
@@ -61,7 +62,15 @@ public class EReferenceHelpItemData extends HelpItemData {
 	/**
 	 * @return the {@link List} of possible child elements
 	 */
-	public List<EClassHelpItemData> getChildrenData() {
-		return childrenData;
+	public List<EClassHelpItemData> getChildData() {
+		return this.childrenData;
+	}
+	
+	public void addChildData(EClassHelpItemData childData) {
+		this.childrenData.add(childData);
+	}
+	
+	public void removeChildData(EClassHelpItemData childData) {
+		this.childrenData.remove(childData);
 	}
 }

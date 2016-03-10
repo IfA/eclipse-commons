@@ -84,6 +84,15 @@ public class HelpItemDescription {
 		public void addNonContainmentReferenceDescription(EReferenceHelpItemData nonContainmentReferenceHelpItemData) {
 			this.nonContainmentReferenceDescription.add(nonContainmentReferenceHelpItemData);
 		}
+		
+		public void removeNonContainmentReferenceDescription(EReferenceHelpItemData nonContainmentReferenceHelpItemData) {
+			this.nonContainmentReferenceDescription.remove(nonContainmentReferenceHelpItemData);
+		}
+		
+		public void setNonContainmentReferenceDescription(
+				List<EReferenceHelpItemData> nonContainmentReferenceDescription) {
+			this.nonContainmentReferenceDescription = nonContainmentReferenceDescription;
+		}
 
 		/**
 		 * Returns a {@link List} of the {@link HelpItemData} descriptions of the {@link EReference non-containment References} of an {@link EObject}
@@ -102,6 +111,14 @@ public class HelpItemDescription {
 			this.containmentReferenceDescription.add(containmentReferenceHelpItemData);
 		}
 
+		public void removeContainmentReferenceDescription(EReferenceHelpItemData containmentReferenceHelpItemData) {
+			this.containmentReferenceDescription.remove(containmentReferenceHelpItemData);
+		}
+		
+		public void setContainmentReferenceDescription(List<EReferenceHelpItemData> containmentReferenceDescription) {
+			this.containmentReferenceDescription = containmentReferenceDescription;
+		}
+		
 		/**
 		 * Returns the {@link EObject} that the {@link HelpItemDescription} was created for
 		 * 
