@@ -119,6 +119,8 @@ public class TreeViewerGroup extends FilteredTree implements IPersistable {
 
 	protected EditingDomain editingDomain;
 
+	private IDialogSettings dialogSettings;
+
 	/**
 	 * A setter for the tool bar listeners that checks for 'null' parameter.
 	 * 
@@ -136,11 +138,13 @@ public class TreeViewerGroup extends FilteredTree implements IPersistable {
 	 * @param adapterFactory The adapter factory used to create label and
 	 * 	content adapters.
 	 * @param editingDomain The editing domain that is used for the viewer.
+	 * @param dialogSettings The dialog settings belonging to the editor 
+	 *  (e.g. XYZPlugin..getPlugin().getDialogSettings()).
 	 * @param groupText The label of the group widget that hold all other
 	 * 	widgets.
 	 */
 	public TreeViewerGroup(Composite parent, ComposedAdapterFactory adapterFactory,
-			EditingDomain editingDomain, String groupText) {
+			EditingDomain editingDomain, IDialogSettings dialogSettings, String groupText) {
 		super(parent, true);
 		this.parent = parent;
 		this.groupText = groupText;
@@ -150,6 +154,7 @@ public class TreeViewerGroup extends FilteredTree implements IPersistable {
 		this.displayAdd = false;
 		this.editingDomain = editingDomain;
 		this.adapterFactory = adapterFactory;
+		this.dialogSettings = dialogSettings;
 		this.init(SWT.MULTI, new PatternFilter());
 	}
 
@@ -160,6 +165,8 @@ public class TreeViewerGroup extends FilteredTree implements IPersistable {
 	 * @param adapterFactory The adapter factory used to create label and
 	 	content adapters.
 	 * @param editingDomain The editing domain that is used for the viewer.
+	 * @param dialogSettings The dialog settings belonging to the editor 
+	 *  (e.g. XYZPlugin..getPlugin().getDialogSettings()).
 	 * @param groupText The label of the group widget that hold all other
 	 * 	widgets.
 	 * @param images A list of images used as icons for the items of the tool bar.
@@ -168,7 +175,7 @@ public class TreeViewerGroup extends FilteredTree implements IPersistable {
 	 * @param displayAdd If to include an 'add' button in the tool bar.
 	 */
 	public TreeViewerGroup(Composite parent, ComposedAdapterFactory adapterFactory, 
-			EditingDomain editingDomain, String groupText, ArrayList<Image> images, 
+			EditingDomain editingDomain, IDialogSettings dialogSettings, String groupText, ArrayList<Image> images, 
 			ArrayList<SelectionListener> listeners, boolean displayCollapseAll, boolean displayAdd) {
 		super(parent, true);
 		this.parent = parent;
@@ -179,6 +186,7 @@ public class TreeViewerGroup extends FilteredTree implements IPersistable {
 		this.displayAdd = displayAdd;
 		this.adapterFactory = adapterFactory;
 		this.editingDomain = editingDomain;
+		this.dialogSettings = dialogSettings;
 		this.init(SWT.MULTI, new PatternFilter());
 	}
 
@@ -270,9 +278,10 @@ public class TreeViewerGroup extends FilteredTree implements IPersistable {
 	@Override
 	protected TreeViewer doCreateTreeViewer(Composite parent, int style) {
 		TreeViewer treeViewer = super.doCreateTreeViewer(parent, style);
+		
 		treeViewer.setLabelProvider(new DelegatingStyledCellLabelProvider(new DecoratingColumLabelProvider.StyledLabelProvider(
 				new AdapterFactoryLabelProvider.StyledLabelProvider(adapterFactory, treeViewer), 
-				new DiagnosticDecorator.Styled(editingDomain, treeViewer, AgteleUIPlugin.getPlugin().getDialogSettings())) {
+				new DiagnosticDecorator.Styled(editingDomain, treeViewer, this.dialogSettings)) {
 			@Override
 			public String getToolTipText(Object element) {
 				String toolTip = super.getToolTipText(element);
@@ -532,6 +541,7 @@ public class TreeViewerGroup extends FilteredTree implements IPersistable {
 		if(settings.getArray("EXPANDED_TREE_PATHS") != null) {
 			String[] paths = settings.getArray("EXPANDED_TREE_PATHS");
 			for (int i = 0; i < paths.length; i++) {
+//				System.out.println(paths[i]);
 				/*
 				 * as the URI of an eObject also reflects the containing resource, we can use this to
 				 * uniquely identify an eObject inside a resource set
