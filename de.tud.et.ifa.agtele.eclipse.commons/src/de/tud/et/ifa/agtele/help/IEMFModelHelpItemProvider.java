@@ -34,7 +34,7 @@ public interface IEMFModelHelpItemProvider {
 	 * @return the help text to be displayed (as HTML)
 	 */
 	default public String render(HelpItemDescription helpItemDescription) {
-		return "";
+		return helpItemDescription.toString();
 	}
 
 	/**
@@ -58,7 +58,6 @@ public interface IEMFModelHelpItemProvider {
 		 */
 		helpItemDescription.setEClassDescription(new EClassHelpItemData(eObject.eClass()));
 
-		
 		if (AgteleEcoreUtil.getAdapterFactoryItemDelegatorFor(eObject) != null) {
 			AdapterFactoryItemDelegator afid = AgteleEcoreUtil.getAdapterFactoryItemDelegatorFor(eObject);
 			/**
@@ -71,7 +70,7 @@ public interface IEMFModelHelpItemProvider {
 				// EAttribute
 				if (itemPropertyDescriptor.getFeature(null) instanceof EAttribute) {
 					EAttribute attr = (EAttribute) itemPropertyDescriptor.getFeature(null);
-					
+
 					helpItemDescription.addAttributeDescription(new EAttributeHelpItemData(attr));
 				}
 				// Non-Containment References
@@ -80,28 +79,34 @@ public interface IEMFModelHelpItemProvider {
 					// display Non-Containment References only if a type is
 					// bound to it
 					if (ncRef.getEGenericType().getEClassifier() != null) {
-						helpItemDescription.addNonContainmentReferenceDescription(new EReferenceHelpItemData(ncRef, (List<EObject>)itemPropertyDescriptor.getChoiceOfValues(eObject)));
+						helpItemDescription.addNonContainmentReferenceDescription(new EReferenceHelpItemData(ncRef,
+								(List<EObject>) itemPropertyDescriptor.getChoiceOfValues(eObject)));
 					}
 				}
 			}
 			// Containment References
 			for (Object cd : afid.getNewChildDescriptors(eObject, AgteleEcoreUtil.getEditingDomainFor(eObject), null)) {
 				if (cd instanceof CommandParameter) {
+					// the reference and the target type from the command
 					EStructuralFeature feature = ((CommandParameter) cd).getEStructuralFeature();
 					EClass target = ((CommandParameter) cd).getEValue().eClass();
-						List<EReferenceHelpItemData> matchingDesc = helpItemDescription.getContainmentReferenceDescription().stream().filter(cRD -> cRD.getEReference().equals((EReference)feature)).collect(Collectors.toList());
-						if (matchingDesc.isEmpty()) {
-							helpItemDescription.addContainmentReferenceDescription(new EReferenceHelpItemData((EReference)feature, Arrays.asList(target)));
-						}
-						else {
-							// if the description already exist add the child element to it
-							// therefore remove the old version of it first
-							helpItemDescription.removeContainmentReferenceDescription(matchingDesc.get(0));
-							// add a child description
-							matchingDesc.get(0).addChildData(new EClassHelpItemData(target));
-							// and add it again
-							helpItemDescription.addContainmentReferenceDescription(matchingDesc.get(0));
-						}
+					// check if a description for this feature already exists
+					List<EReferenceHelpItemData> matchingDesc = helpItemDescription.getContainmentReferenceDescription()
+							.stream().filter(cRD -> cRD.getEReference().equals((EReference) feature))
+							.collect(Collectors.toList());
+					// if it doesn't create a new description for it
+					if (matchingDesc.isEmpty()) {
+						helpItemDescription.addContainmentReferenceDescription(
+								new EReferenceHelpItemData((EReference) feature, Arrays.asList(target)));
+					} else {
+						// if it does add the child element to it
+						// therefore remove the old version of it first
+						helpItemDescription.removeContainmentReferenceDescription(matchingDesc.get(0));
+						// add a child description
+						matchingDesc.get(0).addChildData(new EClassHelpItemData(target));
+						// and add it again
+						helpItemDescription.addContainmentReferenceDescription(matchingDesc.get(0));
+					}
 				}
 			}
 		}
