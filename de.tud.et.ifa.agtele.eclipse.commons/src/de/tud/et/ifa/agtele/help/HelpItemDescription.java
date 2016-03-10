@@ -17,13 +17,15 @@ import org.eclipse.emf.ecore.EReference;
 public class HelpItemDescription {
 		private EClassHelpItemData eClassDescription;
 		private List<EAttributeHelpItemData> attributeDescription;
-		private HashMap<HelpItemData, List<HelpItemData>> nonContainmentReferenceDescription;
-		private HashMap<HelpItemData, List<HelpItemData>> containmentReferenceDescription;
+		private List<EReferenceHelpItemData> nonContainmentReferenceDescription;
+		private List<EReferenceHelpItemData> containmentReferenceDescription;
 		private EObject eObject;
 		
 		public HelpItemDescription(EObject eObject) {
 			this.eObject = eObject;
 			this.attributeDescription = new ArrayList<EAttributeHelpItemData>();
+			this.nonContainmentReferenceDescription = new ArrayList<EReferenceHelpItemData>();
+			this.containmentReferenceDescription = new ArrayList<EReferenceHelpItemData>();
 		}
 
 
@@ -67,34 +69,37 @@ public class HelpItemDescription {
 
 
 		/**
-		 * Returns a {@link List} of the {@link HelpItemData} descriptions of the {@link EReference containment References} of an {@link EObject}
+		 * Returns a {@link List} of the {@link EReferenceHelpItemData} descriptions of the {@link EReference non-containment References} of an {@link EObject}
 		 * 
-		 * @return @{@link List} of {@link HelpItemData}s describing their name, type and documentation
+		 * @return @{@link List} of {@link EReferenceHelpItemData}s describing their name, type and documentation
 		 */
-		public HashMap<HelpItemData, List<HelpItemData>> getNonContainmentReferenceDescription() {
+		public List<EReferenceHelpItemData> getNonContainmentReferenceDescription() {
 			return nonContainmentReferenceDescription;
 		}
 
-
-
-		public void setNonContainmentReferenceDescription(HashMap<HelpItemData, List<HelpItemData>> nonContainmentReferenceDescription) {
-			this.nonContainmentReferenceDescription = nonContainmentReferenceDescription;
+		/**
+		 * Adds a help description of a non-containment reference
+		 * @param nonContainmentReferenceHelpItemData {@link EReferenceHelpItemData} of the reference
+		 */
+		public void addNonContainmentReferenceDescription(EReferenceHelpItemData nonContainmentReferenceHelpItemData) {
+			this.nonContainmentReferenceDescription.add(nonContainmentReferenceHelpItemData);
 		}
-
 
 		/**
 		 * Returns a {@link List} of the {@link HelpItemData} descriptions of the {@link EReference non-containment References} of an {@link EObject}
 		 * 
 		 * @return @{@link List} of {@link HelpItemData}s describing their name, type and documentation
 		 */
-		public HashMap<HelpItemData, List<HelpItemData>> getContainmentReferenceDescription() {
+		public List<EReferenceHelpItemData> getContainmentReferenceDescription() {
 			return containmentReferenceDescription;
 		}
 
-
-
-		public void setContainmentReferenceDescription(HashMap<HelpItemData, List<HelpItemData>> containmentReferenceDescription) {
-			this.containmentReferenceDescription = containmentReferenceDescription;
+		/**
+		 * Adds a help description of a containment reference
+		 * @param containmentReferenceHelpItemData {@link EReferenceHelpItemData} of the reference
+		 */
+		public void addContainmentReferenceDescription(EReferenceHelpItemData containmentReferenceHelpItemData) {
+			this.containmentReferenceDescription.add(containmentReferenceHelpItemData);
 		}
 
 		/**

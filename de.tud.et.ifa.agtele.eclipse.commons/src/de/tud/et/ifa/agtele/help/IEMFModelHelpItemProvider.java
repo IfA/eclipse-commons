@@ -72,6 +72,16 @@ public interface IEMFModelHelpItemProvider {
 					
 					helpItemDescription.addAttributeDescription(new EAttributeHelpItemData(attr));
 				}
+				// Non-Containment References
+				else if (itemPropertyDescriptor.getFeature(null) instanceof EReference) {
+					EReference ncRef = (EReference) itemPropertyDescriptor.getFeature(null);
+					// display Non-Containment References only if a type is
+					// bound to it
+					if (ncRef.getEGenericType().getEClassifier() != null) {
+						helpItemDescription.addNonContainmentReferenceDescription(new EReferenceHelpItemData(ncRef, (List<EObject>)itemPropertyDescriptor.getChoiceOfValues(eObject)));
+					}
+				}
+			}
 		}
 		return helpItemDescription;
 	}
