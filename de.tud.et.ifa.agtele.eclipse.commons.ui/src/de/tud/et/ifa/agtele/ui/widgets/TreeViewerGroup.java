@@ -141,7 +141,7 @@ public class TreeViewerGroup extends FilteredTree implements IPersistable {
 	 * @param dialogSettings The dialog settings belonging to the editor 
 	 *  (e.g. XYZPlugin..getPlugin().getDialogSettings()).
 	 * @param groupText The label of the group widget that hold all other
-	 * 	widgets.
+	 * 	widgets. If this is null no surrounding group will created.
 	 */
 	public TreeViewerGroup(Composite parent, ComposedAdapterFactory adapterFactory,
 			EditingDomain editingDomain, IDialogSettings dialogSettings, String groupText) {
@@ -168,7 +168,7 @@ public class TreeViewerGroup extends FilteredTree implements IPersistable {
 	 * @param dialogSettings The dialog settings belonging to the editor 
 	 *  (e.g. XYZPlugin..getPlugin().getDialogSettings()).
 	 * @param groupText The label of the group widget that hold all other
-	 * 	widgets.
+	 * 	widgets. If this is null no surrounding group will created.
 	 * @param images A list of images used as icons for the items of the tool bar.
 	 * @param listeners A list of SelectionListeners used for the items of the tool bar.
 	 * @param displayCollapseAll If to include a 'collapseAll' button in the tool bar.
@@ -211,17 +211,21 @@ public class TreeViewerGroup extends FilteredTree implements IPersistable {
 		setLayout(layout);
 
 		// The group to hold everything else.
-		group = new Group(this, SWT.NONE);
-		group.setText(this.groupText);
-		group.setLayoutData(
-				new GridData(SWT.FILL, SWT.FILL, true, true));
-		group.setLayout(new GridLayout(1, true));
+		// only create Group if the groupText is set
+		// else use a 
+		if (this.groupText != null) {
+			group = new Group(this, SWT.NONE);
+			group.setText(this.groupText);
+			group.setLayoutData(
+					new GridData(SWT.FILL, SWT.FILL, true, true));
+			group.setLayout(new GridLayout(1, true));
+		}
 
 		if (showFilterControls) {
 
 			// This composite hosts two children: the filter composite and the
 			// tool bar composite.
-			filterComposite= new Composite(group, SWT.NONE);
+			filterComposite = new Composite(group == null ? this : group, SWT.NONE);
 			filterComposite.setLayoutData(new GridData(SWT.FILL, SWT.BEGINNING,
 					true, false));
 
@@ -256,7 +260,7 @@ public class TreeViewerGroup extends FilteredTree implements IPersistable {
 
 		}
 
-		treeComposite = new Composite(group, SWT.NONE);
+		treeComposite = new Composite(group == null ? this : group, SWT.NONE);
 		GridLayout treeCompositeLayout = new GridLayout();
 		treeCompositeLayout.marginHeight = 0;
 		treeCompositeLayout.marginWidth = 0;
