@@ -168,7 +168,7 @@ public interface IEMFModelHelpItemProvider {
 					// if it doesn't create a new description for it
 					if (matchingDesc.isEmpty()) {
 						helpItemDescription.addContainmentReferenceDescription(
-								new EReferenceHelpItemData((EReference) feature, Arrays.asList(target)));
+								new EReferenceHelpItemData((EReference) feature, Arrays.asList(((CommandParameter) cd).getEValue())));
 					} else {
 						// if it does add the child element to it
 						// therefore remove the old version of it first
