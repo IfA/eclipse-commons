@@ -34,7 +34,78 @@ public interface IEMFModelHelpItemProvider {
 	 * @return the help text to be displayed (as HTML)
 	 */
 	default public String render(HelpItemDescription helpItemDescription) {
-		return helpItemDescription.toString();
+		EClassHelpItemData eClass = helpItemDescription.getEClassDescription();
+		List<EAttributeHelpItemData> attributes = helpItemDescription.getAttributeDescription();
+		List<EReferenceHelpItemData> ncRefs = helpItemDescription.getNonContainmentReferenceDescription();
+		List<EReferenceHelpItemData> cRefs = helpItemDescription.getContainmentReferenceDescription();
+		
+		String text = "<HTML><BODY>";
+		
+		//EClass
+		text += eClass.getName();
+		if (!eClass.getDocumentation().isEmpty())
+			text += "<br/>" + eClass.getDocumentation();
+		
+		//EAttributes
+		if (!attributes.isEmpty()) {
+			text += "<br/><br/><br/>Attributes";
+			for (EAttributeHelpItemData attr : attributes) {
+				text += "<br/><br/>" + attr.getName() + " : " + attr.getDataType();
+				if (!attr.getDocumentation().isEmpty())
+					text += "<br/>" + attr.getDocumentation();
+				//Literals in case it is a EEnum
+				if (attr.isEEnum()) {
+					text += "<br/>Possible Values: ";
+					for (EEnumLiteralHelpItemData lit : attr.getEEnumLiterals()) {
+						text += "<br/>" + lit.getName();
+						if (!lit.getDocumentation().isEmpty())
+							text += "<br/>" + lit.getDocumentation();
+					}
+				}
+			}
+			
+			//Non-containment references
+			if (!ncRefs.isEmpty()) {
+				text += "<br/><br/><br/>Non-containment References";
+				for (EReferenceHelpItemData ncRef : ncRefs) {
+					text += "<br/><br/>" + ncRef.getName() + " : " + ncRef.getDataType();
+					if (!ncRef.getDocumentation().isEmpty())
+						text += "<br/>" + ncRef.getDocumentation();
+					// Possible Targets
+					if (!ncRef.getChildData().isEmpty()) {
+						text += "<br/><br/>Possible Targets:";
+						for (EClassHelpItemData target : ncRef.getChildData()) {
+							text += "<br/><br/>" + target.getName();
+							if (!target.getDocumentation().isEmpty())
+								text += "<br/>" + target.getDocumentation();
+						}
+					}
+				}
+			}
+			
+			//Containment references
+			if (!cRefs.isEmpty()) {
+				text += "<br/><br/><br/>Containment References";
+				for (EReferenceHelpItemData cRef : cRefs) {
+					text += "<br/><br/>" + cRef.getName();
+					if (!cRef.getDocumentation().isEmpty())
+						text += "<br/>" + cRef.getDocumentation();
+					// Possible Targets
+					if (!cRef.getChildData().isEmpty()) {
+						text += "<br/><br/>Possible Children:";
+						for (EClassHelpItemData child : cRef.getChildData()) {
+							text += "<br/><br/>" + child.getName();
+							if (!child.getDocumentation().isEmpty())
+								text += "<br/>" + child.getDocumentation();
+						}
+					}
+				}
+			}
+		}
+		
+		text += "</BODY></HTML>";
+		
+		return text;
 	}
 
 	/**

@@ -35,7 +35,7 @@ public class HelpItemDescription {
 	 * 
 	 * @return {@link EClassHelpItemData} describing the name and documentation
 	 */
-	public HelpItemData getEClassDescription() {
+	public EClassHelpItemData getEClassDescription() {
 		return eClassDescription;
 	}
 
@@ -136,4 +136,6 @@ public class HelpItemDescription {
 	public EObject getEObject() {
 		return eObject;
 	}
+	
+	
 }
