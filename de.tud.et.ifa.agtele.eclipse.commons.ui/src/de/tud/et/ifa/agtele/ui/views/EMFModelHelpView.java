@@ -72,7 +72,8 @@ public class EMFModelHelpView extends ViewPart implements IPersistable {
 		contributeToActionBars();
 		
 		currentText = AgteleUIPlugin.getPlugin().getDialogSettings().get("browserText");
-		browser.setText(currentText);
+		if (currentText != null)
+			browser.setText(currentText);
 		if (linkEditor) {
 			show();
 		}
