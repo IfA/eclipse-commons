@@ -349,8 +349,7 @@ public class TreeViewerGroup extends FilteredTree implements IPersistable {
 			item.setImage(BundleContentHelper.getBundleImage(bundleID, "icons/add_obj.gif"));
 			item.setToolTipText("Add Sibling of Same Type");
 
-			item.addSelectionListener(
-					new AddDropDownSelectionListener(item));
+			item.addSelectionListener(createAddDropDownSelectionListener(item));
 		}
 
 		// Add the various tool bar items passed in the constructor
@@ -367,6 +366,10 @@ public class TreeViewerGroup extends FilteredTree implements IPersistable {
 
 	}
 
+	protected AddDropDownSelectionListener createAddDropDownSelectionListener (ToolItem item) {
+		return new AddDropDownSelectionListener(item);
+	}
+	
 	/**
 	 * This creates additional tool bar items besides the standard items
 	 * like 'collapseAll'. The default implementation does nothing - 
@@ -379,7 +382,7 @@ public class TreeViewerGroup extends FilteredTree implements IPersistable {
 		// allow extending classes to easily configure the tool bar
 	}
 
-	class AddDropDownSelectionListener extends SelectionAdapter {
+	public class AddDropDownSelectionListener extends SelectionAdapter {
 
 		private MenuManager menuManager;
 
@@ -485,15 +488,13 @@ public class TreeViewerGroup extends FilteredTree implements IPersistable {
 			ArrayList<IAction> createChildActions = new ArrayList<>();
 			for (Object descriptor : newChildDescriptors) {
 				if(isValidDescriptor(descriptor, treeViewer.getContentProvider())) {
-					createChildActions.add(
-							new CreateChildAction(editorPart, selection, descriptor));
+					createChildActions.add(createCreateChildAction(editorPart, selection, descriptor));
 				}
 			}
 			ArrayList<IAction> createSiblingActions = new ArrayList<>();
 			for (Object descriptor : newSiblingDescriptors) {
 				if(isValidDescriptor(descriptor, treeViewer.getContentProvider())) {
-					createSiblingActions.add(
-							new CreateSiblingAction(editorPart, selection, descriptor));					
+					createSiblingActions.add(createCreateSiblingAction(editorPart, selection, descriptor));					
 				}
 			}
 
@@ -507,6 +508,12 @@ public class TreeViewerGroup extends FilteredTree implements IPersistable {
 			for (IAction iAction : createSiblingActions) {
 				menuManager.add(iAction);
 			}
+		}
+		protected IAction createCreateChildAction(IEditorPart editorPart, ISelection selection, Object descriptor) {
+			return new CreateChildAction(editorPart, selection, descriptor);
+		}
+		protected IAction createCreateSiblingAction(IEditorPart editorPart, ISelection selection, Object descriptor) {
+			return new CreateSiblingAction(editorPart, selection, descriptor);
 		}
 	}
 
