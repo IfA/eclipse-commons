@@ -121,6 +121,8 @@ public class TreeViewerGroup extends FilteredTree implements IPersistable {
 
 	private IDialogSettings dialogSettings;
 
+	private Composite toolbarComposite;
+
 	/**
 	 * A setter for the tool bar listeners that checks for 'null' parameter.
 	 * 
@@ -248,7 +250,7 @@ public class TreeViewerGroup extends FilteredTree implements IPersistable {
 			createFilterControls(filterBoxComposite);
 
 			// create a toolbar besides the filter controls
-			Composite toolbarComposite = new Composite(filterComposite, SWT.NONE);
+			toolbarComposite = new Composite(filterComposite, SWT.NONE);
 			toolbarComposite.setLayoutData(
 					new GridData(SWT.BEGINNING, SWT.BEGINNING, false, false));
 			GridLayout toolbarLayout = new GridLayout(1, false);
@@ -268,7 +270,19 @@ public class TreeViewerGroup extends FilteredTree implements IPersistable {
 		GridData data = new GridData(SWT.FILL, SWT.FILL, true, true);
 		treeComposite.setLayoutData(data);
 		createTreeControl(treeComposite, treeStyle);
-
+	}
+	
+	/**
+	 * Exposes the internal tree composite.
+	 * 
+	 * @return The TreeComposite of the TreeViewerGroup
+	 */
+	public Composite getTreeComposite () {
+		return treeComposite;
+	}
+	
+	public Composite getToolbar() {
+		return toolbarComposite;
 	}
 
 	/**
@@ -580,7 +594,7 @@ public class TreeViewerGroup extends FilteredTree implements IPersistable {
 	 * @param provider The {@link IContentProvider content provider} that is associated with the active viewer.
 	 * @return '<em><b>true</b></em>' if the descriptor is valid for the active viewer; '<em><b>false</b></em>' otherwise.
 	 */
-	private boolean isValidDescriptor(Object descriptor, IContentProvider provider) {
+	public boolean isValidDescriptor(Object descriptor, IContentProvider provider) {
 		
 		if(descriptor == null || provider == null) {
 			return false;
