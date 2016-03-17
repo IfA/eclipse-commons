@@ -115,19 +115,36 @@ public interface IEMFModelHelpItemProvider {
 	 * including their possible {@link EClass child elements}, and
 	 * {@link EReference non-containment References} including their possible
 	 * targets in the model that the eObject originates from.
+	 * This implementation uses the default HelpItemFactory implementation.
 	 * 
 	 * @param eObject
 	 * @return all relevant {@link HelpItemDescription}
 	 */
-	@SuppressWarnings("unchecked")
 	default public HelpItemDescription getHelpItemDescription(EObject eObject) {
-		HelpItemDescription helpItemDescription = new HelpItemDescription(eObject);
+		return getHelpItemDescription(eObject, new HelpItemFactory() {});
+	}
+	
+	/**
+	 * Returns all relevant {@link HelpItemDescription help data} of an
+	 * {@link EObject} by gathering {@link HelpItemData} for the {@link EClass},
+	 * {@link EAttribute EAttributes}, {@link EReference containment References}
+	 * including their possible {@link EClass child elements}, and
+	 * {@link EReference non-containment References} including their possible
+	 * targets in the model that the eObject originates from.
+	 * 
+	 * @param eObject
+	 * @param factory
+	 * @return all relevant {@link HelpItemDescription}
+	 */
+	@SuppressWarnings("unchecked")
+	default public HelpItemDescription getHelpItemDescription(EObject eObject, HelpItemFactory factory) {
+		HelpItemDescription helpItemDescription = factory.createHelpItemDescription(eObject);
 
 		/**
 		 * Generates the Documentation of the properties of a given
 		 * {@link EObject}
 		 */
-		helpItemDescription.setEClassDescription(new EClassHelpItemData(eObject.eClass()));
+		helpItemDescription.setEClassDescription(factory.createEClassHelpItemData(eObject.eClass()));
 
 		if (AgteleEcoreUtil.getAdapterFactoryItemDelegatorFor(eObject) != null) {
 			AdapterFactoryItemDelegator afid = AgteleEcoreUtil.getAdapterFactoryItemDelegatorFor(eObject);
@@ -142,7 +159,7 @@ public interface IEMFModelHelpItemProvider {
 				if (itemPropertyDescriptor.getFeature(null) instanceof EAttribute) {
 					EAttribute attr = (EAttribute) itemPropertyDescriptor.getFeature(null);
 
-					helpItemDescription.addAttributeDescription(new EAttributeHelpItemData(attr));
+					helpItemDescription.addAttributeDescription(factory.createEAttributeHelpItemData(attr));
 				}
 				// Non-Containment References
 				else if (itemPropertyDescriptor.getFeature(null) instanceof EReference) {
@@ -150,7 +167,7 @@ public interface IEMFModelHelpItemProvider {
 					// display Non-Containment References only if a type is
 					// bound to it
 					if (ncRef.getEGenericType().getEClassifier() != null) {
-						helpItemDescription.addNonContainmentReferenceDescription(new EReferenceHelpItemData(ncRef,
+						helpItemDescription.addNonContainmentReferenceDescription(factory.createEReferenceHelpItemData(ncRef,
 								(List<EObject>) itemPropertyDescriptor.getChoiceOfValues(eObject)));
 					}
 				}
@@ -168,13 +185,13 @@ public interface IEMFModelHelpItemProvider {
 					// if it doesn't create a new description for it
 					if (matchingDesc.isEmpty()) {
 						helpItemDescription.addContainmentReferenceDescription(
-								new EReferenceHelpItemData((EReference) feature, Arrays.asList(((CommandParameter) cd).getEValue())));
+								factory.createEReferenceHelpItemData((EReference) feature, Arrays.asList(((CommandParameter) cd).getEValue())));
 					} else {
 						// if it does add the child element to it
 						// therefore remove the old version of it first
 						helpItemDescription.removeContainmentReferenceDescription(matchingDesc.get(0));
 						// add a child description
-						matchingDesc.get(0).addChildData(new EClassHelpItemData(target));
+						matchingDesc.get(0).addChildData(factory.createEClassHelpItemData(target));
 						// and add it again
 						helpItemDescription.addContainmentReferenceDescription(matchingDesc.get(0));
 					}
@@ -182,5 +199,28 @@ public interface IEMFModelHelpItemProvider {
 			}
 		}
 		return helpItemDescription;
+	}
+	/**
+	 * An overridable factory interface that creates HelpItems in order to be consumed by the rendering algorithm.   
+	 * @author Lukas
+	 *
+	 */
+	public interface HelpItemFactory {
+		
+		default public HelpItemDescription createHelpItemDescription(EObject eObject) {
+			return new HelpItemDescription(eObject); 
+		}
+		
+		default public EClassHelpItemData createEClassHelpItemData(EClass eClass) {
+			return new EClassHelpItemData(eClass);
+		}
+		
+		default public EAttributeHelpItemData createEAttributeHelpItemData(EAttribute attribute) {
+			return new EAttributeHelpItemData(attribute);
+		}
+		
+		default public EReferenceHelpItemData createEReferenceHelpItemData(EReference eReference, List<EObject> list) {
+			return new EReferenceHelpItemData(eReference, list);
+		}
 	}
 }
