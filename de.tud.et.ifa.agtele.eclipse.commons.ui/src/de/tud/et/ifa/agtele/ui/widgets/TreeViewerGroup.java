@@ -580,7 +580,7 @@ public class TreeViewerGroup extends FilteredTree implements IPersistable {
 	 * @param provider The {@link IContentProvider content provider} that is associated with the active viewer.
 	 * @return '<em><b>true</b></em>' if the descriptor is valid for the active viewer; '<em><b>false</b></em>' otherwise.
 	 */
-	private boolean isValidDescriptor(Object descriptor, IContentProvider provider) {
+	public boolean isValidDescriptor(Object descriptor, IContentProvider provider) {
 		
 		if(descriptor == null || provider == null) {
 			return false;
@@ -598,6 +598,10 @@ public class TreeViewerGroup extends FilteredTree implements IPersistable {
 		}
 		
 		return true;
+	}
+
+	public Composite getTreeComposite() {
+		return treeComposite;
 	}
 
 }
