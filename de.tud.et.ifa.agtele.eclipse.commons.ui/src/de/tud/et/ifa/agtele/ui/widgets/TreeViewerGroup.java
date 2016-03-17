@@ -613,5 +613,4 @@ public class TreeViewerGroup extends FilteredTree implements IPersistable {
 		
 		return true;
 	}
-
 }

@@ -36,7 +36,7 @@ public class EMFModelHelpView extends ViewPart implements IPersistable {
 	private Action linkAction;
 
 	private String currentText;
-	
+
 	private ISelectionListener selectionListener;
 
 	private Boolean linkEditor;
@@ -70,7 +70,7 @@ public class EMFModelHelpView extends ViewPart implements IPersistable {
 
 		makeActions();
 		contributeToActionBars();
-		
+
 		currentText = AgteleUIPlugin.getPlugin().getDialogSettings().get("browserText");
 		if (currentText != null)
 			browser.setText(currentText);
@@ -92,9 +92,9 @@ public class EMFModelHelpView extends ViewPart implements IPersistable {
 		PlatformUI.getWorkbench().getActiveWorkbenchWindow().getSelectionService()
 				.removeSelectionListener(selectionListener);
 		AgteleUIPlugin.getPlugin().getDialogSettings().put("link", linkEditor);
-		
+
 		AgteleUIPlugin.getPlugin().getDialogSettings().put("browserText", currentText);
-		
+
 		super.dispose();
 	}
 
@@ -154,23 +154,15 @@ public class EMFModelHelpView extends ViewPart implements IPersistable {
 		try {
 			EMFModelHelpView helpView = (EMFModelHelpView) PlatformUI.getWorkbench().getActiveWorkbenchWindow()
 					.getActivePage().showView(ID, null, IWorkbenchPage.VIEW_VISIBLE);
-			
+
 			if (!text.equals(helpView.currentText)) {
 				helpView.browser.setText(text);
-				helpView.currentText = text;				
-			}
-			else return;
+				helpView.currentText = text;
+			} else
+				return;
 		} catch (PartInitException e) {
 			e.printStackTrace();
 		}
-	}
-
-	/**
-	 * Opens the {@link EMFModelHelpView} and shows the index help page
-	 */
-	public static void showIndex() {
-		// TODO create index.html that explains how to use this help
-		showText("EMF Model Help Index");
 	}
 
 	/**
@@ -198,14 +190,16 @@ public class EMFModelHelpView extends ViewPart implements IPersistable {
 					}
 				}
 				if (!structuredSelection.isEmpty()) {
-					EMFModelHelpView.showText(AgteleUIPlugin.getPlugin().getString("_UI_EMFModelHelpView_TooManyElementsSelected"));
+					EMFModelHelpView.showText(
+							AgteleUIPlugin.getPlugin().getString("_UI_EMFModelHelpView_TooManyElementsSelected"));
 				}
 			}
 		}
 	}
 
 	/**
-	 * Generates the documentation page of an {@link EObject} based on the {@link IEMFModelHelpItemProvider} matching the element
+	 * Generates the documentation page of an {@link EObject} based on the
+	 * {@link IEMFModelHelpItemProvider} matching the element
 	 * 
 	 * @param eObject
 	 * @return
@@ -213,24 +207,31 @@ public class EMFModelHelpView extends ViewPart implements IPersistable {
 	private static String getHtml(EObject eObject) {
 		IEMFModelHelpItemProvider iEMFModelHelpItemProvider;
 		// Try finding the IEMFModelHelpItemProvider using the AdapterFactory
-		Adapter adapter = AgteleEcoreUtil.getAdapterFactoryItemDelegatorFor(eObject).getAdapterFactory().adapt(eObject, IEMFModelHelpItemProvider.class);
-		// If it's not found, try it again using a different ItemProvider, like the IEditingDomainItemProvider that should alway be there
+		Adapter adapter = AgteleEcoreUtil.getAdapterFactoryItemDelegatorFor(eObject).getAdapterFactory().adapt(eObject,
+				IEMFModelHelpItemProvider.class);
+		// If it's not found, try it again using a different ItemProvider, like
+		// the IEditingDomainItemProvider that should alway be there
 		if (adapter == null) {
-			adapter = AgteleEcoreUtil.getAdapterFactoryItemDelegatorFor(eObject).getAdapterFactory().adapt(eObject, IEditingDomainItemProvider.class);
+			adapter = AgteleEcoreUtil.getAdapterFactoryItemDelegatorFor(eObject).getAdapterFactory().adapt(eObject,
+					IEditingDomainItemProvider.class);
 		}
-		// Now check if the adapter that was found implements its own IEMFModelHelpItemProvider
+		// Now check if the adapter that was found implements its own
+		// IEMFModelHelpItemProvider
 		if (adapter instanceof IEMFModelHelpItemProvider) {
 			iEMFModelHelpItemProvider = (IEMFModelHelpItemProvider) adapter;
 		}
-		// if it doesn't use the default implementation provided by the IEMFModelHelpItemProvider
+		// if it doesn't use the default implementation provided by the
+		// IEMFModelHelpItemProvider
 		else {
-			iEMFModelHelpItemProvider = new IEMFModelHelpItemProvider() { };
+			iEMFModelHelpItemProvider = new IEMFModelHelpItemProvider() {
+			};
 		}
 		return iEMFModelHelpItemProvider.render(iEMFModelHelpItemProvider.getHelpItemDescription(eObject));
 	}
 
 	/**
-	 * Adding this listener will show the {@link EMFModelHelpView} when pressing F1
+	 * Adding this listener will show the {@link EMFModelHelpView} when pressing
+	 * F1
 	 * 
 	 * @author martin
 	 *
