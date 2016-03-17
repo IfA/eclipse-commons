@@ -9,6 +9,7 @@ import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.EReference;
 import org.eclipse.emf.ecore.EStructuralFeature;
+import org.eclipse.emf.ecore.xml.type.internal.RegEx;
 import org.eclipse.emf.edit.command.CommandParameter;
 import org.eclipse.emf.edit.provider.AdapterFactoryItemDelegator;
 import org.eclipse.emf.edit.provider.IItemPropertyDescriptor;
@@ -23,6 +24,33 @@ import de.tud.et.ifa.agtele.emf.AgteleEcoreUtil;
  */
 public interface IEMFModelHelpItemProvider {
 
+	default public String getHTMLTemplate () {
+		return "<!DOCTYPE html>"
+				+ "<html lang=\"en\">"
+				+ "<head>"
+				+ 	"<meta charset=\"UTF-8\">"
+				+ 	"<title>%TITLE%</title>"
+				+ 	"%HEAD%"
+				+ 	"%STYLE%"
+				+ "</head>"
+				+ "<body>"
+				+ 	"%BODY%"
+				+	"%SCRIPT%"
+				+ "</body>"
+			+  "</html>";
+	}
+	
+	default public String getCSSTemplate() {
+		return "<style type=\"text/css\">%RULES%</style>";
+	}
+	
+	default public String getJavaScriptTemplate() {
+		return "<script type=\"application/javascript\">"
+				+ "\"use strict\";"
+				+ "%CODE%"
+			+  "<script>";
+	}
+		
 	/**
 	 * This method renders the HTML that may be used for the user help. This
 	 * default implementation only lists all properties separated by line
@@ -35,76 +63,203 @@ public interface IEMFModelHelpItemProvider {
 	 */
 	default public String render(HelpItemDescription helpItemDescription) {
 		EClassHelpItemData eClass = helpItemDescription.getEClassDescription();
+		
+		String result = getHTMLTemplate()
+				.replace("%TITLE%", eClass.getName())
+				.replace("%STYLE%", getStyles())
+				.replace("%BODY%", renderBody(helpItemDescription))
+				.replace("%SCRIPT%", getScripts());				
+		return cleanHTML(result);
+	}
+	
+	default public String cleanHTML(String rendered) {
+		return rendered.replaceAll("(%[A-Z]*%)", "");		
+	}
+	
+	default public String getStyles () {
+		String styles = "";
+		
+		styles+= getCSSTemplate().replace("%RULES%",
+				"/*COLORS*/"
+				+ "");	
+		
+		
+		styles+= getCSSTemplate().replace("%RULES%",
+				"/*SHAPE*/"
+				+ ".heading:not(h1), .description, .category, .sub-category {"
+				+ 	"padding-left: 20px;"
+				+ "}"
+				+ "");	
+		
+		return styles;
+	}
+	
+	default public String getScripts() {
+		String scripts = "";
+		
+		scripts += getJavaScriptTemplate().replace("%CODE%", "");
+		
+		return scripts;
+	}
+
+	default public String getBodyTemplate (boolean includeAttributes, boolean includeNCReferences, boolean includeCReferences) {
+		return "<h1 class=\"heading class-heading\">%TITLE% - Help</h1>"
+				+ "<div class=\"class-description description\">%DESCRIPTION%</div>"
+				+ (includeAttributes ? 
+						"<h2 class=\"heading attributes-heading\">Attributes</h2>"
+				+		 	"<div class=\"class-attributes category\">%ATTRIBUTES%</div>"
+						: "")
+				+ (includeNCReferences ? 
+						"<h2 class=\"heading ncreferences-heading\">Non-Containment References</h2>"
+				+ 			"<div class=\"class-nc-references category\">%NCREFERENCES%</div>"
+						: "")
+				+ (includeCReferences ?
+						"<h2 class=\"heading creferences-heading\">Containment References</h2>"
+				+ 			"<div class=\"class-c-references category\">%CREFERENCES%</div>"
+						: "");
+	}
+	
+	default public String renderBody(HelpItemDescription helpItemDescription) {
+		EClassHelpItemData eClass = helpItemDescription.getEClassDescription();
 		List<EAttributeHelpItemData> attributes = helpItemDescription.getAttributeDescription();
 		List<EReferenceHelpItemData> ncRefs = helpItemDescription.getNonContainmentReferenceDescription();
 		List<EReferenceHelpItemData> cRefs = helpItemDescription.getContainmentReferenceDescription();
 		
-		String text = "<HTML><BODY>";
-		
-		//EClass
-		text += eClass.getName();
-		if (!eClass.getDocumentation().isEmpty())
-			text += "<br/>" + eClass.getDocumentation();
-		
-		//EAttributes
+		String body = getBodyTemplate(!attributes.isEmpty(), !ncRefs.isEmpty(), !cRefs.isEmpty()) 
+				.replace("%TITLE%", eClass.getName())
+				.replace("%DESCRIPTION%", eClass.getDocumentation())
+				.replace("%ATTRIBUTES%", renderAttributes(attributes))
+				.replace("%NCREFERENCES%", renderNCReferences(ncRefs))
+				.replace("%CREFERENCES%", rencerCReferences(cRefs));	
+		return body;
+	}
+	
+	public default String getAttributeTemplate(boolean isEEnum) {
+		return "<h3 class=\"heading attribute-heading\">%NAME% \u00bb %TYPE% " + (isEEnum ? "(EEnum)" : "") + "</h3>"
+				+ "<div class=\"attribute-description description\">%DESCRIPTION%"
+				+ (isEEnum ? 
+						"</br>"
+						+ "%EENUMDESCRIPTION%" 
+						: "")
+				
+				+ "</div>"
+				+ (isEEnum ? 
+						"<h4 class=\"heading attribute-values-heading\">Possible Values</h4>"
+						+ "<div class=\"eenum-values sub-category\">%EENUMVALUES%</div>" 
+						: "");
+	}
+
+	public default String renderAttributes(List<EAttributeHelpItemData> attributes) {
+		String text = "";
 		if (!attributes.isEmpty()) {
-			text += "<br/><br/><br/>Attributes";
-			for (EAttributeHelpItemData attr : attributes) {
-				text += "<br/><br/>" + attr.getName() + " : " + attr.getDataType();
-				if (!attr.getDocumentation().isEmpty())
-					text += "<br/>" + attr.getDocumentation();
-				//Literals in case it is a EEnum
-				if (attr.isEEnum()) {
-					text += "<br/>Possible Values: ";
-					for (EEnumLiteralHelpItemData lit : attr.getEEnumLiterals()) {
-						text += "<br/>" + lit.getName();
-						if (!lit.getDocumentation().isEmpty())
-							text += "<br/>" + lit.getDocumentation();
-					}
-				}
-			}
-			
-			//Non-containment references
-			if (!ncRefs.isEmpty()) {
-				text += "<br/><br/><br/>Non-containment References";
-				for (EReferenceHelpItemData ncRef : ncRefs) {
-					text += "<br/><br/>" + ncRef.getName() + " : " + ncRef.getDataType();
-					if (!ncRef.getDocumentation().isEmpty())
-						text += "<br/>" + ncRef.getDocumentation();
-					// Possible Targets
-					if (!ncRef.getChildData().isEmpty()) {
-						text += "<br/><br/>Possible Targets:";
-						for (EClassHelpItemData target : ncRef.getChildData()) {
-							text += "<br/><br/>" + target.getName();
-							if (!target.getDocumentation().isEmpty())
-								text += "<br/>" + target.getDocumentation();
-						}
-					}
-				}
-			}
-			
-			//Containment references
-			if (!cRefs.isEmpty()) {
-				text += "<br/><br/><br/>Containment References";
-				for (EReferenceHelpItemData cRef : cRefs) {
-					text += "<br/><br/>" + cRef.getName();
-					if (!cRef.getDocumentation().isEmpty())
-						text += "<br/>" + cRef.getDocumentation();
-					// Possible Targets
-					if (!cRef.getChildData().isEmpty()) {
-						text += "<br/><br/>Possible Children:";
-						for (EClassHelpItemData child : cRef.getChildData()) {
-							text += "<br/><br/>" + child.getName();
-							if (!child.getDocumentation().isEmpty())
-								text += "<br/>" + child.getDocumentation();
-						}
-					}
-				}
+			for (EAttributeHelpItemData attr : attributes) {				
+				text+= getAttributeTemplate(attr.isEEnum())
+					.replace("%NAME%", attr.getName())
+					.replace("%TYPE%", attr.getDataType())
+					.replace("%DESCRIPTION%", attr.getDocumentation())
+					.replace("%EENUMVALUES%", attr.isEEnum() ? renderEEnumLiterals(attr.getEEnumLiterals()) : "");
+					//TODO gather EEnum DataType description
+					//.replace("%EENUMDESCRIPTION%", attr.isEEnum() ?  : "");
 			}
 		}
+		return text;
+	};
+	
+	public default String getEEnumLiteralTemplate() {
+		return "<h5 class=\"heading eenum-literal-heading\">%NAME%</h5>"
+				+ "<div class=\"eenum-literal-description description\">%DESCRIPTION%</div>";
+	}
+	
+	public default String renderEEnumLiterals(List<EEnumLiteralHelpItemData> eEnumLiterals) {
+		String text = "";
 		
-		text += "</BODY></HTML>";
+		for (EEnumLiteralHelpItemData lit : eEnumLiterals) {
+			text += getEEnumLiteralTemplate()
+					.replace("%NAME%", lit.getName())
+					.replace("%DESCRIPTION%", lit.getDocumentation());
+		}
 		
+		return text;		
+	};
+
+	public default String getNCReferenceTemplate(boolean refsAvailable) {
+		return "<h3 class=\"heading ncreference-heading\">%NAME% \u00bb %TYPE%</h3>"
+				+ "<div class=\"ncreference-description description\">"
+				+ 	"%DESCRIPTION%"			
+				+ "</div>"
+				+ (refsAvailable ? 
+						"<h4 class=\"heading ncreference-referencees-heading\">Available Referencees</h4>"
+						+ "<div class=\"ncreference-referencees sub-category\">%NCREFERENCEES%</div>" 
+						: "");
+	}
+	
+	public default String renderNCReferences(List<EReferenceHelpItemData> ncRefs) {
+		String text = "";
+		if (!ncRefs.isEmpty()) {
+			for (EReferenceHelpItemData ncRef : ncRefs) {
+				text+= getNCReferenceTemplate(!ncRef.getChildData().isEmpty())
+						.replace("%NAME%", ncRef.getName())
+						.replace("%TYPE%", ncRef.getDataType())
+						.replace("%DESCRIPTION%", ncRef.getDocumentation())
+						.replace("%NCREFERENCEES%", !ncRef.getChildData().isEmpty() ? renderNCReferencees(ncRef.getChildData()) : "");
+			}
+		}
+		return text;
+	}
+	
+	public default String getNCReferenceeTemplate() {
+		return "<h5 class=\"heading ncreferencee-heading\">%NAME%</h5>"
+				+ "<div class=\"ncreferencee-description description\">%DESCRIPTION%</div>"; 
+	};
+	
+	public default String renderNCReferencees(List<EClassHelpItemData> childData) {
+		String text = "";
+		
+		for (EClassHelpItemData target : childData) {
+			text += getNCReferenceeTemplate()
+					.replace("%NAME%", target.getName())
+					.replace("%DESCRIPTION%", target.getDocumentation());
+		}
+		
+		return text;
+	}
+
+	public default String getCReferenceTemplate(boolean childrenAvailable) {
+		return "<h3 class=\"heading creference-heading\">%NAME% \u00bb %TYPE%</h3>"
+				+ "<div class=\"creference-description description\">"
+				+ 	"%DESCRIPTION%"			
+				+ "</div>"
+				+ (childrenAvailable ? 
+						"<h4 class=\"heading creference-children-heading\">Creatable Children</h4>"
+						+ "<div class=\"creference-children sub-category\">%CHILDREN%</div>" 
+						: "");
+	}
+	
+	public default String rencerCReferences(List<EReferenceHelpItemData> cRefs) {
+		String text = "";
+			for (EReferenceHelpItemData cRef : cRefs) {
+				
+				text += getCReferenceTemplate(!cRef.getChildData().isEmpty())
+						.replace("%NAME%", cRef.getName())
+						.replace("%DESCRIPTION%", cRef.getDocumentation())
+						.replace("%CHILDREN%", !cRef.getChildData().isEmpty() ? renderCReferenceChildren(cRef.getChildData()) : "");
+			}
+		return text;
+	}
+	
+	public default String getCReferenceChildTemplate () {
+		return "<h5 class=\"heading creference-child-heading\">%NAME% \u00bb %TYPE%</h5>"
+				+ "<div class=\"creference-child-description description\">%DESCRIPTION%</div>"; 
+	}
+	
+	public default String renderCReferenceChildren(List<EClassHelpItemData> childData) {
+		String text = "";
+		for (EClassHelpItemData child : childData) {
+			text += getCReferenceChildTemplate ()
+					.replace("%NAME%", child.getName())
+					.replace("%TYPE%", child.getDataType())
+					.replace("%DESCRIPTION%", child.getDocumentation());
+		}
 		return text;
 	}
 
