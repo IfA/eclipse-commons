@@ -31,7 +31,11 @@ public class EReferenceHelpItemData extends HelpItemData {
 		setName(eReference.getName());
 		// DataType
 		if (eReference.getEGenericType().getEClassifier() == null) {
-			setDataType("?");
+			if (eReference.getEGenericType().getERawType() != null) {
+				setDataType(eReference.getEGenericType().getERawType().getName());
+			}
+			else
+				setDataType("?");
 		}
 		else
 			setDataType(eReference.getEGenericType().getEClassifier().getName());
