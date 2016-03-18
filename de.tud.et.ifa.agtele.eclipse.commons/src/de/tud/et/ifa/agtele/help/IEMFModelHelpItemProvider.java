@@ -1,5 +1,7 @@
 package de.tud.et.ifa.agtele.help;
 
+import java.io.FileInputStream;
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -14,7 +16,9 @@ import org.eclipse.emf.edit.command.CommandParameter;
 import org.eclipse.emf.edit.provider.AdapterFactoryItemDelegator;
 import org.eclipse.emf.edit.provider.IItemPropertyDescriptor;
 
+import de.tud.et.ifa.agtele.Activator;
 import de.tud.et.ifa.agtele.emf.AgteleEcoreUtil;
+import de.tud.et.ifa.agtele.resources.BundleContentHelper;
 
 /**
  * This interface may be implemented to provide a help text.
@@ -49,6 +53,13 @@ public interface IEMFModelHelpItemProvider {
 				+ "\"use strict\";"
 				+ "%CODE%"
 			+  "<script>";
+	}
+
+	default public String getTagContainerTemplate() {
+		return "<div class=\"tag-container\">%TAGS%</div>";
+	}
+	default public String getTagTemplate() {
+		return "<span class=\"tag %TYPE%\">%TEXT%</span>";
 	}
 		
 	/**
@@ -86,8 +97,25 @@ public interface IEMFModelHelpItemProvider {
 		
 		styles+= getCSSTemplate().replace("%RULES%",
 				"/*SHAPE*/"
-				+ ".heading:not(h1), .description, .category, .sub-category {"
+				+ ".heading:not(h1), .description, .category, .sub-category, .tag-container {"
 				+ 	"padding-left: 20px;"
+				+ "}"
+				+ ".tag {"
+				+ 	"display:inline-block;"
+				+ 	"border: 1px solid black;"
+				+ 	"border-radius: 2px;"
+				+ "}"
+				+ ".tag{"
+				+ 	"padding-left: 5px;"
+				+ 	"padding-right: 5px;"
+				+ "}"
+				+ "h5 {"
+				+ 	"margin-bottom: 0px;"
+				+ 	"padding-bottom: 0px;"
+				+ 	"line-height: 8px;"
+				+ "}"
+				+ "h5+div {"
+				+ 	"margin-top:5px;"
 				+ "}"
 				+ "");	
 		
@@ -95,9 +123,20 @@ public interface IEMFModelHelpItemProvider {
 	}
 	
 	default public String getScripts() {
-		String scripts = "";
+		String scripts = "";	
+		boolean success = true;
 		
-		scripts += getJavaScriptTemplate().replace("%CODE%", "");
+		try {
+			scripts += getJavaScriptTemplate().replace("%CODE%", BundleContentHelper.getBundleFileString("de.tud.et.ifa.agtele.eclipse.commons", "files/jquery.min.js"));
+		} catch (IOException e) {
+			success = false;
+			e.printStackTrace();
+		}
+		if (success) {
+			scripts += getJavaScriptTemplate().replace("%CODE%", ""
+				+ "");		
+		}
+		
 		
 		return scripts;
 	}
@@ -184,7 +223,8 @@ public interface IEMFModelHelpItemProvider {
 
 	public default String getNCReferenceTemplate(boolean refsAvailable) {
 		return "<h3 class=\"heading ncreference-heading\">%NAME% \u00bb %TYPE%</h3>"
-				+ "<div class=\"ncreference-description description\">"
+				+ "%TAGS%"
+				+ "<div class=\"ncreference-description description\">"				
 				+ 	"%DESCRIPTION%"			
 				+ "</div>"
 				+ (refsAvailable ? 
@@ -201,12 +241,27 @@ public interface IEMFModelHelpItemProvider {
 						.replace("%NAME%", ncRef.getName())
 						.replace("%TYPE%", ncRef.getDataType())
 						.replace("%DESCRIPTION%", ncRef.getDocumentation())
-						.replace("%NCREFERENCEES%", !ncRef.getChildData().isEmpty() ? renderNCReferencees(ncRef.getChildData()) : "");
+						.replace("%NCREFERENCEES%", !ncRef.getChildData().isEmpty() ? renderNCReferencees(ncRef.getChildData()) : "")
+						.replace("%TAGS%", renderNCRefTags(ncRef));
 			}
 		}
 		return text;
 	}
 	
+	public default String renderNCRefTags(EReferenceHelpItemData ncRef) {
+		String text = "";
+			if (ncRef.getEReference().isDerived()) {
+				text += getTagTemplate()
+					.replace("%TYPE%", "ncref-tags")
+					.replace("%TEXT%", "derived");				
+			}		
+		if (!text.isEmpty()) {
+			text = getTagContainerTemplate().replace("%TAGS%", text);
+		}
+			
+		return text;
+	}
+
 	public default String getNCReferenceeTemplate() {
 		return "<h5 class=\"heading ncreferencee-heading\">%NAME%</h5>"
 				+ "<div class=\"ncreferencee-description description\">%DESCRIPTION%</div>"; 
@@ -241,6 +296,7 @@ public interface IEMFModelHelpItemProvider {
 				
 				text += getCReferenceTemplate(!cRef.getChildData().isEmpty())
 						.replace("%NAME%", cRef.getName())
+						.replace("%TYPE%", cRef.getDataType())
 						.replace("%DESCRIPTION%", cRef.getDocumentation())
 						.replace("%CHILDREN%", !cRef.getChildData().isEmpty() ? renderCReferenceChildren(cRef.getChildData()) : "");
 			}
@@ -248,7 +304,7 @@ public interface IEMFModelHelpItemProvider {
 	}
 	
 	public default String getCReferenceChildTemplate () {
-		return "<h5 class=\"heading creference-child-heading\">%NAME% \u00bb %TYPE%</h5>"
+		return "<h5 class=\"heading creference-child-heading\">\u00bb %NAME%</h5>"
 				+ "<div class=\"creference-child-description description\">%DESCRIPTION%</div>"; 
 	}
 	
