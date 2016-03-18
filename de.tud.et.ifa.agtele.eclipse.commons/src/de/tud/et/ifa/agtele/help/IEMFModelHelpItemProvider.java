@@ -1,6 +1,5 @@
 package de.tud.et.ifa.agtele.help;
 
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
@@ -15,7 +14,6 @@ import org.eclipse.emf.edit.command.CommandParameter;
 import org.eclipse.emf.edit.provider.AdapterFactoryItemDelegator;
 import org.eclipse.emf.edit.provider.IItemPropertyDescriptor;
 
-import de.tud.et.ifa.agtele.Activator;
 import de.tud.et.ifa.agtele.emf.AgteleEcoreUtil;
 import de.tud.et.ifa.agtele.resources.BundleContentHelper;
 
@@ -375,7 +373,7 @@ public interface IEMFModelHelpItemProvider {
 					EReference ncRef = (EReference) itemPropertyDescriptor.getFeature(null);
 					// display Non-Containment References only if a type is
 					// bound to it
-					if (ncRef.getEGenericType().getEClassifier() != null) {
+					if (ncRef.getEGenericType().getEClassifier() != null || ncRef.getEGenericType().getERawType() != null) {
 						helpItemDescription.addNonContainmentReferenceDescription(factory.createEReferenceHelpItemData(ncRef,
 								(List<EObject>) itemPropertyDescriptor.getChoiceOfValues(eObject)));
 					}
