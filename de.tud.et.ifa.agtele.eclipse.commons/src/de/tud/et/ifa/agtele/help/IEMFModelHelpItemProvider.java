@@ -9,7 +9,6 @@ import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.EReference;
 import org.eclipse.emf.ecore.EStructuralFeature;
-import org.eclipse.emf.ecore.xml.type.internal.RegEx;
 import org.eclipse.emf.edit.command.CommandParameter;
 import org.eclipse.emf.edit.provider.AdapterFactoryItemDelegator;
 import org.eclipse.emf.edit.provider.IItemPropertyDescriptor;
@@ -130,7 +129,7 @@ public interface IEMFModelHelpItemProvider {
 				.replace("%DESCRIPTION%", eClass.getDocumentation())
 				.replace("%ATTRIBUTES%", renderAttributes(attributes))
 				.replace("%NCREFERENCES%", renderNCReferences(ncRefs))
-				.replace("%CREFERENCES%", rencerCReferences(cRefs));	
+				.replace("%CREFERENCES%", renderCReferences(cRefs));	
 		return body;
 	}
 	
@@ -157,9 +156,8 @@ public interface IEMFModelHelpItemProvider {
 					.replace("%NAME%", attr.getName())
 					.replace("%TYPE%", attr.getDataType())
 					.replace("%DESCRIPTION%", attr.getDocumentation())
-					.replace("%EENUMVALUES%", attr.isEEnum() ? renderEEnumLiterals(attr.getEEnumLiterals()) : "");
-					//TODO gather EEnum DataType description
-					//.replace("%EENUMDESCRIPTION%", attr.isEEnum() ?  : "");
+					.replace("%EENUMVALUES%", attr.isEEnum() ? renderEEnumLiterals(attr.getEEnumLiterals()) : "")
+					.replace("%EENUMDESCRIPTION%", attr.isEEnum() ? attr.getEEnumDocumentation(): "");
 			}
 		}
 		return text;
@@ -235,7 +233,7 @@ public interface IEMFModelHelpItemProvider {
 						: "");
 	}
 	
-	public default String rencerCReferences(List<EReferenceHelpItemData> cRefs) {
+	public default String renderCReferences(List<EReferenceHelpItemData> cRefs) {
 		String text = "";
 			for (EReferenceHelpItemData cRef : cRefs) {
 				
