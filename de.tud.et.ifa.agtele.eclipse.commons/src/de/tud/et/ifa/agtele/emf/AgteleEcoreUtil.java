@@ -7,10 +7,12 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 
+import org.eclipse.emf.common.util.TreeIterator;
 import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.EClassifier;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.EPackage;
+import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.ecore.resource.ResourceSet;
 import org.eclipse.emf.ecore.util.EcoreUtil;
 import org.eclipse.emf.edit.domain.AdapterFactoryEditingDomain;
@@ -245,5 +247,25 @@ public class AgteleEcoreUtil {
 	 */
 	public static EPackage getRootEPackage(EClass e) {
 		return getRootEPackage(e.getEPackage());
+	}
+	
+	/**
+	 * Returns all instances of an eClass, that are contained in a resource.
+	 * @param eClass
+	 * @param res
+	 * @return All instances of the eClass
+	 */
+	public static Collection<EObject> getAllInstances(EClass eClass, Resource res) {
+		Collection<EObject> result = new ArrayList<EObject>();
+		
+		TreeIterator<EObject> it = res.getAllContents();
+		
+		while (it.hasNext()) {
+			EObject obj = it.next();
+			if (eClass.isSuperTypeOf(obj.eClass())) {
+				result.add(obj);
+			}
+		}		
+		return result;
 	}
 }
