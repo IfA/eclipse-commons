@@ -19,7 +19,6 @@ import org.eclipse.xtext.EcoreUtil2;
 
 import de.tud.et.ifa.agtele.emf.AgteleEcoreUtil;
 import de.tud.et.ifa.agtele.emf.edit.commands.AmbiguousCommandWrapper;
-import de.tud.et.ifa.agtele.emf.edit.commands.AmbiguousCommandWrapper.ICommandSelectionStrategy;
 import de.tud.et.ifa.agtele.emf.edit.commands.BasicDragAndDropAddCommand;
 import de.tud.et.ifa.agtele.emf.edit.commands.BasicDragAndDropSetCommand;
 
@@ -120,6 +119,17 @@ public interface IDragAndDropProvider {
 			return new AmbiguousCommandWrapper(commands, (strategy == null ? new ICommandSelectionStrategy() {} : strategy));
 		}
 		
+	}
+	
+	/**
+	 * This returns the {@link ICommandSelectionStrategy} that is used by 
+	 * {@link #createCustomDragAndDropCommand(EditingDomain, Object, float, int, int, Collection, ICommandSelectionStrategy)}.
+	 * 
+	 * @return The {@link ICommandSelectionStrategy} to be used by 
+	 * {@link #createCustomDragAndDropCommand(EditingDomain, Object, float, int, int, Collection, ICommandSelectionStrategy)}.
+	 */
+	public default ICommandSelectionStrategy getCommandSelectionStrategy() {
+		return new ICommandSelectionStrategy() {};
 	}
 	
 }

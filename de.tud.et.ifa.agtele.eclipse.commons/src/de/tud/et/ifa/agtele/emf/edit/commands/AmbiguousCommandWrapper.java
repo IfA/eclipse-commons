@@ -8,6 +8,8 @@ import org.eclipse.emf.common.command.UnexecutableCommand;
 import org.eclipse.emf.edit.command.DragAndDropFeedback;
 import org.eclipse.swt.dnd.DND;
 
+import de.tud.et.ifa.agtele.emf.edit.ICommandSelectionStrategy;
+
 /**
  * This represents an <em>unambiguous</em> command. This means that this {@link AbstractCommand} wraps a list of other 
  * commands. Before executing, one command is selected from the list based on the specified {@link ICommandSelectionStrategy}.
@@ -112,25 +114,5 @@ public class AmbiguousCommandWrapper extends AbstractCommand implements
 		}
 	}
 	
-	/**
-	 * This interface defines a method to select one of a list of commands to be executed.
-	 *  
-	 * @author mfreund
-	 */
-	public interface ICommandSelectionStrategy {
-
-		/**
-		 * This selects and returns exactly one of the given '<em>commands</em>' that shall be executed.
-		 * <p />
-		 * The default implementation selects the first choice.
-		 * 
-		 * @param commands The ambiguous list of commands that might be executed.
-		 * @return The single command that is to be executed.
-		 */
-		public default AbstractCommand selectCommandToExecute(ArrayList<AbstractCommand> commands) {
-			return (commands != null && !commands.isEmpty() ? commands.iterator().next() : UnexecutableCommand.INSTANCE);
-		}
-
-	}
 
 }
