@@ -177,6 +177,12 @@ public interface IEMFModelHelpItemProvider {
 				+ ".expandable.collapsed ~ .sub-category {"
 				+ 	"display:none;"
 				+ "}"
+				+ ".expandable.collapsed:before{"
+				+ 	"content: '+ ';"
+				+ "}"
+				+ ".expandable.expanded:before{"
+				+ 	"content: '- ';"
+				+ "}"
 				+ "");	
 		
 		return styles;
