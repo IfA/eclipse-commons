@@ -12,14 +12,18 @@ Require-Bundle: org.eclipse.ui,
  org.eclipse.emf.ecore,
  org.eclipse.emf.edit,
  org.eclipse.emf.edit.ui,
- de.tud.et.ifa.agtele.eclipse.commons;bundle-version="0.1.1"
+ de.tud.et.ifa.agtele.eclipse.commons;bundle-version="0.1.1",
+ org.eclipse.ui.workbench,
+ org.eclipse.ui.ide;bundle-version="3.11.0"
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ActivationPolicy: lazy
 Bundle-Activator: de.tud.et.ifa.agtele.ui.AgteleUIPlugin$Implementation
 Export-Package: de.tud.et.ifa.agtele.ui,
+ de.tud.et.ifa.agtele.ui.editors,
  de.tud.et.ifa.agtele.ui.interfaces,
  de.tud.et.ifa.agtele.ui.listeners,
  de.tud.et.ifa.agtele.ui.providers,
  de.tud.et.ifa.agtele.ui.util,
  de.tud.et.ifa.agtele.ui.views,
  de.tud.et.ifa.agtele.ui.widgets
+Import-Package: org.eclipse.core.resources
