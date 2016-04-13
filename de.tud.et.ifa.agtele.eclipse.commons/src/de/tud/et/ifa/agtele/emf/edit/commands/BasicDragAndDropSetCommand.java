@@ -38,4 +38,8 @@ public class BasicDragAndDropSetCommand extends SetCommand implements
 		return DND.DROP_LINK;
 	}
 
+	@Override
+	public String doGetLabel() {
+		return "Set: " + feature.getName();
+	}
 }

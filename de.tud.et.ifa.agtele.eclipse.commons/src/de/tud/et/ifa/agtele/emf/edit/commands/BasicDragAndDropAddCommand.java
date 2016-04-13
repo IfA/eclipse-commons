@@ -37,5 +37,10 @@ public class BasicDragAndDropAddCommand extends AddCommand implements
 	public int getOperation() {
 		return DND.DROP_LINK;
 	}
+	
+	@Override
+	public String doGetLabel() {
+		return "Add: " + feature.getName();
+	}
 
 }
