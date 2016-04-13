@@ -17,6 +17,7 @@ Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ActivationPolicy: lazy
 Bundle-Activator: de.tud.et.ifa.agtele.ui.AgteleUIPlugin$Implementation
 Export-Package: de.tud.et.ifa.agtele.ui,
+ de.tud.et.ifa.agtele.ui.emf.edit,
  de.tud.et.ifa.agtele.ui.interfaces,
  de.tud.et.ifa.agtele.ui.listeners,
  de.tud.et.ifa.agtele.ui.providers,
