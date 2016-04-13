@@ -96,6 +96,8 @@ public interface IEMFModelHelpItemProvider {
 //				+ "}"
 				  "* {"
 				+ 	"font-size:16px;"
+				+ 	"background-color:rgb(240,240,240);"
+				+ 	"color:rgb(40,40,40);"
 				+ "}"
 				+ ".tag {"
 				+ 	"display:inline-block;"
