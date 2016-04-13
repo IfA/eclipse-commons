@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 
+import org.eclipse.emf.common.command.AbstractCommand;
 import org.eclipse.emf.common.command.Command;
 import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.EClassifier;
@@ -17,6 +18,8 @@ import org.eclipse.emf.edit.provider.ItemProviderAdapter;
 import org.eclipse.xtext.EcoreUtil2;
 
 import de.tud.et.ifa.agtele.emf.AgteleEcoreUtil;
+import de.tud.et.ifa.agtele.emf.edit.commands.AmbiguousCommandWrapper;
+import de.tud.et.ifa.agtele.emf.edit.commands.AmbiguousCommandWrapper.ICommandSelectionStrategy;
 import de.tud.et.ifa.agtele.emf.edit.commands.BasicDragAndDropAddCommand;
 import de.tud.et.ifa.agtele.emf.edit.commands.BasicDragAndDropSetCommand;
 
@@ -29,8 +32,12 @@ import de.tud.et.ifa.agtele.emf.edit.commands.BasicDragAndDropSetCommand;
  */
 public interface IDragAndDropProvider {
 	
+	/**
+	 * Create a custom {@link DragAndDropCommand}. The given '<em>strategy</em>' can be used to select 
+	 * one of multiple possible commands to execute.
+	 */
 	public default Command createCustomDragAndDropCommand(EditingDomain domain, Object owner, float location, int operations,
-			int operation, Collection<?> collection) {
+			int operation, Collection<?> collection, ICommandSelectionStrategy strategy) {
 		
 		Command dragAndDropCommand = new DragAndDropCommand(domain, owner, location, operations, operation, collection);
 		
@@ -102,13 +109,15 @@ public interface IDragAndDropProvider {
 				return new BasicDragAndDropSetCommand(domain, parent, ref, collection.iterator().next(), 0);
 			}
 		} else {
-			
-			EReference ref = possibleReferences.iterator().next();
-			if(ref.isMany()) {
-				return new BasicDragAndDropAddCommand(domain, parent, ref, collection);
-			} else {
-				return new BasicDragAndDropSetCommand(domain, parent, ref, collection.iterator().next(), 0);
+			ArrayList<AbstractCommand> commands = new ArrayList<>();
+			for (EReference ref : possibleReferences) {
+				if(ref.isMany()) {
+					commands.add(new BasicDragAndDropAddCommand(domain, parent, ref, collection));
+				} else {
+					commands.add(new BasicDragAndDropSetCommand(domain, parent, ref, collection.iterator().next(), 0));
+				}				
 			}
+			return new AmbiguousCommandWrapper(commands, (strategy == null ? new ICommandSelectionStrategy() {} : strategy));
 		}
 		
 	}

@@ -1,11 +1,15 @@
 package de.tud.et.ifa.agtele.emf.edit;
 
+import java.util.ArrayList;
 import java.util.Collection;
 
 import org.eclipse.emf.common.command.Command;
 import org.eclipse.emf.common.notify.AdapterFactory;
 import org.eclipse.emf.edit.domain.EditingDomain;
 import org.eclipse.emf.edit.provider.ItemProviderAdapter;
+
+import de.tud.et.ifa.agtele.emf.edit.commands.AmbiguousCommandWrapper.ICommandSelectionStrategy;
+
 
 /**
  * A special {@link ItemProviderAdapter} that encapsulates common functionalities.
@@ -27,7 +31,8 @@ public class CommonItemProviderAdapter extends ItemProviderAdapter {
 		
 		// If possible use the special functionality provided by the 'IDragAndDropProvider' interface...
 		if(this instanceof IDragAndDropProvider) {
-			return ((IDragAndDropProvider) this).createCustomDragAndDropCommand(domain, owner, location, operations, operation, collection);
+			return ((IDragAndDropProvider) this).createCustomDragAndDropCommand(domain, owner, location, operations, operation, collection,
+					new ICommandSelectionStrategy() {});
 		} else {
 			return super.createDragAndDropCommand(domain, owner, location, operations, operation, collection);
 		}
