@@ -47,9 +47,8 @@ public interface IEMFModelHelpItemProvider {
 	
 	default public String getJavaScriptTemplate() {
 		return "<script type=\"application/javascript\">"
-				+ "\"use strict\";"
 				+ "%CODE%"
-			+  "<script>";
+			+  "</script>";
 	}
 
 	default public String getTagContainerTemplate() {
@@ -87,32 +86,96 @@ public interface IEMFModelHelpItemProvider {
 	default public String getStyles () {
 		String styles = "";
 		
-		styles+= getCSSTemplate().replace("%RULES%",
-				"/*COLORS*/"
-				+ "");	
+//		styles+= getCSSTemplate().replace("%RULES%",
+//				"/*COLORS*/"
+//				+ "");	
 		
-		
 		styles+= getCSSTemplate().replace("%RULES%",
-				"/*SHAPE*/"
-				+ ".heading:not(h1), .description, .category, .sub-category, .tag-container {"
-				+ 	"padding-left: 20px;"
+//				".heading:not(h1), .description, .category, .sub-category, .tag-container {"
+//				+ 	"padding-left: 20px;"
+//				+ "}"
+				  "* {"
+				+ 	"font-size:16px;"
 				+ "}"
 				+ ".tag {"
 				+ 	"display:inline-block;"
 				+ 	"border: 1px solid black;"
 				+ 	"border-radius: 2px;"
 				+ "}"
+				+ "h1,h2,h3,h4,h5 {"
+				+ 	"margin:0;"
+				+ "}"
+				+ "h3,h4 {"
+				+ 	"cursor:pointer;"
+				+ "}"
 				+ ".tag{"
 				+ 	"padding-left: 5px;"
 				+ 	"padding-right: 5px;"
 				+ "}"
+				+ ".category{"
+				+ 	"padding-left:10px;"
+				+ "}"
+				+ ".description{"
+				+ 	"padding-left:20px;"
+				+ 	"margin-top:3px;"
+				+ 	"margin-bottom:6px;"
+				+ "}"
+				+ "h1 {"
+				+ 	"font-size:24px;"
+				+ 	"padding-top: 5px;"
+				+ 	"padding-bottom:5px;"
+				+ 	"padding-left:15px;"				
+				+ 	"background-color:rgb(200,200,200);"
+				+ "}"
+				+ "h1 + div {"
+//				+ 	"padding-left: 30px;"
+				+ "}"
+				+ "h2 {"
+				+ 	"font-size:22px;"
+				+ 	"padding-top: 4px;"
+				+ 	"padding-bottom:4px;"
+				+ 	"padding-left:15px;"	
+				+ 	"background-color:rgb(210,210,210);"
+				+ "}"
+				+ "h2 + div {"
+//				+ 	"padding-left:30px;"
+				+ "}"
+				+ "h3 {"
+				+ 	"font-size:20px;"
+				+ 	"padding-top: 3px;"
+				+ 	"padding-bottom:3px;"
+				+ 	"padding-left:15px;"	
+				+ 	"background-color:rgb(220,220,220);"
+				+ "}"
+				+ "h3 + div {"
+//				+ 	"padding-left:35px;"
+				+ "}"
+				+ "h4 {"
+				+ 	"font-size:18px;"
+				+ 	"padding-top: 3px;"
+				+ 	"padding-bottom:3px;"
+				+ 	"padding-left:25px;"	
+				+ 	"background-color:rgb(230,230,230);"
+				+ "}"
+				+ "h4 + div {"
+//				+ 	"padding-left:40px;"
+				+ "}"
 				+ "h5 {"
-				+ 	"margin-bottom: 0px;"
-				+ 	"padding-bottom: 0px;"
-				+ 	"line-height: 8px;"
+				+ 	"padding-bottom: 1px;"
+				+ 	"padding-top: 3px;"
+				+ 	"padding-bottom: 3px;"
+				+ 	"line-height: 14px;"
+				+ 	"padding-left:35px;"	
+				+ 	"background-color:rgb(240,240,240);"
 				+ "}"
 				+ "h5+div {"
-				+ 	"margin-top:5px;"
+//				+ 	"padding-top:5px;"
+				+ 	"padding-bottom:5px;"
+				+ 	"padding-left:45px !important;"
+				+ 	"margin:0;"
+				+ "}"
+				+ ".expandable.collapsed ~ .sub-category {"
+				+ 	"display:none;"
 				+ "}"
 				+ "");	
 		
@@ -130,8 +193,16 @@ public interface IEMFModelHelpItemProvider {
 			e.printStackTrace();
 		}
 		if (success) {
-			scripts += getJavaScriptTemplate().replace("%CODE%", ""
-				+ "");		
+			scripts += "\n" + getJavaScriptTemplate().replace("%CODE%", ""
+				+ "(function(){"
+				+ 	"$('.expandable').on('click', function () {"
+				+ 		"if($(this).is('.collapsed')) {"
+				+ 			"$(this).removeClass('collapsed').addClass('expanded');"
+				+ 		"} else {"
+				+ 			"$(this).removeClass('expanded').addClass('collapsed');"
+				+ 		"}"
+				+ 	"});"
+				+ "}())");		
 		}
 		
 		
@@ -171,7 +242,7 @@ public interface IEMFModelHelpItemProvider {
 	}
 	
 	public default String getAttributeTemplate(boolean isEEnum) {
-		return "<h3 class=\"heading attribute-heading\">%NAME% \u00bb %TYPE% " + (isEEnum ? "(EEnum)" : "") + "</h3>"
+		return "<h3 class=\"heading attribute-heading expandable collapsed\">%NAME% \u00bb %TYPE% " + (isEEnum ? "(EEnum)" : "") + "</h3>"
 				+ "<div class=\"attribute-description description\">%DESCRIPTION%"
 				+ (isEEnum ? 
 						"</br>"
@@ -218,7 +289,7 @@ public interface IEMFModelHelpItemProvider {
 	};
 
 	public default String getNCReferenceTemplate(boolean refsAvailable) {
-		return "<h3 class=\"heading ncreference-heading\">%NAME% \u00bb %TYPE%</h3>"
+		return "<h3 class=\"heading ncreference-heading expandable collapsed\">%NAME% \u00bb %TYPE%</h3>"
 				+ "%TAGS%"
 				+ "<div class=\"ncreference-description description\">"				
 				+ 	"%DESCRIPTION%"			
@@ -276,7 +347,7 @@ public interface IEMFModelHelpItemProvider {
 	}
 
 	public default String getCReferenceTemplate(boolean childrenAvailable) {
-		return "<h3 class=\"heading creference-heading\">%NAME% \u00bb %TYPE%</h3>"
+		return "<h3 class=\"heading creference-heading expandable collapsed\">%NAME% \u00bb %TYPE%</h3>"
 				+ "<div class=\"creference-description description\">"
 				+ 	"%DESCRIPTION%"			
 				+ "</div>"
@@ -299,15 +370,15 @@ public interface IEMFModelHelpItemProvider {
 		return text;
 	}
 	
-	public default String getCReferenceChildTemplate () {
-		return "<h5 class=\"heading creference-child-heading\">\u00bb %NAME%</h5>"
-				+ "<div class=\"creference-child-description description\">%DESCRIPTION%</div>"; 
+	public default String getCReferenceChildTemplate (boolean descriptionAvailable) {
+		return "<h5 class=\"heading creference-child-heading\">\u00bb %NAME%</h5>" +
+				(descriptionAvailable ? "<div class=\"creference-child-description description\">%DESCRIPTION%</div>" : ""); 
 	}
 	
 	public default String renderCReferenceChildren(List<EClassHelpItemData> childData) {
 		String text = "";
 		for (EClassHelpItemData child : childData) {
-			text += getCReferenceChildTemplate ()
+			text += getCReferenceChildTemplate (!child.getDocumentation().isEmpty())
 					.replace("%NAME%", child.getName())
 					.replace("%TYPE%", child.getDataType())
 					.replace("%DESCRIPTION%", child.getDocumentation());
