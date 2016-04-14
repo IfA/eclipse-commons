@@ -51,7 +51,15 @@ public interface IDragAndDropProvider {
 	public default Command createCustomDragAndDropCommand(EditingDomain domain, Object owner, float location, int operations,
 			int operation, Collection<?> collection, ICommandSelectionStrategy strategy) {
 		
-		DragAndDropCommand dragAndDropCommand = new DragAndDropCommand(domain, owner, location, operations, operation, collection);
+		DragAndDropCommand dragAndDropCommand = new DragAndDropCommand(domain, owner, location, operations, operation, collection) {
+			
+			@Override
+			public boolean validate(Object owner, float location, int operations, int operation,
+					Collection<?> collection) {
+				// use the default d'n'd command only for move/copy operations (i.e. if the location is near 0 or near 1)
+				return super.validate(owner, location, operations, operation, collection) && (location < 0.2 || location > 0.8);
+			}
+		};
 
 		if(!(owner instanceof EObject) || collection.isEmpty()) {
 			return dragAndDropCommand;
