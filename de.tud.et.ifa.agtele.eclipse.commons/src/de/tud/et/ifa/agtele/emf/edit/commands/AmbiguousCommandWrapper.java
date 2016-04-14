@@ -6,8 +6,7 @@ import java.util.Collection;
 import org.eclipse.emf.common.command.AbstractCommand;
 import org.eclipse.emf.common.command.UnexecutableCommand;
 import org.eclipse.emf.edit.command.DragAndDropFeedback;
-import org.eclipse.swt.dnd.DND;
-
+import org.eclipse.emf.edit.domain.EditingDomain;
 import de.tud.et.ifa.agtele.emf.edit.ICommandSelectionStrategy;
 
 /**
@@ -24,6 +23,11 @@ public class AmbiguousCommandWrapper extends AbstractCommand implements
 	protected ArrayList<AbstractCommand> commands;
 	
 	/**
+	 * The (ambiguous) list of commands that are currently {@link #validate(Object, float, int, int, Collection) valid}.
+	 */
+	protected static ArrayList<AbstractCommand> validCommands = new ArrayList<>();
+	
+	/**
 	 * The single, unambiguous command after resolving the ambiguities.
 	 */
 	protected AbstractCommand command;
@@ -35,12 +39,18 @@ public class AmbiguousCommandWrapper extends AbstractCommand implements
 	
 	/**
 	 * This creates an instance.
-	 * 
+	 * @param domain The {@link EditingDomain} that will be used to execute the command.
+	 * @param owner The object on that the command will be executed.
+	 * @param location The location (between 0.0 and 1.0) in relation to the '<em>owner</em>' where the command will be executed.
+	 * @param operations The permitted operations.
+	 * @param operation The desired operation.
+	 * @param collection The dragged elements.
 	 * @param commands The ambiguous list of {@link AbstractCommand commands} that this shall wrap.
 	 * @param strategy The {@link ICommandSelectionStrategy} that shall be applied to select an unambiguous 
 	 * command before execution.
 	 */
-	public AmbiguousCommandWrapper(ArrayList<AbstractCommand> commands, ICommandSelectionStrategy strategy) {
+	public AmbiguousCommandWrapper(EditingDomain domain, Object owner, float location, int operations,
+			int operation, Collection<?> collection, ArrayList<AbstractCommand> commands, ICommandSelectionStrategy strategy) {
 		
 		this.commands = (commands == null ? new ArrayList<>() : commands);
 		
@@ -53,13 +63,28 @@ public class AmbiguousCommandWrapper extends AbstractCommand implements
 		}
 		
 		this.strategy = strategy;
+		
+		/*
+		 * we need to validate the command already in the constructor as it seems that a new command is created directly before
+		 * execution that would not get validated otherwise
+		 */
+		validate(owner, location, operations, operation, collection);
 	}
 
 	@Override
 	public boolean validate(Object owner, float location, int operations,
 			int operation, Collection<?> collection) {
 		
-		return canExecute();
+		validCommands.clear();
+		for (AbstractCommand command : commands) {
+			if(command instanceof DragAndDropFeedback) {
+				if(((DragAndDropFeedback) command).validate(owner, location, operations, operation, collection)) {
+					validCommands.add(command);
+				}
+			}
+		}
+		
+		return !validCommands.isEmpty();
 	}
 	
 	@Override
@@ -76,26 +101,41 @@ public class AmbiguousCommandWrapper extends AbstractCommand implements
 
 	@Override
 	public int getFeedback() {
-		return DND.FEEDBACK_SELECT;
+		
+		// Determine the feedback to be shown based on the number and types of 'validCommands'
+		if(validCommands.isEmpty()) {
+			return FEEDBACK_NONE;
+		} else if(validCommands.size() == 1 && validCommands.get(0) instanceof DragAndDropFeedback) {
+			return ((DragAndDropFeedback) (validCommands.get(0))).getFeedback();
+		} else {
+			return FEEDBACK_SELECT;
+		}
 	}
 
 	@Override
 	public int getOperation() {
-		return DND.DROP_LINK;
+		
+		// Determine the operation based on the number and types of 'validCommands'
+		if(validCommands.isEmpty()) {
+			return DROP_NONE;
+		} else if(validCommands.size() == 1 && validCommands.get(0) instanceof DragAndDropFeedback) {
+			return ((DragAndDropFeedback) (validCommands.get(0))).getOperation();
+		} else {
+			return DROP_LINK;
+		}
 	}
 
 	@Override
 	public void execute() {
 
 		if(command == null) {
-			command = strategy.selectCommandToExecute(commands);
-			
+			command = strategy.selectCommandToExecute(validCommands);
+			validCommands.clear();
 		}
 		
 		if(command == null) {
 			return;
 		}
-		
 		
 		command.execute();
 	}

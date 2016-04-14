@@ -25,7 +25,7 @@ public class BasicDragAndDropAddCommand extends AddCommand implements
 	@Override
 	public boolean validate(Object owner, float location, int operations,
 			int operation, Collection<?> collection) {
-		return isExecutable;
+		return canExecute() && location >= 0.2 && location <= 0.8;
 	}
 
 	@Override

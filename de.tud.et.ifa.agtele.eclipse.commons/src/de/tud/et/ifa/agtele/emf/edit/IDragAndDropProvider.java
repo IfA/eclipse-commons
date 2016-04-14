@@ -34,13 +34,26 @@ public interface IDragAndDropProvider {
 	/**
 	 * Create a custom {@link DragAndDropCommand}. The given '<em>strategy</em>' can be used to select 
 	 * one of multiple possible commands to execute.
+	 * <p />
+	 * This will usually be called inside an implementation of '<em>createDragAndDropCommand(...)</em>' in a 
+	 * custom ItemProvider instead of just calling '<em>super.createDragAndDropCommand(...)</em>'.
+	 * 
+	 * @param domain The {@link EditingDomain} that will be used to execute the command.
+	 * @param owner The object on that the command will be executed.
+	 * @param location The location (between 0.0 and 1.0) in relation to the '<em>owner</em>' where the command will be executed.
+	 * @param operations The permitted operations.
+	 * @param operation The desired operation.
+	 * @param collection The dragged elements.
+	 * @param strategy The {@link ICommandSelectionStrategy} that shall be applied to select an unambiguous 
+	 * command before execution.
+	 * @return The custom drag and drop command.
 	 */
 	public default Command createCustomDragAndDropCommand(EditingDomain domain, Object owner, float location, int operations,
 			int operation, Collection<?> collection, ICommandSelectionStrategy strategy) {
 		
-		Command dragAndDropCommand = new DragAndDropCommand(domain, owner, location, operations, operation, collection);
-		
-		if(!(owner instanceof EObject) || collection.isEmpty() || (location < 0.25 && location > 0.75)) {
+		DragAndDropCommand dragAndDropCommand = new DragAndDropCommand(domain, owner, location, operations, operation, collection);
+
+		if(!(owner instanceof EObject) || collection.isEmpty()) {
 			return dragAndDropCommand;
 		}
 		
@@ -69,7 +82,7 @@ public interface IDragAndDropProvider {
 		EObject parent = (EObject) owner;
 		EClass commonSuperClass = (EClass) commonSuperType;
 		
-		// Determine all possible non-containment references that could be used to drop the collection
+		// Determine all possible references that could be used to drop the collection
 		//
 		ArrayList<EReference> possibleReferences = new ArrayList<>();
 		for (EReference ref : parent.eClass().getEAllReferences()) {
@@ -95,6 +108,11 @@ public interface IDragAndDropProvider {
 			}
 		}
 		
+		ArrayList<AbstractCommand> commands = new ArrayList<>();
+		if(dragAndDropCommand instanceof DragAndDropCommand && dragAndDropCommand.canExecute()) {
+			commands.add((AbstractCommand) dragAndDropCommand);
+		}
+		
 		// Create a suitable drag and drop command depending on the number of possibilities
 		//
 		if(possibleReferences.isEmpty()) {
@@ -103,12 +121,12 @@ public interface IDragAndDropProvider {
 			
 			EReference ref = possibleReferences.iterator().next();
 			if(ref.isMany()) {
-				return new BasicDragAndDropAddCommand(domain, parent, ref, collection);
+				commands.add(new BasicDragAndDropAddCommand(domain, parent, ref, collection));
 			} else {
-				return new BasicDragAndDropSetCommand(domain, parent, ref, collection.iterator().next(), 0);
+				commands.add(new BasicDragAndDropSetCommand(domain, parent, ref, collection.iterator().next(), 0));
 			}
 		} else {
-			ArrayList<AbstractCommand> commands = new ArrayList<>();
+			
 			for (EReference ref : possibleReferences) {
 				if(ref.isMany()) {
 					commands.add(new BasicDragAndDropAddCommand(domain, parent, ref, collection));
@@ -116,9 +134,14 @@ public interface IDragAndDropProvider {
 					commands.add(new BasicDragAndDropSetCommand(domain, parent, ref, collection.iterator().next(), 0));
 				}				
 			}
-			return new AmbiguousCommandWrapper(commands, (strategy == null ? new ICommandSelectionStrategy() {} : strategy));
 		}
 		
+		if(commands.size() == 1) {
+			return commands.get(0);
+		} else {
+			return new AmbiguousCommandWrapper(domain, owner, location, operations,
+					operation, collection, commands, (strategy == null ? new ICommandSelectionStrategy() {} : strategy));
+		}
 	}
 	
 	/**
