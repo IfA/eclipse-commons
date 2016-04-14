@@ -129,7 +129,13 @@ public class AmbiguousCommandWrapper extends AbstractCommand implements
 	public void execute() {
 
 		if(command == null) {
-			command = strategy.selectCommandToExecute(validCommands);
+			if(validCommands.isEmpty()) {
+				command = null;
+			} else if(validCommands.size() == 1) {
+				command = validCommands.get(0);
+			} else {
+				command = strategy.selectCommandToExecute(validCommands);				
+			}
 			validCommands.clear();
 		}
 		
