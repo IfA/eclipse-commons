@@ -20,10 +20,9 @@ import org.eclipse.emf.common.command.CommandStackListener;
 import org.eclipse.emf.common.util.Diagnostic;
 import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.edit.domain.AdapterFactoryEditingDomain;
-import org.eclipse.emf.edit.domain.EditingDomain;
 import org.eclipse.emf.edit.provider.ComposedAdapterFactory;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
-import org.eclipse.jface.viewers.TreeViewer;
+import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IEditorSite;
@@ -59,7 +58,7 @@ public abstract class ClonableEditor extends MultiPageEditorPart{
 		initializeEditingDomainGen();
 	}
 		
-	protected abstract TreeViewer getSelectionViewer();	
+	protected abstract Viewer getCurrentViewer();	
 	protected abstract void setSelectionToViewer(Collection<?> affectedObjects);	
 	protected abstract List<PropertySheetPage> getPropertySheetPages();	
 	protected abstract ComposedAdapterFactory internalGetAdapterFactory();	
@@ -150,7 +149,7 @@ public abstract class ClonableEditor extends MultiPageEditorPart{
 								  // Try to select the affected objects.
 								  //
 								  Command mostRecentCommand = ((CommandStack)event.getSource()).getMostRecentCommand();
-								  if (mostRecentCommand != null && ClonableEditor.this.getSelectionViewer() != null && ClonableEditor.this.getSelectionViewer().getControl().isFocusControl()) {
+								  if (mostRecentCommand != null && ClonableEditor.this.getCurrentViewer() != null && ClonableEditor.this.getCurrentViewer().getControl().isFocusControl()) {
 									  setSelectionToViewer(mostRecentCommand.getAffectedObjects());
 								  }
 								  for (Iterator<PropertySheetPage> i = getPropertySheetPages().iterator(); i.hasNext(); ) {
