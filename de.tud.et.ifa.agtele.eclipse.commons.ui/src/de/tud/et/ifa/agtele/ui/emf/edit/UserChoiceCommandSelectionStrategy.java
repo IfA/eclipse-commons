@@ -3,6 +3,8 @@ package de.tud.et.ifa.agtele.ui.emf.edit;
 import java.util.ArrayList;
 
 import org.eclipse.emf.common.command.AbstractCommand;
+import org.eclipse.emf.edit.command.DragAndDropCommand;
+import org.eclipse.emf.edit.command.DragAndDropFeedback;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.widgets.Display;
@@ -13,7 +15,7 @@ import de.tud.et.ifa.agtele.ui.util.UIHelper;
 
 /**
  * This implements {@link ICommandSelectionStrategy} in a way that the various possibilities are
- * presented to the user via a pop-up.
+ * presented to the user via a {@link Menu}.
  *  
  * @author mfreund
  */
@@ -32,7 +34,21 @@ public class UserChoiceCommandSelectionStrategy implements ICommandSelectionStra
 		//
 		for (AbstractCommand command : commands) {
 			MenuItem item = new MenuItem(menu, SWT.PUSH);
-			item.setText(command.getLabel());
+			String label = "";
+			if(command instanceof DragAndDropCommand) {
+				int operation = ((DragAndDropCommand) command).getOperation();
+				if(operation == DragAndDropFeedback.DROP_MOVE) {
+					label = "Move here";
+				} else if(operation == DragAndDropFeedback.DROP_COPY) {
+					label = "Copy here";
+				} else {
+					label = command.getLabel();
+				}
+			} else {
+				label = command.getLabel();
+			}
+			item.setText(label);
+			item.setToolTipText(command.getDescription());
 			item.addListener(SWT.Selection, e -> ret.add(command));			
 		}
 		
