@@ -18,7 +18,7 @@ import org.eclipse.emf.edit.provider.ItemProviderAdapter;
 import org.eclipse.xtext.EcoreUtil2;
 
 import de.tud.et.ifa.agtele.emf.AgteleEcoreUtil;
-import de.tud.et.ifa.agtele.emf.edit.commands.AmbiguousCommandWrapper;
+import de.tud.et.ifa.agtele.emf.edit.commands.AmbiguousDragAndDropCommandWrapper;
 import de.tud.et.ifa.agtele.emf.edit.commands.BasicDragAndDropAddCommand;
 import de.tud.et.ifa.agtele.emf.edit.commands.BasicDragAndDropSetCommand;
 
@@ -139,7 +139,7 @@ public interface IDragAndDropProvider {
 		if(commands.size() == 1) {
 			return commands.get(0);
 		} else {
-			return new AmbiguousCommandWrapper(domain, owner, location, operations,
+			return new AmbiguousDragAndDropCommandWrapper(domain, owner, location, operations,
 					operation, collection, commands, (strategy == null ? new ICommandSelectionStrategy() {} : strategy));
 		}
 	}

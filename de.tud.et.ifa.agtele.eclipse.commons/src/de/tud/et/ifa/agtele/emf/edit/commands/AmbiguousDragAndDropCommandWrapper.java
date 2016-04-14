@@ -14,7 +14,7 @@ import de.tud.et.ifa.agtele.emf.edit.ICommandSelectionStrategy;
  * commands. Before executing, one command is selected from the list based on the specified {@link ICommandSelectionStrategy}.
  * Furthermore, this provides {@link DragAndDropFeedback} and can thus be used as DragAndDropCommand.
  */
-public class AmbiguousCommandWrapper extends AbstractCommand implements
+public class AmbiguousDragAndDropCommandWrapper extends AbstractCommand implements
 		DragAndDropFeedback {
 
 	/**
@@ -49,7 +49,7 @@ public class AmbiguousCommandWrapper extends AbstractCommand implements
 	 * @param strategy The {@link ICommandSelectionStrategy} that shall be applied to select an unambiguous 
 	 * command before execution.
 	 */
-	public AmbiguousCommandWrapper(EditingDomain domain, Object owner, float location, int operations,
+	public AmbiguousDragAndDropCommandWrapper(EditingDomain domain, Object owner, float location, int operations,
 			int operation, Collection<?> collection, ArrayList<AbstractCommand> commands, ICommandSelectionStrategy strategy) {
 		
 		this.commands = (commands == null ? new ArrayList<>() : commands);
