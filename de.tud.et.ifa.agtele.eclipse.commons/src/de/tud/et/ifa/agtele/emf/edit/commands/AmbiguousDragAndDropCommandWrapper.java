@@ -8,7 +8,6 @@ import org.eclipse.emf.common.command.UnexecutableCommand;
 import org.eclipse.emf.edit.command.DragAndDropFeedback;
 import org.eclipse.emf.edit.domain.EditingDomain;
 import de.tud.et.ifa.agtele.emf.edit.ICommandSelectionStrategy;
-import de.tud.et.ifa.agtele.emf.exceptions.SorryNoOtherWorkaroundException;
 
 /**
  * This represents an <em>unambiguous</em> command. This means that this {@link AbstractCommand} wraps a list of other 
@@ -141,8 +140,7 @@ public class AmbiguousDragAndDropCommandWrapper extends AbstractCommand implemen
 		}
 		
 		if(command == null) {
-			//We have to throw an exception in order to avoid the editor to be marked as dirty. Yes, this will pollute the console, but...
-			throw new SorryNoOtherWorkaroundException();
+			return;
 		}
 		
 		command.execute();
@@ -159,8 +157,6 @@ public class AmbiguousDragAndDropCommandWrapper extends AbstractCommand implemen
 	public void undo() {
 		if(command != null) {
 			command.undo();
-		} else {
-			super.undo();
 		}
 	}
 	
