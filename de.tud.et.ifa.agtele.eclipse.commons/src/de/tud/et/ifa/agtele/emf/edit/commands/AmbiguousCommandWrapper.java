@@ -25,7 +25,7 @@ public class AmbiguousCommandWrapper extends AbstractCommand implements
 	/**
 	 * The (ambiguous) list of commands that are currently {@link #validate(Object, float, int, int, Collection) valid}.
 	 */
-	protected static ArrayList<AbstractCommand> validCommands = new ArrayList<>();
+	protected ArrayList<AbstractCommand> validCommands = new ArrayList<>();
 	
 	/**
 	 * The single, unambiguous command after resolving the ambiguities.
