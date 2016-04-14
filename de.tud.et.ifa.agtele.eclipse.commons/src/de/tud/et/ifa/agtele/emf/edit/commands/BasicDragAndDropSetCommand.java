@@ -2,7 +2,9 @@ package de.tud.et.ifa.agtele.emf.edit.commands;
 
 import java.util.Collection;
 
+import org.eclipse.emf.ecore.EAttribute;
 import org.eclipse.emf.ecore.EObject;
+import org.eclipse.emf.ecore.EReference;
 import org.eclipse.emf.ecore.EStructuralFeature;
 import org.eclipse.emf.edit.command.DragAndDropFeedback;
 import org.eclipse.emf.edit.command.SetCommand;
@@ -40,6 +42,17 @@ public class BasicDragAndDropSetCommand extends SetCommand implements
 
 	@Override
 	public String doGetLabel() {
-		return "Set: " + feature.getName();
+
+		String ret = "Set as '" + feature.getName() + "'";
+		
+		if(feature instanceof EReference) {
+			ret += (((EReference) feature).isContainment() ? " (containment " : " (non-containment ") + "reference)";
+		} else if(feature instanceof EAttribute) {
+			ret += " (attribute)";
+		} else {			
+			ret += " (feature)";
+		}
+		
+		return ret;
 	}
 }

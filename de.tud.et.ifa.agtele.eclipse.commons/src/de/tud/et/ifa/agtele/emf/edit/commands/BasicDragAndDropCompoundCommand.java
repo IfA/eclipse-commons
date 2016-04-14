@@ -21,7 +21,7 @@ public class BasicDragAndDropCompoundCommand extends CompoundCommand implements
 	@Override
 	public boolean validate(Object owner, float location, int operations,
 			int operation, Collection<?> collection) {
-		return isExecutable;
+		return canExecute();
 	}
 
 	@Override
@@ -33,5 +33,5 @@ public class BasicDragAndDropCompoundCommand extends CompoundCommand implements
 	public int getOperation() {
 		return DND.DROP_LINK;
 	}
-
+	
 }
