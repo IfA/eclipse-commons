@@ -99,6 +99,9 @@ public interface IEMFModelHelpItemProvider {
 				+ 	"background-color:rgb(240,240,240);"
 				+ 	"color:rgb(40,40,40);"
 				+ "}"
+				+ "body {"
+				+ 	"overflow-y:scroll;"
+				+ "}"
 				+ ".tag {"
 				+ 	"display:inline-block;"
 				+ 	"border: 1px solid black;"
@@ -106,9 +109,6 @@ public interface IEMFModelHelpItemProvider {
 				+ "}"
 				+ "h1,h2,h3,h4,h5 {"
 				+ 	"margin:0;"
-				+ "}"
-				+ "h3,h4 {"
-				+ 	"cursor:pointer;"
 				+ "}"
 				+ ".tag{"
 				+ 	"padding-left: 5px;"
@@ -153,11 +153,12 @@ public interface IEMFModelHelpItemProvider {
 //				+ 	"padding-left:35px;"
 				+ "}"
 				+ "h4 {"
-				+ 	"font-size:18px;"
+				+ 	"text-decoration:underline;"
+				+   "font-weight:normal;"
 				+ 	"padding-top: 3px;"
 				+ 	"padding-bottom:3px;"
 				+ 	"padding-left:25px;"	
-				+ 	"background-color:rgb(230,230,230);"
+			//	+ 	"background-color:rgb(230,230,230);"
 				+ "}"
 				+ "h4 + div {"
 //				+ 	"padding-left:40px;"
@@ -166,7 +167,6 @@ public interface IEMFModelHelpItemProvider {
 				+ 	"padding-bottom: 1px;"
 				+ 	"padding-top: 3px;"
 				+ 	"padding-bottom: 3px;"
-				+ 	"line-height: 14px;"
 				+ 	"padding-left:35px;"	
 				+ 	"background-color:rgb(240,240,240);"
 				+ "}"
@@ -176,7 +176,10 @@ public interface IEMFModelHelpItemProvider {
 				+ 	"padding-left:45px !important;"
 				+ 	"margin:0;"
 				+ "}"
-				+ ".expandable.collapsed ~ .sub-category {"
+				+ ".expandable {"
+				+ 	"cursor:pointer;"
+				+ "}"
+				+ ".expandable.collapsed+.sub-category {"
 				+ 	"display:none;"
 				+ "}"
 				+ ".expandable.collapsed:before{"
@@ -250,7 +253,7 @@ public interface IEMFModelHelpItemProvider {
 	}
 	
 	public default String getAttributeTemplate(boolean isEEnum) {
-		return "<h3 class=\"heading attribute-heading expandable collapsed\">%NAME% \u00bb %TYPE% " + (isEEnum ? "(EEnum)" : "") + "</h3>"
+		return "<h3 class=\"heading attribute-heading\">%NAME% \u00bb %TYPE% " + (isEEnum ? "(EEnum)" : "") + "</h3>"
 				+ "<div class=\"attribute-description description\">%DESCRIPTION%"
 				+ (isEEnum ? 
 						"</br>"
@@ -259,7 +262,7 @@ public interface IEMFModelHelpItemProvider {
 				
 				+ "</div>"
 				+ (isEEnum ? 
-						"<h4 class=\"heading attribute-values-heading\">Possible Values</h4>"
+						"<h4 class=\"heading attribute-values-heading expandable collapsed\">Possible Values</h4>"
 						+ "<div class=\"eenum-values sub-category\">%EENUMVALUES%</div>" 
 						: "");
 	}
@@ -297,13 +300,13 @@ public interface IEMFModelHelpItemProvider {
 	};
 
 	public default String getNCReferenceTemplate(boolean refsAvailable) {
-		return "<h3 class=\"heading ncreference-heading expandable collapsed\">%NAME% \u00bb %TYPE%</h3>"
+		return "<h3 class=\"heading ncreference-heading\">%NAME% \u00bb %TYPE%</h3>"
 				+ "%TAGS%"
 				+ "<div class=\"ncreference-description description\">"				
 				+ 	"%DESCRIPTION%"			
 				+ "</div>"
 				+ (refsAvailable ? 
-						"<h4 class=\"heading ncreference-referencees-heading\">Available Referencees</h4>"
+						"<h4 class=\"heading ncreference-referencees-heading expandable collapsed\">Available Referencees</h4>"
 						+ "<div class=\"ncreference-referencees sub-category\">%NCREFERENCEES%</div>" 
 						: "");
 	}
@@ -355,12 +358,12 @@ public interface IEMFModelHelpItemProvider {
 	}
 
 	public default String getCReferenceTemplate(boolean childrenAvailable) {
-		return "<h3 class=\"heading creference-heading expandable collapsed\">%NAME% \u00bb %TYPE%</h3>"
+		return "<h3 class=\"heading creference-heading\">%NAME% \u00bb %TYPE%</h3>"
 				+ "<div class=\"creference-description description\">"
 				+ 	"%DESCRIPTION%"			
 				+ "</div>"
 				+ (childrenAvailable ? 
-						"<h4 class=\"heading creference-children-heading\">Creatable Children</h4>"
+						"<h4 class=\"heading creference-children-heading expandable collapsed\">Creatable Children</h4>"
 						+ "<div class=\"creference-children sub-category\">%CHILDREN%</div>" 
 						: "");
 	}
