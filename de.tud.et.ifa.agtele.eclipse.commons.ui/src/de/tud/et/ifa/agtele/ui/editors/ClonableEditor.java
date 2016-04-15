@@ -229,10 +229,7 @@ public abstract class ClonableEditor extends MultiPageEditorPart{
 			//
 			((BasicCommandStack)getEditingDomain().getCommandStack()).saveIsDone();
 			
-			//need to fire the property change on each editor in order to update the part dirty state properly
-			for (ClonableEditor editor : editingDomainShare.get(getEditingDomain())) {
-				editor.firePropertyChange(IEditorPart.PROP_DIRTY);
-			}
+			updateDirtyState();
 			
 		}
 		catch (Exception exception) {
@@ -242,6 +239,13 @@ public abstract class ClonableEditor extends MultiPageEditorPart{
 		}
 		setUpdateProblemIndication(true);
 		updateProblemIndication();
+	}
+
+	protected void updateDirtyState() {
+		//need to fire the property change on each editor in order to update the part dirty state properly
+		for (ClonableEditor editor : editingDomainShare.get(getEditingDomain())) {
+			editor.firePropertyChange(IEditorPart.PROP_DIRTY);
+		}
 	}
 
 
