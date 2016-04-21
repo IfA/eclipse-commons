@@ -20,7 +20,9 @@ import org.eclipse.xtext.EcoreUtil2;
 import de.tud.et.ifa.agtele.emf.AgteleEcoreUtil;
 import de.tud.et.ifa.agtele.emf.edit.commands.AmbiguousDragAndDropCommandWrapper;
 import de.tud.et.ifa.agtele.emf.edit.commands.BasicDragAndDropAddCommand;
+import de.tud.et.ifa.agtele.emf.edit.commands.BasicDragAndDropCompoundCommand;
 import de.tud.et.ifa.agtele.emf.edit.commands.BasicDragAndDropSetCommand;
+import de.tud.et.ifa.agtele.emf.edit.commands.DragAndDropChangeContainingFeatureCommand;
 
 
 /**
@@ -48,6 +50,7 @@ public interface IDragAndDropProvider {
 	 * command before execution.
 	 * @return The custom drag and drop command.
 	 */
+	@SuppressWarnings("unchecked")
 	public default Command createCustomDragAndDropCommand(EditingDomain domain, Object owner, float location, int operations,
 			int operation, Collection<?> collection, ICommandSelectionStrategy strategy) {
 		
@@ -126,21 +129,10 @@ public interface IDragAndDropProvider {
 		if(possibleReferences.isEmpty()) {
 			return dragAndDropCommand;			
 		} else if(possibleReferences.size() == 1) {
-			
-			EReference ref = possibleReferences.iterator().next();
-			if(ref.isMany()) {
-				commands.add(new BasicDragAndDropAddCommand(domain, parent, ref, collection));
-			} else {
-				commands.add(new BasicDragAndDropSetCommand(domain, parent, ref, collection.iterator().next(), 0));
-			}
+			return createDragAndDropCommand(domain, (Collection<EObject>) collection, parent, possibleReferences.iterator().next());
 		} else {
-			
 			for (EReference ref : possibleReferences) {
-				if(ref.isMany()) {
-					commands.add(new BasicDragAndDropAddCommand(domain, parent, ref, collection));
-				} else {
-					commands.add(new BasicDragAndDropSetCommand(domain, parent, ref, collection.iterator().next(), 0));
-				}				
+				commands.add(createDragAndDropCommand(domain, (Collection<EObject>) collection, parent, ref));
 			}
 		}
 		
@@ -149,6 +141,31 @@ public interface IDragAndDropProvider {
 		} else {
 			return new AmbiguousDragAndDropCommandWrapper(domain, owner, location, operations,
 					operation, collection, commands, (strategy == null ? new ICommandSelectionStrategy() {} : strategy));
+		}
+	}
+
+	/**
+	 * Based on the type of reference to set, creates either a {@link BasicDragAndDropSetCommand}, a 
+	 * {@link BasicDragAndDropAddCommand}, or a {@link BasicDragAndDropCompoundCommand} (in case the collection needs to
+	 * be removed from an old feature first).
+	 * 
+	 * @param domain The {@link EditingDomain} that will be used to execute the command.
+	 * @param collection The dragged elements.
+	 * @param parent The {@link EObject} on that the command will be executed.
+	 * @param ref The {@link EReference} that to that the collection of objects shall be added/that shall be set.
+	 * @return The drag and drop command.
+	 */
+	default AbstractCommand createDragAndDropCommand(EditingDomain domain, Collection<EObject> collection, EObject parent,
+			EReference ref) {
+		
+		if(ref.isContainment()) {
+			return new DragAndDropChangeContainingFeatureCommand(domain, parent, ref, collection);
+		} else {
+			if(ref.isMany()) {
+				return new BasicDragAndDropAddCommand(domain, parent, ref, collection);
+			} else {
+				return new BasicDragAndDropSetCommand(domain, parent, ref, collection.iterator().next(), 0);
+			}
 		}
 	}
 	
