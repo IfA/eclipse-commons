@@ -2,21 +2,22 @@ package de.tud.et.ifa.agtele.emf.edit;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.Iterator;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.eclipse.emf.common.command.AbstractCommand;
 import org.eclipse.emf.common.command.Command;
 import org.eclipse.emf.ecore.EClass;
-import org.eclipse.emf.ecore.EClassifier;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.EReference;
+import org.eclipse.emf.edit.command.CommandParameter;
 import org.eclipse.emf.edit.command.DragAndDropCommand;
 import org.eclipse.emf.edit.domain.EditingDomain;
 import org.eclipse.emf.edit.provider.AdapterFactoryItemDelegator;
 import org.eclipse.emf.edit.provider.IItemPropertyDescriptor;
 import org.eclipse.emf.edit.provider.ItemProviderAdapter;
-import org.eclipse.xtext.EcoreUtil2;
-
 import de.tud.et.ifa.agtele.emf.AgteleEcoreUtil;
 import de.tud.et.ifa.agtele.emf.edit.commands.AmbiguousDragAndDropCommandWrapper;
 import de.tud.et.ifa.agtele.emf.edit.commands.BasicDragAndDropAddCommand;
@@ -69,8 +70,9 @@ public interface IDragAndDropProvider {
 		}
 		
 		// Determine the common super type of all dragged objects (this will be checked against the types of the possible references)
+		// and if all elements are of the exact same type
 		//
-		EClassifier commonSuperType = null;
+		Set<EClass> eClassSet = new HashSet<>();
 		for (Iterator<?> iterator = collection.iterator(); iterator.hasNext();) {
 			Object object = (Object) iterator.next();
 			
@@ -78,20 +80,10 @@ public interface IDragAndDropProvider {
 				return dragAndDropCommand;
 			}
 			
-			if(commonSuperType == null) {
-				commonSuperType = ((EObject) object).eClass();
-			} else {
-				commonSuperType = EcoreUtil2.getCompatibleType(commonSuperType, ((EObject) object).eClass());
-			}
-		}
-
-		if(commonSuperType == null || !(commonSuperType instanceof EClassifier)) {
-			// this should never happen as the common super type should at least be 'EObject'
-			return dragAndDropCommand;
+			eClassSet.add(((EObject) object).eClass());
 		}
 
 		EObject parent = (EObject) owner;
-		EClass commonSuperClass = (EClass) commonSuperType;
 		
 		// Determine all possible references that could be used to drop the collection
 		//
@@ -104,16 +96,30 @@ public interface IDragAndDropProvider {
 				// If there is an 'IItemPropertyDescriptor' for the reference, we use this to check suitable values...
 				//
 				AdapterFactoryItemDelegator delegator = AgteleEcoreUtil.getAdapterFactoryItemDelegatorFor(parent);
-				IItemPropertyDescriptor desc = null;
-				if(delegator != null && (desc = delegator.getPropertyDescriptor(parent, ref)) != null) {
-					if(desc.getChoiceOfValues(parent).containsAll(collection)) {					
+				IItemPropertyDescriptor propDesc = null;
+				Collection<?> childDescs = null;
+				if(delegator != null && (propDesc = delegator.getPropertyDescriptor(parent, ref)) != null) {
+					if(propDesc.getChoiceOfValues(parent).containsAll(collection)) {					
 						possibleReferences.add(ref);
 					}
-				// ... otherwise, only check type conformance.
-				} else {
-					if(ref.getEReferenceType().isSuperTypeOf((EClass) commonSuperClass)) {
-						possibleReferences.add(ref);						
+				// ... otherwise, we evaluate the 'NewChildDescriptors'.
+				//
+				} else if(!(childDescs = delegator.getNewChildDescriptors(parent, domain, null)).isEmpty()) {
+					
+					Iterator<CommandParameter> it = (Iterator<CommandParameter>) childDescs.parallelStream().filter(c -> c instanceof CommandParameter 
+							&& ref.equals(((CommandParameter) c).getEStructuralFeature()) && ((CommandParameter) c).getEValue() != null).collect(Collectors.toList()).iterator();
+					
+					// Check that there is a child descriptor for the required 'ref' and the set of required 'EClasses'
+					//
+					Set<EClass> eClasses = new HashSet<EClass>();
+					while(it.hasNext()) {
+						eClasses.add(it.next().getEValue().eClass());
 					}
+					
+					if(eClassSet.containsAll(eClasses)) {
+						possibleReferences.add(ref);
+					}
+					
 				}
 				
 			}
