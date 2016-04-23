@@ -268,4 +268,24 @@ public class AgteleEcoreUtil {
 		}		
 		return result;
 	}
+	
+	/**
+	 * Returns all instances of an eClass, that are contained in a resource.
+	 * @param eClass
+	 * @param res
+	 * @return All instances of the eClass
+	 */
+	public static Collection<EObject> getAllInstances(EClass eClass, EObject root) {
+		Collection<EObject> result = new ArrayList<EObject>();
+		
+		TreeIterator<EObject> it = root.eAllContents();
+		
+		while (it.hasNext()) {
+			EObject obj = it.next();
+			if (eClass.isSuperTypeOf(obj.eClass())) {
+				result.add(obj);
+			}
+		}		
+		return result;
+	}
 }
