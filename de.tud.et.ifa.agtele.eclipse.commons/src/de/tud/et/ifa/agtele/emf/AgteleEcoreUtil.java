@@ -270,9 +270,9 @@ public class AgteleEcoreUtil {
 	}
 	
 	/**
-	 * Returns all instances of an eClass, that are contained in a resource.
+	 * Returns all instances of an eClass, that are contained in an eObject.
 	 * @param eClass
-	 * @param res
+	 * @param root
 	 * @return All instances of the eClass
 	 */
 	public static Collection<EObject> getAllInstances(EClass eClass, EObject root) {
@@ -287,5 +287,22 @@ public class AgteleEcoreUtil {
 			}
 		}		
 		return result;
+	}
+	
+	/**
+	 * Returns all instances of an eClass, that are contained in an eObject.
+	 * @param eClass
+	 * @param anObject
+	 * @param findRoot if true, the search begins at the local containment root of anObject,
+	 *  if false only instances of the given eClass are found, that are subsequent to the given eObject.
+	 * @return All instances of the eClass
+	 */
+	public static Collection<EObject> getAllInstances(EClass eClass, EObject anObject, boolean findRoot) {
+		if (findRoot) {
+			while (anObject.eContainer() != null && anObject.eContainer() instanceof EObject) {
+				anObject = anObject.eContainer();
+			}
+		}
+		return getAllInstances(eClass, anObject);
 	}
 }
