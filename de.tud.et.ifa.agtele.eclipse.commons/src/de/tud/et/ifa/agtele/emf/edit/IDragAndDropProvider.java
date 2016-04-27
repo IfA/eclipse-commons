@@ -84,45 +84,50 @@ public interface IDragAndDropProvider {
 		}
 
 		EObject parent = (EObject) owner;
-		
-		// Determine all possible references that could be used to drop the collection
-		//
+		AdapterFactoryItemDelegator delegator = AgteleEcoreUtil.getAdapterFactoryItemDelegatorFor(parent);
 		ArrayList<EReference> possibleReferences = new ArrayList<>();
-		for (EReference ref : parent.eClass().getEAllReferences()) {
-			if((ref.isContainment() || ref.getEOpposite() == null || !ref.getEOpposite().isContainment())
-					&& !ref.isDerived() 
-					&& (collection.size() > 1 ? ref.isMany() : true)) {
-				
-				// If there is an 'IItemPropertyDescriptor' for the reference, we use this to check suitable values...
-				//
-				AdapterFactoryItemDelegator delegator = AgteleEcoreUtil.getAdapterFactoryItemDelegatorFor(parent);
-				IItemPropertyDescriptor propDesc = null;
-				Collection<?> childDescs = null;
-				if(delegator != null && (propDesc = delegator.getPropertyDescriptor(parent, ref)) != null) {
-					if(propDesc.getChoiceOfValues(parent).containsAll(collection)) {					
-						possibleReferences.add(ref);
-					}
-				// ... otherwise, we evaluate the 'NewChildDescriptors'.
-				//
-				} else if(!(childDescs = delegator.getNewChildDescriptors(parent, domain, null)).isEmpty()) {
+		
+		if(delegator != null) {
+			
+			// Determine all possible references that could be used to drop the collection
+			//
+			for (EReference ref : parent.eClass().getEAllReferences()) {
+				if((ref.isContainment() || ref.getEOpposite() == null || !ref.getEOpposite().isContainment())
+						&& !ref.isDerived() 
+						&& (collection.size() > 1 ? ref.isMany() : true)) {
 					
-					Iterator<CommandParameter> it = (Iterator<CommandParameter>) childDescs.parallelStream().filter(c -> c instanceof CommandParameter 
-							&& ref.equals(((CommandParameter) c).getEStructuralFeature()) && ((CommandParameter) c).getEValue() != null).collect(Collectors.toList()).iterator();
-					
-					// Check that there is a child descriptor for the required 'ref' and the set of required 'EClasses'
+					// If there is an 'IItemPropertyDescriptor' for the reference, we use this to check suitable values...
 					//
-					Set<EClass> eClasses = new HashSet<EClass>();
-					while(it.hasNext()) {
-						eClasses.add(it.next().getEValue().eClass());
-					}
-					
-					if(eClassSet.containsAll(eClasses)) {
-						possibleReferences.add(ref);
+					IItemPropertyDescriptor propDesc = null;
+					Collection<?> childDescs = null;
+					if((propDesc = delegator.getPropertyDescriptor(parent, ref)) != null) {
+						if(propDesc.getChoiceOfValues(parent).containsAll(collection)) {					
+							possibleReferences.add(ref);
+						}
+						// ... otherwise, we evaluate the 'NewChildDescriptors'.
+						//
+					} else if(!(childDescs = delegator.getNewChildDescriptors(parent, domain, null)).isEmpty()) {
+						
+						Iterator<CommandParameter> it = (Iterator<CommandParameter>) childDescs.parallelStream().filter(c -> c instanceof CommandParameter 
+								&& ref.equals(((CommandParameter) c).getEStructuralFeature()) && ((CommandParameter) c).getEValue() != null).collect(Collectors.toList()).iterator();
+						
+						// Check that there is a child descriptor for the required 'ref' and the set of required 'EClasses'
+						//
+						Set<EClass> eClasses = new HashSet<EClass>();
+						while(it.hasNext()) {
+							eClasses.add(it.next().getEValue().eClass());
+						}
+						
+						if(eClassSet.containsAll(eClasses)) {
+							possibleReferences.add(ref);
+						}
+						
 					}
 					
 				}
-				
 			}
+		} else {
+			//TODO should we apply another strategy in case the delegator could not be determined?
 		}
 		
 		ArrayList<AbstractCommand> commands = new ArrayList<>();
