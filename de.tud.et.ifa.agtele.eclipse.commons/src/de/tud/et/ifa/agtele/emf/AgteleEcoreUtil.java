@@ -314,6 +314,9 @@ public class AgteleEcoreUtil {
 	 */
 	public static Collection<EObject> getAllInstances(EClass eClass, EObject anObject, boolean findRoot) {
 		if (findRoot) {
+			if (anObject.eResource() != null) {
+				return getAllInstances(eClass, anObject.eResource());
+			}
 			while (anObject.eContainer() != null && anObject.eContainer() instanceof EObject) {
 				anObject = anObject.eContainer();
 			}
