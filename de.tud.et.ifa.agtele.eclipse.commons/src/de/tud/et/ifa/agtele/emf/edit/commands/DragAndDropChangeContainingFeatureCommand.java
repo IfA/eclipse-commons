@@ -9,7 +9,6 @@ import org.eclipse.emf.common.util.BasicEList;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.EReference;
 import org.eclipse.emf.edit.command.DragAndDropFeedback;
-import org.eclipse.emf.edit.domain.EditingDomain;
 import org.eclipse.swt.dnd.DND;
 
 /**
@@ -20,29 +19,20 @@ import org.eclipse.swt.dnd.DND;
 public class DragAndDropChangeContainingFeatureCommand extends AbstractCommand implements
 		DragAndDropFeedback {
 	
-	protected EReference originalReference, reference;
-	protected EObject originalOwner, owner;
+	protected EReference originalReference;
+	protected EReference reference;
+	protected EObject originalOwner;
+	protected EObject owner;
 	protected Collection<EObject> values;
 
-	private DragAndDropChangeContainingFeatureCommand(EObject owner,
-			EReference feature, Collection<EObject> values) {
-		
-		super();
-		
-		this.reference = feature;
-		this.owner = owner;
-		this.values = new BasicEList<>(values);
-	}
-	
 	/**
 	 * This creates an instance.
 	 * 
-	 * @param domain The {@link EditingDomain} on which the command will be executed.
 	 * @param owner The new container of the given '<em>value</em>'.
 	 * @param feature The new containing feature of the given '<em>value</em>'.
 	 * @param value The {@link EObject} for which the containing feature shall be changed.
 	 */
-	public DragAndDropChangeContainingFeatureCommand(EditingDomain domain, EObject owner,
+	public DragAndDropChangeContainingFeatureCommand(EObject owner,
 			EReference feature, EObject value) {
 
 		this(owner, feature, Arrays.asList(value));
@@ -55,15 +45,18 @@ public class DragAndDropChangeContainingFeatureCommand extends AbstractCommand i
 	/**
 	 * This creates an instance.
 	 * 
-	 * @param domain The {@link EditingDomain} on which the command will be executed.
 	 * @param owner The new container of the given '<em>values</em>'.
 	 * @param feature The new containing feature of the given '<em>values</em>'.
 	 * @param values The list of {@link EObject EObjects} for which the containing feature shall be changed.
 	 */
-	public DragAndDropChangeContainingFeatureCommand(EditingDomain domain, EObject owner,
+	public DragAndDropChangeContainingFeatureCommand(EObject owner,
 			EReference feature, Collection<EObject> values) {
 
-		this(owner, feature, values);
+		super();
+		
+		this.reference = feature;
+		this.owner = owner;
+		this.values = new BasicEList<>(values);
 		
 		if(values.size() > 1 && !feature.isMany()) {
 			throw new RuntimeException("Trying to set multiple values for a single-valued feature!");

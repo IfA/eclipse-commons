@@ -24,9 +24,9 @@ public class HelpItemDescription {
 
 	public HelpItemDescription(EObject eObject) {
 		this.eObject = eObject;
-		this.attributeDescription = new ArrayList<EAttributeHelpItemData>();
-		this.nonContainmentReferenceDescription = new ArrayList<EReferenceHelpItemData>();
-		this.containmentReferenceDescription = new ArrayList<EReferenceHelpItemData>();
+		this.attributeDescription = new ArrayList<>();
+		this.nonContainmentReferenceDescription = new ArrayList<>();
+		this.containmentReferenceDescription = new ArrayList<>();
 	}
 
 	/**
@@ -54,8 +54,8 @@ public class HelpItemDescription {
 		return attributeDescription;
 	}
 
-	public void addAllAttributeDescription(List<EAttributeHelpItemData> attributeDescription) {
-		attributeDescription.addAll(attributeDescription);
+	public void addAllAttributeDescription(List<EAttributeHelpItemData> attributeDescriptions) {
+		attributeDescription.addAll(attributeDescriptions);
 	}
 
 	/**

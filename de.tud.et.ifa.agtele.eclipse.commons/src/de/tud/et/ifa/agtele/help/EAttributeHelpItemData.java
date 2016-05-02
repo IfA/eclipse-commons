@@ -34,12 +34,12 @@ public class EAttributeHelpItemData extends HelpItemData {
 		else
 			setDocumentation("");
 		
-		this.eEnumLiterals = new ArrayList<EEnumLiteralHelpItemData>();
+		this.eEnumLiterals = new ArrayList<>();
 		this.eEnumDocumentation = "";
 		if (isEEnum) {
 			// Documentation EEnum
-			if (EcoreUtil.getDocumentation(((EEnum) eAttribute.getEAttributeType())) != null)
-				setDocumentation(EcoreUtil.getDocumentation(((EEnum) eAttribute.getEAttributeType())));
+			if (EcoreUtil.getDocumentation((EEnum) eAttribute.getEAttributeType()) != null)
+				setDocumentation(EcoreUtil.getDocumentation((EEnum) eAttribute.getEAttributeType()));
 			//Literals
 			for (EEnumLiteral eEnumLiteral : ((EEnum) eAttribute.getEAttributeType()).getELiterals()) {
 				this.eEnumLiterals.add(new EEnumLiteralHelpItemData(eEnumLiteral));

@@ -25,7 +25,7 @@ import de.tud.et.ifa.agtele.resources.BundleContentHelper;
  */
 public interface IEMFModelHelpItemProvider {
 
-	default public String getHTMLTemplate () {
+	public default String getHTMLTemplate () {
 		return "<!DOCTYPE html>"
 				+ "<html lang=\"en\">"
 				+ "<head>"
@@ -41,20 +41,20 @@ public interface IEMFModelHelpItemProvider {
 			+  "</html>";
 	}
 	
-	default public String getCSSTemplate() {
+	public default String getCSSTemplate() {
 		return "<style type=\"text/css\">%RULES%</style>";
 	}
 	
-	default public String getJavaScriptTemplate() {
+	public default String getJavaScriptTemplate() {
 		return "<script type=\"application/javascript\">"
 				+ "%CODE%"
 			+  "</script>";
 	}
 
-	default public String getTagContainerTemplate() {
+	public default String getTagContainerTemplate() {
 		return "<div class=\"tag-container\">%TAGS%</div>";
 	}
-	default public String getTagTemplate() {
+	public default String getTagTemplate() {
 		return "<span class=\"tag %TYPE%\">%TEXT%</span>";
 	}
 		
@@ -68,7 +68,7 @@ public interface IEMFModelHelpItemProvider {
 	 *            relevant for the rendering of a help page
 	 * @return the help text to be displayed (as HTML)
 	 */
-	default public String render(HelpItemDescription helpItemDescription) {
+	public default String render(HelpItemDescription helpItemDescription) {
 		EClassHelpItemData eClass = helpItemDescription.getEClassDescription();
 		
 		String result = getHTMLTemplate()
@@ -79,17 +79,17 @@ public interface IEMFModelHelpItemProvider {
 		return cleanHTML(result);
 	}
 	
-	default public String cleanHTML(String rendered) {
+	public default String cleanHTML(String rendered) {
 		return rendered.replaceAll("(%[A-Z]*%)", "");		
 	}
 	
-	default public String getStyles () {
+	public default String getStyles () {
 		String styles = "";
 		
 //		styles+= getCSSTemplate().replace("%RULES%",
 //				"/*COLORS*/"
 //				+ "");	
-		
+	
 		styles+= getCSSTemplate().replace("%RULES%",
 //				".heading:not(h1), .description, .category, .sub-category, .tag-container {"
 //				+ 	"padding-left: 20px;"
@@ -193,7 +193,7 @@ public interface IEMFModelHelpItemProvider {
 		return styles;
 	}
 	
-	default public String getScripts() {
+	public default String getScripts() {
 		String scripts = "";	
 		boolean success = true;
 		
@@ -220,7 +220,7 @@ public interface IEMFModelHelpItemProvider {
 		return scripts;
 	}
 
-	default public String getBodyTemplate (boolean includeAttributes, boolean includeNCReferences, boolean includeCReferences) {
+	public default String getBodyTemplate (boolean includeAttributes, boolean includeNCReferences, boolean includeCReferences) {
 		return "<h1 class=\"heading class-heading\">%TITLE% - Help</h1>"
 				+ "<div class=\"class-description description\">%DESCRIPTION%</div>"
 				+ (includeAttributes ? 
@@ -237,19 +237,18 @@ public interface IEMFModelHelpItemProvider {
 						: "");
 	}
 	
-	default public String renderBody(HelpItemDescription helpItemDescription) {
+	public default String renderBody(HelpItemDescription helpItemDescription) {
 		EClassHelpItemData eClass = helpItemDescription.getEClassDescription();
 		List<EAttributeHelpItemData> attributes = helpItemDescription.getAttributeDescription();
 		List<EReferenceHelpItemData> ncRefs = helpItemDescription.getNonContainmentReferenceDescription();
 		List<EReferenceHelpItemData> cRefs = helpItemDescription.getContainmentReferenceDescription();
 		
-		String body = getBodyTemplate(!attributes.isEmpty(), !ncRefs.isEmpty(), !cRefs.isEmpty()) 
+		return getBodyTemplate(!attributes.isEmpty(), !ncRefs.isEmpty(), !cRefs.isEmpty()) 
 				.replace("%TITLE%", eClass.getName())
 				.replace("%DESCRIPTION%", eClass.getDocumentation())
 				.replace("%ATTRIBUTES%", renderAttributes(attributes))
 				.replace("%NCREFERENCES%", renderNCReferences(ncRefs))
 				.replace("%CREFERENCES%", renderCReferences(cRefs));	
-		return body;
 	}
 	
 	public default String getAttributeTemplate(boolean isEEnum) {
@@ -409,7 +408,7 @@ public interface IEMFModelHelpItemProvider {
 	 * @param eObject
 	 * @return all relevant {@link HelpItemDescription}
 	 */
-	default public HelpItemDescription getHelpItemDescription(EObject eObject) {
+	public default HelpItemDescription getHelpItemDescription(EObject eObject) {
 		return getHelpItemDescription(eObject, new HelpItemFactory() {});
 	}
 	
@@ -426,7 +425,7 @@ public interface IEMFModelHelpItemProvider {
 	 * @return all relevant {@link HelpItemDescription}
 	 */
 	@SuppressWarnings("unchecked")
-	default public HelpItemDescription getHelpItemDescription(EObject eObject, HelpItemFactory factory) {
+	public default HelpItemDescription getHelpItemDescription(EObject eObject, HelpItemFactory factory) {
 		HelpItemDescription helpItemDescription = factory.createHelpItemDescription(eObject);
 
 		/**
@@ -496,19 +495,19 @@ public interface IEMFModelHelpItemProvider {
 	 */
 	public interface HelpItemFactory {
 		
-		default public HelpItemDescription createHelpItemDescription(EObject eObject) {
+		public default HelpItemDescription createHelpItemDescription(EObject eObject) {
 			return new HelpItemDescription(eObject); 
 		}
 		
-		default public EClassHelpItemData createEClassHelpItemData(EClass eClass) {
+		public default EClassHelpItemData createEClassHelpItemData(EClass eClass) {
 			return new EClassHelpItemData(eClass);
 		}
 		
-		default public EAttributeHelpItemData createEAttributeHelpItemData(EAttribute attribute) {
+		public default EAttributeHelpItemData createEAttributeHelpItemData(EAttribute attribute) {
 			return new EAttributeHelpItemData(attribute);
 		}
 		
-		default public EReferenceHelpItemData createEReferenceHelpItemData(EReference eReference, List<EObject> list) {
+		public default EReferenceHelpItemData createEReferenceHelpItemData(EReference eReference, List<EObject> list) {
 			return new EReferenceHelpItemData(eReference, list);
 		}
 	}

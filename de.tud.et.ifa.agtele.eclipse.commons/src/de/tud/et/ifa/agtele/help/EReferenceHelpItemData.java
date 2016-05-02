@@ -46,7 +46,7 @@ public class EReferenceHelpItemData extends HelpItemData {
 			setDocumentation("");
 		
 		// Child elements
-		childrenData = new ArrayList<EClassHelpItemData>();
+		childrenData = new ArrayList<>();
 		if (children != null) {
 			for (EObject child : children) {
 				if (child != null) {

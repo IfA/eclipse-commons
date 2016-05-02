@@ -10,6 +10,7 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Enumeration;
+import java.util.List;
 
 import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.core.runtime.Path;
@@ -22,7 +23,7 @@ import org.osgi.framework.Bundle;
  * This allows to retrieve assets from a bundle (an installed eclipse plug-in).
  * 
  */
-public abstract class BundleContentHelper {
+public interface BundleContentHelper {
 	
 	/**
 	 * Get a file from a plugin
@@ -69,9 +70,9 @@ public abstract class BundleContentHelper {
 	 * 	resolve the path.
 	 * @return list of files from the bundle folder
 	 */
-	public static ArrayList<File> getBundleContents(String bundleId, String dir) {
+	public static List<File> getBundleContents(String bundleId, String dir) {
 		Bundle bundle = Platform.getBundle(bundleId);
-		ArrayList<File> files = new ArrayList<File>();
+		ArrayList<File> files = new ArrayList<>();
 
 		// get all bundle entries of the folder
 		Enumeration<String> entries = bundle.getEntryPaths(dir);
@@ -121,7 +122,7 @@ public abstract class BundleContentHelper {
 	public static Image getBundleImage(String bundleId, String path) {
 
 		ImageDescriptor desc = getBundleImageDescriptor(bundleId, path);
-		return (desc != null ? desc.createImage() : null);
+		return desc != null ? desc.createImage() : null;
 	}
 	
 	public static String getBundleFileString(String bundleId, String path) throws IOException {

@@ -2,11 +2,11 @@ package de.tud.et.ifa.agtele.emf.edit.commands;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 import org.eclipse.emf.common.command.AbstractCommand;
 import org.eclipse.emf.common.command.UnexecutableCommand;
 import org.eclipse.emf.edit.command.DragAndDropFeedback;
-import org.eclipse.emf.edit.domain.EditingDomain;
 import de.tud.et.ifa.agtele.emf.edit.ICommandSelectionStrategy;
 import de.tud.et.ifa.agtele.emf.exceptions.SorryNoOtherWorkaroundException;
 
@@ -40,7 +40,6 @@ public class AmbiguousDragAndDropCommandWrapper extends AbstractCommand implemen
 	
 	/**
 	 * This creates an instance.
-	 * @param domain The {@link EditingDomain} that will be used to execute the command.
 	 * @param owner The object on that the command will be executed.
 	 * @param location The location (between 0.0 and 1.0) in relation to the '<em>owner</em>' where the command will be executed.
 	 * @param operations The permitted operations.
@@ -50,10 +49,10 @@ public class AmbiguousDragAndDropCommandWrapper extends AbstractCommand implemen
 	 * @param strategy The {@link ICommandSelectionStrategy} that shall be applied to select an unambiguous 
 	 * command before execution.
 	 */
-	public AmbiguousDragAndDropCommandWrapper(EditingDomain domain, Object owner, float location, int operations,
-			int operation, Collection<?> collection, ArrayList<AbstractCommand> commands, ICommandSelectionStrategy strategy) {
+	public AmbiguousDragAndDropCommandWrapper(Object owner, float location, int operations,
+			int operation, Collection<?> collection, List<AbstractCommand> commands, ICommandSelectionStrategy strategy) {
 		
-		this.commands = (commands == null ? new ArrayList<>() : commands);
+		this.commands = commands == null ? new ArrayList<>() : (ArrayList<AbstractCommand>) commands;
 		
 		if(commands == null || commands.isEmpty()) {
 			this.command = UnexecutableCommand.INSTANCE;
@@ -77,11 +76,9 @@ public class AmbiguousDragAndDropCommandWrapper extends AbstractCommand implemen
 			int operation, Collection<?> collection) {
 		
 		validCommands.clear();
-		for (AbstractCommand command : commands) {
-			if(command instanceof DragAndDropFeedback) {
-				if(((DragAndDropFeedback) command).validate(owner, location, operations, operation, collection)) {
-					validCommands.add(command);
-				}
+		for (AbstractCommand c : commands) {
+			if(c instanceof DragAndDropFeedback && ((DragAndDropFeedback) c).validate(owner, location, operations, operation, collection)) {
+				validCommands.add(c);
 			}
 		}
 		
@@ -92,8 +89,8 @@ public class AmbiguousDragAndDropCommandWrapper extends AbstractCommand implemen
 	public boolean canExecute() {
 		
 		// This can execute if at least one of the wrapped commands can execute
-		for (AbstractCommand command : commands) {
-			if(command.canExecute()) {
+		for (AbstractCommand c : commands) {
+			if(c.canExecute()) {
 				return true;
 			}
 		}

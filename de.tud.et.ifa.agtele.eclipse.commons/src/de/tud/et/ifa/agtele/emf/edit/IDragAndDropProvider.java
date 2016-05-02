@@ -74,7 +74,7 @@ public interface IDragAndDropProvider {
 		//
 		Set<EClass> eClassSet = new HashSet<>();
 		for (Iterator<?> iterator = collection.iterator(); iterator.hasNext();) {
-			Object object = (Object) iterator.next();
+			Object object = iterator.next();
 			
 			if(!(object instanceof EObject)) {
 				return dragAndDropCommand;
@@ -98,22 +98,23 @@ public interface IDragAndDropProvider {
 					
 					// If there is an 'IItemPropertyDescriptor' for the reference, we use this to check suitable values...
 					//
-					IItemPropertyDescriptor propDesc = null;
-					Collection<?> childDescs = null;
+					IItemPropertyDescriptor propDesc;
+					Collection<?> childDescs;
 					if((propDesc = delegator.getPropertyDescriptor(parent, ref)) != null) {
 						if(propDesc.getChoiceOfValues(parent).containsAll(collection)) {					
 							possibleReferences.add(ref);
 						}
 						// ... otherwise, we evaluate the 'NewChildDescriptors'.
 						//
-					} else if(!(childDescs = delegator.getNewChildDescriptors(parent, domain, null)).isEmpty()) {
+					} else if(!(delegator.getNewChildDescriptors(parent, domain, null)).isEmpty()) {
+						childDescs = delegator.getNewChildDescriptors(parent, domain, null);
 						
 						Iterator<CommandParameter> it = (Iterator<CommandParameter>) childDescs.parallelStream().filter(c -> c instanceof CommandParameter 
 								&& ref.equals(((CommandParameter) c).getEStructuralFeature()) && ((CommandParameter) c).getEValue() != null).collect(Collectors.toList()).iterator();
 						
 						// Check that there is a child descriptor for the required 'ref' and the set of required 'EClasses'
 						//
-						Set<EClass> eClasses = new HashSet<EClass>();
+						Set<EClass> eClasses = new HashSet<>();
 						while(it.hasNext()) {
 							eClasses.add(it.next().getEValue().eClass());
 						}
@@ -131,7 +132,7 @@ public interface IDragAndDropProvider {
 		}
 		
 		ArrayList<AbstractCommand> commands = new ArrayList<>();
-		if(dragAndDropCommand instanceof DragAndDropCommand && dragAndDropCommand.canExecute()) {
+		if(dragAndDropCommand.canExecute()) {
 			commands.add((AbstractCommand) dragAndDropCommand);
 		}
 		
@@ -150,8 +151,8 @@ public interface IDragAndDropProvider {
 		if(commands.size() == 1) {
 			return commands.get(0);
 		} else {
-			return new AmbiguousDragAndDropCommandWrapper(domain, owner, location, operations,
-					operation, collection, commands, (strategy == null ? new ICommandSelectionStrategy() {} : strategy));
+			return new AmbiguousDragAndDropCommandWrapper(owner, location, operations,
+					operation, collection, commands, strategy == null ? new ICommandSelectionStrategy() {} : strategy);
 		}
 	}
 
@@ -170,7 +171,7 @@ public interface IDragAndDropProvider {
 			EReference ref) {
 		
 		if(ref.isContainment()) {
-			return new DragAndDropChangeContainingFeatureCommand(domain, parent, ref, collection);
+			return new DragAndDropChangeContainingFeatureCommand(parent, ref, collection);
 		} else {
 			if(ref.isMany()) {
 				return new BasicDragAndDropAddCommand(domain, parent, ref, collection);

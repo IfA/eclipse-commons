@@ -25,7 +25,11 @@ import java.util.jar.Manifest;
  * This provides a set of helper functions that allow to deal with files and resources.
  * 
  */
-public abstract class ResourceHelper {
+public class ResourceHelper {
+	
+	private ResourceHelper() {
+		
+	}
 	
 	/**
 	 * Copy file to a project folder
@@ -72,19 +76,12 @@ public abstract class ResourceHelper {
     	// only try to copy the file, if it really is a file (no dirs)
     	if (file.isFile()) {
 	    	// and copy it
-	    	FileInputStream is = null;
-	        FileOutputStream os = null;
-	        try {
-	            is = new FileInputStream(file);
-	            os = new FileOutputStream(newFile);
-	            byte[] buffer = new byte[1024];
-	            int length;
-	            while ((length = is.read(buffer)) > 0) {
-	                os.write(buffer, 0, length);
-	            }
-	        } finally {
-	            is.close();
-	            os.close();
+			try (FileInputStream is = new FileInputStream(file); FileOutputStream os = new FileOutputStream(newFile)) {
+				byte[] buffer = new byte[1024];
+				int length;
+				while ((length = is.read(buffer)) > 0) {
+					os.write(buffer, 0, length);
+				}
 	        }
     	}
     	else if (file.isDirectory()) {
@@ -227,47 +224,37 @@ public abstract class ResourceHelper {
      * @param target JarOutputStream the File should be written to
      * @throws IOException
      */
-    private static void add(File source, String sourcePath, JarOutputStream target) throws IOException
-    {
-      BufferedInputStream in = null;
-      try {
-    	  if (source.isDirectory()) {
-	          String name = getRelativePath(source, sourcePath).replace("\\", "/");
-	          if (!name.isEmpty() || name.equals("/"))
-	          {
-	            if (!name.endsWith("/"))
-	              name += "/";
-	            JarEntry entry = new JarEntry(name);
-	            entry.setTime(source.lastModified());
-	            target.putNextEntry(entry);
-	            target.closeEntry();
-	          }
-	          for (File nestedFile: source.listFiles()) {
-	        	  add(nestedFile, sourcePath, target);
-	          }
-	          return;
-          }
+    private static void add(File source, String sourcePath, JarOutputStream target) throws IOException {
+		if (source.isDirectory()) {
+			String name = getRelativePath(source, sourcePath).replace("\\", "/");
+			if (!name.isEmpty() || "/".equals(name)) {
+				if (!name.endsWith("/"))
+					name += "/";
+				JarEntry entry = new JarEntry(name);
+				entry.setTime(source.lastModified());
+				target.putNextEntry(entry);
+				target.closeEntry();
+			}
+			for (File nestedFile : source.listFiles()) {
+				add(nestedFile, sourcePath, target);
+			}
+			return;
+		}
+		
+		JarEntry entry = new JarEntry(getRelativePath(source, sourcePath).replace("\\", "/"));
+		entry.setTime(source.lastModified());
+		target.putNextEntry(entry);
 
-        JarEntry entry = new JarEntry(getRelativePath(source, sourcePath).replace("\\", "/"));
-        entry.setTime(source.lastModified());
-        target.putNextEntry(entry);
-        in = new BufferedInputStream(new FileInputStream(source));
-
-        byte[] buffer = new byte[1024];
-        while (true)
-        {
-          int count = in.read(buffer);
-          if (count == -1)
-            break;
-          target.write(buffer, 0, count);
-        }
-        target.closeEntry();
-      }
-      finally
-      {
-        if (in != null)
-          in.close();
-      }
+		try (BufferedInputStream in = new BufferedInputStream(new FileInputStream(source))) {
+			byte[] buffer = new byte[1024];
+			while (true) {
+				int count = in.read(buffer);
+				if (count == -1)
+					break;
+				target.write(buffer, 0, count);
+			}
+			target.closeEntry();
+		}
     }
     
     private static String getRelativePath(File file, String sourceDir) {

@@ -28,8 +28,8 @@ import org.eclipse.emf.edit.provider.ComposedAdapterFactory;
  * @author AG Tele
  *
  */
-public class AgteleEcoreUtil {
-
+public interface AgteleEcoreUtil {
+	
 	/**
 	 * Returns the {@link EditingDomain} of an {@link EObject} or null if none
 	 * can be found
@@ -47,8 +47,7 @@ public class AgteleEcoreUtil {
 		} else if (object.eResource() != null) {
 			ResourceSet resourceSet = object.eResource().getResourceSet();
 			if (resourceSet instanceof IEditingDomainProvider) {
-				EditingDomain editingDomain = ((IEditingDomainProvider) resourceSet).getEditingDomain();
-				return editingDomain;
+				return ((IEditingDomainProvider) resourceSet).getEditingDomain();
 			} else if (resourceSet != null) {
 				editingDomainProvider = (IEditingDomainProvider) EcoreUtil.getExistingAdapter(resourceSet,
 						IEditingDomainProvider.class);
@@ -90,7 +89,7 @@ public class AgteleEcoreUtil {
 	 * @return All found sub classes according to the specified options.
 	 */
 	public static Collection<EClass> getAllSubClasses(Collection<EClass> classes, EClass aClass, boolean includeGivenClass, boolean includeAbstract) {
-		Collection<EClass> result = new ArrayList<EClass>();
+		Collection<EClass> result = new ArrayList<>();
 		if (includeGivenClass && (!aClass.isAbstract() || aClass.isAbstract() && includeAbstract)) {
 			result.add(aClass);
 		}
@@ -137,7 +136,7 @@ public class AgteleEcoreUtil {
 	 * @return All found sub classes according to the specified options.
 	 */
 	public static Collection<EClass> getAllSubClasses(Collection<EClass> classes, EClass aClass, boolean includeAbstract) {
-		Collection<EClass> result = new ArrayList<EClass>();
+		Collection<EClass> result = new ArrayList<>();
 		Iterator<EClass> i = classes.iterator();
 		
 		while(i.hasNext()) {
@@ -148,10 +147,8 @@ public class AgteleEcoreUtil {
 			
 			Collection<EClass> superClasses = checkClass.getEAllSuperTypes();
 			
-			if(superClasses.contains(aClass)) {
-				if (!checkClass.isAbstract() || (checkClass.isAbstract() && includeAbstract)) {
-					result.add(checkClass);
-				}
+			if(superClasses.contains(aClass) && (!checkClass.isAbstract() || (checkClass.isAbstract() && includeAbstract))) {
+				result.add(checkClass);
 			}
 		}
 		return result;
@@ -174,12 +171,12 @@ public class AgteleEcoreUtil {
 	 * @return The collection of all sub packages of the given package.
 	 */
 	public static Collection<EPackage> getAllSubPackages (EPackage p) {
-		ArrayList<EPackage> result = new ArrayList<EPackage>();
+		ArrayList<EPackage> result = new ArrayList<>();
 		
 		if (p != null) {
 			Collection<EPackage> subPackages = p.getESubpackages();
 			
-			if (subPackages != null && subPackages.size() > 0) {
+			if (subPackages != null && !subPackages.isEmpty()) {
 				result.addAll(subPackages);
 				
 				Iterator<EPackage> i = subPackages.iterator();
@@ -198,7 +195,7 @@ public class AgteleEcoreUtil {
 	 * @return The collection of all sub packages of the given package.
 	 */
 	public static Collection<EPackage> getAllSubPackages (EPackage p, boolean includeGiven) {
-		Collection<EPackage> result = new ArrayList<EPackage>();
+		Collection<EPackage> result = new ArrayList<>();
 		if (includeGiven) {
 			result.add(p);
 		}
@@ -212,7 +209,7 @@ public class AgteleEcoreUtil {
 	 * @return The collection of eClasses within the given collection of ePackages.
 	 */
 	public static Collection<EClass> getAllPackageEClasses(Collection<EPackage> packages) {			
-		Collection<EClass> result = new ArrayList<EClass>();		
+		Collection<EClass> result = new ArrayList<>();		
 		Iterator<EPackage> it = packages.iterator();
 		
 		while(it.hasNext()) {
@@ -271,7 +268,7 @@ public class AgteleEcoreUtil {
 	 * @return All instances of the eClass
 	 */
 	public static Collection<EObject> getAllInstances(EClass eClass, Resource res) {
-		Collection<EObject> result = new ArrayList<EObject>();
+		Collection<EObject> result = new ArrayList<>();
 		
 		TreeIterator<EObject> it = res.getAllContents();
 		
@@ -291,7 +288,7 @@ public class AgteleEcoreUtil {
 	 * @return All instances of the eClass
 	 */
 	public static Collection<EObject> getAllInstances(EClass eClass, EObject root) {
-		Collection<EObject> result = new ArrayList<EObject>();
+		Collection<EObject> result = new ArrayList<>();
 		
 		TreeIterator<EObject> it = root.eAllContents();
 		
@@ -317,10 +314,9 @@ public class AgteleEcoreUtil {
 			if (anObject.eResource() != null) {
 				return getAllInstances(eClass, anObject.eResource());
 			}
-			while (anObject.eContainer() != null && anObject.eContainer() instanceof EObject) {
-				anObject = anObject.eContainer();
-			}
+			return  getAllInstances(eClass, EcoreUtil.getRootContainer(anObject, true));
+		} else {
+			return getAllInstances(eClass, anObject);
 		}
-		return getAllInstances(eClass, anObject);
 	}
 }

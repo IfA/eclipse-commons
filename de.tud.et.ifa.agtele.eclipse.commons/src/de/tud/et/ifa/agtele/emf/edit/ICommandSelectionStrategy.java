@@ -1,6 +1,6 @@
 package de.tud.et.ifa.agtele.emf.edit;
 
-import java.util.ArrayList;
+import java.util.List;
 
 import org.eclipse.emf.common.command.AbstractCommand;
 import org.eclipse.emf.common.command.UnexecutableCommand;
@@ -20,7 +20,7 @@ public interface ICommandSelectionStrategy {
 	 * @param commands The ambiguous list of commands that might be executed.
 	 * @return The single command that is to be executed.
 	 */
-	public default AbstractCommand selectCommandToExecute(ArrayList<AbstractCommand> commands) {
+	public default AbstractCommand selectCommandToExecute(List<AbstractCommand> commands) {
 		return (commands != null && !commands.isEmpty() ? commands.iterator().next() : UnexecutableCommand.INSTANCE);
 	}
 

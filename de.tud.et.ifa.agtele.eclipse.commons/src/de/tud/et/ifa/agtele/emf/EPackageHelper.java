@@ -3,6 +3,8 @@ package de.tud.et.ifa.agtele.emf;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -20,7 +22,7 @@ import org.eclipse.xsd.impl.XSDSchemaImpl;
  * This provides convenience methods that are related to {@link EPackage EPackages}.
  *
  */
-public abstract class EPackageHelper {
+public interface EPackageHelper {
 
 	/**
 	 * This tries to determine the ePackages defined in a meta-model (either Ecore or XSD). Therefore,
@@ -35,7 +37,7 @@ public abstract class EPackageHelper {
 	 * @param register if the packages shall be registered to the global ePackage registry.
 	 * @return a map of nsUris and corresponding ePackages found in the Ecore/XSD meta-model, null if any error occurs.
 	 */
-	public static HashMap<String, EPackage> getEPackages(String absolutePathToMetaModelFile, boolean adaptResourceUri, boolean register) {
+	public static Map<String, EPackage> getEPackages(String absolutePathToMetaModelFile, boolean adaptResourceUri, boolean register) {
 
 		HashMap<String, EPackage> ePackages = new HashMap<>();
 
@@ -107,7 +109,7 @@ public abstract class EPackageHelper {
 	 * @param ePackage The root ePackage.
 	 * @return A set of sub-ePackages including the root ePackage itself.
 	 */
-	public static HashSet<EPackage> collectEPackages(EPackage ePackage) {
+	public static Set<EPackage> collectEPackages(EPackage ePackage) {
 		HashSet<EPackage> ePackages = new HashSet<>();
 		ePackages.add(ePackage);
 		for (EPackage child : ePackage.getESubpackages()) {
