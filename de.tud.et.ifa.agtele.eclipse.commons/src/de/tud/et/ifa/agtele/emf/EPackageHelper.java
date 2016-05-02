@@ -3,6 +3,8 @@ package de.tud.et.ifa.agtele.emf;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
+import java.util.stream.Collectors;
 
 import org.eclipse.emf.common.util.BasicEList;
 import org.eclipse.emf.common.util.EList;
@@ -68,16 +70,17 @@ public abstract class EPackageHelper {
 			
 			if(!(contents.get(0) instanceof EPackage)) {
 				return null;
-			} else if(contents.size() > 1 && contents.get(1) instanceof EPackage) {
-				System.out.println("The XSD '" + absolutePathToMetaModelFile + "'defines more than one namespace. "
-						+ "This is currently not supported by the 'EPackageHelper'. Only the first namespace will be used!");
 			}
 		}
 
-		// the ePackage defined by the metamodel
-		EPackage root = (EPackage) contents.get(0);
+		// the root ePackages defined by the metamodel
+		//
+		List<EPackage> rootEPackages = (List<EPackage>) contents.stream().filter(e -> e instanceof EPackage).map(e -> (EPackage) e).
+				collect(Collectors.toList());
 
-		HashSet<EPackage> ePackageSet = collectEPackages(root);
+		// the complete list of packages defined by the meta-model including all sub-packages
+		//
+		HashSet<EPackage> ePackageSet = collectEPackages(rootEPackages);
 
 		for (EPackage ePackage : ePackageSet) {
 
