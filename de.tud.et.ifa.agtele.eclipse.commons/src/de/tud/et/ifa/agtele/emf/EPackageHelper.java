@@ -1,5 +1,6 @@
 package de.tud.et.ifa.agtele.emf;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 
@@ -100,8 +101,8 @@ public abstract class EPackageHelper {
 	 * Recursively collects the sub-packages of an ePackage and returns them as a 
 	 * set (including the root package itself).
 	 *  
-	 * @param ePackage the root ePackage
-	 * @return a set of sub-ePackages including the root ePackage itself
+	 * @param ePackage The root ePackage.
+	 * @return A set of sub-ePackages including the root ePackage itself.
 	 */
 	public static HashSet<EPackage> collectEPackages(EPackage ePackage) {
 		HashSet<EPackage> ePackages = new HashSet<>();
@@ -110,6 +111,23 @@ public abstract class EPackageHelper {
 			ePackages.addAll(collectEPackages(child));
 		}
 		return ePackages;
+	}
+	
+	/**
+	 * Recursively collects the sub-packages of a list of ePackages and returns them as a 
+	 * set (including the root packages themselves).
+	 *  
+	 * @param ePackages The list of root ePackages.
+	 * @return A set of sub-ePackages including the root ePackages themselves.
+	 */
+	public static HashSet<EPackage> collectEPackages(Collection<EPackage> ePackages) {
+		HashSet<EPackage> ret = new HashSet<>();
+		
+		for (EPackage ePackage : ePackages) {
+			ret.addAll(collectEPackages(ePackage));
+		}
+		
+		return ret;
 	}
 
 }
