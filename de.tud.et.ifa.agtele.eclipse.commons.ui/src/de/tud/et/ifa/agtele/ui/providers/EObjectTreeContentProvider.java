@@ -57,7 +57,7 @@ public class EObjectTreeContentProvider implements ITreeContentProvider {
 
 	@Override
 	public boolean hasChildren(Object element) {
-		return (getChildren(element).length > 0 ? true : false);
+		return getChildren(element).length > 0 ? true : false;
 	}
 
 }

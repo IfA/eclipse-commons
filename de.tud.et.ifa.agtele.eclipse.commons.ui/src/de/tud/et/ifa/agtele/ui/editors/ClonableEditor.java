@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import org.eclipse.core.resources.IResourceChangeEvent;
 import org.eclipse.core.resources.IResourceChangeListener;
@@ -35,19 +36,14 @@ public abstract class ClonableEditor extends MultiPageEditorPart{
 	/**
 	 * stores the editing domains per file path in order to be able to reuse it for clonable model editors
 	 */
-	protected static Map<String, AdapterFactoryEditingDomain> editingDomains = new HashMap<String, AdapterFactoryEditingDomain>();
+	protected static Map<String, AdapterFactoryEditingDomain> editingDomains = new HashMap<>();
 	
 	/**
 	 * stores each opened editor instance by editing domain
 	 */
-	protected static Map<AdapterFactoryEditingDomain, Collection<ClonableEditor>> editingDomainShare = new HashMap<AdapterFactoryEditingDomain, Collection<ClonableEditor>>();
+	protected static Map<AdapterFactoryEditingDomain, Collection<ClonableEditor>> editingDomainShare = new HashMap<>();
 	
 	protected CommandStackListener commandStackListener;
-	
-	/**
-	 * This sets up the editing domain for the model editor.
-	 */
-	protected abstract void initializeEditingDomain();
 	
 	/**
 	 * This creates a model editor.
@@ -57,6 +53,11 @@ public abstract class ClonableEditor extends MultiPageEditorPart{
 		super();
 		initializeEditingDomainGen();
 	}
+	
+	/**
+	 * This sets up the editing domain for the model editor.
+	 */
+	protected abstract void initializeEditingDomain();
 		
 	protected abstract Viewer getCurrentViewer();	
 	protected abstract void setSelectionToViewer(Collection<?> affectedObjects);	
@@ -140,9 +141,11 @@ public abstract class ClonableEditor extends MultiPageEditorPart{
 		BasicCommandStack commandStack = new BasicCommandStack();
 
 		commandStackListener = (new CommandStackListener() {
-				 public void commandStackChanged(final EventObject event) {
+				@Override
+				public void commandStackChanged(final EventObject event) {
 					 getContainer().getDisplay().asyncExec
 						 (new Runnable() {
+							  @Override
 							  public void run() {
 								  firePropertyChange(IEditorPart.PROP_DIRTY);
 
@@ -186,7 +189,7 @@ public abstract class ClonableEditor extends MultiPageEditorPart{
 	public void doSave(IProgressMonitor progressMonitor) {
 		// Save only resources that have actually changed.
 		//
-		final Map<Object, Object> saveOptions = new HashMap<Object, Object>();
+		final Map<Object, Object> saveOptions = new HashMap<>();
 		saveOptions.put(Resource.OPTION_SAVE_ONLY_IF_CHANGED, Resource.OPTION_SAVE_ONLY_IF_CHANGED_MEMORY_BUFFER);
 		saveOptions.put(Resource.OPTION_LINE_DELIMITER, Resource.OPTION_LINE_DELIMITER_UNSPECIFIED);
 
@@ -258,7 +261,7 @@ public abstract class ClonableEditor extends MultiPageEditorPart{
 		if (editingDomains.get(path) == null) {
 			//I am a new editor instance, update the editing domain registry
 			editingDomains.put(path, getEditingDomain());
-			Collection<ClonableEditor> editors = new ArrayList<ClonableEditor>();
+			Collection<ClonableEditor> editors = new ArrayList<>();
 			editors.add(this);
 			editingDomainShare.put(getEditingDomain(), editors);
 			ResourcesPlugin.getWorkspace().addResourceChangeListener(getResourceChangeListener(), IResourceChangeEvent.POST_CHANGE);			
@@ -303,9 +306,9 @@ public abstract class ClonableEditor extends MultiPageEditorPart{
 		c.remove(this);
 		if (c.isEmpty()) {
 			editingDomainShare.remove(getEditingDomain());
-			for (String key : editingDomains.keySet()) {
-				if (editingDomains.get(key) == getEditingDomain()) {
-					editingDomains.remove(key);
+			for (Entry<String, AdapterFactoryEditingDomain> entry : editingDomains.entrySet()) {
+				if (entry.getValue() == getEditingDomain()) {
+					editingDomains.remove(entry.getKey());
 					break;
 				}
 			}			
@@ -318,6 +321,7 @@ public abstract class ClonableEditor extends MultiPageEditorPart{
 	 * Do not call dispose on the adapterFactory yourself.
 	 * Do not remove resourceChangeListeners.
 	 */
+	@Override
 	public void dispose() {
 		disposeFromEditorRegistry();
 		super.dispose();

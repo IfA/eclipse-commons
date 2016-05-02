@@ -14,7 +14,7 @@ import org.eclipse.swt.events.SelectionListener;
 public interface SelectionListener2 extends SelectionListener {
 
 	@Override
-	default public void widgetDefaultSelected(SelectionEvent e) {
+	public default void widgetDefaultSelected(SelectionEvent e) {
 		// do nothing on default selection
 	}
 }

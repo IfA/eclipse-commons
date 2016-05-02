@@ -2,6 +2,7 @@ package de.tud.et.ifa.agtele.ui.widgets;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 import org.eclipse.emf.common.ui.viewer.ColumnViewerInformationControlToolTipSupport;
 import org.eclipse.emf.common.util.URI;
@@ -91,15 +92,6 @@ public class TreeViewerGroup extends FilteredTree implements IPersistable {
 	 */
 	protected ArrayList<Image> toolbarImages;
 
-	/**
-	 * A setter for the tool bar images that checks for 'null' parameter.
-	 * 
-	 * @param toolbarImages (may be 'null')
-	 */
-	protected void setToolbarImages(ArrayList<Image> toolbarImages) {
-		this.toolbarImages = 
-				(toolbarImages != null ? toolbarImages : new ArrayList<Image>()); 
-	}
 
 	/**
 	 * This is the list of additional listeners that are invoked when the
@@ -122,16 +114,6 @@ public class TreeViewerGroup extends FilteredTree implements IPersistable {
 	private IDialogSettings dialogSettings;
 
 	private Composite toolbarComposite;
-
-	/**
-	 * A setter for the tool bar listeners that checks for 'null' parameter.
-	 * 
-	 * @param toolbarListeners (may be 'null')
-	 */
-	protected void setToolbarListeners(ArrayList<SelectionListener> toolbarListeners) {
-		this.toolbarListeners = 
-				(toolbarListeners != null ? toolbarListeners : new ArrayList<SelectionListener>()); 
-	}
 
 	/**
 	 * Use this constructor if you do not want to add a tool bar to the viewer.
@@ -177,19 +159,39 @@ public class TreeViewerGroup extends FilteredTree implements IPersistable {
 	 * @param displayAdd If to include an 'add' button in the tool bar.
 	 */
 	public TreeViewerGroup(Composite parent, ComposedAdapterFactory adapterFactory, 
-			EditingDomain editingDomain, IDialogSettings dialogSettings, String groupText, ArrayList<Image> images, 
-			ArrayList<SelectionListener> listeners, boolean displayCollapseAll, boolean displayAdd) {
+			EditingDomain editingDomain, IDialogSettings dialogSettings, String groupText, List<Image> images, 
+			List<SelectionListener> listeners, boolean displayCollapseAll, boolean displayAdd) {
 		super(parent, true);
 		this.parent = parent;
 		this.groupText = groupText;
-		this.setToolbarImages(images);
-		this.setToolbarListeners(listeners);
+		this.setToolbarImages((ArrayList<Image>) images);
+		this.setToolbarListeners((ArrayList<SelectionListener>) listeners);
 		this.displayCollapseAll = displayCollapseAll;
 		this.displayAdd = displayAdd;
 		this.adapterFactory = adapterFactory;
 		this.editingDomain = editingDomain;
 		this.dialogSettings = dialogSettings;
 		this.init(SWT.MULTI, new PatternFilter());
+	}
+
+	/**
+	 * A setter for the tool bar images that checks for 'null' parameter.
+	 * 
+	 * @param toolbarImages (may be 'null')
+	 */
+	protected void setToolbarImages(ArrayList<Image> toolbarImages) {
+		this.toolbarImages = 
+				toolbarImages != null ? toolbarImages : new ArrayList<>(); 
+	}
+
+	/**
+	 * A setter for the tool bar listeners that checks for 'null' parameter.
+	 * 
+	 * @param toolbarListeners (may be 'null')
+	 */
+	protected void setToolbarListeners(ArrayList<SelectionListener> toolbarListeners) {
+		this.toolbarListeners = 
+				toolbarListeners != null ? toolbarListeners : new ArrayList<>(); 
 	}
 
 	/**
@@ -303,7 +305,7 @@ public class TreeViewerGroup extends FilteredTree implements IPersistable {
 			@Override
 			public String getToolTipText(Object element) {
 				String toolTip = super.getToolTipText(element);
-				return (toolTip == null ? (element instanceof EObject ? "Element Type: " + ((EObject) element).eClass().getName() : null) : toolTip);
+				return toolTip == null ? (element instanceof EObject ? "Element Type: " + ((EObject) element).eClass().getName() : null) : toolTip;
 			}
 		}));
 		treeViewer.setContentProvider(new AdapterFactoryContentProvider(adapterFactory));
@@ -465,8 +467,8 @@ public class TreeViewerGroup extends FilteredTree implements IPersistable {
 
 			// Query the new selection for appropriate new child/sibling descriptors
 			//
-			Collection<?> newChildDescriptors = null;
-			Collection<?> newSiblingDescriptors = null;
+			Collection<?> newChildDescriptors;
+			Collection<?> newSiblingDescriptors;
 			ISelection selection = treeViewer.getSelection();
 			if (!(selection instanceof IStructuredSelection) || ((IStructuredSelection)selection).size() > 1) {
 				// nothing to be done
@@ -555,7 +557,7 @@ public class TreeViewerGroup extends FilteredTree implements IPersistable {
 		
 		// Persist the filter text
 		//
-		settings.put("FILTER_TEXT", (getFilterString() != null ? getFilterString() : ""));
+		settings.put("FILTER_TEXT", getFilterString() != null ? getFilterString() : "");
 	}
 
 	@Override

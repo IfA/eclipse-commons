@@ -1,6 +1,7 @@
 package de.tud.et.ifa.agtele.ui.emf.edit;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import org.eclipse.emf.common.command.AbstractCommand;
 import org.eclipse.emf.edit.command.DragAndDropCommand;
@@ -22,7 +23,7 @@ import de.tud.et.ifa.agtele.ui.util.UIHelper;
 public class UserChoiceCommandSelectionStrategy implements ICommandSelectionStrategy {
 
 	@Override
-	public AbstractCommand selectCommandToExecute(ArrayList<AbstractCommand> commands) {
+	public AbstractCommand selectCommandToExecute(List<AbstractCommand> commands) {
 		
 		Menu menu = new Menu(UIHelper.getShell(), SWT.POP_UP);
 		
@@ -34,7 +35,7 @@ public class UserChoiceCommandSelectionStrategy implements ICommandSelectionStra
 		//
 		for (AbstractCommand command : commands) {
 			MenuItem item = new MenuItem(menu, SWT.PUSH);
-			String label = "";
+			String label;
 			if(command instanceof DragAndDropCommand) {
 				int operation = ((DragAndDropCommand) command).getOperation();
 				if(operation == DragAndDropFeedback.DROP_MOVE) {
@@ -61,12 +62,13 @@ public class UserChoiceCommandSelectionStrategy implements ICommandSelectionStra
 		//
 		menu.setVisible(true);
 		while (!menu.isDisposed () && menu.isVisible()) {
-			if (!Display.getDefault().readAndDispatch()) Display.getDefault().sleep();
+			if (!Display.getDefault().readAndDispatch())
+				Display.getDefault().sleep();
 		}
 		while (Display.getDefault().readAndDispatch()); // needed, to get the selection event, which is fired AFTER the menu is hidden
 		menu.dispose ();
 
 		
-		return (ret.isEmpty() ? null : ret.get(0));
+		return ret.isEmpty() ? null : ret.get(0);
 	}
 }

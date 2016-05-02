@@ -13,8 +13,8 @@ import org.eclipse.ui.PlatformUI;
  * 
  * @author mfreund
  */
-public class UIHelper {
-
+public interface UIHelper {
+	
 	/**
 	 * Returns the {@link Shell} from the active workbench window or a new one.
 	 * <br /><br />
@@ -47,6 +47,6 @@ public class UIHelper {
 			return null;
 		}
 		IEditorPart editor = page.getActiveEditor();
-		return (editor == null ? null : editor.getEditorInput());
+		return editor == null ? null : editor.getEditorInput();
 	}
 }
