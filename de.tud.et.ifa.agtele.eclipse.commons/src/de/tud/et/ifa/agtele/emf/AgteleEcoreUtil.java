@@ -5,6 +5,7 @@ package de.tud.et.ifa.agtele.emf;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.Iterator;
 
 import org.eclipse.emf.common.util.TreeIterator;
@@ -240,6 +241,7 @@ public class AgteleEcoreUtil {
 			return (EPackage) root.eContents().get(0);			
 		}
 	}
+	
 	/**
 	 * Returns the topmost package in the package hierarchy of a given eClass.
 	 * @param e
@@ -247,6 +249,19 @@ public class AgteleEcoreUtil {
 	 */
 	public static EPackage getRootEPackage(EClass e) {
 		return getRootEPackage(e.getEPackage());
+	}
+	
+	/**
+	 * Returns the topmost packages in the ePackage hierarchy of the given list of ePackages.
+	 * @param p The list of packages for that the root packages shall be determined.
+	 * @return The root ePackage.
+	 */
+	public static HashSet<EPackage> getRootEPackages(Collection<EPackage> p) {
+		HashSet<EPackage> ret = new HashSet<>();
+		for (EPackage ePackage : p) {
+			ret.add(getRootEPackage(ePackage));
+		}
+		return ret;
 	}
 	
 	/**
