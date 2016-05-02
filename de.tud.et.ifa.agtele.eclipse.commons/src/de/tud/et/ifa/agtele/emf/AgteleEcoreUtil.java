@@ -270,7 +270,7 @@ public interface AgteleEcoreUtil {
 	public static Collection<EObject> getAllInstances(EClass eClass, Resource res) {
 		Collection<EObject> result = new ArrayList<>();
 		
-		TreeIterator<EObject> it = res.getAllContents();
+		Iterator<EObject> it = new AgteleContainmentTreeIterator(res, true, true);
 		
 		while (it.hasNext()) {
 			EObject obj = it.next();
@@ -289,8 +289,8 @@ public interface AgteleEcoreUtil {
 	 */
 	public static Collection<EObject> getAllInstances(EClass eClass, EObject root) {
 		Collection<EObject> result = new ArrayList<>();
-		
-		TreeIterator<EObject> it = root.eAllContents();
+
+		Iterator<EObject> it = new AgteleContainmentTreeIterator(root, true, true);
 		
 		while (it.hasNext()) {
 			EObject obj = it.next();
