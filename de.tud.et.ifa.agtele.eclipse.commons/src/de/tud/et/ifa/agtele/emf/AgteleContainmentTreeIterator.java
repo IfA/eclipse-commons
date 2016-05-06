@@ -83,7 +83,7 @@ public class AgteleContainmentTreeIterator implements Iterator<EObject> {
 			EList<EReference> containmentFeatures = cls.getEAllContainments();
 			
 			for (EReference ref : containmentFeatures) {
-				if (!ref.isDerived() || !ignoreDerived || (ref.isDerived() && (!ref.isVolatile() || !ignoreVolatile))) {
+				if (!ref.isDerived() || (ref.isDerived() && !ignoreDerived && (!ref.isVolatile() || (ref.isVolatile() && !ignoreVolatile)))) {
 					if (ref.isMany()) {
 						EList<EObject> theContent = (EList<EObject>) rootObj.eGet(ref);
 						if (!theContent.isEmpty()) {
