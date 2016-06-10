@@ -45,13 +45,7 @@ public class EMFModelHelpView extends ViewPart implements IPersistable {
 	 * The constructor.
 	 */
 	public EMFModelHelpView() {
-		selectionListener = new ISelectionListener() {
-
-			@Override
-			public void selectionChanged(IWorkbenchPart part, ISelection selection) {
-				showHelp(selection);
-			}
-		};
+		selectionListener = (IWorkbenchPart iw, ISelection selection) -> {showHelp(selection);};
 
 		linkEditor = AgteleUIPlugin.getPlugin().getDialogSettings().getBoolean("link");
 		if (linkEditor)
