@@ -427,7 +427,7 @@ public class ResourceHelper {
 		if (node.isDirectory()) {
 			String[] subNote = node.list();
 			for (String filename : subNote) {
-				generateFileList(new File(node, filename), sourceFolder);
+				fileList.addAll(generateFileList(new File(node, filename), sourceFolder));
 			}
 		}
 		return fileList;
