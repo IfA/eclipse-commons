@@ -7,8 +7,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 
-import org.eclipse.emf.common.util.TreeIterator;
 import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.EClassifier;
 import org.eclipse.emf.ecore.EObject;
@@ -318,5 +318,109 @@ public interface AgteleEcoreUtil {
 		} else {
 			return getAllInstances(eClass, anObject);
 		}
+	}
+	
+	/**
+	 * This moves upward in the containment hierarchy of the given {@link EObject} and
+	 * checks whether (at least) one of its ancestors is an instance of the given 
+	 * {@link EClass type}.
+	 * 
+	 * @param child The {@link EObject} of which the containers shall be checked.
+	 * @param ancestorType The {@link EClass} to check against.
+	 * @return '<em><b>true</b></em>' if at least one of the ancestors is of the specified type;
+	 * '<em><b>false</b></em>' otherwise.
+	 */
+	public static boolean hasAncestorOfType(EObject child, EClass ancestorType) {
+		
+		EObject parent = child.eContainer();
+		
+		while(parent != null) {
+			
+			if(parent.eClass().equals(ancestorType)) {
+				return true;
+			}
+			parent = parent.eContainer();
+		}
+		return false;
+	}
+	
+	/**
+	 * This moves upward in the containment hierarchy of the given {@link EObject} and
+	 * checks whether (at least) one of its ancestors is an instance of the given 
+	 * {@link EClass type} or any of its sub-types.
+	 * 
+	 * @param child The {@link EObject} of which the containers shall be checked.
+	 * @param ancestorType The {@link EClass} to check against.
+	 * @return '<em><b>true</b></em>' if at least one of the ancestors is of the specified type
+	 * or one of its sub-types; '<em><b>false</b></em>' otherwise.
+	 */
+	public static boolean hasAncestorOfKind(EObject child, EClass ancestorType) {
+		
+		EObject parent = child.eContainer();
+		
+		while(parent != null) {
+			
+			List<EClass> typesToCheck = new ArrayList<>();
+			typesToCheck.add(parent.eClass());
+			typesToCheck.addAll(parent.eClass().getEAllSuperTypes());
+			
+			if(typesToCheck.contains(ancestorType)) {
+				return true;
+			}
+			parent = parent.eContainer();
+		}
+		return false;
+	}
+	
+	/**
+	 * This moves upward in the containment hierarchy of the given {@link EObject} and
+	 * returns the first ancestor that is an instance of the given 
+	 * {@link EClass type}.
+	 * 
+	 * @param child The {@link EObject} of which the containers shall be checked.
+	 * @param ancestorType The {@link EClass} to check against.
+	 * @return The first ancestor that is of the specified type or '<em><b>null</b></em>' 
+	 * if there is no such ancestor.
+	 */
+	public static EObject getAncestorOfType(EObject child, EClass ancestorType) {
+		
+		EObject parent = child.eContainer();
+		
+		while(parent != null) {
+			
+			if(parent.eClass().equals(ancestorType)) {
+				return parent;
+			}
+			parent = parent.eContainer();
+		}
+		return null;
+	}
+	
+	/**
+	 * This moves upward in the containment hierarchy of the given {@link EObject} and
+	 * returns the first ancestor that is an instance of the given 
+	 * {@link EClass type} or any of its sub-types.
+	 * 
+	 * @param child The {@link EObject} of which the containers shall be checked.
+	 * @param ancestorType The {@link EClass} to check against.
+	 * @return The first ancestor that is of the specified type or one of its sub-types
+	 * or '<em><b>null</b></em>' if there is no such ancestor.
+	 */
+	public static EObject getAncestorOfKind(EObject child, EClass ancestorType) {
+		
+		EObject parent = child.eContainer();
+		
+		while(parent != null) {
+			
+			List<EClass> typesToCheck = new ArrayList<>();
+			typesToCheck.add(parent.eClass());
+			typesToCheck.addAll(parent.eClass().getEAllSuperTypes());
+			
+			if(typesToCheck.contains(ancestorType)) {
+				return parent;
+			}
+			parent = parent.eContainer();
+		}
+		return null;
 	}
 }
