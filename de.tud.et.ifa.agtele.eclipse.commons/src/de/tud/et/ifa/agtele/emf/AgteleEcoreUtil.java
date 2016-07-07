@@ -1,14 +1,17 @@
 /**
- * 
+ *
  */
 package de.tud.et.ifa.agtele.emf;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 
+import org.eclipse.emf.ecore.EAttribute;
 import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.EClassifier;
 import org.eclipse.emf.ecore.EObject;
@@ -24,16 +27,16 @@ import org.eclipse.emf.edit.provider.ComposedAdapterFactory;
 
 /**
  * This class contains convenient static methods for working with EMF objects.
- * 
+ *
  * @author AG Tele
  *
  */
 public interface AgteleEcoreUtil {
-	
+
 	/**
 	 * Returns the {@link EditingDomain} of an {@link EObject} or null if none
 	 * can be found
-	 * 
+	 *
 	 * @param object
 	 * @return The {@link EditingDomain} or null
 	 */
@@ -62,7 +65,7 @@ public interface AgteleEcoreUtil {
 	/**
 	 * Returns the {@link AdapterFactoryItemDelegator} of an {@link EObject} or
 	 * null if none can be found
-	 * 
+	 *
 	 * @param object
 	 * @return The {@link AdapterFactoryItemDelegator} or null
 	 */
@@ -70,8 +73,8 @@ public interface AgteleEcoreUtil {
 		// get all property descriptors for the current eObject and
 		// therefore do some weird voodoo stuff according to
 		// https://www.eclipse.org/forums/index.php/t/162266/
-		if (getEditingDomainFor(object) instanceof AdapterFactoryEditingDomain) {
-			AdapterFactoryEditingDomain afed = (AdapterFactoryEditingDomain) getEditingDomainFor(object);
+		if (AgteleEcoreUtil.getEditingDomainFor(object) instanceof AdapterFactoryEditingDomain) {
+			AdapterFactoryEditingDomain afed = (AdapterFactoryEditingDomain) AgteleEcoreUtil.getEditingDomainFor(object);
 			if (afed.getAdapterFactory().isFactoryForType(object)) {
 				return new AdapterFactoryItemDelegator(
 						((ComposedAdapterFactory) afed.getAdapterFactory()).getRootAdapterFactory());
@@ -93,10 +96,10 @@ public interface AgteleEcoreUtil {
 		if (includeGivenClass && (!aClass.isAbstract() || aClass.isAbstract() && includeAbstract)) {
 			result.add(aClass);
 		}
-		result.addAll(getAllSubClasses(classes, aClass, includeAbstract));
+		result.addAll(AgteleEcoreUtil.getAllSubClasses(classes, aClass, includeAbstract));
 		return result;
 	}
-	
+
 	/**
 	 * Collects all sub- EClasses of a specific eClass within its respective root ePackage.
 	 * @param includeGivenClass Set to <code>true</code>, if the given class shall be included. If the given class is abstract, it will only be added to the result, if includeAbstract is true.
@@ -105,10 +108,10 @@ public interface AgteleEcoreUtil {
 	 * @return All found sub classes according to the specified options.
 	 */
 	public static Collection<EClass> getAllSubClasses(EClass aClass, boolean includeGivenClass, boolean includeAbstract) {
-		EPackage rootPackage = getRootEPackage(aClass);
-		return getAllSubClasses(getAllPackageEClasses(getAllSubPackages(rootPackage, true)), aClass, includeGivenClass, includeAbstract);
+		EPackage rootPackage = AgteleEcoreUtil.getRootEPackage(aClass);
+		return AgteleEcoreUtil.getAllSubClasses(AgteleEcoreUtil.getAllPackageEClasses(AgteleEcoreUtil.getAllSubPackages(rootPackage, true)), aClass, includeGivenClass, includeAbstract);
 	}
-	
+
 	/**
 	 * Collects all sub- EClasses of a specific eClass within its respective root ePackage. The given class is not included.
 	 * @param aClass The class to search sub classes for
@@ -116,18 +119,18 @@ public interface AgteleEcoreUtil {
 	 * @return All found sub classes according to the specified options.
 	 */
 	public static Collection<EClass> getAllSubClasses(EClass aClass, boolean includeAbstract) {
-		return getAllSubClasses(aClass, false, includeAbstract);
+		return AgteleEcoreUtil.getAllSubClasses(aClass, false, includeAbstract);
 	}
-	
+
 	/**
 	 * Collects all sub- EClasses of a specific eClass within its respective root ePackage. Abstract sub classes are included.
 	 * @param aClass The class to search sub classes for
 	 * @return All found sub classes according to the specified options.
 	 */
 	public static Collection<EClass> getAllSubClasses(EClass aClass) {
-		return getAllSubClasses(aClass, false, true);
+		return AgteleEcoreUtil.getAllSubClasses(aClass, false, true);
 	}
-	
+
 	/**
 	 * Collects all sub- EClasses of a specific eClass in a collection of handed eClasses.
 	 * @param classes The class collection to search for sub classes in
@@ -138,22 +141,22 @@ public interface AgteleEcoreUtil {
 	public static Collection<EClass> getAllSubClasses(Collection<EClass> classes, EClass aClass, boolean includeAbstract) {
 		Collection<EClass> result = new ArrayList<>();
 		Iterator<EClass> i = classes.iterator();
-		
+
 		while(i.hasNext()) {
 			EClass checkClass = i.next();
 			if (checkClass == aClass) {
 				continue;
 			}
-			
+
 			Collection<EClass> superClasses = checkClass.getEAllSuperTypes();
-			
-			if(superClasses.contains(aClass) && (!checkClass.isAbstract() || (checkClass.isAbstract() && includeAbstract))) {
+
+			if(superClasses.contains(aClass) && (!checkClass.isAbstract() || checkClass.isAbstract() && includeAbstract)) {
 				result.add(checkClass);
 			}
 		}
 		return result;
 	}
-	
+
 	/**
 	 * Collects all sub- EClasses of a specific eClass in a collection of handed eClasses.
 	 * This implementation delegates to .getAllSubClasses(Collection<EClass>, EClass, boolean)
@@ -162,9 +165,9 @@ public interface AgteleEcoreUtil {
 	 * @return All found sub classes according to the specified options.
 	 */
 	public static Collection<EClass> getAllSubClasses(Collection<EClass> classes, EClass aClass) {
-		return getAllSubClasses(classes, aClass, true);
+		return AgteleEcoreUtil.getAllSubClasses(classes, aClass, true);
 	}
-	
+
 	/**
 	 * Collects all subPackages that are descendants of a given EPackage.
 	 * @param p
@@ -172,19 +175,19 @@ public interface AgteleEcoreUtil {
 	 */
 	public static Collection<EPackage> getAllSubPackages (EPackage p) {
 		ArrayList<EPackage> result = new ArrayList<>();
-		
+
 		if (p != null) {
 			Collection<EPackage> subPackages = p.getESubpackages();
-			
+
 			if (subPackages != null && !subPackages.isEmpty()) {
 				result.addAll(subPackages);
-				
+
 				Iterator<EPackage> i = subPackages.iterator();
 				while (i.hasNext()) {
-					Collection <EPackage> subSubPackages = getAllSubPackages(i.next());
+					Collection <EPackage> subSubPackages = AgteleEcoreUtil.getAllSubPackages(i.next());
 					result.addAll(subSubPackages);
 				}
-			}			
+			}
 		}
 		return result;
 	}
@@ -199,19 +202,19 @@ public interface AgteleEcoreUtil {
 		if (includeGiven) {
 			result.add(p);
 		}
-		result.addAll(getAllSubPackages(p));
+		result.addAll(AgteleEcoreUtil.getAllSubPackages(p));
 		return result;
 	}
-	
+
 	/**
 	 * Collects a collection of all eClasses within a collection of given ePackages.
 	 * @param packages
 	 * @return The collection of eClasses within the given collection of ePackages.
 	 */
-	public static Collection<EClass> getAllPackageEClasses(Collection<EPackage> packages) {			
-		Collection<EClass> result = new ArrayList<>();		
+	public static Collection<EClass> getAllPackageEClasses(Collection<EPackage> packages) {
+		Collection<EClass> result = new ArrayList<>();
 		Iterator<EPackage> it = packages.iterator();
-		
+
 		while(it.hasNext()) {
 			Collection<EClassifier> c = it.next().getEClassifiers();
 			Iterator<EClassifier> i2 = c.iterator();
@@ -220,11 +223,11 @@ public interface AgteleEcoreUtil {
 				if (aClassifier instanceof EClass) {
 					result.add((EClass) aClassifier);
 				}
-			}			
-		}	
+			}
+		}
 		return result;
 	}
-	
+
 	/**
 	 * Returns the topmost package in the ePackage hierarchy of the given ePackage.
 	 * @param p
@@ -235,19 +238,19 @@ public interface AgteleEcoreUtil {
 		if (root instanceof EPackage) {
 			return (EPackage) root;
 		} else {
-			return (EPackage) root.eContents().get(0);			
+			return (EPackage) root.eContents().get(0);
 		}
 	}
-	
+
 	/**
 	 * Returns the topmost package in the package hierarchy of a given eClass.
 	 * @param e
 	 * @return The root ePackage
 	 */
 	public static EPackage getRootEPackage(EClass e) {
-		return getRootEPackage(e.getEPackage());
+		return AgteleEcoreUtil.getRootEPackage(e.getEPackage());
 	}
-	
+
 	/**
 	 * Returns the topmost packages in the ePackage hierarchy of the given list of ePackages.
 	 * @param p The list of packages for that the root packages shall be determined.
@@ -256,11 +259,11 @@ public interface AgteleEcoreUtil {
 	public static HashSet<EPackage> getRootEPackages(Collection<EPackage> p) {
 		HashSet<EPackage> ret = new HashSet<>();
 		for (EPackage ePackage : p) {
-			ret.add(getRootEPackage(ePackage));
+			ret.add(AgteleEcoreUtil.getRootEPackage(ePackage));
 		}
 		return ret;
 	}
-	
+
 	/**
 	 * Returns all instances of an eClass, that are contained in a resource.
 	 * @param eClass
@@ -269,18 +272,18 @@ public interface AgteleEcoreUtil {
 	 */
 	public static Collection<EObject> getAllInstances(EClass eClass, Resource res) {
 		Collection<EObject> result = new ArrayList<>();
-		
+
 		Iterator<EObject> it = new AgteleContainmentTreeIterator(res, true, true);
-		
+
 		while (it.hasNext()) {
 			EObject obj = it.next();
 			if (eClass.isSuperTypeOf(obj.eClass())) {
 				result.add(obj);
 			}
-		}		
+		}
 		return result;
 	}
-	
+
 	/**
 	 * Returns all instances of an eClass, that are contained in an eObject.
 	 * @param eClass
@@ -291,16 +294,16 @@ public interface AgteleEcoreUtil {
 		Collection<EObject> result = new ArrayList<>();
 
 		Iterator<EObject> it = new AgteleContainmentTreeIterator(root, true, true);
-		
+
 		while (it.hasNext()) {
 			EObject obj = it.next();
 			if (eClass.isSuperTypeOf(obj.eClass())) {
 				result.add(obj);
 			}
-		}		
+		}
 		return result;
 	}
-	
+
 	/**
 	 * Returns all instances of an eClass, that are contained in an eObject.
 	 * @param eClass
@@ -312,30 +315,30 @@ public interface AgteleEcoreUtil {
 	public static Collection<EObject> getAllInstances(EClass eClass, EObject anObject, boolean findRoot) {
 		if (findRoot) {
 			if (anObject.eResource() != null) {
-				return getAllInstances(eClass, anObject.eResource());
+				return AgteleEcoreUtil.getAllInstances(eClass, anObject.eResource());
 			}
-			return  getAllInstances(eClass, EcoreUtil.getRootContainer(anObject, true));
+			return  AgteleEcoreUtil.getAllInstances(eClass, EcoreUtil.getRootContainer(anObject, true));
 		} else {
-			return getAllInstances(eClass, anObject);
+			return AgteleEcoreUtil.getAllInstances(eClass, anObject);
 		}
 	}
-	
+
 	/**
 	 * This moves upward in the containment hierarchy of the given {@link EObject} and
-	 * checks whether (at least) one of its ancestors is an instance of the given 
+	 * checks whether (at least) one of its ancestors is an instance of the given
 	 * {@link EClass type}.
-	 * 
+	 *
 	 * @param child The {@link EObject} of which the containers shall be checked.
 	 * @param ancestorType The {@link EClass} to check against.
 	 * @return '<em><b>true</b></em>' if at least one of the ancestors is of the specified type;
 	 * '<em><b>false</b></em>' otherwise.
 	 */
 	public static boolean hasAncestorOfType(EObject child, EClass ancestorType) {
-		
+
 		EObject parent = child.eContainer();
-		
+
 		while(parent != null) {
-			
+
 			if(parent.eClass().equals(ancestorType)) {
 				return true;
 			}
@@ -343,27 +346,27 @@ public interface AgteleEcoreUtil {
 		}
 		return false;
 	}
-	
+
 	/**
 	 * This moves upward in the containment hierarchy of the given {@link EObject} and
-	 * checks whether (at least) one of its ancestors is an instance of the given 
+	 * checks whether (at least) one of its ancestors is an instance of the given
 	 * {@link EClass type} or any of its sub-types.
-	 * 
+	 *
 	 * @param child The {@link EObject} of which the containers shall be checked.
 	 * @param ancestorType The {@link EClass} to check against.
 	 * @return '<em><b>true</b></em>' if at least one of the ancestors is of the specified type
 	 * or one of its sub-types; '<em><b>false</b></em>' otherwise.
 	 */
 	public static boolean hasAncestorOfKind(EObject child, EClass ancestorType) {
-		
+
 		EObject parent = child.eContainer();
-		
+
 		while(parent != null) {
-			
+
 			List<EClass> typesToCheck = new ArrayList<>();
 			typesToCheck.add(parent.eClass());
 			typesToCheck.addAll(parent.eClass().getEAllSuperTypes());
-			
+
 			if(typesToCheck.contains(ancestorType)) {
 				return true;
 			}
@@ -371,23 +374,23 @@ public interface AgteleEcoreUtil {
 		}
 		return false;
 	}
-	
+
 	/**
 	 * This moves upward in the containment hierarchy of the given {@link EObject} and
-	 * returns the first ancestor that is an instance of the given 
+	 * returns the first ancestor that is an instance of the given
 	 * {@link EClass type}.
-	 * 
+	 *
 	 * @param child The {@link EObject} of which the containers shall be checked.
 	 * @param ancestorType The {@link EClass} to check against.
-	 * @return The first ancestor that is of the specified type or '<em><b>null</b></em>' 
+	 * @return The first ancestor that is of the specified type or '<em><b>null</b></em>'
 	 * if there is no such ancestor.
 	 */
 	public static EObject getAncestorOfType(EObject child, EClass ancestorType) {
-		
+
 		EObject parent = child.eContainer();
-		
+
 		while(parent != null) {
-			
+
 			if(parent.eClass().equals(ancestorType)) {
 				return parent;
 			}
@@ -395,32 +398,62 @@ public interface AgteleEcoreUtil {
 		}
 		return null;
 	}
-	
+
 	/**
 	 * This moves upward in the containment hierarchy of the given {@link EObject} and
-	 * returns the first ancestor that is an instance of the given 
+	 * returns the first ancestor that is an instance of the given
 	 * {@link EClass type} or any of its sub-types.
-	 * 
+	 *
 	 * @param child The {@link EObject} of which the containers shall be checked.
 	 * @param ancestorType The {@link EClass} to check against.
 	 * @return The first ancestor that is of the specified type or one of its sub-types
 	 * or '<em><b>null</b></em>' if there is no such ancestor.
 	 */
 	public static EObject getAncestorOfKind(EObject child, EClass ancestorType) {
-		
+
 		EObject parent = child.eContainer();
-		
+
 		while(parent != null) {
-			
+
 			List<EClass> typesToCheck = new ArrayList<>();
 			typesToCheck.add(parent.eClass());
 			typesToCheck.addAll(parent.eClass().getEAllSuperTypes());
-			
+
 			if(typesToCheck.contains(ancestorType)) {
 				return parent;
 			}
 			parent = parent.eContainer();
 		}
 		return null;
+	}
+
+	/**
+	 * For the given {@link EObject}, this returns the {@link EObject#eGet(org.eclipse.emf.ecore.EStructuralFeature)
+	 * value or values} of the given {@link EAttribute}.
+	 * <p />
+	 * Note: As EAttributes can be {@link EAttribute#isMany() many-valued}, too, this will return either no value, a
+	 * single value, or a list of values. Note: The type of the entries inside the list will match the
+	 * {@link EAttribute#getEAttributeType() type} of the given EAttribute.
+	 *
+	 * @param eObject
+	 *            The {@link EObject} for that the values shall be returned.
+	 * @param eAttribute
+	 *            The {@link EAttribute} for that the values shall be returned.
+	 * @return The determined values (either an empty list, a list consisting of a single value, or mutliple values).
+	 */
+	public static List<Object> getAttributeValueAsList(EObject eObject, EAttribute eAttribute) {
+
+		final Object value = eObject.eGet(eAttribute);
+
+		if (value == null) {
+			return Collections.emptyList();
+		}
+
+		if (eAttribute.isMany()) {
+			return new ArrayList<>((Collection<?>) value);
+		} else {
+			return Arrays.asList(value);
+		}
+
 	}
 }
