@@ -25,7 +25,7 @@ import org.eclipse.emf.edit.provider.ItemProviderAdapter;
  * <p />
  * In order to make use of it, the root item provider of your generated model must extend this instead
  * of the default '<em>ItemProviderAdapter</em>'.
- * 
+ *
  * @author mfreund
  */
 public class CommonItemProviderAdapter extends ItemProviderAdapter {
@@ -40,6 +40,7 @@ public class CommonItemProviderAdapter extends ItemProviderAdapter {
 	 * @author cmartin
 	 */
 	private final class AddCommandWithEnhancedGenericTypeSupport extends AddCommand {
+
 		/**
 		 * This creates an instance of an {@link AddCommand} with enhanced
 		 * support of GenericTypes
@@ -54,7 +55,7 @@ public class CommonItemProviderAdapter extends ItemProviderAdapter {
 				EStructuralFeature feature, Collection<?> collection, int index) {
 			super(domain, owner, feature, collection, index);
 		}
-	
+
 		/**
 		 * Fix the type check <code>if (!eType.isInstance(object)) {</code>
 		 */
@@ -68,7 +69,7 @@ public class CommonItemProviderAdapter extends ItemProviderAdapter {
 					&& (this.index < 0 || this.index > this.ownerList.size())) {
 				return false;
 			}
-	
+
 			if (this.feature != null) {
 				// If it's a feature map, we'll need to validate the entry
 				// feature and enforce its multiplicity restraints.
@@ -76,11 +77,11 @@ public class CommonItemProviderAdapter extends ItemProviderAdapter {
 				FeatureMapUtil.Validator validator = null;
 				boolean documentRoot = false;
 				Set<EStructuralFeature> entryFeatures = Collections.emptySet();
-	
+
 				if (FeatureMapUtil.isFeatureMap(this.feature)) {
 					EClass eClass = this.owner.eClass();
 					validator = FeatureMapUtil.getValidator(eClass, this.feature);
-	
+
 					// Keep track of all the entry features that are already
 					// in the feature map and that will be added, excluding
 					// XML text, CDATA, and comments (if we're in a mixed
@@ -97,27 +98,27 @@ public class CommonItemProviderAdapter extends ItemProviderAdapter {
 						}
 					}
 				}
-	
+
 				// Check each object...
 				//
 				EGenericType eType = this.owner == null ? this.feature.getEGenericType()
 						: this.owner.eClass().getFeatureType(this.feature);
 				for (Object object : this.collection) {
 					boolean containment = false;
-	
+
 					// Check type of object.
 					//
 					if (!eType.isInstance(object)
 							&& !(eType.getEClassifier() != null && eType.getEClassifier().isInstance(object))) {
 						return false;
 					}
-	
+
 					// Check that the object isn't already in a unique list.
 					//
 					if (this.feature.isUnique() && this.ownerList.contains(object)) {
 						return false;
 					}
-	
+
 					// For feature maps, test that the entry feature is a
 					// valid type, that the entry value is an instance of
 					// it,
@@ -129,11 +130,11 @@ public class CommonItemProviderAdapter extends ItemProviderAdapter {
 						FeatureMap.Entry entry = (FeatureMap.Entry) object;
 						EStructuralFeature entryFeature = entry.getEStructuralFeature();
 						containment = entryFeature instanceof EReference && ((EReference) entryFeature).isContainment();
-	
+
 						if (!validator.isValid(entryFeature) || !entryFeature.getEType().isInstance(entry.getValue())) {
 							return false;
 						}
-	
+
 						if (documentRoot) {
 							if (this.isUserElement(entryFeature)) {
 								if (!entryFeatures.isEmpty()) {
@@ -146,7 +147,7 @@ public class CommonItemProviderAdapter extends ItemProviderAdapter {
 							return false;
 						}
 					}
-	
+
 					// Check to see if a container is being put into a
 					// contained object.
 					//
@@ -160,15 +161,22 @@ public class CommonItemProviderAdapter extends ItemProviderAdapter {
 					}
 				}
 			}
-	
+
 			if (this.owner != null && this.domain.isReadOnly(this.owner.eResource())) {
 				return false;
 			}
-	
+
 			return true;
 		}
 	}
 
+	/**
+	 * This creates an instance.
+	 *
+	 * @param adapterFactory
+	 *            An instance is created from an adapter factory. The factory is used as a key so that we always know
+	 *            which factory created this adapter.
+	 */
 	public CommonItemProviderAdapter(AdapterFactory adapterFactory) {
 		super(adapterFactory);
 	}
@@ -176,10 +184,10 @@ public class CommonItemProviderAdapter extends ItemProviderAdapter {
 	@Override
 	protected Command createDragAndDropCommand(EditingDomain domain, Object owner, float location, int operations,
 			int operation, Collection<?> collection) {
-		
+
 		// If possible use the special functionality provided by the 'IDragAndDropProvider' interface...
 		if(this instanceof IDragAndDropProvider) {
-			return ((IDragAndDropProvider) this).createCustomDragAndDropCommand(domain, owner, location, operations, operation, collection, 
+			return ((IDragAndDropProvider) this).createCustomDragAndDropCommand(domain, owner, location, operations, operation, collection,
 					((IDragAndDropProvider) this).getCommandSelectionStrategy());
 		} else {
 			return super.createDragAndDropCommand(domain, owner, location, operations, operation, collection);
@@ -193,8 +201,8 @@ public class CommonItemProviderAdapter extends ItemProviderAdapter {
 	@Override
 	protected Command createAddCommand(EditingDomain domain, EObject owner, EReference feature,
 			Collection<?> collection, int index) {
-	
+
 		return new AddCommandWithEnhancedGenericTypeSupport(domain, owner, feature, collection, index);
 	}
-	
+
 }
