@@ -27,4 +27,26 @@
          </view>
       </perspectiveExtension>
    </extension>
+      <extension point="org.eclipse.ui.editors">
+      <editor
+            id="de.tud.et.ifa.agtele.ui.editors.EcoreEditorID"
+            name="AGTele Ecore Model Editor"
+            icon="icons/EcoreModelFile.gif"
+            class="de.tud.et.ifa.agtele.ui.editors.AgteleEcoreEditor"
+            contributorClass="org.eclipse.emf.ecore.presentation.EcoreActionBarContributor">
+         <contentTypeBinding contentTypeId="org.eclipse.emf.ecore"/>
+         <contentTypeBinding contentTypeId="org.eclipse.emf.emof"/>
+      </editor>
+   </extension>
+   
+   <extension point="org.eclipse.ui.editors">
+      <editor
+            id="de.tud.et.ifa.agtele.ui.editors.ReflectiveEcoreEditorID"
+            name="AGTele Reflective Ecore Model Editor"
+            icon="platform:/plugin/org.eclipse.emf.edit/icons/full/obj16/ModelFile.gif"
+            class="de.tud.et.ifa.agtele.ui.editors.AgteleEcoreEditor"
+            contributorClass="org.eclipse.emf.ecore.presentation.EcoreActionBarContributor$Reflective">
+         <contentTypeBinding contentTypeId="org.eclipse.emf.ecore.xmi"/>
+      </editor>
+   </extension>
 </plugin>
