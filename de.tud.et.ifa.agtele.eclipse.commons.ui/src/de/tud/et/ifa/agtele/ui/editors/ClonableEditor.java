@@ -186,11 +186,18 @@ public abstract class ClonableEditor extends MultiPageEditorPart{
 	 * Don't do anything in the sub class.
 	 */
 	@Override
-	public void doSave(IProgressMonitor progressMonitor) {
+	public void doSave(IProgressMonitor progressMonitors) {
+		doSave(progressMonitors, null);
+	}
+	
+	/**
+	 * This is for implementing {@link IEditorPart} and simply saves the model file.
+	 * Don't do anything in the sub class.
+	 */
+	public void doSave(IProgressMonitor progressMonitor, Map<Object, Object> options) {
 		// Save only resources that have actually changed.
 		//
-		final Map<Object, Object> saveOptions = new HashMap<>();
-		saveOptions.put(Resource.OPTION_SAVE_ONLY_IF_CHANGED, Resource.OPTION_SAVE_ONLY_IF_CHANGED_MEMORY_BUFFER);
+		final Map<Object, Object> saveOptions = options == null ? new HashMap<>() : options;
 		saveOptions.put(Resource.OPTION_LINE_DELIMITER, Resource.OPTION_LINE_DELIMITER_UNSPECIFIED);
 
 		// Do the work within an operation because this is a long running activity that modifies the workbench.
