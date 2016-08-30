@@ -119,7 +119,7 @@ public interface IDragAndDropProvider {
 							eClasses.add(it.next().getEValue().eClass());
 						}
 						
-						if(eClassSet.containsAll(eClasses)) {
+						if(!eClasses.isEmpty() && eClassSet.containsAll(eClasses)) {
 							possibleReferences.add(ref);
 						}
 						
