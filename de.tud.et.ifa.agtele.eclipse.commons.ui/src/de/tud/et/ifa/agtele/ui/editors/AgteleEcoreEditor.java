@@ -84,6 +84,12 @@ public class AgteleEcoreEditor extends EcoreEditor implements IPersistable {
 	};
 
 	/**
+	 * This listens for when the user 'CTRL'-clicks on elements in the {@link #tree} and 'jumps to' a suitable target
+	 * element.
+	 */
+	protected BasicJumpOnClickListener jumpOnCtrlClickListener;
+
+	/**
 	 * This is called during startup. <!-- begin-user-doc --> <!-- end-user-doc -->
 	 */
 	@Override
@@ -91,6 +97,7 @@ public class AgteleEcoreEditor extends EcoreEditor implements IPersistable {
 		super.init(site, editorInput);
 
 		site.getPage().addPartListener(this.persistPartListener);
+
 	}
 
 	/**
@@ -99,6 +106,7 @@ public class AgteleEcoreEditor extends EcoreEditor implements IPersistable {
 	@Override
 	public void dispose() {
 		this.getSite().getPage().removePartListener(this.persistPartListener);
+		this.selectionViewer.getTree().removeSelectionListener(this.jumpOnCtrlClickListener);
 
 		super.dispose();
 	}
@@ -136,6 +144,9 @@ public class AgteleEcoreEditor extends EcoreEditor implements IPersistable {
 			this.selectionViewer.setInput(this.editingDomain.getResourceSet());
 			this.selectionViewer.setSelection(
 					new StructuredSelection(this.editingDomain.getResourceSet().getResources().get(0)), true);
+
+			this.jumpOnCtrlClickListener = new BasicJumpOnClickListener(this.selectionViewer);
+			this.selectionViewer.getTree().addSelectionListener(this.jumpOnCtrlClickListener);
 
 			new AdapterFactoryTreeEditor(this.selectionViewer.getTree(), this.adapterFactory);
 			new ColumnViewerInformationControlToolTipSupport(this.selectionViewer,
