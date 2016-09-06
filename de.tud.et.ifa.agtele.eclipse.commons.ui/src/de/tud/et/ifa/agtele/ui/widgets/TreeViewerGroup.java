@@ -53,6 +53,7 @@ import de.tud.et.ifa.agtele.resources.BundleContentHelper;
 import de.tud.et.ifa.agtele.ui.AgteleUIPlugin;
 import de.tud.et.ifa.agtele.ui.interfaces.IFeatureValidator;
 import de.tud.et.ifa.agtele.ui.interfaces.IPersistable;
+import de.tud.et.ifa.agtele.ui.listeners.SelectionListener2;
 
 /**
  * A class that represents an SWT {@link Group} containing a {@link FilteredTree filtered tree viewer} and optionally a
@@ -107,10 +108,22 @@ public class TreeViewerGroup extends FilteredTree implements IPersistable {
 	 */
 	protected boolean displayAdd;
 
+	/**
+	 * The {@link EditingDomain} for the model to be displayed in this tree viewer. It is, e.g., used to extract labels
+	 * for the elements to be displayed in the tree.
+	 */
 	protected EditingDomain editingDomain;
 
+	/**
+	 * The {@link IDialogSettings} that are used to persist and restore the state of this viewer.
+	 *
+	 * @see IPersistable
+	 */
 	private IDialogSettings dialogSettings;
 
+	/**
+	 * The {@link Composite} holding the {@link ToolBar} that displays the various buttons.
+	 */
 	private Composite toolbarComposite;
 
 	/**
@@ -286,6 +299,11 @@ public class TreeViewerGroup extends FilteredTree implements IPersistable {
 		return this.treeComposite;
 	}
 
+	/**
+	 * The getter for the {@link #toolbarComposite}.
+	 *
+	 * @return The {@link Composite} holding the {@link ToolBar} that displays the various buttons.
+	 */
 	public Composite getToolbar() {
 		return this.toolbarComposite;
 	}
@@ -295,11 +313,14 @@ public class TreeViewerGroup extends FilteredTree implements IPersistable {
 	 * created.
 	 *
 	 * @param parent
+	 *            The parent composite.
 	 * @param style
+	 *            SWT style bits used to create the tree viewer.
 	 * @return
 	 */
 	@Override
 	protected TreeViewer doCreateTreeViewer(Composite parent, int style) {
+
 		TreeViewer treeViewer = super.doCreateTreeViewer(parent, style);
 
 		treeViewer.setLabelProvider(
@@ -334,7 +355,7 @@ public class TreeViewerGroup extends FilteredTree implements IPersistable {
 	 * @param displayAdd
 	 *            If to include an add button.
 	 */
-	protected void createToolbar(Composite parent, ArrayList<Image> images, ArrayList<SelectionListener> listeners,
+	protected void createToolbar(Composite parent, List<Image> images, List<SelectionListener> listeners,
 			boolean displayCollapseAll, boolean displayAdd) {
 
 		if (images.size() != listeners.size()) {
@@ -356,17 +377,7 @@ public class TreeViewerGroup extends FilteredTree implements IPersistable {
 			ToolItem item = new ToolItem(this.toolbar, SWT.PUSH | SWT.TRAIL);
 			item.setImage(BundleContentHelper.getBundleImage(this.bundleID, "icons/collapse_all.gif"));
 			item.setToolTipText("Collapse Tree");
-			item.addSelectionListener(new SelectionListener() {
-
-				@Override
-				public void widgetSelected(SelectionEvent e) {
-					TreeViewerGroup.this.getViewer().collapseAll();
-				}
-
-				@Override
-				public void widgetDefaultSelected(SelectionEvent e) {
-				}
-			});
+			item.addSelectionListener((SelectionListener2) e -> TreeViewerGroup.this.getViewer().collapseAll());
 		}
 
 		// Add the 'add' tool bar item
@@ -392,6 +403,7 @@ public class TreeViewerGroup extends FilteredTree implements IPersistable {
 
 	}
 
+
 	protected AddDropDownSelectionListener createAddDropDownSelectionListener(ToolItem item) {
 		return new AddDropDownSelectionListener(item);
 	}
@@ -408,10 +420,26 @@ public class TreeViewerGroup extends FilteredTree implements IPersistable {
 		// allow extending classes to easily configure the tool bar
 	}
 
+	/**
+	 * A {@link SelectionAdapter} that operates on a {@link ToolItem} and allows the user to add items based on the
+	 * element currently selected in the tree.
+	 *
+	 * @author mfreund
+	 */
 	public class AddDropDownSelectionListener extends SelectionAdapter {
 
+		/**
+		 * The {@link MenuManager} that creates the menu with the various options for adding an element that can be
+		 * selected by the user.
+		 */
 		private MenuManager menuManager;
 
+		/**
+		 * This creates an instance.
+		 *
+		 * @param dropdown
+		 *            The {@link ToolItem} on that this listener listens.
+		 */
 		public AddDropDownSelectionListener(ToolItem dropdown) {
 			this.menuManager = new MenuManager();
 			this.menuManager.createContextMenu(dropdown.getParent());
@@ -587,7 +615,6 @@ public class TreeViewerGroup extends FilteredTree implements IPersistable {
 
 			for (String path : paths) {
 				Object expanded;
-				// System.out.println(paths[i]);
 				/*
 				 * as the URI of an eObject also reflects the containing resource, we can use this to uniquely identify
 				 * an eObject inside a resource set
@@ -613,9 +640,10 @@ public class TreeViewerGroup extends FilteredTree implements IPersistable {
 	}
 
 	/**
-	 * This is used by {@link #generateCreateChildActions(Collection, ISelection)} and
-	 * {@link #generateCreateSiblingActions(Collection, ISelection)} to perform additional checks if an action
-	 * corresponding to the given <em>descriptor</em> is valid for the active <em>content provider</em>.
+	 * This is used by {@link AddDropDownSelectionListener#createCreateChildAction(IEditorPart, ISelection, Object)} and
+	 * {@link AddDropDownSelectionListener#createCreateSiblingAction(IEditorPart, ISelection, Object)} to perform
+	 * additional checks if an action corresponding to the given <em>descriptor</em> is valid for the active <em>content
+	 * provider</em>.
 	 *
 	 * @param descriptor
 	 *            The {@link CommandParameter} that describes an action to be executed.
