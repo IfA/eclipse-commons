@@ -106,8 +106,9 @@ public class AgteleEcoreEditor extends EcoreEditor implements IPersistable {
 	@Override
 	public void dispose() {
 		this.getSite().getPage().removePartListener(this.persistPartListener);
-		this.selectionViewer.getTree().removeSelectionListener(this.jumpOnCtrlClickListener);
-
+		if (!this.selectionViewer.getTree().isDisposed()) {
+			this.selectionViewer.getTree().removeSelectionListener(this.jumpOnCtrlClickListener);
+		}
 		super.dispose();
 	}
 
