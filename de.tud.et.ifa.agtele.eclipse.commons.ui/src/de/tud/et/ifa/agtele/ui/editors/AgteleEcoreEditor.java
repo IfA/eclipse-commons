@@ -4,8 +4,12 @@
 package de.tud.et.ifa.agtele.ui.editors;
 
 import org.eclipse.emf.common.ui.viewer.ColumnViewerInformationControlToolTipSupport;
+import org.eclipse.emf.ecore.EReference;
 import org.eclipse.emf.ecore.presentation.EcoreEditor;
 import org.eclipse.emf.ecore.presentation.EcoreEditorPlugin;
+import org.eclipse.emf.ecore.provider.EReferenceItemProvider;
+import org.eclipse.emf.edit.provider.ComposedImage;
+import org.eclipse.emf.edit.provider.IItemLabelProvider;
 import org.eclipse.emf.edit.ui.celleditor.AdapterFactoryTreeEditor;
 import org.eclipse.emf.edit.ui.provider.AdapterFactoryContentProvider;
 import org.eclipse.emf.edit.ui.provider.AdapterFactoryLabelProvider;
@@ -15,12 +19,14 @@ import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.swt.events.ControlAdapter;
 import org.eclipse.swt.events.ControlEvent;
+import org.eclipse.swt.graphics.Image;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorSite;
 import org.eclipse.ui.IPartListener;
 import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.part.FileEditorInput;
 
+import de.tud.et.ifa.agtele.resources.BundleContentHelper;
 import de.tud.et.ifa.agtele.ui.AgteleUIPlugin;
 import de.tud.et.ifa.agtele.ui.interfaces.IPersistable;
 import de.tud.et.ifa.agtele.ui.widgets.TreeViewerGroup;
@@ -140,7 +146,44 @@ public class AgteleEcoreEditor extends EcoreEditor implements IPersistable {
 
 			this.selectionViewer.setContentProvider(new AdapterFactoryContentProvider(this.adapterFactory));
 			this.selectionViewer.setLabelProvider(new DecoratingColumLabelProvider(
-					new AdapterFactoryLabelProvider(this.adapterFactory), new DiagnosticDecorator(this.editingDomain,
+					// Display containment references with a special icon to make them more distinguishable from
+					// non-containment references
+					// Edited Section begin
+					//
+					new AdapterFactoryLabelProvider(this.adapterFactory) {
+
+						@Override
+						public Image getImage(Object object) {
+
+							if (object instanceof EReference && ((EReference) object).isContainment()) {
+
+								EReferenceItemProvider labelProvider = (EReferenceItemProvider) this.adapterFactory
+										.adapt(object, IItemLabelProvider.class);
+
+								Object image = labelProvider.getImage(object);
+
+								if (image instanceof ComposedImage) {
+
+									// The first sub-image of the composed image always represent the 'base' image (i.e.
+									// the icon for the 'Reference'). Thus we can simply replace this with our special
+									// icon.
+									//
+									((ComposedImage) image).getImages().set(0,
+											BundleContentHelper.getBundleImage(
+													"de.tud.et.ifa.agtele.eclipse.commons.ui",
+													"icons/ContainmentReference.gif"));
+
+									return this.getImageFromObject(image);
+								}
+
+							}
+
+							return super.getImage(object);
+						}
+					},
+					// Edited Section end
+					//
+					new DiagnosticDecorator(this.editingDomain,
 							this.selectionViewer, EcoreEditorPlugin.getPlugin().getDialogSettings())));
 			this.selectionViewer.setInput(this.editingDomain.getResourceSet());
 			this.selectionViewer.setSelection(
@@ -229,4 +272,5 @@ public class AgteleEcoreEditor extends EcoreEditor implements IPersistable {
 		}
 		AgteleEcoreEditor.this.persist(project);
 	}
+
 }
