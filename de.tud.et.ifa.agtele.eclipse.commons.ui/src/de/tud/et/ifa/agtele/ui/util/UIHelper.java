@@ -1,14 +1,18 @@
 package de.tud.et.ifa.agtele.ui.util;
 
+import org.eclipse.core.resources.IFile;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.swt.widgets.Shell;
+import org.eclipse.ui.IEditorDescriptor;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchWindow;
+import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.part.FileEditorInput;
 
 /**
  * This provides convenience methods related to the Eclipse UI.
@@ -85,4 +89,138 @@ public interface UIHelper {
 			return null;
 		}
 	}
+
+	/**
+	 * This opens an editor identified by a given 'editorID' for a given {@link IEditorInput}.
+	 *
+	 * @see #openEditor(IEditorInput, IEditorDescriptor)
+	 * @see #openEditor(IFile, String)
+	 * @see #openEditor(IFile, IEditorDescriptor)
+	 * @see #openEditor(IFile)
+	 *
+	 * @param editorInput
+	 *            The {@link IEditorInput} on which to open the editor.
+	 * @param editorID
+	 *            The id of the editor to use.
+	 *
+	 * @return The opened {@link IEditorPart} or <em>null</em> if no editor could be opened.
+	 * @throws PartInitException
+	 *             If the editor could not be created or initialized.
+	 */
+	public static IEditorPart openEditor(IEditorInput editorInput, String editorID) throws PartInitException {
+
+		IWorkbench wb = PlatformUI.getWorkbench();
+		IWorkbenchWindow window = wb.getActiveWorkbenchWindow();
+		IWorkbenchPage page = window.getActivePage();
+
+		return page.openEditor(editorInput, editorID);
+	}
+
+	/**
+	 * This opens an editor identified by a given {@link IEditorDescriptor} for a given {@link IEditorInput}.
+	 *
+	 * @see #openEditor(IEditorInput, String)
+	 * @see #openEditor(IFile, String)
+	 * @see #openEditor(IFile, IEditorDescriptor)
+	 * @see #openEditor(IFile)
+	 *
+	 * @param editorInput
+	 *            The {@link IEditorInput} on which to open the editor.
+	 * @param editorDescriptor
+	 *            An {@link IEditorDescriptor} of the editor to use.
+	 *
+	 * @return The opened {@link IEditorPart} or <em>null</em> if no editor could be opened.
+	 * @throws PartInitException
+	 *             If the editor could not be created or initialized.
+	 */
+	public static IEditorPart openEditor(IEditorInput editorInput, IEditorDescriptor editorDescriptor)
+			throws PartInitException {
+
+		IWorkbench wb = PlatformUI.getWorkbench();
+		IWorkbenchWindow window = wb.getActiveWorkbenchWindow();
+		IWorkbenchPage page = window.getActivePage();
+
+		return page.openEditor(editorInput, editorDescriptor.getId());
+	}
+
+	/**
+	 * This opens an editor identified by a given 'editorID' for a given {@link IFile}.
+	 *
+	 * @see #openEditor(IEditorInput, String)
+	 * @see #openEditor(IEditorInput, IEditorDescriptor)
+	 * @see #openEditor(IFile, IEditorDescriptor)
+	 * @see #openEditor(IFile)
+	 *
+	 * @param editorInput
+	 *            The {@link IFile} on which to open the editor.
+	 * @param editorID
+	 *            The id of the editor to use.
+	 *
+	 * @return The opened {@link IEditorPart} or <em>null</em> if no editor could be opened.
+	 * @throws PartInitException
+	 *             If the editor could not be created or initialized.
+	 */
+	public static IEditorPart openEditor(IFile editorInput, String editorID) throws PartInitException {
+
+		IWorkbench wb = PlatformUI.getWorkbench();
+		IWorkbenchWindow window = wb.getActiveWorkbenchWindow();
+		IWorkbenchPage page = window.getActivePage();
+
+		return page.openEditor(new FileEditorInput(editorInput), editorID);
+	}
+
+	/**
+	 * This opens an editor identified by a given {@link IEditorDescriptor} for a given {@link IFile}.
+	 *
+	 * @see #openEditor(IEditorInput, String)
+	 * @see #openEditor(IEditorInput, IEditorDescriptor)
+	 * @see #openEditor(IFile, String)
+	 * @see #openEditor(IFile)
+	 *
+	 * @param editorInput
+	 *            The {@link IFile} on which to open the editor.
+	 * @param editorDescriptor
+	 *            An {@link IEditorDescriptor} of the editor to use.
+	 *
+	 * @return The opened {@link IEditorPart} or <em>null</em> if no editor could be opened.
+	 * @throws PartInitException
+	 *             If the editor could not be created or initialized.
+	 */
+	public static IEditorPart openEditor(IFile editorInput, IEditorDescriptor editorDescriptor)
+			throws PartInitException {
+
+		IWorkbench wb = PlatformUI.getWorkbench();
+		IWorkbenchWindow window = wb.getActiveWorkbenchWindow();
+		IWorkbenchPage page = window.getActivePage();
+
+		return page.openEditor(new FileEditorInput(editorInput), editorDescriptor.getId());
+	}
+
+	/**
+	 * This opens the default editor for a given {@link IFile}.
+	 *
+	 * @see #openEditor(IEditorInput, String)
+	 * @see #openEditor(IEditorInput, IEditorDescriptor)
+	 * @see #openEditor(IFile, String)
+	 * @see #openEditor(IFile, IEditorDescriptor)
+	 *
+	 * @param editorInput
+	 *            The {@link IFile} on which to open the editor.
+	 *
+	 * @return The opened {@link IEditorPart} or <em>null</em> if no editor could be opened.
+	 * @throws PartInitException
+	 *             If the editor could not be created or initialized.
+	 */
+	public static IEditorPart openEditor(IFile editorInput) throws PartInitException {
+
+		IWorkbench wb = PlatformUI.getWorkbench();
+		IWorkbenchWindow window = wb.getActiveWorkbenchWindow();
+		IWorkbenchPage page = window.getActivePage();
+
+		IEditorDescriptor editorDescriptor = PlatformUI.getWorkbench().getEditorRegistry()
+				.getDefaultEditor(editorInput.getName());
+
+		return page.openEditor(new FileEditorInput(editorInput), editorDescriptor.getId());
+	}
+
 }
