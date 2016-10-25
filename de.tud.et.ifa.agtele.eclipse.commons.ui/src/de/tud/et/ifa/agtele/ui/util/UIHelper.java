@@ -1,6 +1,7 @@
 package de.tud.et.ifa.agtele.ui.util;
 
 import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
@@ -64,5 +65,24 @@ public interface UIHelper {
 		IWorkbench wb = PlatformUI.getWorkbench();
 		IWorkbenchWindow window = wb.getActiveWorkbenchWindow();
 		return window.getSelectionService().getSelection();
+	}
+
+	/**
+	 * This returns the first element of the current {@link StructuredSelection}.
+	 * <p />
+	 * <b>Important:</b> This must be called from the UI thread. If called from a non-UI thread, it will throw an
+	 * 'InvalidThreadAccessException'.
+	 *
+	 * @return The first element of the current {@link StructuredSelection} or <em>null</em> if either nothing is
+	 *         selected or if the {@link #getCurrentSelection() current selection} is not a {@link StructuredSelection}.
+	 */
+	public static Object getFirstSelection() {
+
+		ISelection selection = UIHelper.getCurrentSelection();
+		if (selection instanceof StructuredSelection) {
+			return ((StructuredSelection) selection).getFirstElement();
+		} else {
+			return null;
+		}
 	}
 }
