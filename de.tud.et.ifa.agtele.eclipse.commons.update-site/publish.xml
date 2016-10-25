@@ -31,10 +31,10 @@
 			<arg value="option confirm off" />
 			
 			<!-- copy the files -->
-			<arg value="put content.jar ${remote-path}" />
-			<arg value="put artifacts.jar ${remote-path}" />
-			<arg value="put features/ ${remote-path}" />
-			<arg value="put plugins/ ${remote-path}" />
+			<arg value="put ${basedir}\content.jar ${remote-path}" />
+			<arg value="put ${basedir}\artifacts.jar ${remote-path}" />
+			<arg value="put ${basedir}\features/ ${remote-path}" />
+			<arg value="put ${basedir}\plugins/ ${remote-path}" />
 			
 			<!-- close the connection -->
 			<arg value="close" />
