@@ -1,5 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <site>
+   <description name="AG Tele Eclipse Commons Update Site" url="https://eats3.et.tu-dresden.de/eclipse/eclipse-commons/updates">
+      This is the update site for the various plug-ins that offer methods and tools for working more efficiently with the Eclipse Modeling Framework.
+   </description>
    <feature url="features/de.tud.et.ifa.agtele.eclipse.commons.feature_0.2.3.qualifier.jar" id="de.tud.et.ifa.agtele.eclipse.commons.feature" version="0.2.3.qualifier">
       <category name="de.tud.et.ifa.agtele.eclipse.commons.category"/>
    </feature>
