@@ -49,4 +49,42 @@
          <contentTypeBinding contentTypeId="org.eclipse.emf.ecore.xmi"/>
       </editor>
    </extension>
+   <extension
+         point="org.eclipse.ui.menus">
+      <menuContribution
+            allPopups="false"
+            locationURI="popup:de.tud.et.ifa.agtele.ui.editors.EcoreEditorID">
+         <command
+               commandId="de.tud.et.ifa.agtele.ui.commands.OpenGenModel"
+               label="Open GenModel"
+               style="push"
+               tooltip="Jumps to the corresponding element in the GenModel associated with this Ecore model">
+            <visibleWhen
+                  checkEnabled="false">
+               <with
+                     variable="activeMenuSelection">
+                  <and>
+                     <count
+                           value="1">
+                     </count>
+                     <iterate
+                           ifEmpty="false">
+                        <instanceof
+                              value="org.eclipse.emf.ecore.EObject">
+                        </instanceof>
+                     </iterate>
+                  </and>
+               </with>
+            </visibleWhen>
+         </command>
+      </menuContribution>
+   </extension>
+   <extension
+         point="org.eclipse.ui.commands">
+      <command
+            defaultHandler="de.tud.et.ifa.agtele.ui.handlers.OpenGenModelHandler"
+            id="de.tud.et.ifa.agtele.ui.commands.OpenGenModel"
+            name="OpenGenModel">
+      </command>
+   </extension>
 </plugin>
