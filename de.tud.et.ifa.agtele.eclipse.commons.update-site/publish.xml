@@ -1,0 +1,61 @@
+<project name="MyProject" default="cleanup" basedir=".">
+    <description>
+		This updates the contents of the update site on the web server.
+    </description>
+	
+	<!-- the URl of the server -->
+	<property name="server-url" value="sftp://root@eats3.et.tu-dresden.de/"/>
+	
+	<!-- the folder (on the server) that shall contain the update site -->
+	<property name="remote-path" value="/srv/eclipse/eclipse-commons/updates/"/>
+	
+	<!-- whether to delete the local update site files at the end -->
+	<property name="delete-local" value="true" />
+
+	<!-- ================================= 
+	          target: publish              
+	         ================================= -->
+	<target name="publish">
+
+		<echo>Publishing to update site...</echo>
+		
+		<!-- copy the 'features' and 'plugins' folder as well as 'artifacts.jar' and 'content.jar'
+			to the specified directory representing the update site -->
+		
+		<exec executable="WinSCP.com"> <!-- WinSCP.com is expected to be on the Windows path! -->
+			<arg value="/command" />
+			<!-- open a connection to the server -->
+			<arg value="open ${server-url}" />
+			
+			<!-- force overwrite -->
+			<arg value="option confirm off" />
+			
+			<!-- copy the files -->
+			<arg value="put content.jar ${remote-path}" />
+			<arg value="put artifacts.jar ${remote-path}" />
+			<arg value="put features/ ${remote-path}" />
+			<arg value="put plugins/ ${remote-path}" />
+			
+			<!-- close the connection -->
+			<arg value="close" />
+			<arg value="exit" />
+		</exec>
+	</target>
+	
+	<!-- ================================= 
+          target: cleanup              
+         ================================= -->
+    <target name="cleanup" depends="publish" if="${delete-local}">
+    	<delete>
+    		<fileset refid="update-site" />
+		</delete>
+    </target>
+	
+	<!-- this fileset represents all the file making up the update site -->
+	<fileset dir="${basedir}" id="update-site">
+		<include name="features/*" />
+		<include name="plugins/*" />
+		<include name="artifacts.jar" />
+		<include name="content.jar" />
+	</fileset>
+</project>

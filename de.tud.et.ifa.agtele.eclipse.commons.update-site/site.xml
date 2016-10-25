@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<site>
+   <feature url="features/de.tud.et.ifa.agtele.eclipse.commons.feature_0.2.3.qualifier.jar" id="de.tud.et.ifa.agtele.eclipse.commons.feature" version="0.2.3.qualifier">
+      <category name="de.tud.et.ifa.agtele.eclipse.commons.category"/>
+   </feature>
+   <category-def name="de.tud.et.ifa.agtele.eclipse.commons.category" label="AG Tele Eclipse Commons">
+      <description>
+         This site contains the AG Tele Eclipse Commons Tools that offers convience methods and tools for working with the Eclipse Modeling Framework.
+      </description>
+   </category-def>
+</site>
