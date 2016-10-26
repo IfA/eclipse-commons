@@ -29,6 +29,7 @@ import org.eclipse.ui.part.FileEditorInput;
 import de.tud.et.ifa.agtele.resources.BundleContentHelper;
 import de.tud.et.ifa.agtele.ui.AgteleUIPlugin;
 import de.tud.et.ifa.agtele.ui.interfaces.IPersistable;
+import de.tud.et.ifa.agtele.ui.listeners.BasicJumpOnClickListener;
 import de.tud.et.ifa.agtele.ui.widgets.TreeViewerGroup;
 
 /**

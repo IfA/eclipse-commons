@@ -1,7 +1,7 @@
 /**
  *
  */
-package de.tud.et.ifa.agtele.ui.editors;
+package de.tud.et.ifa.agtele.ui.listeners;
 
 import org.eclipse.emf.ecore.EGenericType;
 import org.eclipse.emf.ecore.EReference;
@@ -12,8 +12,6 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.widgets.TreeItem;
-
-import de.tud.et.ifa.agtele.ui.listeners.SelectionListener2;
 
 /**
  * A {@link SelectionListener} that operates on a {@link TreeViewer} and jumps to a suitable target if the user clicks
