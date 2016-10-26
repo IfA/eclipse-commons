@@ -83,13 +83,7 @@ public class OpenGenModelHandler extends AbstractHandler {
 
 		EObject selectedElement = (EObject) UIHelper.getFirstSelection();
 
-		// We assume that the associated GenModel is located in the same folder and has the same base name
-		//
-		IPath genModelPath = editorInput.getPath().removeFileExtension().addFileExtension("genmodel");
-
-		// Get an IFile for the path (even if this is not 'null', it does not mean that the file physically exists!)
-		//
-		IFile genModelFile = ResourcesPlugin.getWorkspace().getRoot().getFileForLocation(genModelPath);
+		IFile genModelFile = this.getGenModelFile(editorInput);
 
 		if (genModelFile == null) {
 			this.showError("Error while determining the associated GenModel file");
@@ -165,22 +159,50 @@ public class OpenGenModelHandler extends AbstractHandler {
 	@Override
 	public boolean isEnabled() {
 
+		// test if the menu is actually shown in an Editor
 		if (!(UIHelper.getCurrentEditorInput() instanceof FileEditorInput)) {
 			return false;
 		}
 
+		// test if only on item is currently selected
 		if (!(UIHelper.getCurrentSelection() instanceof StructuredSelection)
 				|| ((StructuredSelection) UIHelper.getCurrentSelection()).size() != 1) {
 			return false;
 		}
 
+		// test if the current selection is an EObject
 		Object selection = UIHelper.getFirstSelection();
 
 		if (!OpenGenModelHandler.allowedElementTypes.parallelStream().filter(t -> t.isInstance(selection)).findAny().isPresent()) {
 			return false;
 		}
 
+		// test if a genmodel actually exists
+		IFile genModelFile = this.getGenModelFile((FileEditorInput) UIHelper.getCurrentEditorInput());
+
+		if (!genModelFile.exists()) {
+			return false;
+		}
+
+		// apparently everything is awesome... so keep going with the command
 		return super.isEnabled();
+	}
+
+	/**
+	 * Get the genmodel as IFile based on the current EditorInput
+	 *
+	 * @param editorInput
+	 * @return
+	 */
+	private IFile getGenModelFile(FileEditorInput editorInput) {
+		// We assume that the associated GenModel is located in the same folder and has the same base name
+		//
+		IPath genModelPath = editorInput.getPath().removeFileExtension().addFileExtension("genmodel");
+
+		// Get an IFile for the path (even if this is not 'null', it does not mean that the file physically exists!)
+		//
+		IFile genModelFile = ResourcesPlugin.getWorkspace().getRoot().getFileForLocation(genModelPath);
+		return genModelFile;
 	}
 
 	/**

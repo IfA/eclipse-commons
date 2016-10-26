@@ -60,21 +60,7 @@
                style="push"
                tooltip="Jumps to the corresponding element in the GenModel associated with this Ecore model">
             <visibleWhen
-                  checkEnabled="false">
-               <with
-                     variable="activeMenuSelection">
-                  <and>
-                     <count
-                           value="1">
-                     </count>
-                     <iterate
-                           ifEmpty="false">
-                        <instanceof
-                              value="org.eclipse.emf.ecore.EObject">
-                        </instanceof>
-                     </iterate>
-                  </and>
-               </with>
+                  checkEnabled="true">
             </visibleWhen>
          </command>
       </menuContribution>
@@ -87,21 +73,7 @@
                style="push"
                tooltip="Jumps to the corresponding element in the GenModel associated with this Ecore model">
             <visibleWhen
-                  checkEnabled="false">
-               <with
-                     variable="activeMenuSelection">
-                  <and>
-                     <count
-                           value="1">
-                     </count>
-                     <iterate
-                           ifEmpty="false">
-                        <instanceof
-                              value="org.eclipse.emf.ecore.EObject">
-                        </instanceof>
-                     </iterate>
-                  </and>
-               </with>
+                  checkEnabled="true">
             </visibleWhen>
          </command>
       </menuContribution>
