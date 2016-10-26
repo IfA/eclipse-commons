@@ -56,6 +56,7 @@
             locationURI="popup:de.tud.et.ifa.agtele.ui.editors.EcoreEditorID">
          <command
                commandId="de.tud.et.ifa.agtele.ui.commands.OpenGenModel"
+               icon="icons/GenModelModelFile.gif"
                label="Open GenModel"
                style="push"
                tooltip="Jumps to the corresponding element in the GenModel associated with this Ecore model">
@@ -69,6 +70,7 @@
             locationURI="popup:org.eclipse.emf.ecore.presentation.EcoreEditorID">
          <command
                commandId="de.tud.et.ifa.agtele.ui.commands.OpenGenModel"
+               icon="icons/GenModelModelFile.gif"
                label="Open GenModel"
                style="push"
                tooltip="Jumps to the corresponding element in the GenModel associated with this Ecore model">
