@@ -105,6 +105,42 @@
             </visibleWhen>
          </command>
       </menuContribution>
+      <menuContribution
+            allPopups="false"
+            locationURI="popup:org.eclipse.emf.codegen.ecore.genmodel.presentation.GenModelEditorID">
+         <menu
+               icon="icons/JavaClassFile.gif"
+               id="openCodeMenu"
+               label="Open Code">
+            <command
+                  commandId="de.tud.et.ifa.agtele.ui.commands.OpenInterfaceModelCode"
+                  label="Open Model Code (Interface)"
+                  style="push"
+                  tooltip="Jumps to the model code generated for the selected element">
+               <visibleWhen
+                     checkEnabled="true">
+               </visibleWhen>
+            </command>
+            <command
+                  commandId="de.tud.et.ifa.agtele.ui.commands.OpenImplModelCode"
+                  label="Open Model Code (Impl)"
+                  style="push"
+                  tooltip="Jumps to the model code generated for the selected element">
+               <visibleWhen
+                     checkEnabled="true">
+               </visibleWhen>
+            </command>
+            <command
+                  commandId="de.tud.et.ifa.agtele.ui.commands.OpenEditCode"
+                  label="Open Edit Code"
+                  style="push"
+                  tooltip="Jumps to the model code generated for the selected element">
+               <visibleWhen
+                     checkEnabled="true">
+               </visibleWhen>
+            </command>
+         </menu>
+      </menuContribution>
    </extension>
    <extension
          point="org.eclipse.ui.commands">
@@ -112,6 +148,21 @@
             defaultHandler="de.tud.et.ifa.agtele.ui.handlers.OpenGenModelHandler"
             id="de.tud.et.ifa.agtele.ui.commands.OpenGenModel"
             name="OpenGenModel">
+      </command>
+      <command
+            defaultHandler="de.tud.et.ifa.agtele.ui.handlers.OpenImplModelCodeHandler"
+            id="de.tud.et.ifa.agtele.ui.commands.OpenImplModelCode"
+            name="OpenImplModelCode">
+      </command>
+      <command
+            defaultHandler="de.tud.et.ifa.agtele.ui.handlers.OpenInterfaceModelCodeHandler"
+            id="de.tud.et.ifa.agtele.ui.commands.OpenInterfaceModelCode"
+            name="OpenInterfaceModelCode">
+      </command>
+      <command
+            defaultHandler="de.tud.et.ifa.agtele.ui.handlers.OpenEditCodeHandler"
+            id="de.tud.et.ifa.agtele.ui.commands.OpenEditCode"
+            name="OpenEditCode">
       </command>
    </extension>
 </plugin>
