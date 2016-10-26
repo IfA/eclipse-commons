@@ -56,25 +56,12 @@
             locationURI="popup:de.tud.et.ifa.agtele.ui.editors.EcoreEditorID">
          <command
                commandId="de.tud.et.ifa.agtele.ui.commands.OpenGenModel"
+               icon="icons/GenModelModelFile.gif"
                label="Open GenModel"
                style="push"
                tooltip="Jumps to the corresponding element in the GenModel associated with this Ecore model">
             <visibleWhen
-                  checkEnabled="false">
-               <with
-                     variable="activeMenuSelection">
-                  <and>
-                     <count
-                           value="1">
-                     </count>
-                     <iterate
-                           ifEmpty="false">
-                        <instanceof
-                              value="org.eclipse.emf.ecore.EObject">
-                        </instanceof>
-                     </iterate>
-                  </and>
-               </with>
+                  checkEnabled="true">
             </visibleWhen>
          </command>
       </menuContribution>
@@ -83,25 +70,12 @@
             locationURI="popup:org.eclipse.emf.ecore.presentation.EcoreEditorID">
          <command
                commandId="de.tud.et.ifa.agtele.ui.commands.OpenGenModel"
+               icon="icons/GenModelModelFile.gif"
                label="Open GenModel"
                style="push"
                tooltip="Jumps to the corresponding element in the GenModel associated with this Ecore model">
             <visibleWhen
-                  checkEnabled="false">
-               <with
-                     variable="activeMenuSelection">
-                  <and>
-                     <count
-                           value="1">
-                     </count>
-                     <iterate
-                           ifEmpty="false">
-                        <instanceof
-                              value="org.eclipse.emf.ecore.EObject">
-                        </instanceof>
-                     </iterate>
-                  </and>
-               </with>
+                  checkEnabled="true">
             </visibleWhen>
          </command>
       </menuContribution>
