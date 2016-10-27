@@ -84,7 +84,79 @@
             locationURI="popup:org.eclipse.emf.codegen.ecore.genmodel.presentation.GenModelEditorID">
          <menu
                icon="icons/JavaClassFile.gif"
-               id="openCodeMenu"
+               id="openCodeFromGenModelEditorMenu"
+               label="Open Code">
+            <command
+                  commandId="de.tud.et.ifa.agtele.ui.commands.OpenInterfaceModelCode"
+                  label="Open Model Code (Interface)"
+                  style="push"
+                  tooltip="Jumps to the model code generated for the selected element">
+               <visibleWhen
+                     checkEnabled="true">
+               </visibleWhen>
+            </command>
+            <command
+                  commandId="de.tud.et.ifa.agtele.ui.commands.OpenImplModelCode"
+                  label="Open Model Code (Impl)"
+                  style="push"
+                  tooltip="Jumps to the model code generated for the selected element">
+               <visibleWhen
+                     checkEnabled="true">
+               </visibleWhen>
+            </command>
+            <command
+                  commandId="de.tud.et.ifa.agtele.ui.commands.OpenEditCode"
+                  label="Open Edit Code"
+                  style="push"
+                  tooltip="Jumps to the model code generated for the selected element">
+               <visibleWhen
+                     checkEnabled="true">
+               </visibleWhen>
+            </command>
+         </menu>
+      </menuContribution>
+      <menuContribution
+            allPopups="false"
+            locationURI="popup:de.tud.et.ifa.agtele.ui.editors.EcoreEditorID">
+         <menu
+               icon="icons/JavaClassFile.gif"
+               id="openCodeFromAGTeleEcoreEditorMenu"
+               label="Open Code">
+            <command
+                  commandId="de.tud.et.ifa.agtele.ui.commands.OpenInterfaceModelCode"
+                  label="Open Model Code (Interface)"
+                  style="push"
+                  tooltip="Jumps to the model code generated for the selected element">
+               <visibleWhen
+                     checkEnabled="true">
+               </visibleWhen>
+            </command>
+            <command
+                  commandId="de.tud.et.ifa.agtele.ui.commands.OpenImplModelCode"
+                  label="Open Model Code (Impl)"
+                  style="push"
+                  tooltip="Jumps to the model code generated for the selected element">
+               <visibleWhen
+                     checkEnabled="true">
+               </visibleWhen>
+            </command>
+            <command
+                  commandId="de.tud.et.ifa.agtele.ui.commands.OpenEditCode"
+                  label="Open Edit Code"
+                  style="push"
+                  tooltip="Jumps to the model code generated for the selected element">
+               <visibleWhen
+                     checkEnabled="true">
+               </visibleWhen>
+            </command>
+         </menu>
+      </menuContribution>
+      <menuContribution
+            allPopups="false"
+            locationURI="popup:org.eclipse.emf.ecore.presentation.EcoreEditorID">
+         <menu
+               icon="icons/JavaClassFile.gif"
+               id="openCodeFromEcoreEditorMenu"
                label="Open Code">
             <command
                   commandId="de.tud.et.ifa.agtele.ui.commands.OpenInterfaceModelCode"
