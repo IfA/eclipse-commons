@@ -55,6 +55,9 @@ import de.tud.et.ifa.agtele.ui.util.UIHelper;
  * An {@link IHandler} that, based on a selection in an Ecore model or GenModel,
  * opens an associated Java file.
  * <p />
+ * Clients can overwrite {@link #getAllowedElementTypes()} to restrict the list
+ * of types on which the handler may be executed.
+ * <p />
  * Clients can specify {@link #getDirectory(GenBase)} and
  * {@link #getQualifiedClassName(GenBase)} in order to customize the concrete
  * Java class to be opened.
@@ -78,7 +81,7 @@ public abstract class OpenCodeHandler extends AbstractHandler {
 	/**
 	 * The list of types on which we allow this handler to be executed.
 	 */
-	protected static final List<Class<?>> allowedElementTypes = Arrays.asList(EPackageImpl.class, EClassImpl.class,
+	private static final List<Class<?>> allowedElementTypes = Arrays.asList(EPackageImpl.class, EClassImpl.class,
 			EOperationImpl.class, EAttributeImpl.class, EReferenceImpl.class, EEnumImpl.class, EEnumLiteralImpl.class,
 			GenPackageImpl.class, GenClassImpl.class, GenOperationImpl.class, GenFeatureImpl.class, GenEnumImpl.class,
 			GenEnumLiteralImpl.class);
@@ -106,6 +109,16 @@ public abstract class OpenCodeHandler extends AbstractHandler {
 	 * @return The path of the directory containing the Java files.
 	 */
 	protected abstract String getDirectory(GenBase selectedElement);
+
+	/**
+	 * This returns the list of types on which we allow this handler to be
+	 * executed.
+	 *
+	 * @return The list of types on which we allow this handler to be executed.
+	 */
+	protected List<Class<?>> getAllowedElementTypes() {
+		return OpenCodeHandler.allowedElementTypes;
+	}
 
 	@Override
 	public Object execute(ExecutionEvent event) throws ExecutionException {
@@ -179,7 +192,7 @@ public abstract class OpenCodeHandler extends AbstractHandler {
 
 		Object selection = UIHelper.getFirstSelection();
 
-		if (!OpenCodeHandler.allowedElementTypes.parallelStream().filter(t -> t.isInstance(selection)).findAny()
+		if (!this.getAllowedElementTypes().parallelStream().filter(t -> t.isInstance(selection)).findAny()
 				.isPresent()) {
 			return false;
 		}

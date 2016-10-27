@@ -113,6 +113,24 @@
                      checkEnabled="true">
                </visibleWhen>
             </command>
+            <command
+                  commandId="de.tud.et.ifa.agtele.ui.commands.OpenEditorCode"
+                  label="Open Editor Code"
+                  style="push"
+                  tooltip="Jumps to the model code generated for the selected element">
+               <visibleWhen
+                     checkEnabled="true">
+               </visibleWhen>
+            </command>
+            <command
+                  commandId="de.tud.et.ifa.agtele.ui.commands.OpenFactoryCode"
+                  label="Open Factory Code"
+                  style="push"
+                  tooltip="Jumps to the model code generated for the selected element">
+               <visibleWhen
+                     checkEnabled="true">
+               </visibleWhen>
+            </command>
          </menu>
       </menuContribution>
       <menuContribution
@@ -143,6 +161,24 @@
             <command
                   commandId="de.tud.et.ifa.agtele.ui.commands.OpenEditCode"
                   label="Open Edit Code"
+                  style="push"
+                  tooltip="Jumps to the model code generated for the selected element">
+               <visibleWhen
+                     checkEnabled="true">
+               </visibleWhen>
+            </command>
+            <command
+                  commandId="de.tud.et.ifa.agtele.ui.commands.OpenEditorCode"
+                  label="Open Editor Code"
+                  style="push"
+                  tooltip="Jumps to the model code generated for the selected element">
+               <visibleWhen
+                     checkEnabled="true">
+               </visibleWhen>
+            </command>
+            <command
+                  commandId="de.tud.et.ifa.agtele.ui.commands.OpenFactoryCode"
+                  label="Open Factory Code"
                   style="push"
                   tooltip="Jumps to the model code generated for the selected element">
                <visibleWhen
@@ -185,6 +221,24 @@
                      checkEnabled="true">
                </visibleWhen>
             </command>
+            <command
+                  commandId="de.tud.et.ifa.agtele.ui.commands.OpenEditorCode"
+                  label="Open Editor Code"
+                  style="push"
+                  tooltip="Jumps to the model code generated for the selected element">
+               <visibleWhen
+                     checkEnabled="true">
+               </visibleWhen>
+            </command>
+            <command
+                  commandId="de.tud.et.ifa.agtele.ui.commands.OpenFactoryCode"
+                  label="Open Factory Code"
+                  style="push"
+                  tooltip="Jumps to the model code generated for the selected element">
+               <visibleWhen
+                     checkEnabled="true">
+               </visibleWhen>
+            </command>
          </menu>
       </menuContribution>
    </extension>
@@ -209,6 +263,16 @@
             defaultHandler="de.tud.et.ifa.agtele.ui.handlers.OpenEditCodeHandler"
             id="de.tud.et.ifa.agtele.ui.commands.OpenEditCode"
             name="OpenEditCode">
+      </command>
+      <command
+            defaultHandler="de.tud.et.ifa.agtele.ui.handlers.OpenEditorCodeHandler"
+            id="de.tud.et.ifa.agtele.ui.commands.OpenEditorCode"
+            name="OpenEditorCode">
+      </command>
+      <command
+            defaultHandler="de.tud.et.ifa.agtele.ui.handlers.OpenFactoryCodeHandler"
+            id="de.tud.et.ifa.agtele.ui.commands.OpenFactoryCode"
+            name="OpenFactoryCode">
       </command>
    </extension>
 </plugin>
