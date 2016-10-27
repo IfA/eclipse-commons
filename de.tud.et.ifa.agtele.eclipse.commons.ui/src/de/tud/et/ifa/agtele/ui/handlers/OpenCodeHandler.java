@@ -160,7 +160,9 @@ public abstract class OpenCodeHandler extends AbstractHandler {
 			return false;
 		}
 
-		if (this.getQualifiedClassName((GenBase) selection) == null) {
+		GenBase elementToOpen = this.getElementToOpen((GenBase) selection);
+
+		if (elementToOpen == null || this.getQualifiedClassName(elementToOpen) == null) {
 			return false;
 		}
 
