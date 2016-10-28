@@ -7,7 +7,7 @@
 	<property name="server-url" value="sftp://root@eats3.et.tu-dresden.de/"/>
 	
 	<!-- the folder (on the server) that shall contain the update site -->
-	<property name="remote-path" value="/srv/eclipse/eclipse-commons/updates/"/>
+	<property name="remote-path" value="/srv/projects/eclipse-commons/updates/"/>
 	
 	<!-- whether to delete the local update site files at the end -->
 	<property name="delete-local" value="true" />
