@@ -25,6 +25,10 @@ For now, the use is granted in projects that are related to education and scienc
 These terms will be replaced, once it has been decided, which public license to issue.
    </license>
 
+   <url>
+      <update label="AG Tele Eclipse Commons Update Site" url="https://eats3.et.tu-dresden.de/projects/eclipse-commons/udpates"/>
+   </url>
+
    <includes
          id="org.eclipse.emf.common"
          version="0.0.0"/>
