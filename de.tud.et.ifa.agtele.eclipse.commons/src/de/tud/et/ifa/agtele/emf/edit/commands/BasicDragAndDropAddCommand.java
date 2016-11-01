@@ -12,47 +12,61 @@ import org.eclipse.emf.edit.domain.EditingDomain;
 import org.eclipse.swt.dnd.DND;
 
 /**
- * An {@link AddCommand} that provides DragAndDropFeedback and can thus be returned by
- * e.g. the 'createDragAndDropCommand' function in EMF item providers.
+ * An {@link AddCommand} that provides DragAndDropFeedback and can thus be returned by e.g. the
+ * 'createDragAndDropCommand' function in EMF item providers.
  *
  */
-public class BasicDragAndDropAddCommand extends AddCommand implements
-		DragAndDropFeedback {
+public class BasicDragAndDropAddCommand extends AddCommand implements DragAndDropFeedback {
 
-	public BasicDragAndDropAddCommand(EditingDomain domain, EObject owner,
-			EStructuralFeature feature, Collection<?> value) {
-		super(domain, owner, feature, value);
+	/**
+	 * This creates an instance.
+	 *
+	 * @param domain
+	 *            The {@link EditingDomain} on which the command shall be executed.
+	 * @param owner
+	 *            The {@link EObject} to which the given <em>values</em> shall be added.
+	 * @param feature
+	 *            The {@link EStructuralFeature} to which the given <em>values</em> shall be added.
+	 * @param values
+	 *            The collection of values to be added.
+	 */
+	public BasicDragAndDropAddCommand(EditingDomain domain, EObject owner, EStructuralFeature feature,
+			Collection<?> values) {
+		super(domain, owner, feature, values);
 	}
 
 	@Override
-	public boolean validate(Object owner, float location, int operations,
-			int operation, Collection<?> collection) {
-		return canExecute() && location >= 0.2 && location <= 0.8;
+	public boolean validate(Object owner, float location, int operations, int operation, Collection<?> collection) {
+
+		return this.canExecute() && location >= 0.2 && location <= 0.8;
 	}
 
 	@Override
 	public int getFeedback() {
+
 		return DND.FEEDBACK_SELECT;
 	}
 
 	@Override
 	public int getOperation() {
+
 		return DND.DROP_LINK;
 	}
-	
+
 	@Override
 	public String doGetLabel() {
-		
-		String ret = "Add to '" + feature.getName() + "'";
-		
-		if(feature instanceof EReference) {
-			ret += (((EReference) feature).isContainment() ? " (containment " : " (non-containment ") + "reference)";
-		} else if(feature instanceof EAttribute) {
+
+		String ret = "Add to '" + this.feature.getName() + "'";
+
+		if (this.feature instanceof EReference) {
+			ret += (((EReference) this.feature).isContainment() ? " (containment " : " (non-containment ")
+					+ "reference)";
+		} else if (this.feature instanceof EAttribute) {
 			ret += " (attribute)";
-		} else {			
+		} else {
 			ret += " (feature)";
 		}
-		
+
 		return ret;
 	}
 
