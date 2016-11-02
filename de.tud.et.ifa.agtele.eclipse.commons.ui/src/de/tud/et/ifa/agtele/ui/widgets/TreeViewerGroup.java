@@ -127,6 +127,11 @@ public class TreeViewerGroup extends FilteredTree implements IPersistable {
 	private Composite toolbarComposite;
 
 	/**
+	 * The options, this instance has been initialized with.
+	 */
+	protected TreeViewerGroupOption[] options;
+	
+	/**
 	 * Use this constructor if you do not want to add a tool bar to the viewer.
 	 *
 	 * @param parent
@@ -143,17 +148,7 @@ public class TreeViewerGroup extends FilteredTree implements IPersistable {
 	 */
 	public TreeViewerGroup(Composite parent, ComposedAdapterFactory adapterFactory, EditingDomain editingDomain,
 			IDialogSettings dialogSettings, String groupText) {
-		super(parent, true);
-		this.parent = parent;
-		this.groupText = groupText;
-		this.setToolbarImages(null);
-		this.setToolbarListeners(null);
-		this.displayCollapseAll = false;
-		this.displayAdd = false;
-		this.editingDomain = editingDomain;
-		this.adapterFactory = adapterFactory;
-		this.dialogSettings = dialogSettings;
-		this.init(SWT.MULTI, new PatternFilter());
+		this(parent, adapterFactory, editingDomain, dialogSettings, groupText, (TreeViewerGroup.TreeViewerGroupOption[]) null);
 	}
 
 	/**
@@ -178,6 +173,7 @@ public class TreeViewerGroup extends FilteredTree implements IPersistable {
 	 *            If to include a 'collapseAll' button in the tool bar.
 	 * @param displayAdd
 	 *            If to include an 'add' button in the tool bar.
+	 * @deprecated
 	 */
 	public TreeViewerGroup(Composite parent, ComposedAdapterFactory adapterFactory, EditingDomain editingDomain,
 			IDialogSettings dialogSettings, String groupText, List<Image> images, List<SelectionListener> listeners,
@@ -193,8 +189,41 @@ public class TreeViewerGroup extends FilteredTree implements IPersistable {
 		this.editingDomain = editingDomain;
 		this.dialogSettings = dialogSettings;
 		this.init(SWT.MULTI, new PatternFilter());
+		//TODO reuse the other constructor
 	}
-
+	/**
+	 * Use this constructor if you do not want to add a tool bar to the viewer.
+	 *
+	 * @param parent
+	 *            The parent composite.
+	 * @param adapterFactory
+	 *            The adapter factory used to create label and content adapters.
+	 * @param editingDomain
+	 *            The editing domain that is used for the viewer.
+	 * @param dialogSettings
+	 *            The dialog settings belonging to the editor (e.g. XYZPlugin..getPlugin().getDialogSettings()).
+	 * @param groupText
+	 *            The label of the group widget that hold all other widgets. If this is null no surrounding group will
+	 *            created.
+	 * @param options
+	 * 		  	  A set of options that are used to alter the default composition of the TreeViewerGroup	
+	 */
+	public TreeViewerGroup(Composite parent, ComposedAdapterFactory adapterFactory, EditingDomain editingDomain,
+			IDialogSettings dialogSettings, String groupText, TreeViewerGroupOption... options) {
+		super(parent, true);
+		this.parent = parent;
+		this.groupText = groupText;
+		this.setToolbarImages(null);
+		this.setToolbarListeners(null);
+		this.displayCollapseAll = false;
+		this.displayAdd = false;
+		this.editingDomain = editingDomain;
+		this.adapterFactory = adapterFactory;
+		this.dialogSettings = dialogSettings;
+		this.options = options == null? new TreeViewerGroupOption[0] : options; 
+		this.init(SWT.MULTI, new PatternFilter());
+	}
+	
 	/**
 	 * A setter for the tool bar images that checks for 'null' parameter.
 	 *
@@ -670,5 +699,72 @@ public class TreeViewerGroup extends FilteredTree implements IPersistable {
 		}
 
 		return true;
+	}
+	
+	/**
+	 * Can be anything, that alters the TreeViewerGroup
+	 * @author Lukas
+	 */
+	public interface TreeViewerGroupOption {};
+	
+	/**
+	 * A ToolbarOption alters the contents of the Toolbar.
+	 * @author Lukas
+	 */
+	public interface TreeViewerGroupToolbarOption extends TreeViewerGroupOption {
+		/**
+		 * Add some Controls to the ToolBar.
+		 * @param toolbar The toolbar to manipulate
+		 * @param options All Options the TreeViewerGroup has been initialized with.
+		 */
+		public default void  addControls (TreeViewerGroup group, ToolBar toolbar, TreeViewerGroupOption[] options) {}		
+	}
+	
+	/**
+	 * A Palette Option can alter the side content next to the actual tree.
+	 * @author Lukas
+	 */
+	public interface TreeViewerGroupPaletteOption extends TreeViewerGroupOption {
+		/**
+		 * Add some Controls to the ToolBar.
+		 * @param toolbar The toolbar to manipulate
+		 * @param options All Options the TreeViewerGroup has been initialized with.
+		 */
+		public default void  addControls (TreeViewerGroup group, Composite tree, TreeViewerGroupOption[] options) {}
+		
+		/**
+		 * Whether content shall be added to the left side
+		 * @return
+		 */
+		public default boolean addToLeftSide () {
+			return false;
+		}
+
+		/**
+		 * Whether content shall be added to the left side
+		 * @return
+		 */
+		public default boolean addToRightSide() {
+			return true;
+		}
+		
+		/**
+		 * Is to be overridden by the TreeViewerGroup in order to replace the container of the tree by another component.
+		 * @param replacer The new tree container
+		 * @return 
+		 */
+		public default void replaceTree (Composite replacer) {}
+	}
+	
+	/**
+	 * A option to add a collapse all button to the toolbar.
+	 * @author Lukas
+	 */
+	public class AddCollapseAllButton implements TreeViewerGroupToolbarOption {
+		@Override
+		public void addControls(TreeViewerGroup group, ToolBar toolbar, TreeViewerGroupOption[] options) {
+			// TODO Auto-generated method stub
+			TreeViewerGroupToolbarOption.super.addControls(group, toolbar, options);
+		}
 	}
 }
