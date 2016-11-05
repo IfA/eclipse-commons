@@ -66,6 +66,21 @@ import de.tud.et.ifa.agtele.ui.listeners.SelectionListener2;
  */
 public class TreeViewerGroup extends FilteredTree implements IPersistable {
 
+	/**
+	 * The default option to add a collapse all button to the tool bar.
+	 */
+	public static TreeViewerGroupOption TOOLBAR_COLLAPSE_ALL_BUTTON = new TreeViewerGroupToolbarCollapseAllButtonOption();
+	
+	/**
+	 * The default option to add an add button to the tool bar.
+	 */
+	public static TreeViewerGroupOption TOOLBAR_ADD_BUTTON = new TreeViewerGroupToolbarAddButtonOption();
+	
+	/**
+	 * The default option to add the model elements tool palette. 
+	 */
+	public static TreeViewerGroupOption PALETTE_MODEL_ELEMENTS = new TreeViewerGroupAddToolPaletteOption();
+	
 	protected final String bundleID = AgteleUIPlugin.getPlugin().getSymbolicName();
 
 	/**
@@ -420,6 +435,14 @@ public class TreeViewerGroup extends FilteredTree implements IPersistable {
 				new DiagnosticDecorator.Styled.EditingDomainLocationListener(this.editingDomain, treeViewer));
 		return treeViewer;
 	}
+	
+	/**
+	 * Returns the tree viewer
+	 * @return
+	 */
+	protected TreeViewer getTreeViewer () {
+		return treeViewer;
+	}
 
 	/**
 	 * This creates a tool bar if necessary.
@@ -590,6 +613,39 @@ public class TreeViewerGroup extends FilteredTree implements IPersistable {
 			}
 		}
 	}
+	
+	/**
+	 * This is used by {@link AddDropDownSelectionListener#createCreateChildAction(IEditorPart, ISelection, Object)} and
+	 * {@link AddDropDownSelectionListener#createCreateSiblingAction(IEditorPart, ISelection, Object)} to perform
+	 * additional checks if an action corresponding to the given <em>descriptor</em> is valid for the active <em>content
+	 * provider</em>.
+	 *
+	 * @param descriptor
+	 *            The {@link CommandParameter} that describes an action to be executed.
+	 * @param provider
+	 *            The {@link IContentProvider content provider} that is associated with the active viewer.
+	 * @return '<em><b>true</b></em>' if the descriptor is valid for the active viewer; '<em><b>false</b></em>'
+	 *         otherwise.
+	 */
+	public boolean isValidDescriptor(Object descriptor, IContentProvider provider) {
+
+		if (descriptor == null || provider == null) {
+			return false;
+		}
+
+		if (!(descriptor instanceof CommandParameter)
+				|| !(((CommandParameter) descriptor).getFeature() instanceof EStructuralFeature)) {
+			return true;
+		}
+
+		CommandParameter commandParam = (CommandParameter) descriptor;
+
+		if (provider instanceof IFeatureValidator) {
+			return ((IFeatureValidator) provider).isValidFeature((EStructuralFeature) commandParam.getFeature());
+		}
+
+		return true;
+	}
 
 	/**
 	 * Can be anything, that alters the TreeViewerGroup
@@ -703,39 +759,7 @@ public class TreeViewerGroup extends FilteredTree implements IPersistable {
 			return new AddDropDownSelectionListener(item);
 		}
 		
-		/**
-		 * This is used by {@link AddDropDownSelectionListener#createCreateChildAction(IEditorPart, ISelection, Object)} and
-		 * {@link AddDropDownSelectionListener#createCreateSiblingAction(IEditorPart, ISelection, Object)} to perform
-		 * additional checks if an action corresponding to the given <em>descriptor</em> is valid for the active <em>content
-		 * provider</em>.
-		 *
-		 * @param descriptor
-		 *            The {@link CommandParameter} that describes an action to be executed.
-		 * @param provider
-		 *            The {@link IContentProvider content provider} that is associated with the active viewer.
-		 * @return '<em><b>true</b></em>' if the descriptor is valid for the active viewer; '<em><b>false</b></em>'
-		 *         otherwise.
-		 */
-		public boolean isValidDescriptor(Object descriptor, IContentProvider provider) {
-
-			if (descriptor == null || provider == null) {
-				return false;
-			}
-
-			if (!(descriptor instanceof CommandParameter)
-					|| !(((CommandParameter) descriptor).getFeature() instanceof EStructuralFeature)) {
-				return true;
-			}
-
-			CommandParameter commandParam = (CommandParameter) descriptor;
-
-			if (provider instanceof IFeatureValidator) {
-				return ((IFeatureValidator) provider).isValidFeature((EStructuralFeature) commandParam.getFeature());
-			}
-
-			return true;
-		}
-
+		
 		/**
 		 * A {@link SelectionAdapter} that operates on a {@link ToolItem} and allows the user to add items based on the
 		 * element currently selected in the tree.
@@ -851,14 +875,14 @@ public class TreeViewerGroup extends FilteredTree implements IPersistable {
 				//
 				ArrayList<IAction> createChildActions = new ArrayList<>();
 				for (Object descriptor : newChildDescriptors) {
-					if (TreeViewerGroupToolbarAddButtonOption.this.isValidDescriptor(descriptor,
+					if (TreeViewerGroupToolbarAddButtonOption.this.group.isValidDescriptor(descriptor,
 							TreeViewerGroupToolbarAddButtonOption.this.group.treeViewer.getContentProvider())) {
 						createChildActions.add(this.createCreateChildAction(editorPart, selection, descriptor));
 					}
 				}
 				ArrayList<IAction> createSiblingActions = new ArrayList<>();
 				for (Object descriptor : newSiblingDescriptors) {
-					if (TreeViewerGroupToolbarAddButtonOption.this.isValidDescriptor(descriptor,
+					if (TreeViewerGroupToolbarAddButtonOption.this.group.isValidDescriptor(descriptor,
 							TreeViewerGroupToolbarAddButtonOption.this.group.treeViewer.getContentProvider())) {
 						createSiblingActions.add(this.createCreateSiblingAction(editorPart, selection, descriptor));
 					}
@@ -897,22 +921,45 @@ public class TreeViewerGroup extends FilteredTree implements IPersistable {
 		 */
 		protected boolean hidden = false;
 		
-		@Override
-		public void addPaletteControls(TreeViewerGroup group, SashForm sash, TreeViewerGroupOption[] options) {
-			// TODO Auto-generated method stub
-			TreeViewerGroupPaletteOption.super.addPaletteControls(group, sash, options);
-		}
+		/**
+		 * The created palette.
+		 */
+		protected ModelElementPalette elementPalette;
+		
+		/**
+		 * The group, this palette has been added to.
+		 */
+		protected TreeViewerGroup group;
 		
 		@Override
+		public void addPaletteControls(TreeViewerGroup group, SashForm sash, TreeViewerGroupOption[] options) {
+			this.group = group;
+			getElementPalette();
+			elementPalette.createPalette(sash);
+		}
+		
+		/**
+		 * Creates an instance of the ModelElementPalette. Override in order to modify the class used.
+		 * @return
+		 */
+		protected TreeViewerGroupModelElementPalette getElementPalette () {
+			return new TreeViewerGroupModelElementPalette();
+		}
+		
+		/**
+		 * Persists the palette settings.
+		 */
+		@Override
 		public void persist(IDialogSettings settings) {
-			// TODO Auto-generated method stub
-			
+			settings.put("MODEL_ELEMENT_PALETTE_HIDDEN", hidden);
 		}
 
+		/**
+		 * Restores the palette settings.
+		 */
 		@Override
 		public void restore(IDialogSettings settings) {
-			// TODO Auto-generated method stub
-			
+			this.setVisibility(settings.getBoolean("MODEL_ELEMENT_PALETTE_HIDDEN"));
 		}
 		
 		@Override
@@ -921,11 +968,11 @@ public class TreeViewerGroup extends FilteredTree implements IPersistable {
 		}
 		
 		/**
-		 * Hide or show the tool palette
-		 * @param hidden
+		 * Hide or show the tool palette.
+		 * @param hidden Set to true, in order to hide the palette.
 		 */
 		public void setVisibility (boolean hidden) {
-			//TODO
+			this.hidden = hidden;
 		}
 		
 		/**
@@ -935,8 +982,25 @@ public class TreeViewerGroup extends FilteredTree implements IPersistable {
 		public class TreeViewerGroupToolbarHideEMFPaletteOption implements TreeViewerGroupToolbarOption {
 			@Override
 			public void addToolbarControls(TreeViewerGroup group, ToolBar toolbar, TreeViewerGroupOption[] options) {
-				// TODO Auto-generated method stub
+				// TODO Add a show/hide button to the Toolbar
 				TreeViewerGroupToolbarOption.super.addToolbarControls(group, toolbar, options);
+			}
+		}
+		
+		public class TreeViewerGroupModelElementPalette extends ModelElementPalette {
+			@Override
+			protected ISelection getSelection() {
+				return TreeViewerGroupAddToolPaletteOption.this.group.treeViewer.getSelection();
+			}
+
+			@Override
+			protected EditingDomain getEditingDomain() {
+				return TreeViewerGroupAddToolPaletteOption.this.group.editingDomain;
+			}
+
+			@Override
+			protected TreeViewerGroup getTreeViewerGroup() {
+				return TreeViewerGroupAddToolPaletteOption.this.group;
 			}
 		}
 	}

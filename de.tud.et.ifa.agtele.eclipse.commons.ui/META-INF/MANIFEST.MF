@@ -32,4 +32,6 @@ Export-Package: de.tud.et.ifa.agtele.ui,
  de.tud.et.ifa.agtele.ui.util,
  de.tud.et.ifa.agtele.ui.views,
  de.tud.et.ifa.agtele.ui.widgets
-Import-Package: org.eclipse.core.resources
+Import-Package: de.tud.et.ifa.agtele.ui.widgets,
+ org.eclipse.core.resources,
+ org.eclipse.wb.swt;version="1.8.0"
