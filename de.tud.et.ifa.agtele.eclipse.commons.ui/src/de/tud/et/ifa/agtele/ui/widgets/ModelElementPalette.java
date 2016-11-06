@@ -27,6 +27,7 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.ui.IEditorPart;
@@ -125,10 +126,7 @@ public abstract class ModelElementPalette {
 		
 		expandButtonsCompositeMap.put(expandButton, parent);
 	}
-	
-	public void createToolbarButton(Composite parent) {
-	}
-	
+		
 	public void expandComposite(Composite comp) {
 		Collection<Composite> cCollection = expandButtonsCompositeMap.values();
 		Composite[] cArray = cCollection.toArray(new Composite[cCollection.size()]);
@@ -174,6 +172,10 @@ public abstract class ModelElementPalette {
 	
 	protected TreeViewer getTreeViewer() {
 		return getTreeViewerGroup().getTreeViewer();
+	}
+	
+	public void update () {
+		createButtons();
 	}
 	
 	public void createButtons () {
@@ -318,6 +320,8 @@ public abstract class ModelElementPalette {
 		protected Listener mouseHoverListener;
 		protected IAction action;
 		
+    	protected Display display = getDisplay();
+		
 		public HoverLabel(Composite parent, IAction action) {
 			super(parent, SWT.SHADOW_NONE | SWT.RIGHT); //SWT.BORDER | SWT.SHADOW_IN | 
 			this.action = action;
@@ -348,13 +352,18 @@ public abstract class ModelElementPalette {
 		    
 		    addListener(SWT.Paint, new Listener()
 		    {
+		    	
 		        @Override
 		        public void handleEvent(Event e)
 		        {	
 		        	if (HoverLabel.this.enabled) {
-		        		HoverLabel.this.setBackground(hovering ? SWTResourceManager.getColor(SWT.COLOR_TITLE_BACKGROUND_GRADIENT) : SWTResourceManager.getColor(SWT.COLOR_WIDGET_BACKGROUND));
+		        		HoverLabel.this.setBackground(hovering ? 
+	        				display.getSystemColor(SWT.COLOR_TITLE_BACKGROUND_GRADIENT) :
+	        					display.getSystemColor(SWT.COLOR_WIDGET_BACKGROUND));
 		        	} else {
-		        		HoverLabel.this.setBackground(hovering ? SWTResourceManager.getColor(SWT.COLOR_TITLE_INACTIVE_BACKGROUND) : SWTResourceManager.getColor(SWT.COLOR_WIDGET_BACKGROUND));
+		        		HoverLabel.this.setBackground(hovering ? 
+	        				display.getSystemColor(SWT.COLOR_TITLE_INACTIVE_BACKGROUND) : 
+	        					display.getSystemColor(SWT.COLOR_WIDGET_BACKGROUND));
 		        	}
 		        }
 		    });	
@@ -371,7 +380,7 @@ public abstract class ModelElementPalette {
 		public void setEnabled(boolean enabled) {
 			this.enabled = enabled;
 			
-			setForeground(enabled ? SWTResourceManager.getColor(SWT.COLOR_WIDGET_FOREGROUND) : SWTResourceManager.getColor(SWT.COLOR_WIDGET_NORMAL_SHADOW));
+			setForeground(enabled ? display.getSystemColor(SWT.COLOR_WIDGET_FOREGROUND) : display.getSystemColor(SWT.COLOR_WIDGET_NORMAL_SHADOW));
 			
 			if(enabled) {
 				addMouseListener(new MouseListener() {						
