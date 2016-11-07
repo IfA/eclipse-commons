@@ -134,16 +134,16 @@ public class AgteleEcoreEditor extends EcoreEditor implements IPersistable {
 		if (!this.getEditingDomain().getResourceSet().getResources().isEmpty()) {
 			// Create a page for the selection tree view.
 			//
-
+			TreeViewerGroup.TreeViewerGroupAddToolPaletteOption paletteOption = TreeViewerGroup.PALETTE_MODEL_ELEMENTS();
 			// Rather use the TreeViewerGroup instead of a standard Tree
 			// Edited Section begin
 			//
 			this.tree = new TreeViewerGroup(this.getContainer(), this.adapterFactory, this.editingDomain,
 					AgteleUIPlugin.getPlugin().getDialogSettings(), null, 
-					TreeViewerGroup.TOOLBAR_COLLAPSE_ALL_BUTTON, 
-					TreeViewerGroup.TOOLBAR_ADD_BUTTON, 
-					TreeViewerGroup.PALETTE_MODEL_ELEMENTS, 
-					TreeViewerGroup.PALETTE_MODEL_ELEMENTS.TOOLBAR_HIDE_PALLETTE_BUTTON);
+					TreeViewerGroup.TOOLBAR_COLLAPSE_ALL_BUTTON(), 
+					TreeViewerGroup.TOOLBAR_ADD_BUTTON(), 
+					paletteOption, 
+					paletteOption.TOOLBAR_HIDE_PALLETTE_BUTTON);
 			this.selectionViewer = this.tree.getViewer();
 			// Edited Section end
 			//

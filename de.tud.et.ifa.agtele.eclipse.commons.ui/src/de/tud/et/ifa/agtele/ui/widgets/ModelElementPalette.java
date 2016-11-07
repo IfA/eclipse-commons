@@ -408,4 +408,8 @@ public abstract class ModelElementPalette {
 		HoverLabel label = new HoverLabel(parent, action);
 		return label;
 	}
+	
+	public void dispose() {
+		paletteContainerScroll.dispose();
+	}
 }
