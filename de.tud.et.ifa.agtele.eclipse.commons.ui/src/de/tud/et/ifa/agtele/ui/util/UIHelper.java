@@ -37,6 +37,25 @@ public interface UIHelper {
 	}
 
 	/**
+	 * This returns the currently active {@link IEditorPart editor}.
+	 * <p />
+	 * <b>Important:</b> This must be called from the UI thread. If called from a non-UI thread, it will throw an
+	 * 'InvalidThreadAccessException'.
+	 *
+	 * @return The currently active {@link IEditorPart editor} or '<em><b>null</b></em>' if there is no open editor.
+	 */
+	public static IEditorPart getCurrentEditor() {
+
+		IWorkbench wb = PlatformUI.getWorkbench();
+		IWorkbenchWindow window = wb.getActiveWorkbenchWindow();
+		IWorkbenchPage page = window.getActivePage();
+		if (page == null) {
+			return null;
+		}
+		return page.getActiveEditor();
+	}
+
+	/**
 	 * This returns the {@link IEditorInput} of the currently active editor.
 	 * <p />
 	 * <b>Important:</b> This must be called from the UI thread. If called from a non-UI thread,
@@ -46,13 +65,8 @@ public interface UIHelper {
 	 * be determined or if there is no open editor.
 	 */
 	public static IEditorInput getCurrentEditorInput() {
-		IWorkbench wb = PlatformUI.getWorkbench();
-		IWorkbenchWindow window = wb.getActiveWorkbenchWindow();
-		IWorkbenchPage page = window.getActivePage();
-		if(page == null) {
-			return null;
-		}
-		IEditorPart editor = page.getActiveEditor();
+
+		IEditorPart editor = UIHelper.getCurrentEditor();
 		return editor == null ? null : editor.getEditorInput();
 	}
 
