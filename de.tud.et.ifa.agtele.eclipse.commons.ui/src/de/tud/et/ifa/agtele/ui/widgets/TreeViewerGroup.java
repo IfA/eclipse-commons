@@ -2,9 +2,7 @@ package de.tud.et.ifa.agtele.ui.widgets;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import org.eclipse.core.commands.Command;
 import org.eclipse.core.commands.ExecutionException;
@@ -13,8 +11,6 @@ import org.eclipse.core.commands.NotHandledException;
 import org.eclipse.core.commands.Parameterization;
 import org.eclipse.core.commands.ParameterizedCommand;
 import org.eclipse.core.commands.common.NotDefinedException;
-import org.eclipse.e4.core.contexts.IEclipseContext;
-import org.eclipse.e4.core.commands.ECommandService;
 import org.eclipse.emf.common.ui.viewer.ColumnViewerInformationControlToolTipSupport;
 import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.EObject;
@@ -40,13 +36,11 @@ import org.eclipse.jface.viewers.IContentProvider;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
-import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TreePath;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.SashForm;
-import org.eclipse.swt.events.DisposeEvent;
 import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
@@ -61,13 +55,11 @@ import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.ToolBar;
 import org.eclipse.swt.widgets.ToolItem;
 import org.eclipse.ui.IEditorPart;
-import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.commands.ICommandService;
 import org.eclipse.ui.dialogs.FilteredTree;
 import org.eclipse.ui.dialogs.PatternFilter;
 import org.eclipse.ui.handlers.IHandlerService;
-import org.eclipse.ui.services.IEvaluationService;
 import org.eclipse.ui.services.IServiceLocator;
 
 import de.tud.et.ifa.agtele.resources.BundleContentHelper;
@@ -94,7 +86,7 @@ public class TreeViewerGroup extends FilteredTree implements IPersistable {
 	public static TreeViewerGroupToolbarCollapseAllButtonOption TOOLBAR_COLLAPSE_ALL_BUTTON() {
 		return new TreeViewerGroupToolbarCollapseAllButtonOption();
 	}
-	
+
 	/**
 	 * The default option to add an add button to the tool bar.
 	 * @return a new instance of TreeViewerGroupToolbarAddButtonOption
@@ -102,24 +94,24 @@ public class TreeViewerGroup extends FilteredTree implements IPersistable {
 	public static TreeViewerGroupToolbarAddButtonOption TOOLBAR_ADD_BUTTON() {
 		return new TreeViewerGroupToolbarAddButtonOption();
 	}
-	
+
 	/**
-	 * The default option to add the model elements tool palette. 
+	 * The default option to add the model elements tool palette.
 	 * @return a new instance of TreeViewerGroupAddToolPaletteOption
 	 */
 	public static TreeViewerGroupAddToolPaletteOption PALETTE_MODEL_ELEMENTS() {
 		return new TreeViewerGroupAddToolPaletteOption();
 	}
-	
-	
+
+
 	/**
-	 * The default option to add a toggle editor split vertically button. 
+	 * The default option to add a toggle editor split vertically button.
 	 * @return a new instance of TreeViewerGroupToolbarToggleSplitEditorVerticallyButtonOption
 	 */
 	public static TreeViewerGroupToolbarToggleSplitEditorVerticallyButtonOption TOOLBAR_TOGGLE_SPLIT_VERTICALLY_BUTTON() {
 		return new TreeViewerGroupToolbarToggleSplitEditorVerticallyButtonOption();
 	}
-		
+
 	protected final String bundleID = AgteleUIPlugin.getPlugin().getSymbolicName();
 
 	/**
@@ -176,7 +168,7 @@ public class TreeViewerGroup extends FilteredTree implements IPersistable {
 	private int[] sashWeights;
 
 	protected DisposeListener disposeListener;
-	
+
 	/**
 	 * Use this constructor if you do not want to add a tool bar to the viewer.
 	 *
@@ -200,7 +192,7 @@ public class TreeViewerGroup extends FilteredTree implements IPersistable {
 		this.editingDomain = editingDomain;
 		this.adapterFactory = adapterFactory;
 		this.dialogSettings = dialogSettings;
-		this.options = new TreeViewerGroupOption[0]; 
+		this.options = new TreeViewerGroupOption[0];
 		this.init(SWT.MULTI, new PatternFilter());
 	}
 
@@ -228,6 +220,7 @@ public class TreeViewerGroup extends FilteredTree implements IPersistable {
 	 *            If to include an 'add' button in the tool bar.
 	 * @deprecated use {@link TreeViewerGroup#TreeViewerGroup(Composite, ComposedAdapterFactory, EditingDomain, IDialogSettings, String, TreeViewerGroupOption...)} instead
 	 */
+	@Deprecated
 	public TreeViewerGroup(Composite parent, ComposedAdapterFactory adapterFactory, EditingDomain editingDomain,
 			IDialogSettings dialogSettings, String groupText, List<Image> images, List<SelectionListener> listeners,
 			boolean displayCollapseAll, boolean displayAdd) {
@@ -237,23 +230,24 @@ public class TreeViewerGroup extends FilteredTree implements IPersistable {
 		this.groupText = groupText;
 		this.editingDomain = editingDomain;
 		this.adapterFactory = adapterFactory;
-		this.dialogSettings = dialogSettings;		
-		
-		this.options = (displayCollapseAll && displayAdd) ? ( new TreeViewerGroupOption[2]) : 
-					((displayAdd || displayCollapseAll) ? (new TreeViewerGroupOption[1]) : new TreeViewerGroupOption[0]);
-		if (displayCollapseAll) {
-			this.options[0] = new TreeViewerGroupToolbarCollapseAllButtonOption();
-			if (displayAdd) {
-				this.options[1] = new TreeViewerGroupToolbarAddButtonOption();
+		this.dialogSettings = dialogSettings;
+
+		this.options = displayCollapseAll && displayAdd ? new TreeViewerGroupOption[2] :
+			displayAdd || displayCollapseAll ? new TreeViewerGroupOption[1] : new TreeViewerGroupOption[0];
+			if (displayCollapseAll) {
+				this.options[0] = new TreeViewerGroupToolbarCollapseAllButtonOption();
+				if (displayAdd) {
+					this.options[1] = new TreeViewerGroupToolbarAddButtonOption();
+				}
+			} else if (displayAdd) {
+				this.options[0] = new TreeViewerGroupToolbarAddButtonOption();
 			}
-		} else if (displayAdd) {
-				this.options[0] = new TreeViewerGroupToolbarAddButtonOption();			
-		}
-		this.init(SWT.MULTI, new PatternFilter());
+			this.init(SWT.MULTI, new PatternFilter());
 	}
-		
+
 	/**
-	 * Use this constructor if you do not want to add a tool bar to the viewer.
+	 * Use this constructor if you want to add one or multiple {@link TreeViewerGroupOption TreeViewerGroupOptions} to
+	 * the viewer.
 	 *
 	 * @param parent
 	 *            The parent composite.
@@ -267,7 +261,7 @@ public class TreeViewerGroup extends FilteredTree implements IPersistable {
 	 *            The label of the group widget that hold all other widgets. If this is null no surrounding group will
 	 *            created.
 	 * @param options
-	 * 		  	  A set of options that are used to alter the default composition of the TreeViewerGroup	
+	 *            A set of options that are used to alter the default composition of the TreeViewerGroup
 	 */
 	public TreeViewerGroup(Composite parent, ComposedAdapterFactory adapterFactory, EditingDomain editingDomain,
 			IDialogSettings dialogSettings, String groupText, TreeViewerGroupOption... options) {
@@ -277,10 +271,10 @@ public class TreeViewerGroup extends FilteredTree implements IPersistable {
 		this.editingDomain = editingDomain;
 		this.adapterFactory = adapterFactory;
 		this.dialogSettings = dialogSettings;
-		this.options = options == null? new TreeViewerGroupOption[0] : options; 
+		this.options = options == null? new TreeViewerGroupOption[0] : options;
 		this.init(SWT.MULTI, new PatternFilter());
 	}
-	
+
 	/**
 	 * A setter for the tool bar images that checks for 'null' parameter.
 	 *
@@ -288,6 +282,7 @@ public class TreeViewerGroup extends FilteredTree implements IPersistable {
 	 *            (may be 'null')
 	 * @deprecated Remove, if there are no dependencies anymore
 	 */
+	@Deprecated
 	protected void setToolbarImages(ArrayList<Image> toolbarImages) {
 		//Not used anymore
 	}
@@ -299,6 +294,7 @@ public class TreeViewerGroup extends FilteredTree implements IPersistable {
 	 *            (may be 'null')
 	 * @deprecated Remove, if there are no dependencies anymore
 	 */
+	@Deprecated
 	protected void setToolbarListeners(ArrayList<SelectionListener> toolbarListeners) {
 		//not used anymore
 	}
@@ -313,16 +309,13 @@ public class TreeViewerGroup extends FilteredTree implements IPersistable {
 	@Override
 	protected void createControl(Composite parent, int treeStyle) {
 
-		this.disposeListener = new DisposeListener() {
-			@Override
-			public void widgetDisposed(DisposeEvent e) {
-				parent.removeDisposeListener(disposeListener);
-				TreeViewerGroup.this.dispose();
-			}			
+		this.disposeListener = e -> {
+			parent.removeDisposeListener(TreeViewerGroup.this.disposeListener);
+			TreeViewerGroup.this.dispose();
 		};
-		
-		parent.addDisposeListener(disposeListener);
-		
+
+		parent.addDisposeListener(this.disposeListener);
+
 		// Set the layout for the main composite
 		if (parent.getLayout() instanceof GridLayout) {
 			this.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
@@ -349,29 +342,29 @@ public class TreeViewerGroup extends FilteredTree implements IPersistable {
 
 		int paletteCount = 0;
 		int treeIndex = 0;
-		
+
 		//creates the palette controls to the left side of the tree
-		for (TreeViewerGroupOption i : options) {
+		for (TreeViewerGroupOption i : this.options) {
 			if (i instanceof TreeViewerGroupPaletteOption && ((TreeViewerGroupPaletteOption)i).addToLeftSide()) {
-				if (treePaletteSeparator == null) {
-					treePaletteSeparator = new SashForm(this.group == null ? this : this.group, SWT.SMOOTH);
-					treePaletteSeparator.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 1, 1));
-				}				
-				
-				((TreeViewerGroupPaletteOption)i).addPaletteControls(this, treePaletteSeparator, paletteCount, options);
+				if (this.treePaletteSeparator == null) {
+					this.treePaletteSeparator = new SashForm(this.group == null ? this : this.group, SWT.SMOOTH);
+					this.treePaletteSeparator.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 1, 1));
+				}
+
+				((TreeViewerGroupPaletteOption)i).addPaletteControls(this, this.treePaletteSeparator, paletteCount, this.options);
 				paletteCount += 1;
 			}
 		}
 		treeIndex = paletteCount;
 		paletteCount += 1;
-		
+
 		//create the tree and its composite
-		if (treePaletteSeparator != null) {
-			this.treeComposite = new Composite(treePaletteSeparator, SWT.NONE);			
+		if (this.treePaletteSeparator != null) {
+			this.treeComposite = new Composite(this.treePaletteSeparator, SWT.NONE);
 		} else {
-			this.treeComposite = new Composite(this.group == null ? this : this.group, SWT.NONE);				
+			this.treeComposite = new Composite(this.group == null ? this : this.group, SWT.NONE);
 		}
-		
+
 		GridLayout treeCompositeLayout = new GridLayout();
 		treeCompositeLayout.marginHeight = 0;
 		treeCompositeLayout.marginWidth = 0;
@@ -379,32 +372,32 @@ public class TreeViewerGroup extends FilteredTree implements IPersistable {
 		GridData data = new GridData(SWT.FILL, SWT.FILL, true, true);
 		this.treeComposite.setLayoutData(data);
 		this.createTreeControl(this.treeComposite, treeStyle);
-		
+
 		//adds the palettes to the right of the tree
-		for (TreeViewerGroupOption i : options) {
+		for (TreeViewerGroupOption i : this.options) {
 			if (i instanceof TreeViewerGroupPaletteOption && ((TreeViewerGroupPaletteOption)i).addToRightSide()) {
-				if (treePaletteSeparator == null) {
-					treePaletteSeparator = new SashForm(this.group == null ? this : this.group, SWT.SMOOTH);
-					treePaletteSeparator.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 1, 1));
+				if (this.treePaletteSeparator == null) {
+					this.treePaletteSeparator = new SashForm(this.group == null ? this : this.group, SWT.SMOOTH);
+					this.treePaletteSeparator.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 1, 1));
 					//Move the tree
-					this.treeComposite.setParent(treePaletteSeparator);
-				}			
-				((TreeViewerGroupPaletteOption) i).addPaletteControls(this, treePaletteSeparator, paletteCount, options);
+					this.treeComposite.setParent(this.treePaletteSeparator);
+				}
+				((TreeViewerGroupPaletteOption) i).addPaletteControls(this, this.treePaletteSeparator, paletteCount, this.options);
 				paletteCount += 1;
 			}
 		}
-		
+
 		//calculate the weights of the sash form
-		if (treePaletteSeparator != null && (sashWeights == null || sashWeights.length != paletteCount)) {
-			sashWeights = new int[paletteCount];
+		if (this.treePaletteSeparator != null && (this.sashWeights == null || this.sashWeights.length != paletteCount)) {
+			this.sashWeights = new int[paletteCount];
 			for (int i = 0; i<paletteCount; i+= 1) {
-				sashWeights[i] = 1;
+				this.sashWeights[i] = 1;
 			}
-			sashWeights[treeIndex] = paletteCount;
-			treePaletteSeparator.setWeights(sashWeights);
+			this.sashWeights[treeIndex] = paletteCount;
+			this.treePaletteSeparator.setWeights(this.sashWeights);
 		}
 	}
-	
+
 	/**
 	 * creates the filter controls
 	 */
@@ -428,7 +421,7 @@ public class TreeViewerGroup extends FilteredTree implements IPersistable {
 		filterBoxLayout.marginHeight = 0;
 		filterBoxLayout.marginWidth = 0;
 		filterBoxComposite.setLayout(filterLayout);
-		filterBoxComposite.setFont(parent.getFont());
+		filterBoxComposite.setFont(this.parent.getFont());
 		this.createFilterControls(filterBoxComposite);
 
 		// create a toolbar besides the filter controls
@@ -490,13 +483,13 @@ public class TreeViewerGroup extends FilteredTree implements IPersistable {
 				new DiagnosticDecorator.Styled.EditingDomainLocationListener(this.editingDomain, treeViewer));
 		return treeViewer;
 	}
-	
+
 	/**
 	 * Returns the tree viewer
 	 * @return
 	 */
 	protected TreeViewer getTreeViewer () {
-		return treeViewer;
+		return this.treeViewer;
 	}
 
 	/**
@@ -514,11 +507,12 @@ public class TreeViewerGroup extends FilteredTree implements IPersistable {
 	 *            If to include an add button.
 	 * @deprecated remove, if there are no dependencies anymore
 	 */
+	@Deprecated
 	protected void createToolbar(Composite parent, List<Image> images, List<SelectionListener> listeners,
 			boolean displayCollapseAll, boolean displayAdd) {
 		this.createToolbar(parent);
 	}
-	
+
 	/**
 	 * This creates a tool bar if necessary.
 	 *
@@ -533,7 +527,7 @@ public class TreeViewerGroup extends FilteredTree implements IPersistable {
 					this.toolbar = new ToolBar(parent, SWT.NONE);
 					this.toolbar.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 				}
-			
+
 				((TreeViewerGroupToolbarOption) i).addToolbarControls(this, this.toolbar, this.options);
 			}
 		}
@@ -542,7 +536,7 @@ public class TreeViewerGroup extends FilteredTree implements IPersistable {
 		this.createAdditionalToolbarItems(this.toolbar);
 
 		if (this.toolbar != null) {
-			this.toolbar.pack();			
+			this.toolbar.pack();
 		}
 	}
 
@@ -554,6 +548,7 @@ public class TreeViewerGroup extends FilteredTree implements IPersistable {
 	 *            The parent tool bar.
 	 * @deprecated remove, if there are no dependencies anymore
 	 */
+	@Deprecated
 	protected void createAdditionalToolbarItems(ToolBar toolbar) {
 		// allow extending classes to easily configure the tool bar
 	}
@@ -592,18 +587,18 @@ public class TreeViewerGroup extends FilteredTree implements IPersistable {
 		// Persist the filter text
 		//
 		settings.put("FILTER_TEXT", this.getFilterString() != null ? this.getFilterString() : "");
-		
-		if (treePaletteSeparator != null) {
-			sashWeights = treePaletteSeparator.getWeights();
-			String[] weights = new String[sashWeights.length];
-			for (int i = 0; i<sashWeights.length; i+=1) {
-				weights[i] = Integer.toString(sashWeights[i]);
+
+		if (this.treePaletteSeparator != null) {
+			this.sashWeights = this.treePaletteSeparator.getWeights();
+			String[] weights = new String[this.sashWeights.length];
+			for (int i = 0; i<this.sashWeights.length; i+=1) {
+				weights[i] = Integer.toString(this.sashWeights[i]);
 			}
-			
+
 			settings.put("PALETTE_WEIGHTS", weights);
 			//System.out.println("Store PALETTE_WEIGHTS " + stringArrayToString(weights));
 		}
-		
+
 		for (TreeViewerGroupOption i : this.options) {
 			if (i instanceof TreeViewerGroupPersistableOption) {
 				((TreeViewerGroupPersistableOption) i).persist(settings);
@@ -612,23 +607,23 @@ public class TreeViewerGroup extends FilteredTree implements IPersistable {
 	}
 	public String stringArrayToString (String[] ar) {
 		String result = "[";
-		
+
 		for (int i = 0; i < ar.length; i += 1) {
 			if (i>0) {result += ",";}
 			result += "'" + ar[i] + "'";
 		}
-		
+
 		return result + "]";
 	}
-	
+
 	public String intArrayToString (int[] ar) {
 		String result = "[";
-		
+
 		for (int i = 0; i < ar.length; i += 1) {
 			if (i>0) {result += ",";}
 			result += Integer.toString(ar[i]);
 		}
-		
+
 		return result + "]";
 	}
 
@@ -666,14 +661,14 @@ public class TreeViewerGroup extends FilteredTree implements IPersistable {
 		}
 
 		try {
-		String[] weights = settings.getArray("PALETTE_WEIGHTS");
+			String[] weights = settings.getArray("PALETTE_WEIGHTS");
 			if (weights != null) {
-				sashWeights = new int[weights.length];
+				this.sashWeights = new int[weights.length];
 				for (int i = 0; i < weights.length; i+=1) {
-					sashWeights[i] = new Integer(weights[i]);
+					this.sashWeights[i] = new Integer(weights[i]);
 				}
-				if (treePaletteSeparator != null && !treePaletteSeparator.isDisposed()) {
-					treePaletteSeparator.setWeights(sashWeights);
+				if (this.treePaletteSeparator != null && !this.treePaletteSeparator.isDisposed()) {
+					this.treePaletteSeparator.setWeights(this.sashWeights);
 					//System.out.println("Restore PALETTE_WEIGHTS " + stringArrayToString(weights));
 				}
 			} else {
@@ -683,14 +678,14 @@ public class TreeViewerGroup extends FilteredTree implements IPersistable {
 			//do nothing, default weights will kick in
 			//System.out.println("Did not restore PALETTE_WEIGHTS");
 		}
-		
+
 		for (TreeViewerGroupOption i : this.options) {
 			if (i instanceof TreeViewerGroupPersistableOption) {
 				((TreeViewerGroupPersistableOption) i).restore(settings);
 			}
 		}
 	}
-	
+
 	/**
 	 * This is used by {@link AddDropDownSelectionListener#createCreateChildAction(IEditorPart, ISelection, Object)} and
 	 * {@link AddDropDownSelectionListener#createCreateSiblingAction(IEditorPart, ISelection, Object)} to perform
@@ -723,9 +718,9 @@ public class TreeViewerGroup extends FilteredTree implements IPersistable {
 
 		return true;
 	}
-	
+
 	/**
-	 * 
+	 *
 	 */
 	@Override
 	public void dispose () {
@@ -745,7 +740,7 @@ public class TreeViewerGroup extends FilteredTree implements IPersistable {
 		 */
 		public void dispose();
 	};
-	
+
 	/**
 	 * A ToolbarOption alters the contents of the Toolbar.
 	 * @author Lukas
@@ -757,9 +752,9 @@ public class TreeViewerGroup extends FilteredTree implements IPersistable {
 		 * @param toolbar The toolbar to manipulate
 		 * @param options All Options the TreeViewerGroup has been initialized with.
 		 */
-		public default void  addToolbarControls (TreeViewerGroup group, ToolBar toolbar, TreeViewerGroupOption[] options) {}	
+		public default void  addToolbarControls (TreeViewerGroup group, ToolBar toolbar, TreeViewerGroupOption[] options) {}
 	}
-	
+
 	/**
 	 * A Palette Option can alter the side content next to the actual tree.
 	 * @author Lukas
@@ -773,7 +768,7 @@ public class TreeViewerGroup extends FilteredTree implements IPersistable {
 		 * @param options All Options the TreeViewerGroup has been initialized with.
 		 */
 		public default void  addPaletteControls (TreeViewerGroup group, SashForm sash, int index, TreeViewerGroupOption[] options) {}
-		
+
 		/**
 		 * Whether content shall be added to the left side
 		 * @return Return true, if the palette shall be added to the left side.
@@ -790,15 +785,15 @@ public class TreeViewerGroup extends FilteredTree implements IPersistable {
 			return false;
 		}
 	}
-	
+
 	/**
 	 * An option that adds info to the persisted group data
 	 * @author Lukas
 	 */
 	public static interface TreeViewerGroupPersistableOption extends TreeViewerGroupOption, IPersistable {
-		
+
 	}
-	
+
 	/**
 	 * An option to add a collapse all button to the toolbar.
 	 * @author Lukas
@@ -808,21 +803,21 @@ public class TreeViewerGroup extends FilteredTree implements IPersistable {
 		 * The added item.
 		 */
 		protected ToolItem item;
-		
+
 		@Override
 		public void addToolbarControls(TreeViewerGroup group, ToolBar toolbar, TreeViewerGroupOption[] options) {
-			item = new ToolItem(toolbar, SWT.PUSH | SWT.TRAIL);
-			item.setImage(BundleContentHelper.getBundleImage(group.bundleID, "icons/collapse_all.gif"));
-			item.setToolTipText("Collapse Tree");
-			item.addSelectionListener((SelectionListener2) e -> group.getViewer().collapseAll());
+			this.item = new ToolItem(toolbar, SWT.PUSH | SWT.TRAIL);
+			this.item.setImage(BundleContentHelper.getBundleImage(group.bundleID, "icons/collapse_all.gif"));
+			this.item.setToolTipText("Collapse Tree");
+			this.item.addSelectionListener((SelectionListener2) e -> group.getViewer().collapseAll());
 		}
-		
+
 		@Override
-		public void dispose() {			
-			item.dispose();
+		public void dispose() {
+			this.item.dispose();
 		}
 	}
-	
+
 	/**
 	 * An option to add a split editor vertically button to the toolbar.
 	 * @author Lukas
@@ -832,40 +827,37 @@ public class TreeViewerGroup extends FilteredTree implements IPersistable {
 		 * The added item.
 		 */
 		protected ToolItem item;
-		
+
 		@Override
 		public void addToolbarControls(TreeViewerGroup group, ToolBar toolbar, TreeViewerGroupOption[] options) {
-			item = new ToolItem(toolbar, SWT.PUSH | SWT.TRAIL);
-			item.setImage(BundleContentHelper.getBundleImage(group.bundleID, "icons/th_horizontal.gif"));
-			item.setToolTipText("Toggle Split Editor");
-			item.addSelectionListener( new SelectionListener2 () {				
-				@Override
-				public void widgetSelected(SelectionEvent e) {
-					ICommandService commandService = (ICommandService) ((IServiceLocator) PlatformUI.getWorkbench())
-	                         .getService(ICommandService.class);
+			this.item = new ToolItem(toolbar, SWT.PUSH | SWT.TRAIL);
+			this.item.setImage(BundleContentHelper.getBundleImage(group.bundleID, "icons/th_horizontal.gif"));
+			this.item.setToolTipText("Toggle Split Editor");
+			this.item.addSelectionListener( (SelectionListener2) e -> {
+				ICommandService commandService = ((IServiceLocator) PlatformUI.getWorkbench())
+						.getService(ICommandService.class);
 
-					Command command = commandService.getCommand("org.eclipse.ui.window.splitEditor");
-					
-					IHandlerService handlerService = (IHandlerService) ((IServiceLocator) PlatformUI.getWorkbench())
-		                    .getService(IHandlerService.class);
+				Command command = commandService.getCommand("org.eclipse.ui.window.splitEditor");
 
-					try {
-						Parameterization[] params = new Parameterization[] { new Parameterization(
-						                    command.getParameter("Splitter.isHorizontal"), "false") };					
-						ParameterizedCommand parametrizedCommand = new ParameterizedCommand(command, params);
-						handlerService.executeCommand(parametrizedCommand, null);
-					} catch (ExecutionException | NotDefinedException | NotEnabledException | NotHandledException e1) {
-						e1.printStackTrace();
-					}
-				}				
+				IHandlerService handlerService = ((IServiceLocator) PlatformUI.getWorkbench())
+						.getService(IHandlerService.class);
+
+				try {
+					Parameterization[] params = new Parameterization[] { new Parameterization(
+							command.getParameter("Splitter.isHorizontal"), "false") };
+					ParameterizedCommand parametrizedCommand = new ParameterizedCommand(command, params);
+					handlerService.executeCommand(parametrizedCommand, null);
+				} catch (ExecutionException | NotDefinedException | NotEnabledException | NotHandledException e1) {
+					e1.printStackTrace();
+				}
 			});
-		}		
+		}
 		@Override
 		public void dispose() {
-			item.dispose();			
+			this.item.dispose();
 		}
 	}
-	
+
 	/**
 	 * Adds an Add Button to the Toolbar.
 	 * @author Lukas
@@ -875,30 +867,31 @@ public class TreeViewerGroup extends FilteredTree implements IPersistable {
 		 * The added item.
 		 */
 		protected ToolItem item;
-		
+
 		protected TreeViewerGroup group;
-		
+
 		protected AddDropDownSelectionListener listener;
-		
+
 		/**
 		 * Add some Controls to the ToolBar.
 		 * @param toolbar The toolbar to manipulate
 		 * @param options All Options the TreeViewerGroup has been initialized with.
 		 */
+		@Override
 		public void addToolbarControls (TreeViewerGroup group, ToolBar toolbar, TreeViewerGroupOption[] options) {
 			this.group = group;
-			item = new ToolItem(toolbar, SWT.DROP_DOWN);
-			item.setImage(BundleContentHelper.getBundleImage(group.bundleID, "icons/add_obj.gif"));
-			item.setToolTipText("Add Sibling of Same Type");
-			listener = this.createAddDropDownSelectionListener(item);
-			item.addSelectionListener(listener);
-		}		
-		
+			this.item = new ToolItem(toolbar, SWT.DROP_DOWN);
+			this.item.setImage(BundleContentHelper.getBundleImage(group.bundleID, "icons/add_obj.gif"));
+			this.item.setToolTipText("Add Sibling of Same Type");
+			this.listener = this.createAddDropDownSelectionListener(this.item);
+			this.item.addSelectionListener(this.listener);
+		}
+
 		protected AddDropDownSelectionListener createAddDropDownSelectionListener(ToolItem item) {
 			return new AddDropDownSelectionListener(item);
 		}
-		
-		
+
+
 		/**
 		 * A {@link SelectionAdapter} that operates on a {@link ToolItem} and allows the user to add items based on the
 		 * element currently selected in the tree.
@@ -906,13 +899,13 @@ public class TreeViewerGroup extends FilteredTree implements IPersistable {
 		 * @author mfreund
 		 */
 		public class AddDropDownSelectionListener extends SelectionAdapter {
-		
+
 			/**
 			 * The {@link MenuManager} that creates the menu with the various options for adding an element that can be
 			 * selected by the user.
 			 */
 			private MenuManager menuManager;
-		
+
 			/**
 			 * This creates an instance.
 			 *
@@ -923,7 +916,7 @@ public class TreeViewerGroup extends FilteredTree implements IPersistable {
 				this.menuManager = new MenuManager();
 				this.menuManager.createContextMenu(dropdown.getParent());
 			}
-		
+
 			@Override
 			public void widgetSelected(SelectionEvent event) {
 				if (event.detail == SWT.ARROW) {
@@ -937,7 +930,7 @@ public class TreeViewerGroup extends FilteredTree implements IPersistable {
 					this.addDefaultElement();
 				}
 			}
-		
+
 			/**
 			 * This determines the currently selected element and adds an element of the same type to its parent.
 			 */
@@ -953,29 +946,29 @@ public class TreeViewerGroup extends FilteredTree implements IPersistable {
 					// nothing to be done
 					return;
 				}
-		
+
 				// A command that will create a new eObject that is of the same
 				// type of the selected eObject. The newly created object will then
 				// be added to the parent.
 				CreateChildCommand command = new CreateChildCommand(TreeViewerGroupToolbarAddButtonOption.this.group.editingDomain,
 						((EObject) selectedObject).eContainer(), ((EObject) selectedObject).eContainingFeature(),
 						EcoreUtil.create(((EObject) selectedObject).eClass()), null);
-		
+
 				// Execute the command and set the selection of the viewer to the
 				// newly created object.
 				TreeViewerGroupToolbarAddButtonOption.this.group.editingDomain.getCommandStack().execute(command);
 				TreeViewerGroupToolbarAddButtonOption.this.group.treeViewer.setSelection(new StructuredSelection(command.getResult().toArray()));
 			}
-		
+
 			/**
 			 * This creates a new menu based on the currently selected element that allows to create children and siblings.
 			 */
 			private void createMenu() {
-		
+
 				// Clear the context menu
 				//
 				this.menuManager.removeAll();
-		
+
 				// Query the new selection for appropriate new child/sibling descriptors
 				//
 				Collection<?> newChildDescriptors;
@@ -985,7 +978,7 @@ public class TreeViewerGroup extends FilteredTree implements IPersistable {
 					// nothing to be done
 					return;
 				}
-		
+
 				boolean doNotCreateSiblingActions = false;
 				if (((IStructuredSelection) selection).isEmpty()) {
 					// if nothing is selected,we manually select the viewer input; this will allow to add the
@@ -997,19 +990,19 @@ public class TreeViewerGroup extends FilteredTree implements IPersistable {
 						return;
 					}
 				}
-		
+
 				Object object = ((IStructuredSelection) selection).getFirstElement();
-		
+
 				newChildDescriptors = TreeViewerGroupToolbarAddButtonOption.this.group.editingDomain.getNewChildDescriptors(object, null);
 				if (doNotCreateSiblingActions) {
 					newSiblingDescriptors = new ArrayList<>();
 				} else {
 					newSiblingDescriptors = TreeViewerGroupToolbarAddButtonOption.this.group.editingDomain.getNewChildDescriptors(null, object);
 				}
-		
+
 				IEditorPart editorPart = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage()
 						.getActiveEditor();
-		
+
 				// Generate actions for selection; populate and redraw the menus.
 				//
 				ArrayList<IAction> createChildActions = new ArrayList<>();
@@ -1026,7 +1019,7 @@ public class TreeViewerGroup extends FilteredTree implements IPersistable {
 						createSiblingActions.add(this.createCreateSiblingAction(editorPart, selection, descriptor));
 					}
 				}
-		
+
 				// Populate the context menu
 				//
 				this.menuManager.add(new Separator("Add Child"));
@@ -1038,45 +1031,45 @@ public class TreeViewerGroup extends FilteredTree implements IPersistable {
 					this.menuManager.add(iAction);
 				}
 			}
-		
+
 			protected IAction createCreateChildAction(IEditorPart editorPart, ISelection selection, Object descriptor) {
 				return new CreateChildAction(editorPart, selection, descriptor);
 			}
-		
+
 			protected IAction createCreateSiblingAction(IEditorPart editorPart, ISelection selection, Object descriptor) {
 				return new CreateSiblingAction(editorPart, selection, descriptor);
 			}
-			
+
 			public void dispose() {
-				menuManager.dispose();
+				this.menuManager.dispose();
 			}
 		}
-		
+
 		@Override
 		public void dispose() {
-			listener.dispose();
-			item.dispose();
+			this.listener.dispose();
+			this.item.dispose();
 		}
 	}
-	
+
 	/**
 	 * Adds a Toolbar for the model editing to the right side of the tree view.
 	 * @author Lukas
 	 */
 	public static class TreeViewerGroupAddToolPaletteOption implements TreeViewerGroupPaletteOption, TreeViewerGroupPersistableOption {
-		
+
 		public TreeViewerGroupToolbarHideEMFPaletteOption TOOLBAR_HIDE_PALLETTE_BUTTON = new TreeViewerGroupToolbarHideEMFPaletteOption();
-		
+
 		/**
 		 * If the palette is currently hidden.
 		 */
 		protected boolean hidden = false;
-		
+
 		/**
 		 * The created palette.
 		 */
 		protected ModelElementPalette elementPalette;
-		
+
 		/**
 		 * The group, this palette has been added to.
 		 */
@@ -1086,40 +1079,35 @@ public class TreeViewerGroup extends FilteredTree implements IPersistable {
 		 * The index of this palette in the sash.
 		 */
 		protected int index;
-		
+
 		/**
 		 * The weight, the palette had before hiding.
-		 */		
+		 */
 		protected int oldWeight = -1;
 
 		/**
 		 * The listener that listens for changed selections on the tree
 		 */
 		protected ISelectionChangedListener listener;
-		
+
 		@Override
 		public void addPaletteControls(TreeViewerGroup group, SashForm sash, int index, TreeViewerGroupOption[] options) {
 			this.group = group;
 			this.index = index;
-			elementPalette = getElementPalette();
-			elementPalette.createPalette(sash);
-			
-			if (oldWeight > -1) {
-				this.setVisibility(hidden);
+			this.elementPalette = this.getElementPalette();
+			this.elementPalette.createPalette(sash);
+
+			if (this.oldWeight > -1) {
+				this.setVisibility(this.hidden);
 			}
-			
-			this.listener = new ISelectionChangedListener () {
-				@Override
-				public void selectionChanged(SelectionChangedEvent event) {
-					elementPalette.update();
-				}				
-			};
-			
+
+			this.listener = event -> TreeViewerGroupAddToolPaletteOption.this.elementPalette.update();
+
 			group.treeViewer.addSelectionChangedListener(this.listener);
-			
-			elementPalette.update();
+
+			this.elementPalette.update();
 		}
-		
+
 		/**
 		 * Creates an instance of the ModelElementPalette. Override in order to modify the class used.
 		 * @return
@@ -1127,14 +1115,14 @@ public class TreeViewerGroup extends FilteredTree implements IPersistable {
 		protected TreeViewerGroupModelElementPalette getElementPalette () {
 			return new TreeViewerGroupModelElementPalette();
 		}
-		
+
 		/**
 		 * Persists the palette settings.
 		 */
 		@Override
 		public void persist(IDialogSettings settings) {
-			settings.put("MODEL_ELEMENT_PALETTE_HIDDEN", isHidden());
-			settings.put("MODEL_ELEMENT_PALETTE_OLD_WEIGHT", oldWeight);
+			settings.put("MODEL_ELEMENT_PALETTE_HIDDEN", this.isHidden());
+			settings.put("MODEL_ELEMENT_PALETTE_OLD_WEIGHT", this.oldWeight);
 			//System.out.println("Store MODEL_ELEMENT_PALETTE_HIDDEN " + isHidden());
 			//System.out.println("Store MODEL_ELEMENT_PALETTE_OLD_WEIGHT " + oldWeight);
 		}
@@ -1159,55 +1147,55 @@ public class TreeViewerGroup extends FilteredTree implements IPersistable {
 				//System.out.println("Did not Restore MODEL_ELEMENT_PALETTE_HIDDEN");
 			}
 		}
-		
+
 		@Override
 		public boolean addToRightSide() {
 			return true;
 		}
-		
+
 		/**
 		 * Hide or show the tool palette.
 		 * @param hidden Set to true, in order to hide the palette.
 		 */
 		public void setVisibility (boolean hidden) {
-			if (hidden != isHidden()) {
+			if (hidden != this.isHidden()) {
 				this.hidden = hidden;
 				int[] weights = this.group.treePaletteSeparator.getWeights();
-				
-				if (elementPalette == null) {
+
+				if (this.elementPalette == null) {
 					return;
 				}
-				
+
 				if (hidden) {
-					oldWeight = weights[index];
-					weights[index] = 0;
+					this.oldWeight = weights[this.index];
+					weights[this.index] = 0;
 					this.group.treePaletteSeparator.setWeights(weights);
-				} else {				
-					weights[index] = oldWeight < 8 ? 8 : oldWeight;
+				} else {
+					weights[this.index] = this.oldWeight < 8 ? 8 : this.oldWeight;
 					this.group.treePaletteSeparator.setWeights(weights);
 				}
 			}
 		}
-		
+
 		/**
 		 * Hide or show the tool palette.
 		 */
-		public void toggleVisibility () {			
-			setVisibility(!isHidden());
+		public void toggleVisibility () {
+			this.setVisibility(!this.isHidden());
 		}
-		
+
 		/**
 		 * Returns the hidden property based on the actual size of the displayed palette.
 		 * @return whether the palette is visible
 		 */
 		public boolean isHidden() {
 			if (this.group.treePaletteSeparator.isDisposed()) {
-				return hidden;
+				return this.hidden;
 			}
 			int[] weights = this.group.treePaletteSeparator.getWeights();
-			return weights[index] <= 0;
+			return weights[this.index] <= 0;
 		}
-		
+
 		/**
 		 * Adds a show/hide button to the toolbar
 		 * @author Lukas
@@ -1218,20 +1206,20 @@ public class TreeViewerGroup extends FilteredTree implements IPersistable {
 
 			@Override
 			public void addToolbarControls(TreeViewerGroup group, ToolBar toolbar, TreeViewerGroupOption[] options) {
-				item = new ToolItem(toolbar, SWT.PUSH | SWT.TRAIL);
-				item.setImage(BundleContentHelper.getBundleImage(group.bundleID, "icons/toggledetailpane_co.gif"));
-				item.setToolTipText("Show/Hide Tool Elemet Palette");
+				this.item = new ToolItem(toolbar, SWT.PUSH | SWT.TRAIL);
+				this.item.setImage(BundleContentHelper.getBundleImage(group.bundleID, "icons/toggledetailpane_co.gif"));
+				this.item.setToolTipText("Show/Hide Tool Elemet Palette");
 				//TODO store and remove the listener
 				this.listener = (SelectionListener2) e -> TreeViewerGroupAddToolPaletteOption.this.toggleVisibility();
-				item.addSelectionListener(this.listener);
+				this.item.addSelectionListener(this.listener);
 			}
 			@Override
 			public void dispose() {
-				item.removeSelectionListener(listener);
-				item.dispose();				
+				this.item.removeSelectionListener(this.listener);
+				this.item.dispose();
 			}
 		}
-		
+
 		public class TreeViewerGroupModelElementPalette extends ModelElementPalette {
 			@Override
 			protected ISelection getSelection() {
@@ -1248,11 +1236,11 @@ public class TreeViewerGroup extends FilteredTree implements IPersistable {
 				return TreeViewerGroupAddToolPaletteOption.this.group;
 			}
 		}
-		
+
 		@Override
 		public void dispose() {
-			this.group.treeViewer.removeSelectionChangedListener(listener);
-			elementPalette.dispose();
+			this.group.treeViewer.removeSelectionChangedListener(this.listener);
+			this.elementPalette.dispose();
 		}
 	}
 }
