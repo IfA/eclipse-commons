@@ -132,8 +132,6 @@ public class AgteleEcoreEditor extends ClonableEcoreEditor implements IPersistab
 		//
 		if (!this.getEditingDomain().getResourceSet().getResources().isEmpty()) {
 			// Create a page for the selection tree view.
-			//
-			TreeViewerGroup.TreeViewerGroupAddToolPaletteOption paletteOption = TreeViewerGroup.PALETTE_MODEL_ELEMENTS();
 			// Rather use the TreeViewerGroup instead of a standard Tree
 			// Edited Section begin
 			//
@@ -142,8 +140,7 @@ public class AgteleEcoreEditor extends ClonableEcoreEditor implements IPersistab
 					new TreeViewerGroup.TreeViewerGroupToolbarCollapseAllButtonOption(),
 					new TreeViewerGroup.TreeViewerGroupToolbarAddButtonOption(),
 					new TreeViewerGroup.TreeViewerGroupToolbarToggleSplitEditorVerticallyButtonOption(),
-					paletteOption,
-					paletteOption.TOOLBAR_HIDE_PALLETTE_BUTTON);
+					new TreeViewerGroup.TreeViewerGroupAddToolPaletteOption.TreeViewerGroupAddToolPaletteToolbarHideEMFPaletteOption());
 			this.selectionViewer = this.tree.getViewer();
 			// Edited Section end
 			//

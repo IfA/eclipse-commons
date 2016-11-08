@@ -926,7 +926,7 @@ public class TreeViewerGroup extends FilteredTree implements IPersistable {
 		/**
 		 * The weight, the palette had before hiding.
 		 */
-		protected int oldWeight = -1;
+		protected float oldWeight = (float) -1.0;
 
 		/**
 		 * The listener that listens for changed selections on the tree
@@ -949,6 +949,36 @@ public class TreeViewerGroup extends FilteredTree implements IPersistable {
 			group.treeViewer.addSelectionChangedListener(this.listener);
 
 			this.elementPalette.update();
+		}
+
+		public int getTotalWeight(int[] ar) {
+			int total = 0;
+
+			for (int i : ar) {
+				total += i;
+			}
+
+			return total;
+		}
+
+		public float getRelativeWidth() {
+			int[] weights = this.group.treePaletteSeparator.getWeights();
+			int total = this.getTotalWeight(weights);
+
+			return (float) weights[this.index] / (float) total;
+		}
+
+		public void setRelativeWidth(float width) {
+			if (width < 0 || width > 1) {
+				return;
+			}
+
+			int[] weights = this.group.treePaletteSeparator.getWeights();
+			int total = this.getTotalWeight(weights) - weights[this.index];
+
+			weights[this.index] = (int) (Math.floor(total / (1.0 - width)) * width);
+
+			this.group.treePaletteSeparator.setWeights(weights);
 		}
 
 		/**
@@ -974,9 +1004,9 @@ public class TreeViewerGroup extends FilteredTree implements IPersistable {
 		@Override
 		public void restore(IDialogSettings settings) {
 			try {
-				this.oldWeight = settings.getInt("MODEL_ELEMENT_PALETTE_OLD_WEIGHT");
+				this.oldWeight = settings.getFloat("MODEL_ELEMENT_PALETTE_OLD_WEIGHT");
 			} catch (Exception e) {
-				this.oldWeight = 35;
+				this.oldWeight = (float) .35;
 			}
 			try {
 				this.setVisibility(settings.getBoolean("MODEL_ELEMENT_PALETTE_HIDDEN"));
@@ -1004,12 +1034,11 @@ public class TreeViewerGroup extends FilteredTree implements IPersistable {
 				}
 
 				if (hidden) {
-					this.oldWeight = weights[this.index];
+					this.oldWeight = this.getRelativeWidth();
 					weights[this.index] = 0;
 					this.group.treePaletteSeparator.setWeights(weights);
 				} else {
-					weights[this.index] = this.oldWeight < 8 ? 8 : this.oldWeight;
-					this.group.treePaletteSeparator.setWeights(weights);
+					this.setRelativeWidth(this.oldWeight < .1 ? (float) .1 : this.oldWeight);
 				}
 			}
 		}
@@ -1070,6 +1099,29 @@ public class TreeViewerGroup extends FilteredTree implements IPersistable {
 			@Override
 			protected TreeViewerGroup getTreeViewerGroup() {
 				return TreeViewerGroupAddToolPaletteOption.this.group;
+			}
+		}
+
+		public static class TreeViewerGroupAddToolPaletteToolbarHideEMFPaletteOption
+		extends TreeViewerGroupAddToolPaletteOption implements TreeViewerGroupToolbarOption {
+			protected ToolItem toolBarItem;
+			protected SelectionListener2 toolbarListener;
+
+			@Override
+			public void addToolbarControls(TreeViewerGroup group, ToolBar toolbar, TreeViewerGroupOption[] options) {
+				this.toolBarItem = new ToolItem(toolbar, SWT.PUSH | SWT.TRAIL);
+				this.toolBarItem
+				.setImage(BundleContentHelper.getBundleImage(group.bundleID, "icons/toggledetailpane_co.gif"));
+				this.toolBarItem.setToolTipText("Show/Hide Tool Elemet Palette");
+				this.toolbarListener = (SelectionListener2) e -> this.toggleVisibility();
+				this.toolBarItem.addSelectionListener(this.toolbarListener);
+			}
+
+			@Override
+			public void dispose() {
+				this.toolBarItem.removeSelectionListener(this.toolbarListener);
+				this.toolBarItem.dispose();
+				super.dispose();
 			}
 		}
 
