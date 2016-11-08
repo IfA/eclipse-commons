@@ -5,7 +5,6 @@ package de.tud.et.ifa.agtele.ui.editors;
 
 import org.eclipse.emf.common.ui.viewer.ColumnViewerInformationControlToolTipSupport;
 import org.eclipse.emf.ecore.EReference;
-import org.eclipse.emf.ecore.presentation.EcoreEditor;
 import org.eclipse.emf.ecore.presentation.EcoreEditorPlugin;
 import org.eclipse.emf.ecore.provider.EReferenceItemProvider;
 import org.eclipse.emf.edit.provider.ComposedImage;
@@ -37,7 +36,7 @@ import de.tud.et.ifa.agtele.ui.widgets.TreeViewerGroup;
  *
  * @author cmartin
  */
-public class AgteleEcoreEditor extends EcoreEditor implements IPersistable {
+public class AgteleEcoreEditor extends ClonableEcoreEditor implements IPersistable {
 
 	private TreeViewerGroup tree;
 
@@ -139,10 +138,11 @@ public class AgteleEcoreEditor extends EcoreEditor implements IPersistable {
 			// Edited Section begin
 			//
 			this.tree = new TreeViewerGroup(this.getContainer(), this.adapterFactory, this.editingDomain,
-					AgteleUIPlugin.getPlugin().getDialogSettings(), null, 
-					TreeViewerGroup.TOOLBAR_COLLAPSE_ALL_BUTTON(), 
-					TreeViewerGroup.TOOLBAR_ADD_BUTTON(), 
-					paletteOption, 
+					AgteleUIPlugin.getPlugin().getDialogSettings(), null,
+					new TreeViewerGroup.TreeViewerGroupToolbarCollapseAllButtonOption(),
+					new TreeViewerGroup.TreeViewerGroupToolbarAddButtonOption(),
+					new TreeViewerGroup.TreeViewerGroupToolbarToggleSplitEditorVerticallyButtonOption(),
+					paletteOption,
 					paletteOption.TOOLBAR_HIDE_PALLETTE_BUTTON);
 			this.selectionViewer = this.tree.getViewer();
 			// Edited Section end
