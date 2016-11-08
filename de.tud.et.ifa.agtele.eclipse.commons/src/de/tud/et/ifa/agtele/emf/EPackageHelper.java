@@ -1,7 +1,12 @@
 package de.tud.et.ifa.agtele.emf;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+import java.util.List;
+import java.util.stream.Collectors;
 
 import org.eclipse.emf.common.util.BasicEList;
 import org.eclipse.emf.common.util.EList;
@@ -17,7 +22,7 @@ import org.eclipse.xsd.impl.XSDSchemaImpl;
  * This provides convenience methods that are related to {@link EPackage EPackages}.
  *
  */
-public abstract class EPackageHelper {
+public interface EPackageHelper {
 
 	/**
 	 * This tries to determine the ePackages defined in a meta-model (either Ecore or XSD). Therefore,
@@ -32,7 +37,7 @@ public abstract class EPackageHelper {
 	 * @param register if the packages shall be registered to the global ePackage registry.
 	 * @return a map of nsUris and corresponding ePackages found in the Ecore/XSD meta-model, null if any error occurs.
 	 */
-	public static HashMap<String, EPackage> getEPackages(String absolutePathToMetaModelFile, boolean adaptResourceUri, boolean register) {
+	public static Map<String, EPackage> getEPackages(String absolutePathToMetaModelFile, boolean adaptResourceUri, boolean register) {
 
 		HashMap<String, EPackage> ePackages = new HashMap<>();
 
@@ -67,16 +72,17 @@ public abstract class EPackageHelper {
 			
 			if(!(contents.get(0) instanceof EPackage)) {
 				return null;
-			} else if(contents.size() > 1 && contents.get(1) instanceof EPackage) {
-				System.out.println("The XSD '" + absolutePathToMetaModelFile + "'defines more than one namespace. "
-						+ "This is currently not supported by the 'EPackageHelper'. Only the first namespace will be used!");
 			}
 		}
 
-		// the ePackage defined by the metamodel
-		EPackage root = (EPackage) contents.get(0);
+		// the root ePackages defined by the metamodel
+		//
+		List<EPackage> rootEPackages = (List<EPackage>) contents.stream().filter(e -> e instanceof EPackage).map(e -> (EPackage) e).
+				collect(Collectors.toList());
 
-		HashSet<EPackage> ePackageSet = collectEPackages(root);
+		// the complete list of packages defined by the meta-model including all sub-packages
+		//
+		HashSet<EPackage> ePackageSet = collectEPackages(rootEPackages);
 
 		for (EPackage ePackage : ePackageSet) {
 
@@ -100,16 +106,33 @@ public abstract class EPackageHelper {
 	 * Recursively collects the sub-packages of an ePackage and returns them as a 
 	 * set (including the root package itself).
 	 *  
-	 * @param ePackage the root ePackage
-	 * @return a set of sub-ePackages including the root ePackage itself
+	 * @param ePackage The root ePackage.
+	 * @return A set of sub-ePackages including the root ePackage itself.
 	 */
-	public static HashSet<EPackage> collectEPackages(EPackage ePackage) {
+	public static Set<EPackage> collectEPackages(EPackage ePackage) {
 		HashSet<EPackage> ePackages = new HashSet<>();
 		ePackages.add(ePackage);
 		for (EPackage child : ePackage.getESubpackages()) {
 			ePackages.addAll(collectEPackages(child));
 		}
 		return ePackages;
+	}
+	
+	/**
+	 * Recursively collects the sub-packages of a list of ePackages and returns them as a 
+	 * set (including the root packages themselves).
+	 *  
+	 * @param ePackages The list of root ePackages.
+	 * @return A set of sub-ePackages including the root ePackages themselves.
+	 */
+	public static HashSet<EPackage> collectEPackages(Collection<EPackage> ePackages) {
+		HashSet<EPackage> ret = new HashSet<>();
+		
+		for (EPackage ePackage : ePackages) {
+			ret.addAll(collectEPackages(ePackage));
+		}
+		
+		return ret;
 	}
 
 }
