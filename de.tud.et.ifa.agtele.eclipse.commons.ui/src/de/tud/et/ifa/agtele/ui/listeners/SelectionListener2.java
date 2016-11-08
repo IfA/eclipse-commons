@@ -8,13 +8,14 @@ import org.eclipse.swt.events.SelectionListener;
  * in a way that it provides a default implementation for the
  * 'widgetDefaultSelected' method that does nothing. Thus, the user only
  * has to implement the 'widgetSelected' method.
- * 
+ *
  * @author mfreund
  */
+@FunctionalInterface
 public interface SelectionListener2 extends SelectionListener {
 
 	@Override
-	default public void widgetDefaultSelected(SelectionEvent e) {
+	public default void widgetDefaultSelected(SelectionEvent e) {
 		// do nothing on default selection
 	}
 }
