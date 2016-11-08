@@ -5,11 +5,16 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Set;
 
+import org.eclipse.e4.ui.css.swt.internal.theme.Theme;
+import org.eclipse.e4.ui.css.swt.theme.IThemeEngine;
 import org.eclipse.emf.edit.domain.EditingDomain;
 import org.eclipse.emf.edit.ui.action.CreateChildAction;
 import org.eclipse.emf.edit.ui.action.CreateSiblingAction;
 import org.eclipse.jface.action.IAction;
+import org.eclipse.jface.resource.ColorRegistry;
+import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.StructuredSelection;
@@ -21,6 +26,7 @@ import org.eclipse.swt.custom.ScrolledComposite;
 import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.events.MouseListener;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -31,7 +37,10 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.ui.IEditorPart;
+import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.internal.Workbench;
+import org.eclipse.ui.themes.IThemeManager;
 import org.eclipse.wb.swt.ResourceManager;
 import org.eclipse.wb.swt.SWTResourceManager;
 
@@ -116,6 +125,9 @@ public abstract class ModelElementPalette {
 		gd_expandButton.heightHint = 18;
 		expandButton.setLayoutData(gd_expandButton);
 		expandButton.setText(text + " (0)");
+		
+		expandButton.setBackground(JFaceResources.getColorRegistry().get("CONTENT_ASSIST_BACKGROUND_COLOR"));
+		expandButton.setForeground(JFaceResources.getColorRegistry().get("CONTENT_ASSIST_FOREGROUND_COLOR"));
 		
 		expandButton.addSelectionListener(new SelectionListener2() {				
 			@Override
@@ -321,7 +333,8 @@ public abstract class ModelElementPalette {
 		protected IAction action;
 		
     	protected Display display = getDisplay();
-		
+    	
+		@SuppressWarnings("restriction")
 		public HoverLabel(Composite parent, IAction action) {
 			super(parent, SWT.SHADOW_NONE | SWT.RIGHT); //SWT.BORDER | SWT.SHADOW_IN | 
 			this.action = action;
@@ -334,8 +347,10 @@ public abstract class ModelElementPalette {
 			//lblNewLabel_1.setBackground(SWTResourceManager.getColor(SWT.COLOR_WIDGET_LIGHT_SHADOW));
 			setText(action.getText());
 			setEnabled(action.isEnabled());
-			setToolTipText(action.getToolTipText());						
+			setToolTipText(action.getToolTipText());	
 			
+			ColorRegistry registry = JFaceResources.getColorRegistry();
+								
 			mouseHoverListener = new Listener()
 		    {
 		        @Override
@@ -352,20 +367,37 @@ public abstract class ModelElementPalette {
 		    
 		    addListener(SWT.Paint, new Listener()
 		    {
-		    	
-		        @Override
+		    	 @Override
 		        public void handleEvent(Event e)
-		        {	
+		        {
 		        	if (HoverLabel.this.enabled) {
-		        		HoverLabel.this.setBackground(hovering ? 
-	        				display.getSystemColor(SWT.COLOR_TITLE_BACKGROUND_GRADIENT) :
-	        					display.getSystemColor(SWT.COLOR_WIDGET_BACKGROUND));
+		        		HoverLabel.this.setBackground(hovering ? registry.get("org.eclipse.ui.workbench.ACTIVE_TAB_BG_START") :
+	        					registry.get("CONTENT_ASSIST_BACKGROUND_COLOR"));
+		        		HoverLabel.this.setForeground(hovering ? 
+		        				registry.get("org.eclipse.ui.workbench.ACTIVE_TAB_SELECTED_TEXT_COLOR") : 
+		        					registry.get("CONTENT_ASSIST_FOREGROUND_COLOR"));
 		        	} else {
 		        		HoverLabel.this.setBackground(hovering ? 
-	        				display.getSystemColor(SWT.COLOR_TITLE_INACTIVE_BACKGROUND) : 
-	        					display.getSystemColor(SWT.COLOR_WIDGET_BACKGROUND));
+	        				registry.get("org.eclipse.ui.editors.currentLineColor") : 
+	        					registry.get("org.eclipse.ui.workbench.INACTIVE_TAB_BG_END"));
+		        		HoverLabel.this.setForeground(hovering ? 
+		        				registry.get("org.eclipse.ui.workbench.ACTIVE_TAB_UNSELECTED_TEXT_COLOR") : 
+		        					registry.get("org.eclipse.ui.workbench.INACTIVE_TAB_TEXT_COLOR"));
 		        	}
 		        }
+//		        @Override
+//		        public void handleEvent(Event e)
+//		        {
+//		        	if (HoverLabel.this.enabled) {
+//		        		HoverLabel.this.setBackground(hovering ? 
+//	        				display.getSystemColor(SWT.COLOR_TITLE_BACKGROUND_GRADIENT) :
+//	        					display.getSystemColor(SWT.COLOR_WIDGET_BACKGROUND));
+//		        	} else {
+//		        		HoverLabel.this.setBackground(hovering ? 
+//	        				display.getSystemColor(SWT.COLOR_TITLE_INACTIVE_BACKGROUND) : 
+//	        					display.getSystemColor(SWT.COLOR_WIDGET_BACKGROUND));
+//		        	}
+//		        }
 		    });	
 //		    HoverLabel.this.addListener(SWT., new Listener() {
 //				@Override
