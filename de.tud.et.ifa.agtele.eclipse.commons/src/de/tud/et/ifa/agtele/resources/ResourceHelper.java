@@ -7,6 +7,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.jar.Attributes;
@@ -22,8 +23,12 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.core.runtime.Path;
+import org.eclipse.emf.common.util.URI;
+import org.eclipse.emf.ecore.resource.Resource;
 
 /**
  * This provides a set of helper functions that allow to deal with files and resources.
@@ -480,4 +485,72 @@ public class ResourceHelper {
 
 		return file.substring(sourceFolder.length() + 1, file.length());
 	}
+
+	/**
+	 * For a given EMF {@link Resource}, returns an Eclipse {@link IFile} that represents this resource.
+	 *
+	 * @param resource
+	 *            The {@link Resource} for which the file shall be returned.
+	 * @return The {@link IFile} representing the resource or '<em>null</em>' if no file could be determined.
+	 */
+	public static IFile getFileForResource(Resource resource) {
+
+		try {
+
+			URI resourceURI = ResourceHelper.convertPlatformToFileURI(resource.getURI());
+
+			if (resourceURI == null) {
+				return null;
+			}
+
+			IFile[] files = ResourcesPlugin.getWorkspace().getRoot()
+					.findFilesForLocationURI(new java.net.URI(resourceURI.toString()));
+
+			return files.length == 0 ? null : files[0];
+
+		} catch (Exception e) {
+			e.printStackTrace();
+			return null;
+		}
+
+	}
+
+	/**
+	 * For a given platform-scheme absolute {@link URI}, this returns a file-scheme absolute URI.
+	 * <p />
+	 * Note: If the given URI is already a file-scheme absolute URI, it is simply returned.
+	 *
+	 * @param uri
+	 *            The URI to be converted.
+	 * @return A file-scheme absolute URI representing the location of the file identified by the given URI or
+	 *         '<em>null</em>' if the given URI is no absolute file- or platform-scheme URI or if no file-scheme URI
+	 *         could be determined.
+	 */
+	public static URI convertPlatformToFileURI(URI uri) {
+
+		if (uri.isFile() && uri.hasAbsolutePath()) {
+
+			// If the URI is already in the 'file:/' form, we may return it directly.
+			//
+			return uri;
+
+		} else if (uri.isPlatform()) {
+
+			// If the URI is a 'platform:/resource' URI, we need to convert it to a 'file:/' URI making use of the
+			// 'FileLocator'.
+			//
+			try {
+				return URI.createFileURI(FileLocator.toFileURL(new URL(uri.toString())).getFile());
+			} catch (Exception e) {
+				return null;
+			}
+
+		} else {
+
+			// Relative URIs or other forms (e.g. plugin-based URIs) are currently not supported.
+			//
+			return null;
+		}
+	}
+
 }
