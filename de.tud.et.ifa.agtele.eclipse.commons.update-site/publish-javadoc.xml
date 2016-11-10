@@ -7,7 +7,7 @@
 	<property name="server-url" value="sftp://root@eats3.et.tu-dresden.de/"/>
 	
 	<!-- the folder (on the server) that shall contain the update site -->
-	<property name="remote-path" value="/srv/projects/eclipse-commons/"/>
+	<property name="remote-path" value="/srv/projects/eclipse-commons/docs"/>
 	
 	<!-- whether to delete the local update site files at the end -->
 	<property name="delete-local" value="true" />
@@ -121,7 +121,10 @@
 	          target: publish              
 	         ================================= -->
 	<target name="publish" depends="generate">
-
+		
+		<!-- create a tarball -->
+		<tar basedir="docs" destfile="docs.tar" />
+		
 		<echo>Publishing generated docs...</echo>
 		
 		<!-- copy the 'docs' and 'plugins' folder as well as 'artifacts.jar' and 'content.jar'
@@ -136,15 +139,24 @@
 			<arg value="option confirm off" />
 			
 			<!-- skip any problems -->
-			<arg value="option batch continue" />
+			<!--<arg value="option batch continue" />-->
 			
 			<!-- copy the files -->
-			<arg value="put ${basedir}\docs/ ${remote-path}" />
+			<arg value="put ${basedir}\docs.tar ${remote-path}/docs.tar" />
+			
+			<!-- unpack the tarball -->
+			<arg value="call tar xfv ${remote-path}/docs.tar -C ${remote-path}" />
+			
+			<!-- delete the (remote) tarball -->
+			<arg value="call rm ${remote-path}/docs.tar" />
 			
 			<!-- close the connection -->
 			<arg value="close" />
 			<arg value="exit" />
 		</exec>
+		
+		<!-- delete the (local) tarball -->
+		<delete file="docs.tar" />
 	</target>
 	
 	<!-- ================================= 
