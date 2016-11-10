@@ -84,7 +84,7 @@
 	
 		<exec executable="javadoc"> <!--JDK is expected to be on the Windows path! -->
 			
-			<arg value="-public"/>
+			<arg value="-protected"/>
 			
 			<arg value="-doctitle"/>
 			<arg value="AGTele Eclipse Commons Documentation"/>
