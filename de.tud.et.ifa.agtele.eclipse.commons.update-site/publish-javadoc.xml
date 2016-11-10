@@ -113,6 +113,10 @@
 			<arg value="http://download.eclipse.org/modeling/emf/emf/javadoc/2.11/" />
 			<arg value="-link" />
 			<arg value="http://help.eclipse.org/neon/topic/org.eclipse.platform.doc.isv/reference/api/" />
+			
+			<!-- prevent 'self-closing element not allowed' errors -->
+			<arg value="-xDoclint:syntax" />
+			
 		</exec>
 		
 	</target>
