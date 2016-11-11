@@ -48,16 +48,19 @@ public class AgteleEcoreEditor extends ClonableEcoreEditor implements IPersistab
 
 		@Override
 		public void partActivated(IWorkbenchPart p) {
+
 			// Ignore.
 		}
 
 		@Override
 		public void partBroughtToTop(IWorkbenchPart p) {
+
 			// Ignore.
 		}
 
 		@Override
 		public void partClosed(IWorkbenchPart p) {
+
 			if (p == AgteleEcoreEditor.this && AgteleEcoreEditor.this.getEditorInput() instanceof FileEditorInput) {
 				AgteleEcoreEditor.this.doPersist();
 			}
@@ -65,11 +68,13 @@ public class AgteleEcoreEditor extends ClonableEcoreEditor implements IPersistab
 
 		@Override
 		public void partDeactivated(IWorkbenchPart p) {
+
 			// Ignore.
 		}
 
 		@Override
 		public void partOpened(IWorkbenchPart p) {
+
 			if (p == AgteleEcoreEditor.this && AgteleEcoreEditor.this.getEditorInput() instanceof FileEditorInput) {
 
 				// Restore the UI state
@@ -77,9 +82,11 @@ public class AgteleEcoreEditor extends ClonableEcoreEditor implements IPersistab
 				IDialogSettings settings = AgteleUIPlugin.getPlugin().getDialogSettings();
 				IDialogSettings section = settings.getSection("UI_STATE");
 				if (section != null) {
-					String pamtramFile = ((FileEditorInput) AgteleEcoreEditor.this.getEditorInput()).getFile()
-							.toString();
-					IDialogSettings project = section.getSection(pamtramFile);
+
+					// Use the file opened in the editor as identifier
+					//
+					String file = ((FileEditorInput) AgteleEcoreEditor.this.getEditorInput()).getFile().toString();
+					IDialogSettings project = section.getSection(file);
 
 					if (project != null) {
 						AgteleEcoreEditor.this.restore(project);
@@ -100,6 +107,7 @@ public class AgteleEcoreEditor extends ClonableEcoreEditor implements IPersistab
 	 */
 	@Override
 	public void init(IEditorSite site, IEditorInput editorInput) {
+
 		super.init(site, editorInput);
 
 		site.getPage().addPartListener(this.persistPartListener);
@@ -111,6 +119,7 @@ public class AgteleEcoreEditor extends ClonableEcoreEditor implements IPersistab
 	 */
 	@Override
 	public void dispose() {
+
 		this.getSite().getPage().removePartListener(this.persistPartListener);
 		if (!this.selectionViewer.getTree().isDisposed()) {
 			this.selectionViewer.getTree().removeSelectionListener(this.jumpOnCtrlClickListener);
@@ -124,6 +133,7 @@ public class AgteleEcoreEditor extends ClonableEcoreEditor implements IPersistab
 	 */
 	@Override
 	public void createPages() {
+
 		// Creates the model from the editor input
 		//
 		this.createModel();
@@ -185,8 +195,8 @@ public class AgteleEcoreEditor extends ClonableEcoreEditor implements IPersistab
 					},
 					// Edited Section end
 					//
-					new DiagnosticDecorator(this.editingDomain,
-							this.selectionViewer, EcoreEditorPlugin.getPlugin().getDialogSettings())));
+					new DiagnosticDecorator(this.editingDomain, this.selectionViewer,
+							EcoreEditorPlugin.getPlugin().getDialogSettings())));
 			this.selectionViewer.setInput(this.editingDomain.getResourceSet());
 			this.selectionViewer.setSelection(
 					new StructuredSelection(this.editingDomain.getResourceSet().getResources().get(0)), true);
@@ -214,6 +224,7 @@ public class AgteleEcoreEditor extends ClonableEcoreEditor implements IPersistab
 
 			@Override
 			public void controlResized(ControlEvent event) {
+
 				if (!this.guard) {
 					this.guard = true;
 					AgteleEcoreEditor.this.hideTabs();
@@ -238,6 +249,7 @@ public class AgteleEcoreEditor extends ClonableEcoreEditor implements IPersistab
 
 	@Override
 	public void restore(final IDialogSettings settings) {
+
 		// perform the restore operations in an asynchronous way
 		try {
 			this.getSite().getShell().getDisplay().asyncExec(() -> {
@@ -260,6 +272,7 @@ public class AgteleEcoreEditor extends ClonableEcoreEditor implements IPersistab
 	 *
 	 */
 	protected void doPersist() {
+
 		// Save the UI state
 		//
 		IDialogSettings settings = AgteleUIPlugin.getPlugin().getDialogSettings();

@@ -13,7 +13,6 @@ import org.eclipse.swt.widgets.ToolItem;
 import de.tud.et.ifa.agtele.resources.BundleContentHelper;
 import de.tud.et.ifa.agtele.ui.listeners.SelectionListener2;
 
-
 /**
  * A {@link TreeViewerGroup} that can be minimized (and restored) when placed inside a {@link MinimizableSashForm}.
  *
@@ -38,7 +37,8 @@ public class MinimizableTreeViewerGroup extends TreeViewerGroup implements IMini
 	private boolean isMinimized;
 
 	/**
-	 * The {@link ToolItem} that toggles the state of the tree viewer group between <em>minimized</em> and <em>normal</em>.
+	 * The {@link ToolItem} that toggles the state of the tree viewer group between <em>minimized</em> and
+	 * <em>normal</em>.
 	 */
 	private ToolItem minimizeItem;
 
@@ -93,10 +93,11 @@ public class MinimizableTreeViewerGroup extends TreeViewerGroup implements IMini
 		// either minimize or restore the control depending on the 'minimized' state
 		this.minimizeItem.addSelectionListener((SelectionListener2) e -> {
 
-			if(!MinimizableTreeViewerGroup.this.isMinimized) {
-				((MinimizableSashForm) MinimizableTreeViewerGroup.this.parent).minimizeControl(MinimizableTreeViewerGroup.this);
-			} else {
+			if (MinimizableTreeViewerGroup.this.isMinimized) {
 				((MinimizableSashForm) MinimizableTreeViewerGroup.this.parent).restoreLayout();
+			} else {
+				((MinimizableSashForm) MinimizableTreeViewerGroup.this.parent)
+						.minimizeControl(MinimizableTreeViewerGroup.this);
 			}
 		});
 
@@ -107,6 +108,7 @@ public class MinimizableTreeViewerGroup extends TreeViewerGroup implements IMini
 
 	@Override
 	public void dispose() {
+
 		this.minimizeImage.dispose();
 		this.restoreImage.dispose();
 		super.dispose();
@@ -115,7 +117,7 @@ public class MinimizableTreeViewerGroup extends TreeViewerGroup implements IMini
 	@Override
 	public int getMinimizedHeight() {
 
-		if(this.minimizedHeight == -1) {
+		if (this.minimizedHeight == -1) {
 			// in the 'minimized' state, we do not want to display the tree viewer
 			this.minimizedHeight = this.group.getSize().y - this.treeViewer.getTree().getSize().y;
 		}
@@ -125,6 +127,7 @@ public class MinimizableTreeViewerGroup extends TreeViewerGroup implements IMini
 
 	@Override
 	public void minimize() {
+
 		this.isMinimized = true;
 		this.minimizeItem.setImage(this.restoreImage);
 		this.minimizeItem.setToolTipText("Restore");
@@ -132,6 +135,7 @@ public class MinimizableTreeViewerGroup extends TreeViewerGroup implements IMini
 
 	@Override
 	public void restore() {
+
 		this.isMinimized = false;
 		this.minimizeItem.setImage(this.minimizeImage);
 		this.minimizeItem.setToolTipText("Minimize");
