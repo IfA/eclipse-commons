@@ -1,7 +1,7 @@
 package de.tud.et.ifa.agtele.ui.widgets;
 
 import java.util.ArrayList;
-import java.util.Collection;
+import java.util.List;
 
 import org.eclipse.core.commands.Command;
 import org.eclipse.core.commands.ExecutionException;
@@ -13,10 +13,8 @@ import org.eclipse.core.commands.common.NotDefinedException;
 import org.eclipse.emf.common.ui.viewer.ColumnViewerInformationControlToolTipSupport;
 import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.EObject;
-import org.eclipse.emf.ecore.EStructuralFeature;
 import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.ecore.util.EcoreUtil;
-import org.eclipse.emf.edit.command.CommandParameter;
 import org.eclipse.emf.edit.command.CreateChildCommand;
 import org.eclipse.emf.edit.domain.EditingDomain;
 import org.eclipse.emf.edit.provider.ComposedAdapterFactory;
@@ -27,11 +25,9 @@ import org.eclipse.emf.edit.ui.provider.AdapterFactoryLabelProvider;
 import org.eclipse.emf.edit.ui.provider.DecoratingColumLabelProvider;
 import org.eclipse.emf.edit.ui.provider.DelegatingStyledCellLabelProvider;
 import org.eclipse.emf.edit.ui.provider.DiagnosticDecorator;
-import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.dialogs.IDialogSettings;
-import org.eclipse.jface.viewers.IContentProvider;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
@@ -51,7 +47,6 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.ToolBar;
 import org.eclipse.swt.widgets.ToolItem;
-import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.commands.ICommandService;
 import org.eclipse.ui.dialogs.FilteredTree;
@@ -61,10 +56,9 @@ import org.eclipse.ui.services.IServiceLocator;
 
 import de.tud.et.ifa.agtele.resources.BundleContentHelper;
 import de.tud.et.ifa.agtele.ui.AgteleUIPlugin;
-import de.tud.et.ifa.agtele.ui.interfaces.IFeatureValidator;
+import de.tud.et.ifa.agtele.ui.emf.editor.ActionUtil;
 import de.tud.et.ifa.agtele.ui.interfaces.IPersistable;
 import de.tud.et.ifa.agtele.ui.listeners.SelectionListener2;
-import de.tud.et.ifa.agtele.ui.widgets.TreeViewerGroup.TreeViewerGroupToolbarAddButtonOption.AddDropDownSelectionListener;
 
 /**
  * A class that represents an SWT {@link Group} containing a {@link FilteredTree filtered tree viewer} and optionally a
@@ -530,39 +524,6 @@ public class TreeViewerGroup extends FilteredTree implements IPersistable {
 	}
 
 	/**
-	 * This is used by {@link AddDropDownSelectionListener#createCreateChildAction(IEditorPart, ISelection, Object)} and
-	 * {@link AddDropDownSelectionListener#createCreateSiblingAction(IEditorPart, ISelection, Object)} to perform
-	 * additional checks if an action corresponding to the given <em>descriptor</em> is valid for the active <em>content
-	 * provider</em>.
-	 *
-	 * @param descriptor
-	 *            The {@link CommandParameter} that describes an action to be executed.
-	 * @param provider
-	 *            The {@link IContentProvider content provider} that is associated with the active viewer.
-	 * @return '<em><b>true</b></em>' if the descriptor is valid for the active viewer; '<em><b>false</b></em>'
-	 *         otherwise.
-	 */
-	public boolean isValidDescriptor(Object descriptor, IContentProvider provider) {
-
-		if (descriptor == null || provider == null) {
-			return false;
-		}
-
-		if (!(descriptor instanceof CommandParameter)
-				|| !(((CommandParameter) descriptor).getFeature() instanceof EStructuralFeature)) {
-			return true;
-		}
-
-		CommandParameter commandParam = (CommandParameter) descriptor;
-
-		if (provider instanceof IFeatureValidator) {
-			return ((IFeatureValidator) provider).isValidFeature((EStructuralFeature) commandParam.getFeature());
-		}
-
-		return true;
-	}
-
-	/**
 	 *
 	 */
 	@Override
@@ -576,13 +537,14 @@ public class TreeViewerGroup extends FilteredTree implements IPersistable {
 	 * Can be anything, that alters the TreeViewerGroup
 	 * @author Lukas
 	 */
+	@FunctionalInterface
 	public static interface TreeViewerGroupOption {
 
 		/**
 		 * Disposes the created UI elements and removes created event listeners from other elements.
 		 */
 		public void dispose();
-	};
+	}
 
 	/**
 	 * A ToolbarOption alters the contents of the Toolbar.
@@ -756,7 +718,9 @@ public class TreeViewerGroup extends FilteredTree implements IPersistable {
 			 *            The {@link ToolItem} on that this listener listens.
 			 */
 			public AddDropDownSelectionListener(ToolItem dropdown) {
-				this.menuManager = new MenuManager();
+				this.menuManager = new MenuManager() {
+
+				};
 				this.menuManager.createContextMenu(dropdown.getParent());
 			}
 
@@ -812,75 +776,42 @@ public class TreeViewerGroup extends FilteredTree implements IPersistable {
 				//
 				this.menuManager.removeAll();
 
-				// Query the new selection for appropriate new child/sibling descriptors
-				//
-				Collection<?> newChildDescriptors;
-				Collection<?> newSiblingDescriptors;
 				ISelection selection = TreeViewerGroupToolbarAddButtonOption.this.group.treeViewer.getSelection();
 				if (!(selection instanceof IStructuredSelection) || ((IStructuredSelection) selection).size() > 1) {
 					// nothing to be done
 					return;
 				}
 
-				boolean doNotCreateSiblingActions = false;
+				List<CreateChildAction> createChildActions;
+				List<CreateSiblingAction> createSiblingActions = new ArrayList<>();
+
+
 				if (((IStructuredSelection) selection).isEmpty()) {
 					// if nothing is selected,we manually select the viewer input; this will allow to add the
 					// top level elements in this viewer
-					doNotCreateSiblingActions = true; // in this case, we only want allow to create child actions
+					//
 					try {
 						selection = new StructuredSelection(TreeViewerGroupToolbarAddButtonOption.this.group.treeViewer.getInput());
 					} catch (Exception e) {
 						return;
 					}
-				}
-
-				Object object = ((IStructuredSelection) selection).getFirstElement();
-
-				newChildDescriptors = TreeViewerGroupToolbarAddButtonOption.this.group.editingDomain.getNewChildDescriptors(object, null);
-				if (doNotCreateSiblingActions) {
-					newSiblingDescriptors = new ArrayList<>();
+					createChildActions = ActionUtil.getCreateChildActions(
+							TreeViewerGroupToolbarAddButtonOption.this.group.getTreeViewer(),
+							(StructuredSelection) selection);
 				} else {
-					newSiblingDescriptors = TreeViewerGroupToolbarAddButtonOption.this.group.editingDomain.getNewChildDescriptors(null, object);
-				}
 
-				IEditorPart editorPart = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage()
-						.getActiveEditor();
-
-				// Generate actions for selection; populate and redraw the menus.
-				//
-				ArrayList<IAction> createChildActions = new ArrayList<>();
-				for (Object descriptor : newChildDescriptors) {
-					if (TreeViewerGroupToolbarAddButtonOption.this.group.isValidDescriptor(descriptor,
-							TreeViewerGroupToolbarAddButtonOption.this.group.treeViewer.getContentProvider())) {
-						createChildActions.add(this.createCreateChildAction(editorPart, selection, descriptor));
-					}
-				}
-				ArrayList<IAction> createSiblingActions = new ArrayList<>();
-				for (Object descriptor : newSiblingDescriptors) {
-					if (TreeViewerGroupToolbarAddButtonOption.this.group.isValidDescriptor(descriptor,
-							TreeViewerGroupToolbarAddButtonOption.this.group.treeViewer.getContentProvider())) {
-						createSiblingActions.add(this.createCreateSiblingAction(editorPart, selection, descriptor));
-					}
+					createChildActions = ActionUtil
+							.getCreateChildActions(TreeViewerGroupToolbarAddButtonOption.this.group.getTreeViewer());
+					createSiblingActions = ActionUtil
+							.getCreateSiblingActions(TreeViewerGroupToolbarAddButtonOption.this.group.getTreeViewer());
 				}
 
 				// Populate the context menu
 				//
 				this.menuManager.add(new Separator("Add Child"));
-				for (IAction iAction : createChildActions) {
-					this.menuManager.add(iAction);
-				}
+				createChildActions.stream().forEach(this.menuManager::add);
 				this.menuManager.add(new Separator("Add Sibling"));
-				for (IAction iAction : createSiblingActions) {
-					this.menuManager.add(iAction);
-				}
-			}
-
-			protected IAction createCreateChildAction(IEditorPart editorPart, ISelection selection, Object descriptor) {
-				return new CreateChildAction(editorPart, selection, descriptor);
-			}
-
-			protected IAction createCreateSiblingAction(IEditorPart editorPart, ISelection selection, Object descriptor) {
-				return new CreateSiblingAction(editorPart, selection, descriptor);
+				createSiblingActions.stream().forEach(this.menuManager::add);
 			}
 
 			public void dispose() {
