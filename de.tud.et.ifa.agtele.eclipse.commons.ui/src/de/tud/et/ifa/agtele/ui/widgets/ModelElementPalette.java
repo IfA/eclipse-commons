@@ -11,7 +11,6 @@ import org.eclipse.emf.edit.domain.EditingDomain;
 import org.eclipse.emf.edit.ui.action.CreateChildAction;
 import org.eclipse.emf.edit.ui.action.CreateSiblingAction;
 import org.eclipse.jface.action.IAction;
-import org.eclipse.jface.resource.ColorRegistry;
 import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
@@ -313,7 +312,7 @@ public abstract class ModelElementPalette {
 			this.setEnabled(action.isEnabled());
 			this.setToolTipText(action.getToolTipText());
 
-			ColorRegistry registry = JFaceResources.getColorRegistry();
+			// ColorRegistry registry = JFaceResources.getColorRegistry();
 
 			this.mouseHoverListener = e -> {
 				HoverLabel.this.hovering = e.type == SWT.MouseEnter || e.type == SWT.MouseMove;
@@ -325,33 +324,33 @@ public abstract class ModelElementPalette {
 			this.addListener(SWT.MouseExit, this.mouseHoverListener);
 
 			this.addListener(SWT.Paint, e -> {
+				// if (HoverLabel.this.enabled) {
+				// HoverLabel.this.setBackground(HoverLabel.this.hovering ?
+				// registry.get("org.eclipse.ui.workbench.ACTIVE_TAB_BG_START")
+				// :
+				// registry.get("CONTENT_ASSIST_BACKGROUND_COLOR"));
+				// HoverLabel.this.setForeground(HoverLabel.this.hovering ?
+				// registry.get("org.eclipse.ui.workbench.ACTIVE_TAB_SELECTED_TEXT_COLOR")
+				// :
+				// registry.get("CONTENT_ASSIST_FOREGROUND_COLOR"));
+				// } else {
+				// HoverLabel.this.setBackground(HoverLabel.this.hovering ?
+				// registry.get("org.eclipse.ui.editors.currentLineColor") :
+				// registry.get("org.eclipse.ui.workbench.INACTIVE_TAB_BG_END"));
+				// HoverLabel.this.setForeground(HoverLabel.this.hovering ?
+				// registry.get("org.eclipse.ui.workbench.ACTIVE_TAB_UNSELECTED_TEXT_COLOR")
+				// :
+				// registry.get("org.eclipse.ui.workbench.INACTIVE_TAB_TEXT_COLOR"));
+				// }
 				if (HoverLabel.this.enabled) {
-					HoverLabel.this.setBackground(HoverLabel.this.hovering ? registry.get("org.eclipse.ui.workbench.ACTIVE_TAB_BG_START") :
-						registry.get("CONTENT_ASSIST_BACKGROUND_COLOR"));
-					HoverLabel.this.setForeground(HoverLabel.this.hovering ?
-							registry.get("org.eclipse.ui.workbench.ACTIVE_TAB_SELECTED_TEXT_COLOR") :
-								registry.get("CONTENT_ASSIST_FOREGROUND_COLOR"));
+					HoverLabel.this.setBackground(
+							this.hovering ? this.display.getSystemColor(SWT.COLOR_TITLE_BACKGROUND_GRADIENT)
+									: this.display.getSystemColor(SWT.COLOR_WIDGET_BACKGROUND));
 				} else {
-					HoverLabel.this.setBackground(HoverLabel.this.hovering ?
-							registry.get("org.eclipse.ui.editors.currentLineColor") :
-								registry.get("org.eclipse.ui.workbench.INACTIVE_TAB_BG_END"));
-					HoverLabel.this.setForeground(HoverLabel.this.hovering ?
-							registry.get("org.eclipse.ui.workbench.ACTIVE_TAB_UNSELECTED_TEXT_COLOR") :
-								registry.get("org.eclipse.ui.workbench.INACTIVE_TAB_TEXT_COLOR"));
+					HoverLabel.this.setBackground(
+							this.hovering ? this.display.getSystemColor(SWT.COLOR_TITLE_INACTIVE_BACKGROUND)
+									: this.display.getSystemColor(SWT.COLOR_WIDGET_BACKGROUND));
 				}
-				//		        @Override
-				//		        public void handleEvent(Event e)
-				//		        {
-				//		        	if (HoverLabel.this.enabled) {
-				//		        		HoverLabel.this.setBackground(hovering ?
-				//	        				display.getSystemColor(SWT.COLOR_TITLE_BACKGROUND_GRADIENT) :
-				//	        					display.getSystemColor(SWT.COLOR_WIDGET_BACKGROUND));
-				//		        	} else {
-				//		        		HoverLabel.this.setBackground(hovering ?
-				//	        				display.getSystemColor(SWT.COLOR_TITLE_INACTIVE_BACKGROUND) :
-				//	        					display.getSystemColor(SWT.COLOR_WIDGET_BACKGROUND));
-				//		        	}
-				//		        }
 			});
 			//		    HoverLabel.this.addListener(SWT., new Listener() {
 			//				@Override

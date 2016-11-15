@@ -100,7 +100,4 @@
             name="OpenFactoryCode">
       </command>
    </extension>
-   <extension
-         point="org.eclipse.e4.ui.css.swt.theme">
-   </extension>
 </plugin>
