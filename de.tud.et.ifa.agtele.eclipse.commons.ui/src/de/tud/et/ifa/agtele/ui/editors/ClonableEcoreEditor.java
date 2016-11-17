@@ -1248,7 +1248,8 @@ implements IEditingDomainProvider, ISelectionProvider, IMenuListener, IViewerPro
 	 * This accesses a cached version of the content outliner. <!--
 	 * begin-user-doc --> <!-- end-user-doc -->
 	 *
-	 * @generated
+	 * @generated NOT due to missing active editor Part, when the outline page
+	 *            is being created
 	 */
 	public IContentOutlinePage getContentOutlinePage() {
 		if (this.contentOutlinePage == null) {
@@ -1285,11 +1286,15 @@ implements IEditingDomainProvider, ISelectionProvider, IMenuListener, IViewerPro
 					if (!ClonableEcoreEditor.this.editingDomain.getResourceSet().getResources().isEmpty()) {
 						// Select the root object in the view.
 						//
+						// sets the active editor part in order to omit weird
+						// Null Pointer Exceptions
+						ClonableEcoreEditor.this.getActionBarContributor().setActiveEditor(ClonableEcoreEditor.this);
 						ClonableEcoreEditor.this.contentOutlineViewer.setSelection(
 								new StructuredSelection(
 										ClonableEcoreEditor.this.editingDomain.getResourceSet().getResources().get(0)),
 								true);
 					}
+
 				}
 
 				@Override
