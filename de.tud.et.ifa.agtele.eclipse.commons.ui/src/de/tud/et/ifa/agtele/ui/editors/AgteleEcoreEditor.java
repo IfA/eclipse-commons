@@ -4,8 +4,10 @@
 package de.tud.et.ifa.agtele.ui.editors;
 
 import org.eclipse.emf.common.ui.viewer.ColumnViewerInformationControlToolTipSupport;
+import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.EReference;
 import org.eclipse.emf.ecore.presentation.EcoreEditorPlugin;
+import org.eclipse.emf.ecore.provider.EModelElementItemProvider;
 import org.eclipse.emf.ecore.provider.EReferenceItemProvider;
 import org.eclipse.emf.edit.provider.ComposedImage;
 import org.eclipse.emf.edit.provider.IItemLabelProvider;
@@ -167,27 +169,40 @@ public class AgteleEcoreEditor extends ClonableEcoreEditor implements IPersistab
 						@Override
 						public Image getImage(Object object) {
 
-							if (object instanceof EReference && ((EReference) object).isContainment()) {
+							if (object instanceof EReference || object instanceof EClass) {
 
-								EReferenceItemProvider labelProvider = (EReferenceItemProvider) this.adapterFactory
+								EModelElementItemProvider labelProvider = (EModelElementItemProvider) this.adapterFactory
 										.adapt(object, IItemLabelProvider.class);
 
 								Object image = labelProvider.getImage(object);
-
-								if (image instanceof ComposedImage) {
-
-									// The first sub-image of the composed image always represent the 'base' image (i.e.
-									// the icon for the 'Reference'). Thus we can simply replace this with our special
-									// icon.
-									//
-									((ComposedImage) image).getImages().set(0,
-											BundleContentHelper.getBundleImage(
-													"de.tud.et.ifa.agtele.eclipse.commons.ui",
-													"icons/ContainmentReference.gif"));
-
-									return this.getImageFromObject(image);
+								String imagePath = null;
+									
+								if (object instanceof EReference && ((EReference) object).isContainment()) {
+									imagePath = "icons/ContainmentReference.gif";
+								} else if (object instanceof EClass && ((EClass)object).isInterface()) {
+									imagePath = "icons/EInterface.gif";
+								} else if (object instanceof EClass && ((EClass)object).isAbstract()) {
+									imagePath = "icons/EAbstractClass.gif";
 								}
 
+								if (imagePath != null) {
+									if (image instanceof ComposedImage) {
+										// The first sub-image of the composed image always represent the 'base' image (i.e.
+										// the icon for the 'Reference'). Thus we can simply replace this with our special
+										// icon.
+										//
+										((ComposedImage) image).getImages().set(0,
+												BundleContentHelper.getBundleImage(
+													"de.tud.et.ifa.agtele.eclipse.commons.ui",
+													imagePath));
+	
+										return this.getImageFromObject(image);
+									} else {
+										return this.getImageFromObject(BundleContentHelper.getBundleImage(
+											"de.tud.et.ifa.agtele.eclipse.commons.ui",
+											imagePath));
+									}									
+								}
 							}
 
 							return super.getImage(object);
