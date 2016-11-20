@@ -110,4 +110,28 @@ public class EMFCompareUtil {
 		return match == null || !origin.eClass().equals(match.eClass()) ? null : (T) match;
 
 	}
+
+	/**
+	 * This compares the two {@link Notifier Notifiers} <em>left</em> and <em>right</em> and checks if they match
+	 * without difference.
+	 *
+	 * @param left
+	 *            The {@link Notifier} representing the left part of the comparison (this might e.g. be a resource, a
+	 *            model, or an excerpt of a model).
+	 * @param right
+	 *            The {@link Notifier} representing the right part of the comparison (this might e.g. be a resource, a
+	 *            model, or an excerpt of a model).
+	 * @return '<em><b>true</b></em>' if the two given notifiers match, '<em><b>false</b></em>' otherwise.
+	 */
+	public static boolean isMatch(Notifier left, Notifier right) {
+
+		// Compare the left and right sides
+		//
+		IComparisonScope scope = new DefaultComparisonScope(left, right, null);
+		EMFCompare comparator = EMFComparatorFactory.getComparator(new DefaultDiffEngine(new DiffBuilder()));
+		Comparison result = comparator.compare(scope);
+
+		return result.getDifferences().isEmpty();
+
+	}
 }
