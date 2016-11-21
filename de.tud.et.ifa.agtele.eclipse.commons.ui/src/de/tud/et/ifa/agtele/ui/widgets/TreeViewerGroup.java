@@ -13,11 +13,13 @@ import org.eclipse.core.commands.NotHandledException;
 import org.eclipse.core.commands.Parameterization;
 import org.eclipse.core.commands.ParameterizedCommand;
 import org.eclipse.core.commands.common.NotDefinedException;
+import org.eclipse.emf.common.notify.AdapterFactory;
 import org.eclipse.emf.common.ui.viewer.ColumnViewerInformationControlToolTipSupport;
 import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.ecore.util.EcoreUtil;
+import org.eclipse.emf.ecore.xmi.XMIResource;
 import org.eclipse.emf.edit.command.CreateChildCommand;
 import org.eclipse.emf.edit.domain.EditingDomain;
 import org.eclipse.emf.edit.provider.ComposedAdapterFactory;
@@ -58,6 +60,7 @@ import org.eclipse.ui.dialogs.PatternFilter;
 import org.eclipse.ui.handlers.IHandlerService;
 import org.eclipse.ui.services.IServiceLocator;
 
+import de.tud.et.ifa.agtele.emf.compare.EMFCompareUtil;
 import de.tud.et.ifa.agtele.resources.BundleContentHelper;
 import de.tud.et.ifa.agtele.ui.AgteleUIPlugin;
 import de.tud.et.ifa.agtele.ui.emf.editor.ActionUtil;
@@ -376,7 +379,7 @@ public class TreeViewerGroup extends FilteredTree implements IPersistable {
 								? "Element Type: " + ((EObject) element).eClass().getName() : null : toolTip;
 					}
 				}));
-		treeViewer.setContentProvider(new AdapterFactoryContentProvider(this.adapterFactory));
+		treeViewer.setContentProvider(new TreeViewerGroupContentProvider(this.adapterFactory, treeViewer));
 		new ColumnViewerInformationControlToolTipSupport(treeViewer,
 				new DiagnosticDecorator.Styled.EditingDomainLocationListener(this.editingDomain, treeViewer));
 		return treeViewer;
@@ -464,7 +467,7 @@ public class TreeViewerGroup extends FilteredTree implements IPersistable {
 		// Persist the various options passed by the user
 		//
 		Arrays.asList(this.options).stream().filter(i -> i instanceof TreeViewerGroupPersistableOption)
-				.forEach(i -> ((TreeViewerGroupPersistableOption) i).persist(settings));
+		.forEach(i -> ((TreeViewerGroupPersistableOption) i).persist(settings));
 	}
 
 	@Override
@@ -529,6 +532,48 @@ public class TreeViewerGroup extends FilteredTree implements IPersistable {
 	public void dispose() {
 
 		Arrays.asList(this.options).stream().forEach(i -> i.dispose());
+	}
+
+	public class TreeViewerGroupContentProvider extends AdapterFactoryContentProvider {
+
+		private TreeViewerGroupContentProvider(AdapterFactory adapterFactory, TreeViewer treeViewer) {
+			super(adapterFactory);
+
+			this.viewerRefresh = new ViewerRefresh(treeViewer) {
+
+				@Override
+				public void run() {
+					Object resource = TreeViewerGroup.this.getTreeViewer().getInput();
+					EObject left = null, right = null;
+					Object[] expanded = null;
+
+					if (resource instanceof XMIResource) {
+						expanded = TreeViewerGroup.this.getTreeViewer().getExpandedElements();
+						if (expanded.length > 0 && expanded[0] instanceof EObject) {
+							left = (EObject) expanded[0];
+						}
+					}
+					IStructuredSelection selection = TreeViewerGroup.this.getTreeViewer().getStructuredSelection();
+					super.run();
+					if (resource instanceof XMIResource && left != null) {
+						right = ((XMIResource) TreeViewerGroup.this.getTreeViewer().getInput()).getContents().get(0);
+
+						ArrayList<EObject> originalList = new ArrayList<>();
+						for (Object obj : expanded) {
+							if (obj instanceof EObject) {
+								originalList.add((EObject) obj);
+							}
+						}
+
+						TreeViewerGroup.this.getTreeViewer()
+						.setExpandedElements(EMFCompareUtil.getMatches(left, right, originalList).toArray());
+					}
+					//TreeViewerGroup.this.getTreeViewer().expandAll();
+					//					TreeViewerGroup.this.getTreeViewer().setExpandedElements(expanded);
+					TreeViewerGroup.this.getTreeViewer().setSelection(selection);
+				}
+			};
+		}
 	}
 
 	/**
@@ -656,7 +701,7 @@ public class TreeViewerGroup extends FilteredTree implements IPersistable {
 	 * @author Lukas
 	 */
 	public static class TreeViewerGroupToolbarToggleSplitEditorVerticallyButtonOption
-			implements TreeViewerGroupToolbarOption {
+	implements TreeViewerGroupToolbarOption {
 
 		/**
 		 * The added item.
@@ -805,7 +850,7 @@ public class TreeViewerGroup extends FilteredTree implements IPersistable {
 				// newly created object.
 				TreeViewerGroupToolbarAddButtonOption.this.group.editingDomain.getCommandStack().execute(command);
 				TreeViewerGroupToolbarAddButtonOption.this.group.treeViewer
-						.setSelection(new StructuredSelection(command.getResult().toArray()));
+				.setSelection(new StructuredSelection(command.getResult().toArray()));
 			}
 
 			/**
@@ -876,7 +921,7 @@ public class TreeViewerGroup extends FilteredTree implements IPersistable {
 	 * @author Lukas
 	 */
 	public static class TreeViewerGroupAddToolPaletteOption
-			implements TreeViewerGroupPaletteOption, TreeViewerGroupPersistableOption {
+	implements TreeViewerGroupPaletteOption, TreeViewerGroupPersistableOption {
 
 		public TreeViewerGroupToolbarHideEMFPaletteOption TOOLBAR_HIDE_PALLETTE_BUTTON = new TreeViewerGroupToolbarHideEMFPaletteOption();
 
@@ -1100,7 +1145,7 @@ public class TreeViewerGroup extends FilteredTree implements IPersistable {
 		}
 
 		public static class TreeViewerGroupAddToolPaletteToolbarHideEMFPaletteOption
-				extends TreeViewerGroupAddToolPaletteOption implements TreeViewerGroupToolbarOption {
+		extends TreeViewerGroupAddToolPaletteOption implements TreeViewerGroupToolbarOption {
 
 			protected ToolItem toolBarItem;
 
@@ -1111,7 +1156,7 @@ public class TreeViewerGroup extends FilteredTree implements IPersistable {
 
 				this.toolBarItem = new ToolItem(toolbar, SWT.PUSH | SWT.TRAIL);
 				this.toolBarItem
-						.setImage(BundleContentHelper.getBundleImage(group.bundleID, "icons/toggledetailpane_co.gif"));
+				.setImage(BundleContentHelper.getBundleImage(group.bundleID, "icons/toggledetailpane_co.gif"));
 				this.toolBarItem.setToolTipText("Show/Hide Tool Elemet Palette");
 				this.toolbarListener = (SelectionListener2) e -> this.toggleVisibility();
 				this.toolBarItem.addSelectionListener(this.toolbarListener);
