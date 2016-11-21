@@ -3,6 +3,9 @@
  */
 package de.tud.et.ifa.agtele.emf.compare;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.eclipse.emf.common.notify.Notifier;
 import org.eclipse.emf.compare.Comparison;
 import org.eclipse.emf.compare.EMFCompare;
@@ -56,9 +59,7 @@ public class EMFCompareUtil {
 
 		// Compare the left and right sides
 		//
-		IComparisonScope scope = new DefaultComparisonScope(left, right, null);
-		EMFCompare comparator = EMFComparatorFactory.getComparator(new DefaultDiffEngine(new DiffBuilder()));
-		Comparison result = comparator.compare(scope);
+		Comparison result = EMFCompareUtil.compare(left, right);
 
 		// Find a match for the origin
 		//
@@ -73,6 +74,34 @@ public class EMFCompareUtil {
 		} else {
 			return match.getLeft();
 		}
+	}
+
+	public static List<EObject> getMatches(Notifier left, Notifier right, List<EObject> origin) {
+		// Compare the left and right sides
+		//
+		Comparison comparison = EMFCompareUtil.compare(left, right);
+
+		ArrayList<EObject> result = new ArrayList<>(origin.size());
+
+		for (int i = 0; i < origin.size(); i += 1) {
+			EObject obj = origin.get(i);
+			Match match = comparison.getMatch(obj);
+			if (match != null) {
+				if (match.getLeft() == obj && match.getRight() != null) {
+					result.add(i, match.getRight());
+				} else if (match.getLeft() != null) {
+					result.add(i, match.getLeft());
+				}
+			}
+		}
+		return result;
+	}
+
+	public static Comparison compare(Notifier left, Notifier right) {
+		IComparisonScope scope = new DefaultComparisonScope(left, right, null);
+		EMFCompare comparator = EMFComparatorFactory.getComparator(new DefaultDiffEngine(new DiffBuilder()));
+		Comparison result = comparator.compare(scope);
+		return result;
 	}
 
 	/**
@@ -125,11 +154,7 @@ public class EMFCompareUtil {
 	 */
 	public static boolean isMatch(Notifier left, Notifier right) {
 
-		// Compare the left and right sides
-		//
-		IComparisonScope scope = new DefaultComparisonScope(left, right, null);
-		EMFCompare comparator = EMFComparatorFactory.getComparator(new DefaultDiffEngine(new DiffBuilder()));
-		Comparison result = comparator.compare(scope);
+		Comparison result = EMFCompareUtil.compare(left, right);
 
 		return result.getDifferences().isEmpty();
 
