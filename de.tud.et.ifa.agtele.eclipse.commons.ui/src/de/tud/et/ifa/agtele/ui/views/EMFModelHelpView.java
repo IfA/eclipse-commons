@@ -1,14 +1,7 @@
 package de.tud.et.ifa.agtele.ui.views;
 
-import org.eclipse.swt.widgets.Composite;
-import org.eclipse.ui.part.*;
-
-import de.tud.et.ifa.agtele.emf.AgteleEcoreUtil;
-import de.tud.et.ifa.agtele.help.IEMFModelHelpItemProvider;
-import de.tud.et.ifa.agtele.resources.BundleContentHelper;
-import de.tud.et.ifa.agtele.ui.AgteleUIPlugin;
-
 import java.util.Iterator;
+
 import org.eclipse.emf.common.notify.Adapter;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.edit.provider.IEditingDomainItemProvider;
@@ -16,10 +9,23 @@ import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IToolBarManager;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.StructuredSelection;
-import org.eclipse.ui.*;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.browser.Browser;
 import org.eclipse.swt.events.HelpEvent;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.ui.IActionBars;
+import org.eclipse.ui.IPersistable;
+import org.eclipse.ui.ISelectionListener;
+import org.eclipse.ui.IWorkbenchPage;
+import org.eclipse.ui.IWorkbenchPart;
+import org.eclipse.ui.PartInitException;
+import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.part.ViewPart;
+
+import de.tud.et.ifa.agtele.emf.AgteleEcoreUtil;
+import de.tud.et.ifa.agtele.help.IEMFModelHelpItemProvider;
+import de.tud.et.ifa.agtele.resources.BundleContentHelper;
+import de.tud.et.ifa.agtele.ui.AgteleUIPlugin;
 
 /**
  * This view displays Amino UIs help contents
@@ -45,12 +51,13 @@ public class EMFModelHelpView extends ViewPart implements IPersistable {
 	 * The constructor.
 	 */
 	public EMFModelHelpView() {
-		selectionListener = (IWorkbenchPart iw, ISelection selection) -> {showHelp(selection);};
+		this.selectionListener = (IWorkbenchPart iw, ISelection selection) -> {EMFModelHelpView.showHelp(selection);};
 
-		linkEditor = AgteleUIPlugin.getPlugin().getDialogSettings().getBoolean("link");
-		if (linkEditor)
+		this.linkEditor = AgteleUIPlugin.getPlugin().getDialogSettings().getBoolean("link");
+		if (this.linkEditor) {
 			PlatformUI.getWorkbench().getActiveWorkbenchWindow().getSelectionService()
-					.addSelectionListener(selectionListener);
+			.addSelectionListener(this.selectionListener);
+		}
 
 	}
 
@@ -60,16 +67,17 @@ public class EMFModelHelpView extends ViewPart implements IPersistable {
 	 */
 	@Override
 	public void createPartControl(Composite parent) {
-		browser = new Browser(parent, SWT.NONE);
+		this.browser = new Browser(parent, SWT.NONE);
 
-		makeActions();
-		contributeToActionBars();
+		this.makeActions();
+		this.contributeToActionBars();
 
-		currentText = AgteleUIPlugin.getPlugin().getDialogSettings().get("browserText");
-		if (currentText != null)
-			browser.setText(currentText);
-		if (linkEditor) {
-			show();
+		this.currentText = AgteleUIPlugin.getPlugin().getDialogSettings().get("browserText");
+		if (this.currentText != null) {
+			this.browser.setText(this.currentText);
+		}
+		if (this.linkEditor) {
+			EMFModelHelpView.show();
 		}
 	}
 
@@ -78,82 +86,84 @@ public class EMFModelHelpView extends ViewPart implements IPersistable {
 	 */
 	@Override
 	public void setFocus() {
-		browser.setFocus();
+		this.browser.setFocus();
 	}
 
 	@Override
 	public void dispose() {
 		PlatformUI.getWorkbench().getActiveWorkbenchWindow().getSelectionService()
-				.removeSelectionListener(selectionListener);
-		AgteleUIPlugin.getPlugin().getDialogSettings().put("link", linkEditor);
+		.removeSelectionListener(this.selectionListener);
+		AgteleUIPlugin.getPlugin().getDialogSettings().put("link", this.linkEditor);
 
-		AgteleUIPlugin.getPlugin().getDialogSettings().put("browserText", currentText);
+		AgteleUIPlugin.getPlugin().getDialogSettings().put("browserText", this.currentText);
 
 		super.dispose();
 	}
 
 	private void contributeToActionBars() {
-		IActionBars bars = getViewSite().getActionBars();
-		fillLocalToolBar(bars.getToolBarManager());
+		IActionBars bars = this.getViewSite().getActionBars();
+		this.fillLocalToolBar(bars.getToolBarManager());
 	}
 
 	private void fillLocalToolBar(IToolBarManager manager) {
-		manager.add(linkAction);
+		manager.add(this.linkAction);
 	}
 
 	private void makeActions() {
-		linkAction = new Action("Link Editor",
+		this.linkAction = new Action("Link Editor",
 				BundleContentHelper.getBundleImageDescriptor(AgteleUIPlugin.PLUGIN_ID, "icons/synced.gif")) {
+			@Override
 			public void run() {
-				linkEditor = !linkEditor;
-				if (linkEditor) {
+				EMFModelHelpView.this.linkEditor = !EMFModelHelpView.this.linkEditor;
+				if (EMFModelHelpView.this.linkEditor) {
 					PlatformUI.getWorkbench().getActiveWorkbenchWindow().getSelectionService()
-							.addSelectionListener(selectionListener);
+					.addSelectionListener(EMFModelHelpView.this.selectionListener);
 				} else {
 					PlatformUI.getWorkbench().getActiveWorkbenchWindow().getSelectionService()
-							.removeSelectionListener(selectionListener);
+					.removeSelectionListener(EMFModelHelpView.this.selectionListener);
 				}
-				linkAction.setChecked(linkEditor);
+				EMFModelHelpView.this.linkAction.setChecked(EMFModelHelpView.this.linkEditor);
 			}
 		};
-		linkAction.setToolTipText("Link with Selection");
-		linkAction.setChecked(linkEditor);
+		this.linkAction.setToolTipText("Link with Selection");
+		this.linkAction.setChecked(this.linkEditor);
 	}
 
 	/**
 	 * Opens the view and shows help based on the current selection
 	 */
 	public static void show() {
-		showHelp(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getSelectionService().getSelection());
+		EMFModelHelpView.showHelp(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getSelectionService().getSelection());
 	}
 
 	/**
 	 * Opens the {@link EMFModelHelpView}, generates the help page for the given
 	 * AminoUI {@link EObject} and displays it
-	 * 
+	 *
 	 * @param eObject
 	 *            AminoUI model element
 	 */
 	public static void showHelp(EObject eObject) {
-		showText(getHtml(eObject));
+		EMFModelHelpView.showText(EMFModelHelpView.getHtml(eObject));
 	}
 
 	/**
 	 * Opens the {@link EMFModelHelpView} and displays text in it
-	 * 
+	 *
 	 * @param text
 	 *            text to be displayed
 	 */
 	public static void showText(String text) {
 		try {
 			EMFModelHelpView helpView = (EMFModelHelpView) PlatformUI.getWorkbench().getActiveWorkbenchWindow()
-					.getActivePage().showView(ID, null, IWorkbenchPage.VIEW_VISIBLE);
+					.getActivePage().showView(EMFModelHelpView.ID, null, IWorkbenchPage.VIEW_VISIBLE);
 
 			if (!text.equals(helpView.currentText)) {
 				helpView.browser.setText(text);
 				helpView.currentText = text;
-			} else
+			} else {
 				return;
+			}
 		} catch (PartInitException e) {
 			e.printStackTrace();
 		}
@@ -162,7 +172,7 @@ public class EMFModelHelpView extends ViewPart implements IPersistable {
 	/**
 	 * Determine the current selection and show the help if it is an
 	 * {@link EObject}
-	 * 
+	 *
 	 * @param selection
 	 */
 	private static void showHelp(ISelection selection) {
@@ -194,13 +204,17 @@ public class EMFModelHelpView extends ViewPart implements IPersistable {
 	/**
 	 * Generates the documentation page of an {@link EObject} based on the
 	 * {@link IEMFModelHelpItemProvider} matching the element
-	 * 
+	 *
 	 * @param eObject
 	 * @return
 	 */
 	private static String getHtml(EObject eObject) {
 		IEMFModelHelpItemProvider iEMFModelHelpItemProvider;
 		// Try finding the IEMFModelHelpItemProvider using the AdapterFactory
+		if (AgteleEcoreUtil.getAdapterFactoryItemDelegatorFor(eObject) == null) {
+			return "No Help available";
+		}
+
 		Adapter adapter = AgteleEcoreUtil.getAdapterFactoryItemDelegatorFor(eObject).getAdapterFactory().adapt(eObject,
 				IEMFModelHelpItemProvider.class);
 		// If it's not found, try it again using a different ItemProvider, like
@@ -226,7 +240,7 @@ public class EMFModelHelpView extends ViewPart implements IPersistable {
 	/**
 	 * Adding this listener will show the {@link EMFModelHelpView} when pressing
 	 * F1
-	 * 
+	 *
 	 * @author martin
 	 *
 	 */
@@ -234,7 +248,7 @@ public class EMFModelHelpView extends ViewPart implements IPersistable {
 
 		@Override
 		public void helpRequested(HelpEvent e) {
-			show();
+			EMFModelHelpView.show();
 		}
 	}
 }
