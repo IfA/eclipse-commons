@@ -365,23 +365,23 @@ implements IEditingDomainProvider, ISelectionProvider, IMenuListener, IViewerPro
 		public void notifyChanged(Notification notification) {
 			if (notification.getNotifier() instanceof Resource) {
 				switch (notification.getFeatureID(Resource.class)) {
-					case Resource.RESOURCE__IS_LOADED:
-					case Resource.RESOURCE__ERRORS:
-					case Resource.RESOURCE__WARNINGS: {
-						Resource resource = (Resource) notification.getNotifier();
-						Diagnostic diagnostic = ClonableEcoreEditor.this.analyzeResourceProblems(resource, null);
-						if (diagnostic.getSeverity() != Diagnostic.OK) {
-							ClonableEcoreEditor.this.resourceToDiagnosticMap.put(resource, diagnostic);
-						} else {
-							ClonableEcoreEditor.this.resourceToDiagnosticMap.remove(resource);
-						}
-
-						if (ClonableEcoreEditor.this.updateProblemIndication) {
-							ClonableEcoreEditor.this.getSite().getShell().getDisplay()
-							.asyncExec(() -> ClonableEcoreEditor.this.updateProblemIndication());
-						}
-						break;
+				case Resource.RESOURCE__IS_LOADED:
+				case Resource.RESOURCE__ERRORS:
+				case Resource.RESOURCE__WARNINGS: {
+					Resource resource = (Resource) notification.getNotifier();
+					Diagnostic diagnostic = ClonableEcoreEditor.this.analyzeResourceProblems(resource, null);
+					if (diagnostic.getSeverity() != Diagnostic.OK) {
+						ClonableEcoreEditor.this.resourceToDiagnosticMap.put(resource, diagnostic);
+					} else {
+						ClonableEcoreEditor.this.resourceToDiagnosticMap.remove(resource);
 					}
+
+					if (ClonableEcoreEditor.this.updateProblemIndication) {
+						ClonableEcoreEditor.this.getSite().getShell().getDisplay()
+						.asyncExec(() -> ClonableEcoreEditor.this.updateProblemIndication());
+					}
+					break;
+				}
 				}
 			} else {
 				super.notifyChanged(notification);
@@ -1148,10 +1148,14 @@ implements IEditingDomainProvider, ISelectionProvider, IMenuListener, IViewerPro
 			this.selectionViewer = new TreeViewer(tree);
 			this.setCurrentViewer(this.selectionViewer);
 
-			this.selectionViewer.setContentProvider(new AdapterFactoryContentProvider(this.adapterFactory));
-			this.selectionViewer.setLabelProvider(new DecoratingColumLabelProvider(
-					new AdapterFactoryLabelProvider(this.adapterFactory), new DiagnosticDecorator(this.editingDomain,
-							this.selectionViewer, AgteleUIPlugin.getPlugin().getDialogSettings())));
+			// this.selectionViewer.setContentProvider(new
+			// AdapterFactoryContentProvider(this.adapterFactory));
+			// this.selectionViewer.setLabelProvider(new
+			// DecoratingColumLabelProvider(
+			// new AdapterFactoryLabelProvider(this.adapterFactory), new
+			// DiagnosticDecorator(this.editingDomain,
+			// this.selectionViewer,
+			// AgteleUIPlugin.getPlugin().getDialogSettings())));
 			this.selectionViewer.setInput(this.editingDomain.getResourceSet());
 			this.selectionViewer.setSelection(
 					new StructuredSelection(this.editingDomain.getResourceSet().getResources().get(0)), true);
@@ -1643,21 +1647,21 @@ implements IEditingDomainProvider, ISelectionProvider, IMenuListener, IViewerPro
 			if (selection instanceof IStructuredSelection) {
 				Collection<?> collection = ((IStructuredSelection) selection).toList();
 				switch (collection.size()) {
-					case 0: {
-						statusLineManager.setMessage(ClonableEcoreEditor.getString("_UI_NoObjectSelected"));
-						break;
-					}
-					case 1: {
-						String text = new AdapterFactoryItemDelegator(this.adapterFactory)
-								.getText(collection.iterator().next());
-						statusLineManager.setMessage(ClonableEcoreEditor.getString("_UI_SingleObjectSelected", text));
-						break;
-					}
-					default: {
-						statusLineManager.setMessage(ClonableEcoreEditor.getString("_UI_MultiObjectSelected",
-								Integer.toString(collection.size())));
-						break;
-					}
+				case 0: {
+					statusLineManager.setMessage(ClonableEcoreEditor.getString("_UI_NoObjectSelected"));
+					break;
+				}
+				case 1: {
+					String text = new AdapterFactoryItemDelegator(this.adapterFactory)
+							.getText(collection.iterator().next());
+					statusLineManager.setMessage(ClonableEcoreEditor.getString("_UI_SingleObjectSelected", text));
+					break;
+				}
+				default: {
+					statusLineManager.setMessage(ClonableEcoreEditor.getString("_UI_MultiObjectSelected",
+							Integer.toString(collection.size())));
+					break;
+				}
 				}
 			} else {
 				statusLineManager.setMessage("");
