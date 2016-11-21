@@ -8,7 +8,6 @@ import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.EReference;
 import org.eclipse.emf.ecore.presentation.EcoreEditorPlugin;
 import org.eclipse.emf.ecore.provider.EModelElementItemProvider;
-import org.eclipse.emf.ecore.provider.EReferenceItemProvider;
 import org.eclipse.emf.edit.provider.ComposedImage;
 import org.eclipse.emf.edit.provider.IItemLabelProvider;
 import org.eclipse.emf.edit.ui.celleditor.AdapterFactoryTreeEditor;
@@ -27,6 +26,7 @@ import org.eclipse.ui.IPartListener;
 import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.part.FileEditorInput;
 
+import de.tud.et.ifa.agtele.emf.edit.IDragAndDropProvider;
 import de.tud.et.ifa.agtele.resources.BundleContentHelper;
 import de.tud.et.ifa.agtele.ui.AgteleUIPlugin;
 import de.tud.et.ifa.agtele.ui.interfaces.IPersistable;
@@ -38,7 +38,7 @@ import de.tud.et.ifa.agtele.ui.widgets.TreeViewerGroup;
  *
  * @author cmartin
  */
-public class AgteleEcoreEditor extends ClonableEcoreEditor implements IPersistable {
+public class AgteleEcoreEditor extends ClonableEcoreEditor implements IPersistable, IDragAndDropProvider {
 
 	private TreeViewerGroup tree;
 
@@ -176,7 +176,7 @@ public class AgteleEcoreEditor extends ClonableEcoreEditor implements IPersistab
 
 								Object image = labelProvider.getImage(object);
 								String imagePath = null;
-									
+
 								if (object instanceof EReference && ((EReference) object).isContainment()) {
 									imagePath = "icons/ContainmentReference.gif";
 								} else if (object instanceof EClass && ((EClass)object).isInterface()) {
@@ -193,15 +193,15 @@ public class AgteleEcoreEditor extends ClonableEcoreEditor implements IPersistab
 										//
 										((ComposedImage) image).getImages().set(0,
 												BundleContentHelper.getBundleImage(
-													"de.tud.et.ifa.agtele.eclipse.commons.ui",
-													imagePath));
-	
+														"de.tud.et.ifa.agtele.eclipse.commons.ui",
+														imagePath));
+
 										return this.getImageFromObject(image);
 									} else {
 										return this.getImageFromObject(BundleContentHelper.getBundleImage(
-											"de.tud.et.ifa.agtele.eclipse.commons.ui",
-											imagePath));
-									}									
+												"de.tud.et.ifa.agtele.eclipse.commons.ui",
+												imagePath));
+									}
 								}
 							}
 

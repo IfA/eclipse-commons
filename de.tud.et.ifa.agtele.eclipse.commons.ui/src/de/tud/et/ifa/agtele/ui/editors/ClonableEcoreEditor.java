@@ -53,6 +53,8 @@ import org.eclipse.emf.ecore.util.EContentAdapter;
 import org.eclipse.emf.ecore.util.EcoreUtil;
 import org.eclipse.emf.ecore.xmi.XMLResource;
 import org.eclipse.emf.ecore.xmi.impl.GenericXMLResourceFactoryImpl;
+import org.eclipse.emf.edit.command.CommandParameter;
+import org.eclipse.emf.edit.command.DragAndDropCommand;
 import org.eclipse.emf.edit.domain.AdapterFactoryEditingDomain;
 import org.eclipse.emf.edit.domain.IEditingDomainProvider;
 import org.eclipse.emf.edit.provider.AdapterFactoryItemDelegator;
@@ -120,6 +122,7 @@ import org.eclipse.ui.views.properties.IPropertySheetPage;
 import org.eclipse.ui.views.properties.PropertySheet;
 import org.eclipse.ui.views.properties.PropertySheetPage;
 
+import de.tud.et.ifa.agtele.emf.edit.IDragAndDropProvider;
 import de.tud.et.ifa.agtele.ui.AgteleUIPlugin;
 import de.tud.et.ifa.agtele.ui.util.UIHelper;
 
@@ -362,23 +365,23 @@ implements IEditingDomainProvider, ISelectionProvider, IMenuListener, IViewerPro
 		public void notifyChanged(Notification notification) {
 			if (notification.getNotifier() instanceof Resource) {
 				switch (notification.getFeatureID(Resource.class)) {
-				case Resource.RESOURCE__IS_LOADED:
-				case Resource.RESOURCE__ERRORS:
-				case Resource.RESOURCE__WARNINGS: {
-					Resource resource = (Resource) notification.getNotifier();
-					Diagnostic diagnostic = ClonableEcoreEditor.this.analyzeResourceProblems(resource, null);
-					if (diagnostic.getSeverity() != Diagnostic.OK) {
-						ClonableEcoreEditor.this.resourceToDiagnosticMap.put(resource, diagnostic);
-					} else {
-						ClonableEcoreEditor.this.resourceToDiagnosticMap.remove(resource);
-					}
+					case Resource.RESOURCE__IS_LOADED:
+					case Resource.RESOURCE__ERRORS:
+					case Resource.RESOURCE__WARNINGS: {
+						Resource resource = (Resource) notification.getNotifier();
+						Diagnostic diagnostic = ClonableEcoreEditor.this.analyzeResourceProblems(resource, null);
+						if (diagnostic.getSeverity() != Diagnostic.OK) {
+							ClonableEcoreEditor.this.resourceToDiagnosticMap.put(resource, diagnostic);
+						} else {
+							ClonableEcoreEditor.this.resourceToDiagnosticMap.remove(resource);
+						}
 
-					if (ClonableEcoreEditor.this.updateProblemIndication) {
-						ClonableEcoreEditor.this.getSite().getShell().getDisplay()
-						.asyncExec(() -> ClonableEcoreEditor.this.updateProblemIndication());
+						if (ClonableEcoreEditor.this.updateProblemIndication) {
+							ClonableEcoreEditor.this.getSite().getShell().getDisplay()
+							.asyncExec(() -> ClonableEcoreEditor.this.updateProblemIndication());
+						}
+						break;
 					}
-					break;
-				}
 				}
 			} else {
 				super.notifyChanged(notification);
@@ -739,6 +742,31 @@ implements IEditingDomainProvider, ISelectionProvider, IMenuListener, IViewerPro
 					return result;
 				}
 			}
+
+			// Edited Section begin
+			//
+			@Override
+			public Command createCommand(Class<? extends Command> commandClass, CommandParameter commandParameter) {
+
+				// If possible use the special functionality provided by the 'IDragAndDropProvider' interface to create
+				// DragAndDropCommands.
+				//
+				if (commandClass.equals(DragAndDropCommand.class)
+						&& ClonableEcoreEditor.this instanceof IDragAndDropProvider
+						&& commandParameter.getCollection().stream().allMatch(e -> !(e instanceof URI))) {
+
+					DragAndDropCommand.Detail detail = (DragAndDropCommand.Detail) commandParameter.getFeature();
+
+					return ((IDragAndDropProvider) ClonableEcoreEditor.this).createCustomDragAndDropCommand(
+							ClonableEcoreEditor.this.editingDomain, commandParameter.getOwner(), detail.location,
+							detail.operations, detail.operation, commandParameter.getCollection(),
+							((IDragAndDropProvider) ClonableEcoreEditor.this).getCommandSelectionStrategy());
+				}
+
+				return super.createCommand(commandClass, commandParameter);
+			}
+			// Edited Section end
+			//
 		};
 	}
 
@@ -1615,21 +1643,21 @@ implements IEditingDomainProvider, ISelectionProvider, IMenuListener, IViewerPro
 			if (selection instanceof IStructuredSelection) {
 				Collection<?> collection = ((IStructuredSelection) selection).toList();
 				switch (collection.size()) {
-				case 0: {
-					statusLineManager.setMessage(ClonableEcoreEditor.getString("_UI_NoObjectSelected"));
-					break;
-				}
-				case 1: {
-					String text = new AdapterFactoryItemDelegator(this.adapterFactory)
-							.getText(collection.iterator().next());
-					statusLineManager.setMessage(ClonableEcoreEditor.getString("_UI_SingleObjectSelected", text));
-					break;
-				}
-				default: {
-					statusLineManager.setMessage(ClonableEcoreEditor.getString("_UI_MultiObjectSelected",
-							Integer.toString(collection.size())));
-					break;
-				}
+					case 0: {
+						statusLineManager.setMessage(ClonableEcoreEditor.getString("_UI_NoObjectSelected"));
+						break;
+					}
+					case 1: {
+						String text = new AdapterFactoryItemDelegator(this.adapterFactory)
+								.getText(collection.iterator().next());
+						statusLineManager.setMessage(ClonableEcoreEditor.getString("_UI_SingleObjectSelected", text));
+						break;
+					}
+					default: {
+						statusLineManager.setMessage(ClonableEcoreEditor.getString("_UI_MultiObjectSelected",
+								Integer.toString(collection.size())));
+						break;
+					}
 				}
 			} else {
 				statusLineManager.setMessage("");
@@ -1823,4 +1851,5 @@ implements IEditingDomainProvider, ISelectionProvider, IMenuListener, IViewerPro
 	protected void setResourceChangeListener(IResourceChangeListener resourceChangeListener) {
 		this.resourceChangeListener = resourceChangeListener;
 	}
+
 }
