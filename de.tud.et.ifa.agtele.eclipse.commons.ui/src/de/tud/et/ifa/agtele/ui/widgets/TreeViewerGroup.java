@@ -570,6 +570,7 @@ public class TreeViewerGroup extends FilteredTree implements IPersistable {
 					}
 					//TreeViewerGroup.this.getTreeViewer().expandAll();
 					//					TreeViewerGroup.this.getTreeViewer().setExpandedElements(expanded);
+					//TODO if the matching works, the selection also needs to be matched
 					TreeViewerGroup.this.getTreeViewer().setSelection(selection);
 				}
 			};
