@@ -100,8 +100,7 @@ public class EMFCompareUtil {
 	public static Comparison compare(Notifier left, Notifier right) {
 		IComparisonScope scope = new DefaultComparisonScope(left, right, null);
 		EMFCompare comparator = EMFComparatorFactory.getComparator(new DefaultDiffEngine(new DiffBuilder()));
-		Comparison result = comparator.compare(scope);
-		return result;
+		return comparator.compare(scope);
 	}
 
 	/**
