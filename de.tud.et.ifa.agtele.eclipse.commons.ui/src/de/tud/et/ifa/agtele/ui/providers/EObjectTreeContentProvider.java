@@ -36,6 +36,8 @@ public class EObjectTreeContentProvider implements ITreeContentProvider {
 			return this.getChildren(inputElement);
 		} else if (inputElement instanceof Collection) {
 			return ((Collection<?>) inputElement).toArray();
+		} else if (inputElement instanceof Object[]) {
+			return (Object[]) inputElement;
 		} else {
 			return new Object[] {};
 		}
