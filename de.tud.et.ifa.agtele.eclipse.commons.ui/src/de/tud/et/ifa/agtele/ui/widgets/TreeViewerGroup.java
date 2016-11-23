@@ -19,7 +19,6 @@ import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.ecore.util.EcoreUtil;
-import org.eclipse.emf.ecore.xmi.XMIResource;
 import org.eclipse.emf.edit.command.CreateChildCommand;
 import org.eclipse.emf.edit.domain.EditingDomain;
 import org.eclipse.emf.edit.provider.ComposedAdapterFactory;
@@ -60,7 +59,6 @@ import org.eclipse.ui.dialogs.PatternFilter;
 import org.eclipse.ui.handlers.IHandlerService;
 import org.eclipse.ui.services.IServiceLocator;
 
-import de.tud.et.ifa.agtele.emf.compare.EMFCompareUtil;
 import de.tud.et.ifa.agtele.resources.BundleContentHelper;
 import de.tud.et.ifa.agtele.ui.AgteleUIPlugin;
 import de.tud.et.ifa.agtele.ui.emf.editor.ActionUtil;
@@ -544,34 +542,41 @@ public class TreeViewerGroup extends FilteredTree implements IPersistable {
 				@Override
 				public void run() {
 					Object resource = TreeViewerGroup.this.getTreeViewer().getInput();
-					EObject left = null, right = null;
-					Object[] expanded = null;
-
-					if (resource instanceof XMIResource) {
-						expanded = TreeViewerGroup.this.getTreeViewer().getExpandedElements();
-						if (expanded.length > 0 && expanded[0] instanceof EObject) {
-							left = (EObject) expanded[0];
-						}
-					}
+					Object[] expanded = TreeViewerGroup.this.getTreeViewer().getExpandedElements();
 					IStructuredSelection selection = TreeViewerGroup.this.getTreeViewer().getStructuredSelection();
-					super.run();
-					if (resource instanceof XMIResource && left != null) {
-						right = ((XMIResource) TreeViewerGroup.this.getTreeViewer().getInput()).getContents().get(0);
 
-						ArrayList<EObject> originalList = new ArrayList<>();
+					super.run();
+					if (resource instanceof Resource) {
+						ArrayList<Object> newExpanded = new ArrayList<>();
 						for (Object obj : expanded) {
-							if (obj instanceof EObject) {
-								originalList.add((EObject) obj);
+							if (obj instanceof EObject && ((EObject) obj).eIsProxy()) {
+								EObject resolved = EcoreUtil.resolve((EObject) obj,
+										((Resource) resource).getResourceSet());
+								if (resolved != null) {
+									newExpanded.add(resolved);
+								}
+							} else {
+								newExpanded.add(obj);
 							}
 						}
 
 						TreeViewerGroup.this.getTreeViewer()
-						.setExpandedElements(EMFCompareUtil.getMatches(left, right, originalList).toArray());
+						.setExpandedElements(newExpanded.toArray());
+
+						ArrayList<Object> newSelection = new ArrayList<>();
+						for (Object obj : selection.toList()) {
+							if (obj instanceof EObject && ((EObject) obj).eIsProxy()) {
+								EObject resolved = EcoreUtil.resolve((EObject) obj,
+										((Resource) resource).getResourceSet());
+								if (resolved != null) {
+									newSelection.add(resolved);
+								}
+							} else {
+								newSelection.add(obj);
+							}
+						}
+						TreeViewerGroup.this.getTreeViewer().setSelection(new StructuredSelection(newSelection));
 					}
-					//TreeViewerGroup.this.getTreeViewer().expandAll();
-					//					TreeViewerGroup.this.getTreeViewer().setExpandedElements(expanded);
-					//TODO if the matching works, the selection also needs to be matched
-					TreeViewerGroup.this.getTreeViewer().setSelection(selection);
 				}
 			};
 		}
