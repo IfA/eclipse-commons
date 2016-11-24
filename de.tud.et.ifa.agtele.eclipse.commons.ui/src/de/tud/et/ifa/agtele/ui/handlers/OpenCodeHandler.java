@@ -46,6 +46,7 @@ import org.eclipse.emf.ecore.util.EcoreUtil;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.swt.widgets.Shell;
+import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.part.FileEditorInput;
 
@@ -85,6 +86,16 @@ public abstract class OpenCodeHandler extends AbstractHandler {
 			EOperationImpl.class, EAttributeImpl.class, EReferenceImpl.class, EEnumImpl.class, EEnumLiteralImpl.class,
 			GenPackageImpl.class, GenClassImpl.class, GenOperationImpl.class, GenFeatureImpl.class, GenEnumImpl.class,
 			GenEnumLiteralImpl.class);
+
+	/**
+	 * The {@link GenBase GenModel element} that was selected by the user or the is equivalent to the user's selection.
+	 */
+	protected GenBase selectedElement;
+
+	/**
+	 * The {@link IEditorPart} used to display the generated code.
+	 */
+	protected IEditorPart editor;
 
 	/**
 	 * This returns the qualified name of the Java class to open for the given
@@ -128,21 +139,17 @@ public abstract class OpenCodeHandler extends AbstractHandler {
 			return null;
 		}
 
-		// The GenModel element that was selected by the user or the
-		// corresponding GenModel element if an Ecore model element was selected
-		//
-		GenBase selectedElement = UIHelper.getFirstSelection() instanceof GenBase
-				? (GenBase) UIHelper.getFirstSelection()
+		this.selectedElement = UIHelper.getFirstSelection() instanceof GenBase ? (GenBase) UIHelper.getFirstSelection()
 				: this.getGenModelElement((EObject) UIHelper.getFirstSelection());
 
-		if (selectedElement == null) {
+		if (this.selectedElement == null) {
 			this.showError("Unable to determine corresponding element in the GenModel");
 			return null;
 		}
 
 		// The element for that we want to open the Java class
 		//
-		GenBase elementToOpen = this.getElementToOpen(selectedElement);
+		GenBase elementToOpen = this.getElementToOpen(this.selectedElement);
 
 		if (!(elementToOpen instanceof GenClass || elementToOpen instanceof GenPackage
 				|| elementToOpen instanceof GenEnum)) {
@@ -152,7 +159,7 @@ public abstract class OpenCodeHandler extends AbstractHandler {
 
 		// Determine the path of the Java class to open
 		//
-		StringBuilder pathBuilder = new StringBuilder(this.getDirectory(selectedElement)).append(IPath.SEPARATOR)
+		StringBuilder pathBuilder = new StringBuilder(this.getDirectory(this.selectedElement)).append(IPath.SEPARATOR)
 				.append(this.getQualifiedClassName(elementToOpen).replace(".".charAt(0), IPath.SEPARATOR))
 				.append(".java");
 
@@ -165,10 +172,9 @@ public abstract class OpenCodeHandler extends AbstractHandler {
 			return null;
 		}
 
-		// Open the GenModel editor
-		//
 		try {
-			UIHelper.openEditor((IFile) javaFile);
+			this.editor = UIHelper.openEditor((IFile) javaFile);
+
 		} catch (PartInitException e) {
 			this.showError("Error while opening the Java editor");
 			return null;
