@@ -13,7 +13,6 @@ import org.eclipse.core.commands.NotHandledException;
 import org.eclipse.core.commands.Parameterization;
 import org.eclipse.core.commands.ParameterizedCommand;
 import org.eclipse.core.commands.common.NotDefinedException;
-import org.eclipse.emf.common.notify.AdapterFactory;
 import org.eclipse.emf.common.ui.viewer.ColumnViewerInformationControlToolTipSupport;
 import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.EObject;
@@ -24,7 +23,6 @@ import org.eclipse.emf.edit.domain.EditingDomain;
 import org.eclipse.emf.edit.provider.ComposedAdapterFactory;
 import org.eclipse.emf.edit.ui.action.CreateChildAction;
 import org.eclipse.emf.edit.ui.action.CreateSiblingAction;
-import org.eclipse.emf.edit.ui.provider.AdapterFactoryContentProvider;
 import org.eclipse.emf.edit.ui.provider.AdapterFactoryLabelProvider;
 import org.eclipse.emf.edit.ui.provider.DecoratingColumLabelProvider;
 import org.eclipse.emf.edit.ui.provider.DelegatingStyledCellLabelProvider;
@@ -64,6 +62,7 @@ import de.tud.et.ifa.agtele.ui.AgteleUIPlugin;
 import de.tud.et.ifa.agtele.ui.emf.editor.ActionUtil;
 import de.tud.et.ifa.agtele.ui.interfaces.IPersistable;
 import de.tud.et.ifa.agtele.ui.listeners.SelectionListener2;
+import de.tud.et.ifa.agtele.ui.providers.StateRestoringViewerContentProvider;
 
 /**
  * A class that represents an SWT {@link Group} containing a {@link FilteredTree filtered tree viewer} and optionally a
@@ -377,7 +376,7 @@ public class TreeViewerGroup extends FilteredTree implements IPersistable {
 								? "Element Type: " + ((EObject) element).eClass().getName() : null : toolTip;
 					}
 				}));
-		treeViewer.setContentProvider(new TreeViewerGroupContentProvider(this.adapterFactory, treeViewer));
+		treeViewer.setContentProvider(new StateRestoringViewerContentProvider(this.adapterFactory, treeViewer));
 		new ColumnViewerInformationControlToolTipSupport(treeViewer,
 				new DiagnosticDecorator.Styled.EditingDomainLocationListener(this.editingDomain, treeViewer));
 		return treeViewer;
@@ -529,57 +528,7 @@ public class TreeViewerGroup extends FilteredTree implements IPersistable {
 	@Override
 	public void dispose() {
 
-		Arrays.asList(this.options).stream().forEach(i -> i.dispose());
-	}
-
-	public class TreeViewerGroupContentProvider extends AdapterFactoryContentProvider {
-
-		private TreeViewerGroupContentProvider(AdapterFactory adapterFactory, TreeViewer treeViewer) {
-			super(adapterFactory);
-
-			this.viewerRefresh = new ViewerRefresh(treeViewer) {
-
-				@Override
-				public void run() {
-					Object resource = TreeViewerGroup.this.getTreeViewer().getInput();
-					Object[] expanded = TreeViewerGroup.this.getTreeViewer().getExpandedElements();
-					IStructuredSelection selection = TreeViewerGroup.this.getTreeViewer().getStructuredSelection();
-
-					super.run();
-					if (resource instanceof Resource) {
-						ArrayList<Object> newExpanded = new ArrayList<>();
-						for (Object obj : expanded) {
-							if (obj instanceof EObject && ((EObject) obj).eIsProxy()) {
-								EObject resolved = EcoreUtil.resolve((EObject) obj,
-										((Resource) resource).getResourceSet());
-								if (resolved != null) {
-									newExpanded.add(resolved);
-								}
-							} else {
-								newExpanded.add(obj);
-							}
-						}
-
-						TreeViewerGroup.this.getTreeViewer()
-						.setExpandedElements(newExpanded.toArray());
-
-						ArrayList<Object> newSelection = new ArrayList<>();
-						for (Object obj : selection.toList()) {
-							if (obj instanceof EObject && ((EObject) obj).eIsProxy()) {
-								EObject resolved = EcoreUtil.resolve((EObject) obj,
-										((Resource) resource).getResourceSet());
-								if (resolved != null) {
-									newSelection.add(resolved);
-								}
-							} else {
-								newSelection.add(obj);
-							}
-						}
-						TreeViewerGroup.this.getTreeViewer().setSelection(new StructuredSelection(newSelection));
-					}
-				}
-			};
-		}
+		Arrays.asList(this.options).stream().forEach(TreeViewerGroupOption::dispose);
 	}
 
 	/**

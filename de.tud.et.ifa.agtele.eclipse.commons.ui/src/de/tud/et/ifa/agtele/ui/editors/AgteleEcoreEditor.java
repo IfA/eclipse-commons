@@ -11,7 +11,6 @@ import org.eclipse.emf.ecore.provider.EModelElementItemProvider;
 import org.eclipse.emf.edit.provider.ComposedImage;
 import org.eclipse.emf.edit.provider.IItemLabelProvider;
 import org.eclipse.emf.edit.ui.celleditor.AdapterFactoryTreeEditor;
-import org.eclipse.emf.edit.ui.provider.AdapterFactoryContentProvider;
 import org.eclipse.emf.edit.ui.provider.AdapterFactoryLabelProvider;
 import org.eclipse.emf.edit.ui.provider.DecoratingColumLabelProvider;
 import org.eclipse.emf.edit.ui.provider.DiagnosticDecorator;
@@ -158,7 +157,7 @@ public class AgteleEcoreEditor extends ClonableEcoreEditor implements IPersistab
 			//
 			this.setCurrentViewer(this.selectionViewer);
 
-			this.selectionViewer.setContentProvider(new AdapterFactoryContentProvider(this.adapterFactory));
+			// this.selectionViewer.setContentProvider(new AdapterFactoryContentProvider(this.adapterFactory));
 			this.selectionViewer.setLabelProvider(new DecoratingColumLabelProvider(
 					// Display containment references with a special icon to make them more distinguishable from
 					// non-containment references
