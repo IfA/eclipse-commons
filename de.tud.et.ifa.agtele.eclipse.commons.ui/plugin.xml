@@ -66,6 +66,28 @@
             class="de.tud.et.ifa.agtele.ui.contributions.OpenCodeMenuContribution"
             locationURI="popup:org.eclipse.emf.codegen.ecore.genmodel.presentation.GenModelEditorID?after=open-actions">
       </menuContribution>
+      <menuContribution
+            allPopups="false"
+            locationURI="menu:org.eclipse.ui.main.menu">
+         <menu
+               id="de.tud.et.ifa.agtele.eclipse.commons.ui.ecoreEditorMenuId"
+               label="Agtele Settings">
+            <command
+                  commandId="de.tud.et.ifa.agtele.eclipse.commons.ui.showInheritedEcoreClassFeaturesCommand"
+                  label="Show inherited Class Features"
+                  style="toggle">
+            </command>
+         </menu>
+      </menuContribution>
+      <menuContribution
+            allPopups="true"
+            locationURI="menu:org.eclipse.emf.ecoreMenuID?after=additions">
+         <command
+               commandId="de.tud.et.ifa.agtele.eclipse.commons.ui.showInheritedEcoreClassFeaturesCommand"
+               label="Show inherited Class Features"
+               style="toggle">
+         </command>
+      </menuContribution>
    </extension>
    <extension
          point="org.eclipse.ui.commands">
@@ -98,6 +120,11 @@
             defaultHandler="de.tud.et.ifa.agtele.ui.handlers.OpenFactoryCodeHandler"
             id="de.tud.et.ifa.agtele.ui.commands.OpenFactoryCode"
             name="OpenFactoryCode">
+      </command>
+      <command
+            defaultHandler="de.tud.et.ifa.agtele.ui.handlers.ShowInheritedEcoreClassFeaturesCommandHandler"
+            id="de.tud.et.ifa.agtele.eclipse.commons.ui.showInheritedEcoreClassFeaturesCommand"
+            name="ShowInheritedEcoreClassFeaturesCommand">
       </command>
    </extension>
 </plugin>

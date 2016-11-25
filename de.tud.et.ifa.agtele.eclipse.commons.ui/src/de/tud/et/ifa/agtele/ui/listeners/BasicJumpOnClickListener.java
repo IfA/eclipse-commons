@@ -13,6 +13,8 @@ import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.widgets.TreeItem;
 
+import de.tud.et.ifa.agtele.ui.providers.AgteleEcoreContentProvider.NonContainedChildWrapper;
+
 /**
  * A {@link SelectionListener} that operates on a {@link TreeViewer} and jumps to a suitable target if the user clicks
  * on an element in the tree while holding a defined set of modifiers.
@@ -142,6 +144,8 @@ public class BasicJumpOnClickListener implements SelectionListener2 {
 			target = ((EReference) selected).getEReferenceType();
 		} else if (selected instanceof EGenericType) {
 			target = ((EGenericType) selected).getEClassifier();
+		} else if (selected instanceof NonContainedChildWrapper) {
+			target = ((NonContainedChildWrapper) selected).getNoncontainedChild();
 		}
 
 		return target;

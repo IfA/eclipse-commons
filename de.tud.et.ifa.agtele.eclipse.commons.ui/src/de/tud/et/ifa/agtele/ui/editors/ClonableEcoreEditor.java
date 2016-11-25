@@ -124,6 +124,7 @@ import org.eclipse.ui.views.properties.PropertySheetPage;
 
 import de.tud.et.ifa.agtele.emf.edit.IDragAndDropProvider;
 import de.tud.et.ifa.agtele.ui.AgteleUIPlugin;
+import de.tud.et.ifa.agtele.ui.providers.AgteleEcoreContentProvider;
 import de.tud.et.ifa.agtele.ui.util.UIHelper;
 
 public class ClonableEcoreEditor extends ClonableEditor
@@ -1375,7 +1376,7 @@ implements IEditingDomainProvider, ISelectionProvider, IMenuListener, IViewerPro
 				ClonableEcoreEditor.this.getActionBarContributor().shareGlobalActions(this, actionBars);
 			}
 		};
-		propertySheetPage.setPropertySourceProvider(new AdapterFactoryContentProvider(this.adapterFactory));
+		propertySheetPage.setPropertySourceProvider(new AgteleEcoreContentProvider(this.adapterFactory, null));
 		this.propertySheetPages.add(propertySheetPage);
 
 		return propertySheetPage;

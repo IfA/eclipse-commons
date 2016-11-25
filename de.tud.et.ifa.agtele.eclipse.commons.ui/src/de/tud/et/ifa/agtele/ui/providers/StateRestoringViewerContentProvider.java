@@ -30,6 +30,8 @@ public class StateRestoringViewerContentProvider extends AdapterFactoryContentPr
 
 		super(adapterFactory);
 
-		this.viewerRefresh = new StateRestoringViewerRefresh(structuredViewer);
+		if (structuredViewer != null) {
+			this.viewerRefresh = new StateRestoringViewerRefresh(structuredViewer);
+		}
 	}
 }
