@@ -29,8 +29,8 @@ public class ShowInheritedEcoreClassFeaturesCommandHandler extends AbstractHandl
 
 		ShowInheritedEcoreClassFeaturesCommandHandler.checked = !ShowInheritedEcoreClassFeaturesCommandHandler.checked;
 
-		ShowInheritedEcoreClassFeaturesCommandHandler.store
-		.setValue(ShowInheritedEcoreClassFeaturesCommandHandler.VISIBILITY_SETTING_KEY,
+		ShowInheritedEcoreClassFeaturesCommandHandler.store.setValue(
+				ShowInheritedEcoreClassFeaturesCommandHandler.VISIBILITY_SETTING_KEY,
 				ShowInheritedEcoreClassFeaturesCommandHandler.checked);
 
 		AgteleEcoreContentProvider.setInheritedContentVisibility(ShowInheritedEcoreClassFeaturesCommandHandler.checked);
@@ -49,18 +49,8 @@ public class ShowInheritedEcoreClassFeaturesCommandHandler extends AbstractHandl
 	}
 
 	protected static boolean getInitialVisibility() {
-		boolean value = false;
-		if (!ShowInheritedEcoreClassFeaturesCommandHandler.store
-				.contains(ShowInheritedEcoreClassFeaturesCommandHandler.VISIBILITY_SETTING_KEY)) {
-			ShowInheritedEcoreClassFeaturesCommandHandler.store
-			.setValue(ShowInheritedEcoreClassFeaturesCommandHandler.VISIBILITY_SETTING_KEY, true);
-			value = true;
-		} else {
-			value = ShowInheritedEcoreClassFeaturesCommandHandler.store
-					.getBoolean(ShowInheritedEcoreClassFeaturesCommandHandler.VISIBILITY_SETTING_KEY);
-		}
-
-		return value;
+		return ShowInheritedEcoreClassFeaturesCommandHandler.store
+				.getBoolean(ShowInheritedEcoreClassFeaturesCommandHandler.VISIBILITY_SETTING_KEY);
 	}
 
 	public static boolean isVisible() {
