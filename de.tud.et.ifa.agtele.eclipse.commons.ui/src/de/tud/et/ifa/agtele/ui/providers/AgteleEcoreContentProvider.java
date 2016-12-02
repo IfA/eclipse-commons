@@ -13,12 +13,39 @@ import org.eclipse.ui.views.properties.IPropertySource;
 
 import de.tud.et.ifa.agtele.ui.handlers.ShowInheritedEcoreClassFeaturesCommandHandler;
 
+/**
+ * This provider enhances the default content provider for ecore models in order
+ * to be able to display {@link EStructuralFeature}s and {@link EOperation}s
+ * that are derived from super-{@link EClass}es. The display of the additionally
+ * provided content can be switched on and off globally by use of the
+ * {@link ShowInheritedEcoreClassFeaturesCommandHandler}.
+ *
+ * This provider keeps track of its instances in order to refresh the associated
+ * views, when the
+ * {@link ShowInheritedEcoreClassFeaturesCommandHandler#isVisible()} changes.
+ * For that, the
+ * {@link AgteleEcoreContentProvider#setInheritedContentVisibility(boolean)}
+ * method is to be called.
+ * 
+ * @author Baron
+ *
+ */
 public class AgteleEcoreContentProvider extends StateRestoringViewerContentProvider {
 
+	/**
+	 * The list of content provider instances.
+	 */
 	static protected List<AgteleEcoreContentProvider> instances = new ArrayList<>();
 
+	/**
+	 * Flag indicating whether the inherited content is to be displayed.
+	 */
 	static protected boolean inheritedContentVisible = true;
 
+	/**
+	 * @param adapterFactory
+	 * @param structuredViewer
+	 */
 	public AgteleEcoreContentProvider(AdapterFactory adapterFactory, StructuredViewer structuredViewer) {
 		super(adapterFactory, structuredViewer);
 
@@ -26,6 +53,12 @@ public class AgteleEcoreContentProvider extends StateRestoringViewerContentProvi
 		AgteleEcoreContentProvider.inheritedContentVisible = AgteleEcoreContentProvider.getCurrentVisibilityState();
 	}
 
+	/**
+	 * Standard
+	 * {@link StateRestoringViewerContentProvider#getPropertySource(Object)}. In
+	 * case of a {@link NonContainedChildWrapper} it delegates to the
+	 * {@link NonContainedChildWrapper#noncontainedChild}.
+	 */
 	@Override
 	public IPropertySource getPropertySource(Object object) {
 		if (object instanceof NonContainedChildWrapper) {
@@ -34,6 +67,18 @@ public class AgteleEcoreContentProvider extends StateRestoringViewerContentProvi
 		return super.getPropertySource(object);
 	}
 
+	/**
+	 * Standard {@link StateRestoringViewerContentProvider#getChildren(Object)},
+	 * except in case the object is an {@link EClass}, for each inherited
+	 * (tree-) child, a {@link NonContainedChildWrapper} is created. This
+	 * wrapper is needed in order to keep track of the respective parent node in
+	 * the tree, which in case of inherited features is not the eContainer of
+	 * the feature.
+	 *
+	 * The order of inherited features (and {@link EStructuralFeature}s and
+	 * {@link EOperation}s within) cannot be set right now. TODO create Agtele
+	 * Settings for that.
+	 */
 	@Override
 	public Object[] getChildren(Object object) {
 		List<Object> result = new ArrayList<>();
@@ -62,6 +107,11 @@ public class AgteleEcoreContentProvider extends StateRestoringViewerContentProvi
 		return result.toArray();
 	}
 
+	/**
+	 * Standard {@link StateRestoringViewerContentProvider#hasChildren(Object)}.
+	 * In case of a {@link NonContainedChildWrapper} it delegates to the
+	 * {@link NonContainedChildWrapper#noncontainedChild}.
+	 */
 	@Override
 	public boolean hasChildren(Object object) {
 		if (object instanceof NonContainedChildWrapper) {
@@ -70,11 +120,21 @@ public class AgteleEcoreContentProvider extends StateRestoringViewerContentProvi
 		return super.hasChildren(object);
 	}
 
+	/**
+	 * Sets the visibility of inherited {@link EClass} content and
+	 * {@link #refreshViewers()} afterwards.
+	 * 
+	 * @param visible
+	 */
 	static public void setInheritedContentVisibility(boolean visible) {
 		AgteleEcoreContentProvider.inheritedContentVisible = visible;
 		AgteleEcoreContentProvider.refreshViewers();
 	}
 
+	/**
+	 * Iterates the {@link #instances} and {@link StructuredViewer#refresh()}es
+	 * the views, if a view is available.
+	 */
 	static public void refreshViewers() {
 		for (AgteleEcoreContentProvider provider : AgteleEcoreContentProvider.instances) {
 			if (provider.viewer != null) {
@@ -96,8 +156,15 @@ public class AgteleEcoreContentProvider extends StateRestoringViewerContentProvi
 	 */
 	public static class NonContainedChildWrapper {
 
+		/**
+		 * The child that usually is contained in another container.
+		 */
 		protected Object noncontainedChild;
 
+		/**
+		 * The parent node to which the non contained child is virtually
+		 * displayed.
+		 */
 		protected Object parentNode;
 
 		@SuppressWarnings("unused")
@@ -130,6 +197,12 @@ public class AgteleEcoreContentProvider extends StateRestoringViewerContentProvi
 		}
 	}
 
+	/**
+	 * Queries the
+	 * {@link ShowInheritedEcoreClassFeaturesCommandHandler#isVisible()}
+	 * 
+	 * @return
+	 */
 	protected static boolean getCurrentVisibilityState() {
 		return ShowInheritedEcoreClassFeaturesCommandHandler.isVisible();
 	}
