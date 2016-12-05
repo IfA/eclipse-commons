@@ -7,6 +7,8 @@ import java.util.stream.Collectors;
 
 import org.eclipse.emf.ecore.EAttribute;
 import org.eclipse.emf.ecore.EClass;
+import org.eclipse.emf.ecore.EEnum;
+import org.eclipse.emf.ecore.EEnumLiteral;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.EReference;
 import org.eclipse.emf.ecore.EStructuralFeature;
@@ -18,13 +20,71 @@ import de.tud.et.ifa.agtele.emf.AgteleEcoreUtil;
 import de.tud.et.ifa.agtele.resources.BundleContentHelper;
 
 /**
- * This interface may be implemented to provide a help text.
+ * This Interface is used to render HTMl help text from an {@link EObject}.
+ * Use the Methods {@link #getHelpItemDescription(EObject)} to render the default help view.
  * 
- * @author martin
+ * The generation of the HTML document containing the help relies on html snippets containing placeholdes like '%PLACEHOLDER%'
+ * and render methods replacing the placeholders with data from the {@link HelpItemData} objects and the references 
+ * {@link EObject}s such as {@link EClass}, {@link EReference}, etc. 
+ * 
+ * The {@link HelpItemData} and {@link HelpItemDescription} objects are created using an overridable {@link HelpItemFactory}.
+ * 
+ * The rendering can be adapted by:
+ * <ul>
+ * <li>overriding the getter methods for the general html templates (change the logical structure of the generated document): 
+ * <ul>
+ * 		<li>{@link #getHTMLTemplate()}</li> 
+ * 		<li>{@link #getCSSTemplate()}</li>
+ * 		<li>{@link #getJavaScriptTemplate()}</li>
+ * 		<li>{@link #getTagTemplate()}</li>
+ * 		<li>{@link #getTagContainerTemplate()}</li>
+ * 		<li>{@link #getBodyTemplate(boolean, boolean, boolean)}</li>
+ * </ul>
+ * </li>
+ * 
+ * <li>overriding the methods for creating the default HTML utility (changes style and behavior)
+ * <ul>
+ * 		<li>{@link #getStyles()}</li>
+ * 		<li>{@link #getScripts()}</li>
+ * </ul>
+ * </li>
+ * 
+ * <li>overriding the getter methods for the EMF specific html templates (change the logical structure of the help item display): 
+ * <ul>
+ * 		<li>{@link #getAttributeTemplate(boolean)}</li>
+ * 		<li>{@link #getEEnumLiteralTemplate()}</li>
+ * 		<li>{@link #getNCReferenceeTemplate()}, {@link #getNCReferenceTemplate(boolean)}</li>
+ * 		<li>{@link #getCReferenceTemplate(boolean)}</li>
+ * 		<li>{@link #getCReferenceChildTemplate(boolean)}</li>
+ * </ul>
+ * </li>
+ * <li>overriding the render methods, that process the {@link HelpItemData} and replace the placeholders such as '%PLACEHOLDER%' from the html templates with the EMF specific content:
+ * <ul>
+ * 		<li>{@link #renderBody(HelpItemDescription)}</li>
+ * 		<li>{@link #renderAttributes(List)}</li>
+ * 		<li>{@link #renderCReferenceChildren(List)}</li>
+ * 		<li>{@link #renderCReferences(List)}</li>
+ * 		<li>{@link #renderEEnumLiterals(List)}</li>
+ * 		<li>{@link #renderNCReferencees(List)}</li>
+ * 		<li>{@link #renderNCReferences(List)}</li>
+ * 		<li>{@link #renderNCRefTags(EReferenceHelpItemData)}</li>
+ * </ul>
+ * </li>
+ * <li>providing a custom {@link HelpItemFactory} implementation to the {@link #getHelpItemDescription(EObject, HelpItemFactory)}
+ * method that generates the {@link HelpItemDescription} including the {@link HelpItemData} objects that are consumed by the render-methods.</li>
+ * </ul>
+ * 
+ * @author cmartin
+ * @author Baron
  *
  */
 public interface IEMFModelHelpItemProvider {
 
+	/**
+	 * The general structure of the HTML document.
+	 * 
+	 * @return Contains the following placeholders: %TITLE%, %HEAD%, %STYLE%, %BODY%, %SCRIPT%.
+	 */
 	public default String getHTMLTemplate () {
 		return "<!DOCTYPE html>"
 				+ "<html lang=\"en\">"
@@ -41,19 +101,35 @@ public interface IEMFModelHelpItemProvider {
 			+  "</html>";
 	}
 	
+	/**
+	 * The template for an html style tag.
+	 * @return Contains the placeholder %RULES%
+	 */
 	public default String getCSSTemplate() {
 		return "<style type=\"text/css\">%RULES%</style>";
 	}
 	
+	/**
+	 * The template for an html script tag (javascript).
+	 * @return Contains the placeholder %CODE%
+	 */
 	public default String getJavaScriptTemplate() {
 		return "<script type=\"application/javascript\">"
 				+ "%CODE%"
 			+  "</script>";
 	}
 
+	/**
+	 * The template for a tag container that is to be displayed for some of the features.
+	 * @return Contains placeholder %TAGS%
+	 */
 	public default String getTagContainerTemplate() {
 		return "<div class=\"tag-container\">%TAGS%</div>";
 	}
+	/**
+	 * The template for a tag, that is to be displayed inside the {@link #getTagContainerTemplate()}.
+	 * @return Contains placeholders %TYPE%, %TEXT%
+	 */
 	public default String getTagTemplate() {
 		return "<span class=\"tag %TYPE%\">%TEXT%</span>";
 	}
@@ -79,10 +155,19 @@ public interface IEMFModelHelpItemProvider {
 		return cleanHTML(result);
 	}
 	
+	/**
+	 * Cleans the generated text from the '%PLACEHOLDER%'s.
+	 * @param rendered 
+	 * @return The cleaned string.
+	 */
 	public default String cleanHTML(String rendered) {
 		return rendered.replaceAll("(%[A-Z]*%)", "");		
 	}
 	
+	/**
+	 * Delivers the default styles in the Help view.
+	 * @return Calls {@link #getCSSTemplate()} and replaces the %RULES% placeholder.
+	 */
 	public default String getStyles () {
 		String styles = "";
 		
@@ -193,6 +278,11 @@ public interface IEMFModelHelpItemProvider {
 		return styles;
 	}
 	
+	/**
+	 * Delivers the default scripts for the generated help.
+	 * Calls {@link #getJavaScriptTemplate()} and replaces the %CODE% placeholder.
+	 * @return the jquery script and the custom script for collapsing and expanding the help texts.
+	 */
 	public default String getScripts() {
 		String scripts = "";	
 		boolean success = true;
@@ -220,6 +310,13 @@ public interface IEMFModelHelpItemProvider {
 		return scripts;
 	}
 
+	/**
+	 * The logical structure of the help document. Contains the placeholders %TITLE%, %DESCRIPTION%, [%ATTRIBUTES%, %NCREFERENCES%, %CREFERENCES%].
+	 * @param includeAttributes Whether to include the attributes section 
+	 * @param includeNCReferences Whether to include the non-containment references section
+	 * @param includeCReferences Whether to include the containment references section
+	 * @return The prepared template.
+	 */
 	public default String getBodyTemplate (boolean includeAttributes, boolean includeNCReferences, boolean includeCReferences) {
 		return "<h1 class=\"heading class-heading\">%TITLE% - Help</h1>"
 				+ "<div class=\"class-description description\">%DESCRIPTION%</div>"
@@ -237,6 +334,12 @@ public interface IEMFModelHelpItemProvider {
 						: "");
 	}
 	
+	/**
+	 * Calls {@link #getBodyTemplate(boolean, boolean, boolean)} and replaces its placeholders by invoking
+	 * {@link #renderAttributes(List)}, {@link #renderNCReferences(List)}, {@link #renderCReferences(List)}
+	 * @param helpItemDescription
+	 * @return The rendered body content.
+	 */
 	public default String renderBody(HelpItemDescription helpItemDescription) {
 		EClassHelpItemData eClass = helpItemDescription.getEClassDescription();
 		List<EAttributeHelpItemData> attributes = helpItemDescription.getAttributeDescription();
@@ -250,7 +353,12 @@ public interface IEMFModelHelpItemProvider {
 				.replace("%NCREFERENCES%", renderNCReferences(ncRefs))
 				.replace("%CREFERENCES%", renderCReferences(cRefs));	
 	}
-	
+	/**
+	 * The default html template for the display of an attribute help text. 
+	 * Contains the placeholders %NAME%, %TYPE%, %DESCRIPTION%, [%EENUMDESCRIPTION%, %EENUMVALUES%]
+	 * @param isEEnum Whether to include the sections for documenting an EEnum.
+	 * @return The template including the placeholders
+	 */
 	public default String getAttributeTemplate(boolean isEEnum) {
 		return "<h3 class=\"heading attribute-heading\">%NAME% \u00bb %TYPE% " + (isEEnum ? "(EEnum)" : "") + "</h3>"
 				+ "<div class=\"attribute-description description\">%DESCRIPTION%"
@@ -266,6 +374,12 @@ public interface IEMFModelHelpItemProvider {
 						: "");
 	}
 
+	/**
+	 * Calls {@link #getAttributeTemplate(boolean)} and replaces the placeholders according to the {@link EAttributeHelpItemData}.
+	 * Invokes {@link #renderEEnumLiterals(List)} in case the attribute type is an {@link EEnum}.
+	 * @param attributes The attributes to render
+	 * @return The rendered attributes help text.
+	 */
 	public default String renderAttributes(List<EAttributeHelpItemData> attributes) {
 		String text = "";
 		if (!attributes.isEmpty()) {
@@ -281,11 +395,20 @@ public interface IEMFModelHelpItemProvider {
 		return text;
 	};
 	
+	/**
+	 * The default html template for documenting an {@link EEnumLiteral}. 
+	 * @return Contains the placeholders %NAME% and %DESCRIPTION%.
+	 */
 	public default String getEEnumLiteralTemplate() {
 		return "<h5 class=\"heading eenum-literal-heading\">%NAME%</h5>"
 				+ "<div class=\"eenum-literal-description description\">%DESCRIPTION%</div>";
 	}
 	
+	/**
+	 * Calls {@link #getEEnumLiteralTemplate()} and replaces the placeholders.
+	 * @param eEnumLiterals The enum literals to display.
+	 * @return The help text for EEnum values to set.
+	 */
 	public default String renderEEnumLiterals(List<EEnumLiteralHelpItemData> eEnumLiterals) {
 		String text = "";
 		
@@ -298,6 +421,11 @@ public interface IEMFModelHelpItemProvider {
 		return text;		
 	};
 
+	/**
+	 * The default html template for rendering the help text of a non-containment {@link EReference}.
+	 * @param refsAvailable Whether to include the available references section.
+	 * @return Contains placeholders for %NAME%, %TYPE%, %TAGS%, %DESCRIPTION%, [%NCREFERENCEES%]
+	 */
 	public default String getNCReferenceTemplate(boolean refsAvailable) {
 		return "<h3 class=\"heading ncreference-heading\">%NAME% \u00bb %TYPE%</h3>"
 				+ "%TAGS%"
@@ -310,6 +438,12 @@ public interface IEMFModelHelpItemProvider {
 						: "");
 	}
 	
+	/**
+	 * Calls {@link #getNCReferenceTemplate(boolean)} and replaces the placeholders according to the list of 
+	 * {@link EReferenceHelpItemData} of non-containment references.
+	 * @param ncRefs
+	 * @return The rendered help text of the non-containment references.
+	 */
 	public default String renderNCReferences(List<EReferenceHelpItemData> ncRefs) {
 		String text = "";
 		if (!ncRefs.isEmpty()) {
@@ -325,6 +459,12 @@ public interface IEMFModelHelpItemProvider {
 		return text;
 	}
 	
+	/**
+	 * Renders the tags of a reference help text. 
+	 * Calls {@link #getTagContainerTemplate()} and {@link #getTagTemplate()} and replaces the placeholder.
+	 * @param ncRef The non-containment reference to get the tags for.
+	 * @return The rendered tags section.
+	 */
 	public default String renderNCRefTags(EReferenceHelpItemData ncRef) {
 		String text = "";
 			if (ncRef.getEReference().isDerived()) {
@@ -339,11 +479,20 @@ public interface IEMFModelHelpItemProvider {
 		return text;
 	}
 
+	/**
+	 * Returns the template for including possible referenced objects (referencee) within the model in the help text.
+	 * @return Contains placeholders %NAME%, %DESCRIPTION%
+	 */
 	public default String getNCReferenceeTemplate() {
 		return "<h5 class=\"heading ncreferencee-heading\">%NAME%</h5>"
 				+ "<div class=\"ncreferencee-description description\">%DESCRIPTION%</div>"; 
 	};
 	
+	/**
+	 * Calls {@link #getNCReferenceeTemplate()} and replaces the placeholders.
+	 * @param childData
+	 * @return The possible referencees of a reference.
+	 */
 	public default String renderNCReferencees(List<EClassHelpItemData> childData) {
 		String text = "";
 		
@@ -356,6 +505,11 @@ public interface IEMFModelHelpItemProvider {
 		return text;
 	}
 
+	/**
+	 * The default html template of a containment reference help text.
+	 * @param childrenAvailable Whether to include the creatable children section.
+	 * @return Contains placeholders %NAME%, %TYPE%, %DESCRIPTION%, [%CHILDREN%]
+	 */
 	public default String getCReferenceTemplate(boolean childrenAvailable) {
 		return "<h3 class=\"heading creference-heading\">%NAME% \u00bb %TYPE%</h3>"
 				+ "<div class=\"creference-description description\">"
@@ -366,7 +520,11 @@ public interface IEMFModelHelpItemProvider {
 						+ "<div class=\"creference-children sub-category\">%CHILDREN%</div>" 
 						: "");
 	}
-	
+	/**
+	 * Calls {@link #getCReferenceTemplate(boolean)} and replaces the placeholders.
+	 * @param cRefs
+	 * @return The rendered help text for containment references.
+	 */
 	public default String renderCReferences(List<EReferenceHelpItemData> cRefs) {
 		String text = "";
 			for (EReferenceHelpItemData cRef : cRefs) {
@@ -380,11 +538,21 @@ public interface IEMFModelHelpItemProvider {
 		return text;
 	}
 	
+	/**
+	 * The default html template for providing the help text for creatable children of a containment reference.
+	 * @param descriptionAvailable Whether to include the description section of the creatable child.
+	 * @return Contains placeholders %NAME% [%DESCRIPTION%]
+	 */
 	public default String getCReferenceChildTemplate (boolean descriptionAvailable) {
 		return "<h5 class=\"heading creference-child-heading\">\u00bb %NAME%</h5>" +
 				(descriptionAvailable ? "<div class=\"creference-child-description description\">%DESCRIPTION%</div>" : ""); 
 	}
 	
+	/**
+	 * Calls {@link #getCReferenceChildTemplate(boolean)} and replaces the placeholders.
+	 * @param childData
+	 * @return The rendered help text for the creatable children of a containment reference.
+	 */
 	public default String renderCReferenceChildren(List<EClassHelpItemData> childData) {
 		String text = "";
 		for (EClassHelpItemData child : childData) {
@@ -421,7 +589,8 @@ public interface IEMFModelHelpItemProvider {
 	 * targets in the model that the eObject originates from.
 	 * 
 	 * @param eObject
-	 * @param factory
+	 * @param factory Specify a custom factory for the {@link HelpItemData} and {@link HelpItemDescription} objects
+	 * in order to provide custom information to the {@link #render(HelpItemDescription)} method.
 	 * @return all relevant {@link HelpItemDescription}
 	 */
 	@SuppressWarnings("unchecked")
@@ -489,24 +658,48 @@ public interface IEMFModelHelpItemProvider {
 		return helpItemDescription;
 	}
 	/**
-	 * An overridable factory interface that creates HelpItems in order to be consumed by the rendering algorithm.   
-	 * @author Lukas
-	 *
+	 * An overridable factory interface that creates HelpItems in order to be consumed by the rendering algorithm.
+	 * Override the factory with custom methods and provide it to the
+	 * {@link IEMFModelHelpItemProvider#getHelpItemDescription(EObject, HelpItemFactory)} in order to customize 
+	 * the content of the {@link HelpItemDescription} and {@link HelpItemData} objects that are used 
+	 * for the rendering of the help view.
+	 * @author Baron
 	 */
 	public interface HelpItemFactory {
 		
+		/**
+		 * Creates a help item description.
+		 * @param eObject
+		 * @return a help item description for the specified object.
+		 */
 		public default HelpItemDescription createHelpItemDescription(EObject eObject) {
 			return new HelpItemDescription(eObject); 
 		}
 		
+		/**
+		 * Creates an {@link EClass} help item data object
+		 * @param eClass
+		 * @return An {@link EClass} help item data object
+		 */
 		public default EClassHelpItemData createEClassHelpItemData(EClass eClass) {
 			return new EClassHelpItemData(eClass);
 		}
 		
+		/**
+		 * Creates an {@link EAttribute} help item data object.
+		 * @param attribute
+		 * @return An {@link EAttribute} help item data object.
+		 */
 		public default EAttributeHelpItemData createEAttributeHelpItemData(EAttribute attribute) {
 			return new EAttributeHelpItemData(attribute);
 		}
 		
+		/**
+		 * Crates an {@link EReference} help item data object.
+		 * @param eReference
+		 * @param list
+		 * @return A {@link EReference} new help item data object.
+		 */
 		public default EReferenceHelpItemData createEReferenceHelpItemData(EReference eReference, List<EObject> list) {
 			return new EReferenceHelpItemData(eReference, list);
 		}
