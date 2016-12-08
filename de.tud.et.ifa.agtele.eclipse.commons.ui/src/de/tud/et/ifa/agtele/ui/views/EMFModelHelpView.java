@@ -2,9 +2,7 @@ package de.tud.et.ifa.agtele.ui.views;
 
 import java.util.Iterator;
 
-import org.eclipse.emf.common.notify.Adapter;
 import org.eclipse.emf.ecore.EObject;
-import org.eclipse.emf.edit.provider.IEditingDomainItemProvider;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IToolBarManager;
 import org.eclipse.jface.viewers.ISelection;
@@ -56,7 +54,7 @@ public class EMFModelHelpView extends ViewPart implements IPersistable {
 		this.linkEditor = AgteleUIPlugin.getPlugin().getDialogSettings().getBoolean("link");
 		if (this.linkEditor) {
 			PlatformUI.getWorkbench().getActiveWorkbenchWindow().getSelectionService()
-			.addSelectionListener(this.selectionListener);
+					.addSelectionListener(this.selectionListener);
 		}
 
 	}
@@ -92,7 +90,7 @@ public class EMFModelHelpView extends ViewPart implements IPersistable {
 	@Override
 	public void dispose() {
 		PlatformUI.getWorkbench().getActiveWorkbenchWindow().getSelectionService()
-		.removeSelectionListener(this.selectionListener);
+				.removeSelectionListener(this.selectionListener);
 		AgteleUIPlugin.getPlugin().getDialogSettings().put("link", this.linkEditor);
 
 		AgteleUIPlugin.getPlugin().getDialogSettings().put("browserText", this.currentText);
@@ -117,10 +115,10 @@ public class EMFModelHelpView extends ViewPart implements IPersistable {
 				EMFModelHelpView.this.linkEditor = !EMFModelHelpView.this.linkEditor;
 				if (EMFModelHelpView.this.linkEditor) {
 					PlatformUI.getWorkbench().getActiveWorkbenchWindow().getSelectionService()
-					.addSelectionListener(EMFModelHelpView.this.selectionListener);
+							.addSelectionListener(EMFModelHelpView.this.selectionListener);
 				} else {
 					PlatformUI.getWorkbench().getActiveWorkbenchWindow().getSelectionService()
-					.removeSelectionListener(EMFModelHelpView.this.selectionListener);
+							.removeSelectionListener(EMFModelHelpView.this.selectionListener);
 				}
 				EMFModelHelpView.this.linkAction.setChecked(EMFModelHelpView.this.linkEditor);
 			}
@@ -209,31 +207,17 @@ public class EMFModelHelpView extends ViewPart implements IPersistable {
 	 * @return
 	 */
 	private static String getHtml(EObject eObject) {
-		IEMFModelHelpItemProvider iEMFModelHelpItemProvider;
-		// Try finding the IEMFModelHelpItemProvider using the AdapterFactory
-		if (AgteleEcoreUtil.getAdapterFactoryItemDelegatorFor(eObject) == null) {
-			return "No Help available";
-		}
 
-		Adapter adapter = AgteleEcoreUtil.getAdapterFactoryItemDelegatorFor(eObject).getAdapterFactory().adapt(eObject,
+		IEMFModelHelpItemProvider iEMFModelHelpItemProvider = AgteleEcoreUtil.adapt(eObject,
 				IEMFModelHelpItemProvider.class);
-		// If it's not found, try it again using a different ItemProvider, like
-		// the IEditingDomainItemProvider that should alway be there
-		if (adapter == null) {
-			adapter = AgteleEcoreUtil.getAdapterFactoryItemDelegatorFor(eObject).getAdapterFactory().adapt(eObject,
-					IEditingDomainItemProvider.class);
-		}
-		// Now check if the adapter that was found implements its own
-		// IEMFModelHelpItemProvider
-		if (adapter instanceof IEMFModelHelpItemProvider) {
-			iEMFModelHelpItemProvider = (IEMFModelHelpItemProvider) adapter;
-		}
-		// if it doesn't use the default implementation provided by the
-		// IEMFModelHelpItemProvider
-		else {
+
+		// Create a new provider if necessary
+		//
+		if (iEMFModelHelpItemProvider == null) {
 			iEMFModelHelpItemProvider = new IEMFModelHelpItemProvider() {
 			};
 		}
+
 		return iEMFModelHelpItemProvider.render(iEMFModelHelpItemProvider.getHelpItemDescription(eObject));
 	}
 
