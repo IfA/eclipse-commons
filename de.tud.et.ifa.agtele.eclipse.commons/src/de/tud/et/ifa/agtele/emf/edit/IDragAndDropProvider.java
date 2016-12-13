@@ -8,11 +8,13 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.eclipse.emf.common.command.AbstractCommand;
 import org.eclipse.emf.common.command.Command;
+import org.eclipse.emf.common.command.CommandWrapper;
 import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.EReference;
@@ -32,7 +34,8 @@ import de.tud.et.ifa.agtele.emf.edit.commands.BasicDragAndDropSetCommand;
 import de.tud.et.ifa.agtele.emf.edit.commands.DragAndDropChangeContainingFeatureCommand;
 
 /**
- * This provides custom implementations for the '<em>createDragAndDropCommand(...)</em>' function provided by the
+ * This provides custom implementations for the
+ * '<em>createDragAndDropCommand(...)</em>' function provided by the
  * {@link ItemProviderAdapter}.
  *
  * @author mfreund
@@ -40,19 +43,21 @@ import de.tud.et.ifa.agtele.emf.edit.commands.DragAndDropChangeContainingFeature
 public interface IDragAndDropProvider {
 
 	/**
-	 * Create a custom {@link DragAndDropCommand}. The given '<em>strategy</em>' can be used to select one of multiple
-	 * possible commands to execute.
+	 * Create a custom {@link DragAndDropCommand}. The given '<em>strategy</em>'
+	 * can be used to select one of multiple possible commands to execute.
 	 * <p />
-	 * This will usually be called inside an implementation of '<em>createDragAndDropCommand(...)</em>' in a custom
-	 * ItemProvider instead of just calling '<em>super.createDragAndDropCommand(...)</em>'.
+	 * This will usually be called inside an implementation of
+	 * '<em>createDragAndDropCommand(...)</em>' in a custom ItemProvider instead
+	 * of just calling '<em>super.createDragAndDropCommand(...)</em>'.
 	 *
 	 * @param domain
-	 *            The {@link EditingDomain} that will be used to execute the command.
+	 *            The {@link EditingDomain} that will be used to execute the
+	 *            command.
 	 * @param owner
 	 *            The object on that the command will be executed.
 	 * @param location
-	 *            The location (between 0.0 and 1.0) in relation to the '<em>owner</em>' where the command will be
-	 *            executed.
+	 *            The location (between 0.0 and 1.0) in relation to the
+	 *            '<em>owner</em>' where the command will be executed.
 	 * @param operations
 	 *            The permitted operations.
 	 * @param operation
@@ -60,8 +65,8 @@ public interface IDragAndDropProvider {
 	 * @param collection
 	 *            The dragged elements.
 	 * @param strategy
-	 *            The {@link ICommandSelectionStrategy} that shall be applied to select an unambiguous command before
-	 *            execution.
+	 *            The {@link ICommandSelectionStrategy} that shall be applied to
+	 *            select an unambiguous command before execution.
 	 * @return The custom drag and drop command.
 	 */
 	@SuppressWarnings("unchecked")
@@ -75,7 +80,8 @@ public interface IDragAndDropProvider {
 			public boolean validate(Object owner, float location, int operations, int operation,
 					Collection<?> collection) {
 
-				// use the default d'n'd command only for move/copy operations (i.e. if the location is near 0 or near
+				// use the default d'n'd command only for move/copy operations
+				// (i.e. if the location is near 0 or near
 				// 1)
 				return super.validate(owner, location, operations, operation, collection)
 						&& (location < 0.2 || location > 0.8);
@@ -86,7 +92,8 @@ public interface IDragAndDropProvider {
 			return dragAndDropCommand;
 		}
 
-		// Determine the common super type of all dragged objects (this will be checked against the types of the
+		// Determine the common super type of all dragged objects (this will be
+		// checked against the types of the
 		// possible references)
 		// and if all elements are of the exact same type
 		//
@@ -101,18 +108,24 @@ public interface IDragAndDropProvider {
 
 		EObject parent = (EObject) owner;
 		AdapterFactoryItemDelegator delegator = AgteleEcoreUtil.getAdapterFactoryItemDelegatorFor(parent);
+
+		// A map that stores all references that are covered by the created
+		// command as well as whether they are disabled
+		//
 		Map<EReference, Boolean> possibleReferences = new HashMap<>();
 
 		if (delegator != null) {
 
-			// Determine all possible references that could be used to drop the collection
+			// Determine all possible references that could be used to drop the
+			// collection
 			//
 			for (EReference ref : parent.eClass().getEAllReferences()) {
 				if ((ref.isContainment() || ref.getEOpposite() == null || !ref.getEOpposite().isContainment())
 						&& !ref.isDerived() && (collection.size() > 1 ? ref.isMany() : true) && eClassSet
 								.parallelStream().allMatch(eClass -> ref.getEReferenceType().isSuperTypeOf(eClass))) {
 
-					// If there is an 'IItemPropertyDescriptor' for the reference, we use this to check suitable
+					// If there is an 'IItemPropertyDescriptor' for the
+					// reference, we use this to check suitable
 					// values...
 					//
 					IItemPropertyDescriptor propDesc;
@@ -123,7 +136,8 @@ public interface IDragAndDropProvider {
 							possibleReferences.put(ref, false);
 						} else {
 
-							// Check if the objects in the 'collection' are already referenced by 'parent.ref'
+							// Check if the objects in the 'collection' are
+							// already referenced by 'parent.ref'
 							//
 							List<Object> currentValues = new ArrayList<>(ref.isMany()
 									? (Collection<Object>) parent.eGet(ref) : Arrays.asList(parent.eGet(ref)));
@@ -143,7 +157,8 @@ public interface IDragAndDropProvider {
 										&& ((CommandParameter) c).getEValue() != null)
 								.collect(Collectors.toList()).iterator();
 
-						// Check that there is a child descriptor for the required 'ref' and the set of required
+						// Check that there is a child descriptor for the
+						// required 'ref' and the set of required
 						// 'EClasses'
 						//
 						Set<EClass> eClasses = new HashSet<>();
@@ -162,7 +177,8 @@ public interface IDragAndDropProvider {
 				}
 			}
 		} else {
-			// TODO should we apply another strategy in case the delegator could not be determined?
+			// TODO should we apply another strategy in case the delegator could
+			// not be determined?
 		}
 
 		ArrayList<AbstractCommand> commands = new ArrayList<>();
@@ -170,7 +186,8 @@ public interface IDragAndDropProvider {
 			commands.add(dragAndDropCommand);
 		}
 
-		// Create a suitable drag and drop command depending on the number of possibilities
+		// Create a suitable drag and drop command depending on the number of
+		// possibilities
 		//
 		if (possibleReferences.isEmpty() || possibleReferences.values().parallelStream().allMatch(v -> !v)) {
 			return dragAndDropCommand;
@@ -178,8 +195,26 @@ public interface IDragAndDropProvider {
 			return this.createDragAndDropCommand(domain, (Collection<EObject>) collection, parent,
 					possibleReferences.keySet().iterator().next());
 		} else {
-			for (EReference ref : possibleReferences.keySet()) {
-				commands.add(this.createDragAndDropCommand(domain, (Collection<EObject>) collection, parent, ref));
+			for (Entry<EReference, Boolean> entry : possibleReferences.entrySet()) {
+
+				AbstractCommand command = this.createDragAndDropCommand(domain, (Collection<EObject>) collection,
+						parent, entry.getKey());
+
+				if (entry.getValue()) {
+					commands.add(command);
+				} else {
+					// For 'disabled' commands we still create the drag and drop
+					// command (as this is required for the 'strategy' to work
+					// correctly) but we make sure it cannot be executed
+					//
+					commands.add(new CommandWrapper(command) {
+
+						@Override
+						public boolean canExecute() {
+							return false;
+						}
+					});
+				}
 			}
 		}
 
@@ -193,18 +228,21 @@ public interface IDragAndDropProvider {
 	}
 
 	/**
-	 * Based on the type of reference to set, creates either a {@link BasicDragAndDropSetCommand}, a
-	 * {@link BasicDragAndDropAddCommand}, or a {@link BasicDragAndDropCompoundCommand} (in case the collection needs to
-	 * be removed from an old feature first).
+	 * Based on the type of reference to set, creates either a
+	 * {@link BasicDragAndDropSetCommand}, a {@link BasicDragAndDropAddCommand},
+	 * or a {@link BasicDragAndDropCompoundCommand} (in case the collection
+	 * needs to be removed from an old feature first).
 	 *
 	 * @param domain
-	 *            The {@link EditingDomain} that will be used to execute the command.
+	 *            The {@link EditingDomain} that will be used to execute the
+	 *            command.
 	 * @param collection
 	 *            The dragged elements.
 	 * @param parent
 	 *            The {@link EObject} on that the command will be executed.
 	 * @param ref
-	 *            The {@link EReference} that to that the collection of objects shall be added/that shall be set.
+	 *            The {@link EReference} that to that the collection of objects
+	 *            shall be added/that shall be set.
 	 * @return The drag and drop command.
 	 */
 	default AbstractCommand createDragAndDropCommand(EditingDomain domain, Collection<EObject> collection,
