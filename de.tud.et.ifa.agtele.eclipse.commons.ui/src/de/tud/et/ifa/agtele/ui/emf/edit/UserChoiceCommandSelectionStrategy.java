@@ -18,7 +18,7 @@ import de.tud.et.ifa.agtele.ui.util.UIHelper;
 /**
  * This implements {@link ICommandSelectionStrategy} in a way that the various possibilities are presented to the user
  * via a {@link Menu}.
- * 
+ *
  * @author mfreund
  */
 public class UserChoiceCommandSelectionStrategy implements ICommandSelectionStrategy {
@@ -52,6 +52,7 @@ public class UserChoiceCommandSelectionStrategy implements ICommandSelectionStra
 			item.setText(label);
 			item.setToolTipText(command.getDescription());
 			item.addListener(SWT.Selection, e -> ret.add(command));
+			item.setEnabled(command.canExecute());
 		}
 
 		// The menu is located at the position of the cursor
