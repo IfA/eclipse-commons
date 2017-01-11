@@ -26,7 +26,7 @@ import de.tud.et.ifa.agtele.ui.handlers.ShowInheritedEcoreClassFeaturesCommandHa
  * For that, the
  * {@link AgteleEcoreContentProvider#setInheritedContentVisibility(boolean)}
  * method is to be called.
- * 
+ *
  * @author Baron
  *
  */
@@ -98,7 +98,7 @@ public class AgteleEcoreContentProvider extends StateRestoringViewerContentProvi
 			}
 			//Display all inherited operations
 			for (EClass superClass : eClass.getEAllSuperTypes()) {
-				for (EOperation operation : superClass.getEAllOperations()) {
+				for (EOperation operation : superClass.getEOperations()) {
 					result.add(new NonContainedChildWrapper(operation, object));
 				}
 			}
@@ -123,7 +123,7 @@ public class AgteleEcoreContentProvider extends StateRestoringViewerContentProvi
 	/**
 	 * Sets the visibility of inherited {@link EClass} content and
 	 * {@link #refreshViewers()} afterwards.
-	 * 
+	 *
 	 * @param visible
 	 */
 	static public void setInheritedContentVisibility(boolean visible) {
@@ -200,7 +200,7 @@ public class AgteleEcoreContentProvider extends StateRestoringViewerContentProvi
 	/**
 	 * Queries the
 	 * {@link ShowInheritedEcoreClassFeaturesCommandHandler#isVisible()}
-	 * 
+	 *
 	 * @return
 	 */
 	protected static boolean getCurrentVisibilityState() {
