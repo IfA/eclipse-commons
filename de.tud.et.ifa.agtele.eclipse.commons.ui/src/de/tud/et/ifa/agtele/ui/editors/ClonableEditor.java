@@ -31,6 +31,8 @@ import org.eclipse.ui.actions.WorkspaceModifyOperation;
 import org.eclipse.ui.part.MultiPageEditorPart;
 import org.eclipse.ui.views.properties.PropertySheetPage;
 
+import de.tud.et.ifa.agtele.emf.edit.AgteleAdapterFactoryEditingDomain;
+
 public abstract class ClonableEditor extends MultiPageEditorPart{
 	/**
 	 * stores the editing domains per file path in order to be able to reuse it for clonable model editors
@@ -167,7 +169,8 @@ public abstract class ClonableEditor extends MultiPageEditorPart{
 
 		// Create the editing domain with a special command stack.
 		//
-		this.setEditingDomain(new AdapterFactoryEditingDomain(this.internalGetAdapterFactory(), commandStack, new HashMap<Resource, Boolean>()));
+		this.setEditingDomain(new AgteleAdapterFactoryEditingDomain(this.internalGetAdapterFactory(), commandStack,
+				new HashMap<Resource, Boolean>()));
 	}
 
 
