@@ -553,13 +553,13 @@ public interface AgteleEcoreUtil {
 		final Object value = eObject.eGet(eAttribute);
 
 		if (value == null) {
-			return Collections.emptyList();
+			return new ArrayList<>(Collections.emptyList());
 		}
 
 		if (eAttribute.isMany()) {
 			return new ArrayList<>((Collection<?>) value);
 		} else {
-			return Arrays.asList(value);
+			return new ArrayList<>(Arrays.asList(value));
 		}
 
 	}
