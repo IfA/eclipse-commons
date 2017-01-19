@@ -23,3 +23,5 @@ Export-Package: de.tud.et.ifa.agtele,
  de.tud.et.ifa.agtele.emf.edit.commands,
  de.tud.et.ifa.agtele.help,
  de.tud.et.ifa.agtele.resources
+Import-Package: org.eclipse.emf.ecore.xmi,
+ org.eclipse.emf.ecore.xmi.impl
