@@ -41,8 +41,18 @@ public class UserChoiceCommandSelectionStrategy implements ICommandSelectionStra
 				int operation = ((DragAndDropCommand) command).getOperation();
 				if (operation == DragAndDropFeedback.DROP_MOVE) {
 					label = "Move here";
+					if (((DragAndDropCommand) command).getLocation() < 0.5) {
+						label += " (Above)";
+					} else {
+						label += " (Below)";
+					}
 				} else if (operation == DragAndDropFeedback.DROP_COPY) {
 					label = "Copy here";
+					if (((DragAndDropCommand) command).getLocation() < 0.5) {
+						label += " (Above)";
+					} else {
+						label += " (Below)";
+					}
 				} else {
 					label = command.getLabel();
 				}
