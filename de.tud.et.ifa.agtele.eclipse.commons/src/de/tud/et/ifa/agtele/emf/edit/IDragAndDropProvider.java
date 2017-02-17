@@ -34,8 +34,7 @@ import de.tud.et.ifa.agtele.emf.edit.commands.BasicDragAndDropSetCommand;
 import de.tud.et.ifa.agtele.emf.edit.commands.DragAndDropChangeContainingFeatureCommand;
 
 /**
- * This provides custom implementations for the
- * '<em>createDragAndDropCommand(...)</em>' function provided by the
+ * This provides custom implementations for the '<em>createDragAndDropCommand(...)</em>' function provided by the
  * {@link ItemProviderAdapter}.
  *
  * @author mfreund
@@ -43,21 +42,19 @@ import de.tud.et.ifa.agtele.emf.edit.commands.DragAndDropChangeContainingFeature
 public interface IDragAndDropProvider {
 
 	/**
-	 * Create a custom {@link DragAndDropCommand}. The given '<em>strategy</em>'
-	 * can be used to select one of multiple possible commands to execute.
+	 * Create a custom {@link DragAndDropCommand}. The given '<em>strategy</em>' can be used to select one of multiple
+	 * possible commands to execute.
 	 * <p />
-	 * This will usually be called inside an implementation of
-	 * '<em>createDragAndDropCommand(...)</em>' in a custom ItemProvider instead
-	 * of just calling '<em>super.createDragAndDropCommand(...)</em>'.
+	 * This will usually be called inside an implementation of '<em>createDragAndDropCommand(...)</em>' in a custom
+	 * ItemProvider instead of just calling '<em>super.createDragAndDropCommand(...)</em>'.
 	 *
 	 * @param domain
-	 *            The {@link EditingDomain} that will be used to execute the
-	 *            command.
+	 *            The {@link EditingDomain} that will be used to execute the command.
 	 * @param owner
 	 *            The object on that the command will be executed.
 	 * @param location
-	 *            The location (between 0.0 and 1.0) in relation to the
-	 *            '<em>owner</em>' where the command will be executed.
+	 *            The location (between 0.0 and 1.0) in relation to the '<em>owner</em>' where the command will be
+	 *            executed.
 	 * @param operations
 	 *            The permitted operations.
 	 * @param operation
@@ -65,8 +62,8 @@ public interface IDragAndDropProvider {
 	 * @param collection
 	 *            The dragged elements.
 	 * @param strategy
-	 *            The {@link ICommandSelectionStrategy} that shall be applied to
-	 *            select an unambiguous command before execution.
+	 *            The {@link ICommandSelectionStrategy} that shall be applied to select an unambiguous command before
+	 *            execution.
 	 * @return The custom drag and drop command.
 	 */
 	@SuppressWarnings("unchecked")
@@ -74,19 +71,7 @@ public interface IDragAndDropProvider {
 			int operations, int operation, Collection<?> collection, ICommandSelectionStrategy strategy) {
 
 		DragAndDropCommand dragAndDropCommand = new DragAndDropCommand(domain, owner, location, operations, operation,
-				collection) {
-
-			@Override
-			public boolean validate(Object owner, float location, int operations, int operation,
-					Collection<?> collection) {
-
-				// use the default d'n'd command only for move/copy operations
-				// (i.e. if the location is near 0 or near
-				// 1)
-				return super.validate(owner, location, operations, operation, collection)
-						&& (location < 0.2 || location > 0.8);
-			}
-		};
+				collection);
 
 		if (!(owner instanceof EObject) || collection.isEmpty()) {
 			return dragAndDropCommand;
@@ -192,8 +177,8 @@ public interface IDragAndDropProvider {
 		if (possibleReferences.isEmpty() || possibleReferences.values().parallelStream().allMatch(v -> !v)) {
 			return dragAndDropCommand;
 		} else if (possibleReferences.size() == 1) {
-			return this.createDragAndDropCommand(domain, (Collection<EObject>) collection, parent,
-					possibleReferences.keySet().iterator().next());
+			commands.add(this.createDragAndDropCommand(domain, (Collection<EObject>) collection, parent,
+					possibleReferences.keySet().iterator().next()));
 		} else {
 			for (Entry<EReference, Boolean> entry : possibleReferences.entrySet()) {
 
@@ -211,6 +196,7 @@ public interface IDragAndDropProvider {
 
 						@Override
 						public boolean canExecute() {
+
 							return false;
 						}
 					});
@@ -228,21 +214,18 @@ public interface IDragAndDropProvider {
 	}
 
 	/**
-	 * Based on the type of reference to set, creates either a
-	 * {@link BasicDragAndDropSetCommand}, a {@link BasicDragAndDropAddCommand},
-	 * or a {@link BasicDragAndDropCompoundCommand} (in case the collection
-	 * needs to be removed from an old feature first).
+	 * Based on the type of reference to set, creates either a {@link BasicDragAndDropSetCommand}, a
+	 * {@link BasicDragAndDropAddCommand}, or a {@link BasicDragAndDropCompoundCommand} (in case the collection needs to
+	 * be removed from an old feature first).
 	 *
 	 * @param domain
-	 *            The {@link EditingDomain} that will be used to execute the
-	 *            command.
+	 *            The {@link EditingDomain} that will be used to execute the command.
 	 * @param collection
 	 *            The dragged elements.
 	 * @param parent
 	 *            The {@link EObject} on that the command will be executed.
 	 * @param ref
-	 *            The {@link EReference} that to that the collection of objects
-	 *            shall be added/that shall be set.
+	 *            The {@link EReference} that to that the collection of objects shall be added/that shall be set.
 	 * @return The drag and drop command.
 	 */
 	default AbstractCommand createDragAndDropCommand(EditingDomain domain, Collection<EObject> collection,

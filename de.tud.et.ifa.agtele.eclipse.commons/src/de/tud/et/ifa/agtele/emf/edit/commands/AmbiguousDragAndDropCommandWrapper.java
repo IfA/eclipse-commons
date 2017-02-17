@@ -113,8 +113,7 @@ public class AmbiguousDragAndDropCommandWrapper extends AbstractCommand implemen
 		// Determine the feedback to be shown based on the number and types of 'validCommands'
 		if (this.validCommands.isEmpty()) {
 			return DragAndDropFeedback.FEEDBACK_NONE;
-		} else if (this.validCommands.size() == 1 && this.commands.size() == 1
-				&& this.validCommands.get(0) instanceof DragAndDropFeedback) {
+		} else if (this.validCommands.size() == 1 && this.validCommands.get(0) instanceof DragAndDropFeedback) {
 			return ((DragAndDropFeedback) this.validCommands.get(0)).getFeedback();
 		} else {
 			return DragAndDropFeedback.FEEDBACK_SELECT;
@@ -127,8 +126,7 @@ public class AmbiguousDragAndDropCommandWrapper extends AbstractCommand implemen
 		// Determine the operation based on the number and types of 'validCommands'
 		if (this.validCommands.isEmpty()) {
 			return DragAndDropFeedback.DROP_NONE;
-		} else if (this.validCommands.size() == 1 && this.commands.size() == 1
-				&& this.validCommands.get(0) instanceof DragAndDropFeedback) {
+		} else if (this.validCommands.size() == 1 && this.validCommands.get(0) instanceof DragAndDropFeedback) {
 			return ((DragAndDropFeedback) this.validCommands.get(0)).getOperation();
 		} else {
 			return DragAndDropFeedback.DROP_LINK;
@@ -141,8 +139,8 @@ public class AmbiguousDragAndDropCommandWrapper extends AbstractCommand implemen
 		if (this.command == null) {
 			if (this.validCommands.isEmpty()) {
 				this.command = null;
-				// } else if(validCommands.size() == 1) {
-				// command = validCommands.get(0);
+			} else if (this.validCommands.size() == 1) {
+				this.command = this.validCommands.get(0);
 			} else {
 				this.command = this.strategy.selectCommandToExecute(this.commands);
 			}
