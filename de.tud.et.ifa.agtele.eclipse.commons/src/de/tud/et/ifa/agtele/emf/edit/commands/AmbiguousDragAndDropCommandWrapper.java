@@ -3,9 +3,11 @@ package de.tud.et.ifa.agtele.emf.edit.commands;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.eclipse.emf.common.command.AbstractCommand;
 import org.eclipse.emf.common.command.UnexecutableCommand;
+import org.eclipse.emf.edit.command.DragAndDropCommand;
 import org.eclipse.emf.edit.command.DragAndDropFeedback;
 
 import de.tud.et.ifa.agtele.emf.edit.ICommandSelectionStrategy;
@@ -22,12 +24,12 @@ public class AmbiguousDragAndDropCommandWrapper extends AbstractCommand implemen
 	/**
 	 * The (ambiguous) list of commands that this wraps.
 	 */
-	protected ArrayList<AbstractCommand> commands;
+	protected List<AbstractCommand> commands;
 
 	/**
 	 * The (ambiguous) list of commands that are currently {@link #validate(Object, float, int, int, Collection) valid}.
 	 */
-	protected ArrayList<AbstractCommand> validCommands = new ArrayList<>();
+	protected List<AbstractCommand> validCommands = new ArrayList<>();
 
 	/**
 	 * The single, unambiguous command after resolving the ambiguities.
@@ -92,6 +94,17 @@ public class AmbiguousDragAndDropCommandWrapper extends AbstractCommand implemen
 			}
 		}
 
+		// disable the default move/copy command if the mouse is positioned in the middle of an element and there are
+		// other valid commands to execute
+		//
+		if (this.validCommands.size() > 1 && location > 0.2 && location < 0.8) {
+			this.validCommands = this.validCommands.parallelStream()
+					.filter(c -> !(c instanceof DragAndDropCommand)
+							|| ((DragAndDropCommand) c).getOperation() != DragAndDropCommand.DROP_MOVE
+									&& ((DragAndDropCommand) c).getOperation() != DragAndDropCommand.DROP_COPY)
+					.collect(Collectors.toList());
+		}
+
 		return !this.validCommands.isEmpty();
 	}
 
@@ -142,7 +155,7 @@ public class AmbiguousDragAndDropCommandWrapper extends AbstractCommand implemen
 			} else if (this.validCommands.size() == 1) {
 				this.command = this.validCommands.get(0);
 			} else {
-				this.command = this.strategy.selectCommandToExecute(this.commands);
+				this.command = this.strategy.selectCommandToExecute(this.validCommands);
 			}
 			this.validCommands.clear();
 		}
