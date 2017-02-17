@@ -18,8 +18,10 @@ import org.eclipse.ui.IPartListener;
 import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.part.FileEditorInput;
 
+import de.tud.et.ifa.agtele.emf.edit.ICommandSelectionStrategy;
 import de.tud.et.ifa.agtele.emf.edit.IDragAndDropProvider;
 import de.tud.et.ifa.agtele.ui.AgteleUIPlugin;
+import de.tud.et.ifa.agtele.ui.emf.edit.UserChoiceCommandSelectionStrategy;
 import de.tud.et.ifa.agtele.ui.interfaces.IPersistable;
 import de.tud.et.ifa.agtele.ui.listeners.BasicJumpOnClickListener;
 import de.tud.et.ifa.agtele.ui.providers.AgteleEcoreAdapterFactoryLabelProvider;
@@ -152,7 +154,7 @@ public class AgteleEcoreEditor extends ClonableEcoreEditor implements IPersistab
 			this.setCurrentViewer(this.selectionViewer);
 
 			this.selectionViewer
-			.setContentProvider(new AgteleEcoreContentProvider(this.adapterFactory, this.selectionViewer));
+					.setContentProvider(new AgteleEcoreContentProvider(this.adapterFactory, this.selectionViewer));
 
 			this.selectionViewer.setLabelProvider(new DecoratingColumLabelProvider(
 					// Display containment references with a special icon to make them more distinguishable from
@@ -251,4 +253,9 @@ public class AgteleEcoreEditor extends ClonableEcoreEditor implements IPersistab
 		AgteleEcoreEditor.this.persist(project);
 	}
 
+	@Override
+	public ICommandSelectionStrategy getCommandSelectionStrategy() {
+
+		return new UserChoiceCommandSelectionStrategy();
+	}
 }
