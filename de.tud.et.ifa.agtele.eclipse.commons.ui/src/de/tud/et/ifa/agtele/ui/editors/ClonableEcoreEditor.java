@@ -63,7 +63,6 @@ import org.eclipse.emf.edit.provider.ReflectiveItemProviderAdapterFactory;
 import org.eclipse.emf.edit.provider.resource.ResourceItemProviderAdapterFactory;
 import org.eclipse.emf.edit.ui.action.EditingDomainActionBarContributor;
 import org.eclipse.emf.edit.ui.celleditor.AdapterFactoryTreeEditor;
-import org.eclipse.emf.edit.ui.dnd.EditingDomainViewerDropAdapter;
 import org.eclipse.emf.edit.ui.dnd.LocalTransfer;
 import org.eclipse.emf.edit.ui.dnd.ViewerDragAdapter;
 import org.eclipse.emf.edit.ui.provider.AdapterFactoryContentProvider;
@@ -124,13 +123,15 @@ import org.eclipse.ui.views.properties.PropertySheetPage;
 
 import de.tud.et.ifa.agtele.emf.edit.IDragAndDropProvider;
 import de.tud.et.ifa.agtele.ui.AgteleUIPlugin;
+import de.tud.et.ifa.agtele.ui.emf.editor.TooltipDisplayingDropAdapter;
 import de.tud.et.ifa.agtele.ui.providers.AgteleEcoreContentProvider;
 import de.tud.et.ifa.agtele.ui.util.UIHelper;
 
 public class ClonableEcoreEditor extends ClonableEditor
-implements IEditingDomainProvider, ISelectionProvider, IMenuListener, IViewerProvider, IGotoMarker {
+		implements IEditingDomainProvider, ISelectionProvider, IMenuListener, IViewerProvider, IGotoMarker {
 
 	public static class XML extends ClonableEcoreEditor {
+
 		public XML() {
 			try {
 				this.editingDomain.getResourceSet().getResourceFactoryRegistry().getExtensionToFactoryMap().put("*",
@@ -147,6 +148,7 @@ implements IEditingDomainProvider, ISelectionProvider, IMenuListener, IViewerPro
 
 		@Override
 		public void createModel() {
+
 			super.createModel();
 
 			// Load the schema and packages that were used to load the instance
@@ -167,24 +169,23 @@ implements IEditingDomainProvider, ISelectionProvider, IMenuListener, IViewerPro
 	}
 
 	/**
-	 * This keeps track of the editing domain that is used to track all changes
-	 * to the model. <!-- begin-user-doc --> <!-- end-user-doc -->
+	 * This keeps track of the editing domain that is used to track all changes to the model. <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
 	 *
 	 * @generated
 	 */
 	protected AdapterFactoryEditingDomain editingDomain;
 
 	/**
-	 * This is the one adapter factory used for providing views of the model.
-	 * <!-- begin-user-doc --> <!-- end-user-doc -->
+	 * This is the one adapter factory used for providing views of the model. <!-- begin-user-doc --> <!-- end-user-doc
+	 * -->
 	 *
 	 * @generated
 	 */
 	protected ComposedAdapterFactory adapterFactory;
 
 	/**
-	 * This is the content outline page. <!-- begin-user-doc --> <!--
-	 * end-user-doc -->
+	 * This is the content outline page. <!-- begin-user-doc --> <!-- end-user-doc -->
 	 *
 	 * @generated
 	 */
@@ -198,82 +199,75 @@ implements IEditingDomainProvider, ISelectionProvider, IMenuListener, IViewerPro
 	protected IStatusLineManager contentOutlineStatusLineManager;
 
 	/**
-	 * This is the content outline page's viewer. <!-- begin-user-doc --> <!--
-	 * end-user-doc -->
+	 * This is the content outline page's viewer. <!-- begin-user-doc --> <!-- end-user-doc -->
 	 *
 	 * @generated
 	 */
 	protected TreeViewer contentOutlineViewer;
 
 	/**
-	 * This is the property sheet page. <!-- begin-user-doc --> <!--
-	 * end-user-doc -->
+	 * This is the property sheet page. <!-- begin-user-doc --> <!-- end-user-doc -->
 	 *
 	 * @generated
 	 */
 	protected List<PropertySheetPage> propertySheetPages = new ArrayList<>();
 
 	/**
-	 * This is the viewer that shadows the selection in the content outline. The
-	 * parent relation must be correctly defined for this to work. <!--
-	 * begin-user-doc --> <!-- end-user-doc -->
+	 * This is the viewer that shadows the selection in the content outline. The parent relation must be correctly
+	 * defined for this to work. <!-- begin-user-doc --> <!-- end-user-doc -->
 	 *
 	 * @generated
 	 */
 	protected TreeViewer selectionViewer;
 
 	/**
-	 * This keeps track of the active content viewer, which may be either one of
-	 * the viewers in the pages or the content outline viewer. <!--
-	 * begin-user-doc --> <!-- end-user-doc -->
+	 * This keeps track of the active content viewer, which may be either one of the viewers in the pages or the content
+	 * outline viewer. <!-- begin-user-doc --> <!-- end-user-doc -->
 	 *
 	 * @generated
 	 */
 	protected Viewer currentViewer;
 
 	/**
-	 * This listens to which ever viewer is active. <!-- begin-user-doc --> <!--
-	 * end-user-doc -->
+	 * This listens to which ever viewer is active. <!-- begin-user-doc --> <!-- end-user-doc -->
 	 *
 	 * @generated
 	 */
 	protected ISelectionChangedListener selectionChangedListener;
 
 	/**
-	 * This keeps track of all the
-	 * {@link org.eclipse.jface.viewers.ISelectionChangedListener}s that are
-	 * listening to this editor. <!-- begin-user-doc --> <!-- end-user-doc -->
+	 * This keeps track of all the {@link org.eclipse.jface.viewers.ISelectionChangedListener}s that are listening to
+	 * this editor. <!-- begin-user-doc --> <!-- end-user-doc -->
 	 *
 	 * @generated
 	 */
 	protected Collection<ISelectionChangedListener> selectionChangedListeners = new ArrayList<>();
 
 	/**
-	 * This keeps track of the selection of the editor as a whole. <!--
-	 * begin-user-doc --> <!-- end-user-doc -->
+	 * This keeps track of the selection of the editor as a whole. <!-- begin-user-doc --> <!-- end-user-doc -->
 	 *
 	 * @generated
 	 */
 	protected ISelection editorSelection = StructuredSelection.EMPTY;
 
 	/**
-	 * The MarkerHelper is responsible for creating workspace resource markers
-	 * presented in Eclipse's Problems View. <!-- begin-user-doc --> <!--
-	 * end-user-doc -->
+	 * The MarkerHelper is responsible for creating workspace resource markers presented in Eclipse's Problems View.
+	 * <!-- begin-user-doc --> <!-- end-user-doc -->
 	 *
 	 * @generated
 	 */
 	protected MarkerHelper markerHelper = new EditUIMarkerHelper();
 
 	/**
-	 * This listens for when the outline becomes active <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
+	 * This listens for when the outline becomes active <!-- begin-user-doc --> <!-- end-user-doc -->
 	 *
 	 * @generated NOT due to incorrect handling of the selection viewer
 	 */
 	protected IPartListener partListener = new IPartListener() {
+
 		@Override
 		public void partActivated(IWorkbenchPart p) {
+
 			if (p instanceof ContentOutline) {
 				if (((ContentOutline) p).getCurrentPage() == ClonableEcoreEditor.this.contentOutlinePage) {
 					ClonableEcoreEditor.this.getActionBarContributor().setActiveEditor(ClonableEcoreEditor.this);
@@ -296,93 +290,94 @@ implements IEditingDomainProvider, ISelectionProvider, IMenuListener, IViewerPro
 
 		@Override
 		public void partBroughtToTop(IWorkbenchPart p) {
+
 			// Ignore.
 		}
 
 		@Override
 		public void partClosed(IWorkbenchPart p) {
+
 			// Ignore.
 		}
 
 		@Override
 		public void partDeactivated(IWorkbenchPart p) {
+
 			// Ignore.
 		}
 
 		@Override
 		public void partOpened(IWorkbenchPart p) {
+
 			// Ignore.
 		}
 	};
 
 	/**
-	 * Resources that have been removed since last activation. <!--
-	 * begin-user-doc --> <!-- end-user-doc -->
+	 * Resources that have been removed since last activation. <!-- begin-user-doc --> <!-- end-user-doc -->
 	 *
 	 * @generated
 	 */
 	protected Collection<Resource> removedResources = new ArrayList<>();
 
 	/**
-	 * Resources that have been changed since last activation. <!--
-	 * begin-user-doc --> <!-- end-user-doc -->
+	 * Resources that have been changed since last activation. <!-- begin-user-doc --> <!-- end-user-doc -->
 	 *
 	 * @generated NOT
 	 */
 	protected Collection<Resource> changedResources = new UniqueEList<>();
 
 	/**
-	 * Resources that have been saved. <!-- begin-user-doc --> <!-- end-user-doc
-	 * -->
+	 * Resources that have been saved. <!-- begin-user-doc --> <!-- end-user-doc -->
 	 *
 	 * @generated
 	 */
 	protected Collection<Resource> savedResources = new ArrayList<>();
 
 	/**
-	 * Map to store the diagnostic associated with a resource. <!--
-	 * begin-user-doc --> <!-- end-user-doc -->
+	 * Map to store the diagnostic associated with a resource. <!-- begin-user-doc --> <!-- end-user-doc -->
 	 *
 	 * @generated
 	 */
 	protected Map<Resource, Diagnostic> resourceToDiagnosticMap = new LinkedHashMap<>();
 
 	/**
-	 * Controls whether the problem indication should be updated. <!--
-	 * begin-user-doc --> <!-- end-user-doc -->
+	 * Controls whether the problem indication should be updated. <!-- begin-user-doc --> <!-- end-user-doc -->
 	 *
 	 * @generated
 	 */
 	protected boolean updateProblemIndication = true;
 
 	/**
-	 * Adapter used to update the problem indication when resources are demanded
-	 * loaded. <!-- begin-user-doc --> <!-- end-user-doc -->
+	 * Adapter used to update the problem indication when resources are demanded loaded. <!-- begin-user-doc --> <!--
+	 * end-user-doc -->
 	 *
 	 * @generated
 	 */
 	protected EContentAdapter problemIndicationAdapter = new EContentAdapter() {
+
 		@Override
 		public void notifyChanged(Notification notification) {
+
 			if (notification.getNotifier() instanceof Resource) {
 				switch (notification.getFeatureID(Resource.class)) {
-				case Resource.RESOURCE__IS_LOADED:
-				case Resource.RESOURCE__ERRORS:
-				case Resource.RESOURCE__WARNINGS: {
-					Resource resource = (Resource) notification.getNotifier();
-					Diagnostic diagnostic = ClonableEcoreEditor.this.analyzeResourceProblems(resource, null);
-					if (diagnostic.getSeverity() != Diagnostic.OK) {
-						ClonableEcoreEditor.this.resourceToDiagnosticMap.put(resource, diagnostic);
-					} else {
-						ClonableEcoreEditor.this.resourceToDiagnosticMap.remove(resource);
-					}
+					case Resource.RESOURCE__IS_LOADED:
+					case Resource.RESOURCE__ERRORS:
+					case Resource.RESOURCE__WARNINGS: {
+						Resource resource = (Resource) notification.getNotifier();
+						Diagnostic diagnostic = ClonableEcoreEditor.this.analyzeResourceProblems(resource, null);
+						if (diagnostic.getSeverity() != Diagnostic.OK) {
+							ClonableEcoreEditor.this.resourceToDiagnosticMap.put(resource, diagnostic);
+						} else {
+							ClonableEcoreEditor.this.resourceToDiagnosticMap.remove(resource);
+						}
 
-					if (ClonableEcoreEditor.this.updateProblemIndication) {
-						ClonableEcoreEditor.this.getSite().getShell().getDisplay()
-						.asyncExec(() -> ClonableEcoreEditor.this.updateProblemIndication());
+						if (ClonableEcoreEditor.this.updateProblemIndication) {
+							ClonableEcoreEditor.this.getSite().getShell().getDisplay()
+									.asyncExec(() -> ClonableEcoreEditor.this.updateProblemIndication());
+						}
+						break;
 					}
-					break;
-				}
 				}
 			} else {
 				super.notifyChanged(notification);
@@ -391,23 +386,24 @@ implements IEditingDomainProvider, ISelectionProvider, IMenuListener, IViewerPro
 
 		@Override
 		protected void setTarget(Resource target) {
+
 			this.basicSetTarget(target);
 		}
 
 		@Override
 		protected void unsetTarget(Resource target) {
+
 			this.basicUnsetTarget(target);
 			ClonableEcoreEditor.this.resourceToDiagnosticMap.remove(target);
 			if (ClonableEcoreEditor.this.updateProblemIndication) {
 				ClonableEcoreEditor.this.getSite().getShell().getDisplay()
-				.asyncExec(() -> ClonableEcoreEditor.this.updateProblemIndication());
+						.asyncExec(() -> ClonableEcoreEditor.this.updateProblemIndication());
 			}
 		}
 	};
 
 	/**
-	 * This listens for workspace changes. <!-- begin-user-doc --> <!--
-	 * end-user-doc -->
+	 * This listens for workspace changes. <!-- begin-user-doc --> <!-- end-user-doc -->
 	 *
 	 * @generated
 	 */
@@ -415,12 +411,16 @@ implements IEditingDomainProvider, ISelectionProvider, IMenuListener, IViewerPro
 		IResourceDelta delta = event.getDelta();
 		try {
 			class ResourceDeltaVisitor implements IResourceDeltaVisitor {
+
 				protected ResourceSet resourceSet = ClonableEcoreEditor.this.editingDomain.getResourceSet();
+
 				protected Collection<Resource> changedResources = new ArrayList<>();
+
 				protected Collection<Resource> removedResources = new ArrayList<>();
 
 				@Override
 				public boolean visit(final IResourceDelta delta) {
+
 					if (delta.getResource().getType() == IResource.FILE) {
 						if (delta.getKind() == IResourceDelta.REMOVED || delta.getKind() == IResourceDelta.CHANGED) {
 							final Resource resource = this.resourceSet.getResource(
@@ -449,10 +449,12 @@ implements IEditingDomainProvider, ISelectionProvider, IMenuListener, IViewerPro
 				}
 
 				public Collection<Resource> getChangedResources() {
+
 					return this.changedResources;
 				}
 
 				public Collection<Resource> getRemovedResources() {
+
 					return this.removedResources;
 				}
 			}
@@ -483,12 +485,12 @@ implements IEditingDomainProvider, ISelectionProvider, IMenuListener, IViewerPro
 	};
 
 	/**
-	 * Handles activation of the editor or it's associated views. <!--
-	 * begin-user-doc --> <!-- end-user-doc -->
+	 * Handles activation of the editor or it's associated views. <!-- begin-user-doc --> <!-- end-user-doc -->
 	 *
 	 * @generated
 	 */
 	protected void handleActivateGen() {
+
 		// Recompute the read only state.
 		//
 		if (this.editingDomain.getResourceToReadOnlyMap() != null) {
@@ -519,6 +521,7 @@ implements IEditingDomainProvider, ISelectionProvider, IMenuListener, IViewerPro
 			.asList(new String[] { "xcore", "emof", "ecore", "genmodel" });
 
 	protected void handleActivate() {
+
 		if (this.removedResources.isEmpty() && !this.changedResources.isEmpty()) {
 			for (Resource resource : this.editingDomain.getResourceSet().getResources()) {
 				if (!this.changedResources.contains(resource)) {
@@ -540,12 +543,12 @@ implements IEditingDomainProvider, ISelectionProvider, IMenuListener, IViewerPro
 	}
 
 	/**
-	 * Handles what to do with changed resources on activation. <!--
-	 * begin-user-doc --> <!-- end-user-doc -->
+	 * Handles what to do with changed resources on activation. <!-- begin-user-doc --> <!-- end-user-doc -->
 	 *
 	 * @generated NOT
 	 */
 	protected void handleChangedResources() {
+
 		if (!this.changedResources.isEmpty() && (!this.isDirty() || this.handleDirtyConflict())) {
 			if (this.isDirty()) {
 				this.changedResources.addAll(this.editingDomain.getResourceSet().getResources());
@@ -581,13 +584,14 @@ implements IEditingDomainProvider, ISelectionProvider, IMenuListener, IViewerPro
 	}
 
 	/**
-	 * Updates the problems indication with the information described in the
-	 * specified diagnostic. <!-- begin-user-doc --> <!-- end-user-doc -->
+	 * Updates the problems indication with the information described in the specified diagnostic. <!-- begin-user-doc
+	 * --> <!-- end-user-doc -->
 	 *
 	 * @generated
 	 */
 	@Override
 	protected void updateProblemIndication() {
+
 		if (this.updateProblemIndication) {
 			BasicDiagnostic diagnostic = new BasicDiagnostic(Diagnostic.OK, "org.eclipse.emf.ecore.editor", 0, null,
 					new Object[] { this.editingDomain.getResourceSet() });
@@ -631,23 +635,22 @@ implements IEditingDomainProvider, ISelectionProvider, IMenuListener, IViewerPro
 	}
 
 	/**
-	 * Shows a dialog that asks if conflicting changes should be discarded. <!--
-	 * begin-user-doc --> <!-- end-user-doc -->
+	 * Shows a dialog that asks if conflicting changes should be discarded. <!-- begin-user-doc --> <!-- end-user-doc
+	 * -->
 	 *
 	 * @generated
 	 */
 	protected boolean handleDirtyConflict() {
+
 		return MessageDialog.openQuestion(this.getSite().getShell(),
 				ClonableEcoreEditor.getString("_UI_FileConflict_label"),
 				ClonableEcoreEditor.getString("_WARN_FileConflict"));
 	}
 
 	/**
-	 * This creates a model editor. <!-- begin-user-doc --> <!-- end-user-doc
-	 * -->
+	 * This creates a model editor. <!-- begin-user-doc --> <!-- end-user-doc -->
 	 *
-	 * @generated NOT due to manipulation of the resource listener, that needs
-	 *            to be stored in a variable
+	 * @generated NOT due to manipulation of the resource listener, that needs to be stored in a variable
 	 */
 	public ClonableEcoreEditor() {
 		super();
@@ -655,18 +658,19 @@ implements IEditingDomainProvider, ISelectionProvider, IMenuListener, IViewerPro
 
 	@Override
 	protected void initializeEditingDomainGen() {
+
 		this.initializeEditingDomain();
 	}
 
 	/**
-	 * This sets up the editing domain for the model editor. <!-- begin-user-doc
-	 * --> <!-- end-user-doc -->
+	 * This sets up the editing domain for the model editor. <!-- begin-user-doc --> <!-- end-user-doc -->
 	 *
-	 * @generated NOT due to modifications in EcoreEditor and local changes in
-	 *            order to expose the command stack listener
+	 * @generated NOT due to modifications in EcoreEditor and local changes in order to expose the command stack
+	 *            listener
 	 */
 	@Override
 	protected void initializeEditingDomain() {
+
 		// Create an adapter factory that yields item providers.
 		//
 		this.adapterFactory = new ComposedAdapterFactory(ComposedAdapterFactory.Descriptor.Registry.INSTANCE);
@@ -679,8 +683,10 @@ implements IEditingDomainProvider, ISelectionProvider, IMenuListener, IViewerPro
 		// executed.
 		//
 		BasicCommandStack commandStack = new BasicCommandStack() {
+
 			@Override
 			public void execute(Command command) {
+
 				if (!(command instanceof AbstractCommand.NonDirtying)) {
 					DiagnosticDecorator.cancel(ClonableEcoreEditor.this.editingDomain);
 				}
@@ -689,8 +695,7 @@ implements IEditingDomainProvider, ISelectionProvider, IMenuListener, IViewerPro
 		};
 
 		/*
-		 * Store the command stack listener in a field in order to reuse it on a
-		 * shared editing domain.
+		 * Store the command stack listener in a field in order to reuse it on a shared editing domain.
 		 */
 		this.commandStackListener = event -> ClonableEcoreEditor.this.getContainer().getDisplay().asyncExec(() -> {
 			ClonableEcoreEditor.this.firePropertyChange(IEditorPart.PROP_DIRTY);
@@ -720,15 +725,18 @@ implements IEditingDomainProvider, ISelectionProvider, IMenuListener, IViewerPro
 	}
 
 	void createEditingDomain(ComposedAdapterFactory adapterFactory, CommandStack commandStack) {
+
 		// Create the editing domain with a special command stack.
 		//
 		this.editingDomain = new AdapterFactoryEditingDomain(this.adapterFactory, commandStack) {
+
 			{
 				this.resourceToReadOnlyMap = new HashMap<>();
 			}
 
 			@Override
 			public boolean isReadOnly(Resource resource) {
+
 				if (super.isReadOnly(resource) || resource == null) {
 					return true;
 				} else {
@@ -736,7 +744,7 @@ implements IEditingDomainProvider, ISelectionProvider, IMenuListener, IViewerPro
 					boolean result = "java".equals(uri.scheme()) || "xcore".equals(uri.fileExtension())
 							|| "xcoreiq".equals(uri.fileExtension()) || "genmodel".equals(uri.fileExtension())
 							|| uri.isPlatformResource()
-							&& !this.resourceSet.getURIConverter().normalize(uri).isPlatformResource();
+									&& !this.resourceSet.getURIConverter().normalize(uri).isPlatformResource();
 					if (this.resourceToReadOnlyMap != null) {
 						this.resourceToReadOnlyMap.put(resource, result);
 					}
@@ -772,24 +780,24 @@ implements IEditingDomainProvider, ISelectionProvider, IMenuListener, IViewerPro
 	}
 
 	/**
-	 * This is here for the listener to be able to call it. <!-- begin-user-doc
-	 * --> <!-- end-user-doc -->
+	 * This is here for the listener to be able to call it. <!-- begin-user-doc --> <!-- end-user-doc -->
 	 *
 	 * @generated
 	 */
 	@Override
 	protected void firePropertyChange(int action) {
+
 		super.firePropertyChange(action);
 	}
 
 	/**
-	 * This sets the selection into whichever viewer is active. <!--
-	 * begin-user-doc --> <!-- end-user-doc -->
+	 * This sets the selection into whichever viewer is active. <!-- begin-user-doc --> <!-- end-user-doc -->
 	 *
 	 * @generated
 	 */
 	@Override
 	public void setSelectionToViewer(Collection<?> collection) {
+
 		final Collection<?> theSelection = collection;
 		// Make sure it's okay.
 		//
@@ -808,16 +816,15 @@ implements IEditingDomainProvider, ISelectionProvider, IMenuListener, IViewerPro
 	}
 
 	/**
-	 * This returns the editing domain as required by the
-	 * {@link IEditingDomainProvider} interface. This is important for
-	 * implementing the static methods of {@link AdapterFactoryEditingDomain}
-	 * and for supporting {@link org.eclipse.emf.edit.ui.action.CommandAction}.
-	 * <!-- begin-user-doc --> <!-- end-user-doc -->
+	 * This returns the editing domain as required by the {@link IEditingDomainProvider} interface. This is important
+	 * for implementing the static methods of {@link AdapterFactoryEditingDomain} and for supporting
+	 * {@link org.eclipse.emf.edit.ui.action.CommandAction}. <!-- begin-user-doc --> <!-- end-user-doc -->
 	 *
 	 * @generated
 	 */
 	@Override
 	public AdapterFactoryEditingDomain getEditingDomain() {
+
 		return this.editingDomain;
 	}
 
@@ -827,6 +834,7 @@ implements IEditingDomainProvider, ISelectionProvider, IMenuListener, IViewerPro
 	 * @generated
 	 */
 	public class ReverseAdapterFactoryContentProvider extends AdapterFactoryContentProvider {
+
 		/**
 		 * <!-- begin-user-doc --> <!-- end-user-doc -->
 		 *
@@ -843,6 +851,7 @@ implements IEditingDomainProvider, ISelectionProvider, IMenuListener, IViewerPro
 		 */
 		@Override
 		public Object[] getElements(Object object) {
+
 			Object parent = super.getParent(object);
 			return (parent == null ? Collections.EMPTY_SET : Collections.singleton(parent)).toArray();
 		}
@@ -854,6 +863,7 @@ implements IEditingDomainProvider, ISelectionProvider, IMenuListener, IViewerPro
 		 */
 		@Override
 		public Object[] getChildren(Object object) {
+
 			Object parent = super.getParent(object);
 			return (parent == null ? Collections.EMPTY_SET : Collections.singleton(parent)).toArray();
 		}
@@ -865,6 +875,7 @@ implements IEditingDomainProvider, ISelectionProvider, IMenuListener, IViewerPro
 		 */
 		@Override
 		public boolean hasChildren(Object object) {
+
 			Object parent = super.getParent(object);
 			return parent != null;
 		}
@@ -876,18 +887,19 @@ implements IEditingDomainProvider, ISelectionProvider, IMenuListener, IViewerPro
 		 */
 		@Override
 		public Object getParent(Object object) {
+
 			return null;
 		}
 	}
 
 	/**
-	 * This makes sure that one content viewer, either for the current page or
-	 * the outline view, if it has focus, is the current one. <!--
-	 * begin-user-doc --> <!-- end-user-doc -->
+	 * This makes sure that one content viewer, either for the current page or the outline view, if it has focus, is the
+	 * current one. <!-- begin-user-doc --> <!-- end-user-doc -->
 	 *
 	 * @generated
 	 */
 	public void setCurrentViewer(Viewer viewer) {
+
 		// If it is changing...
 		//
 		if (this.currentViewer != viewer) {
@@ -923,24 +935,25 @@ implements IEditingDomainProvider, ISelectionProvider, IMenuListener, IViewerPro
 	}
 
 	/**
-	 * This returns the viewer as required by the {@link IViewerProvider}
-	 * interface. <!-- begin-user-doc --> <!-- end-user-doc -->
+	 * This returns the viewer as required by the {@link IViewerProvider} interface. <!-- begin-user-doc --> <!--
+	 * end-user-doc -->
 	 *
 	 * @generated
 	 */
 	@Override
 	public Viewer getViewer() {
+
 		return this.currentViewer;
 	}
 
 	/**
-	 * This creates a context menu for the viewer and adds a listener as well
-	 * registering the menu for extension. <!-- begin-user-doc --> <!--
-	 * end-user-doc -->
+	 * This creates a context menu for the viewer and adds a listener as well registering the menu for extension. <!--
+	 * begin-user-doc --> <!-- end-user-doc -->
 	 *
-	 * @generated
+	 * @generated NOT
 	 */
-	protected void createContextMenuForGen(StructuredViewer viewer) {
+	protected void createContextMenuFor(StructuredViewer viewer) {
+
 		MenuManager contextMenu = new MenuManager("#PopUp");
 		contextMenu.add(new Separator("additions"));
 		contextMenu.setRemoveAllWhenShown(true);
@@ -953,19 +966,20 @@ implements IEditingDomainProvider, ISelectionProvider, IMenuListener, IViewerPro
 		Transfer[] transfers = new Transfer[] { LocalTransfer.getInstance(), LocalSelectionTransfer.getTransfer(),
 				FileTransfer.getInstance() };
 		viewer.addDragSupport(dndOperations, transfers, new ViewerDragAdapter(viewer));
-		viewer.addDropSupport(dndOperations, transfers, new EditingDomainViewerDropAdapter(this.editingDomain, viewer));
-	}
 
-	protected void createContextMenuFor(StructuredViewer viewer) {
-		this.createContextMenuForGen(viewer);
+		// Use the custom drop adapter that will display a tooltip to the user
+		viewer.addDropSupport(dndOperations, transfers, new TooltipDisplayingDropAdapter(this.editingDomain, viewer));
 
+		// Show the 'PropertiesView' if the user double-clicks on an element
 		viewer.getControl().addMouseListener(new MouseAdapter() {
+
 			@Override
 			public void mouseDoubleClick(MouseEvent event) {
+
 				if (event.button == 1) {
 					try {
 						ClonableEcoreEditor.this.getEditorSite().getPage()
-						.showView("org.eclipse.ui.views.PropertySheet");
+								.showView("org.eclipse.ui.views.PropertySheet");
 					} catch (PartInitException exception) {
 						AgteleUIPlugin.INSTANCE.log(exception);
 					}
@@ -975,13 +989,13 @@ implements IEditingDomainProvider, ISelectionProvider, IMenuListener, IViewerPro
 	}
 
 	/**
-	 * This is the method called to load a resource into the editing domain's
-	 * resource set based on the editor's input. <!-- begin-user-doc --> <!--
-	 * end-user-doc -->
+	 * This is the method called to load a resource into the editing domain's resource set based on the editor's input.
+	 * <!-- begin-user-doc --> <!-- end-user-doc -->
 	 *
 	 * @generated
 	 */
 	public void createModelGen() {
+
 		URI resourceURI = EditUIUtil.getURI(this.getEditorInput(),
 				this.editingDomain.getResourceSet().getURIConverter());
 		Exception exception = null;
@@ -1003,6 +1017,7 @@ implements IEditingDomainProvider, ISelectionProvider, IMenuListener, IViewerPro
 	}
 
 	public void createModel() {
+
 		boolean isReflective = this.getActionBarContributor() instanceof EcoreActionBarContributor.Reflective;
 
 		final ResourceSet resourceSet = this.editingDomain.getResourceSet();
@@ -1017,70 +1032,76 @@ implements IEditingDomainProvider, ISelectionProvider, IMenuListener, IViewerPro
 			if (genModelEPackage != null) {
 				resourceSet.getLoadOptions().put(XMLResource.OPTION_MISSING_PACKAGE_HANDLER,
 						new XMLResource.MissingPackageHandler() {
-					protected EClass genModelEClass;
-					protected EStructuralFeature genPackagesFeature;
-					protected EClass genPackageEClass;
-					protected EStructuralFeature ecorePackageFeature;
-					protected Map<String, URI> ePackageNsURIToGenModelLocationMap;
 
-					@Override
-					public EPackage getPackage(String nsURI) {
-						// Initialize the metadata for accessing the
-						// GenModel reflective the first time.
-						//
-						if (this.genModelEClass == null) {
-							this.genModelEClass = (EClass) genModelEPackage.getEClassifier("GenModel");
-							this.genPackagesFeature = this.genModelEClass.getEStructuralFeature("genPackages");
-							this.genPackageEClass = (EClass) genModelEPackage.getEClassifier("GenPackage");
-							this.ecorePackageFeature = this.genPackageEClass
-									.getEStructuralFeature("ecorePackage");
-						}
+							protected EClass genModelEClass;
 
-						// Initialize the map from registered package
-						// namespaces to their GenModel locations the
-						// first time.
-						//
-						if (this.ePackageNsURIToGenModelLocationMap == null) {
-							this.ePackageNsURIToGenModelLocationMap = EcorePlugin
-									.getEPackageNsURIToGenModelLocationMap(true);
-						}
+							protected EStructuralFeature genPackagesFeature;
 
-						// Look up the namespace URI in the map.
-						//
-						EPackage ePackage = null;
-						URI uri = this.ePackageNsURIToGenModelLocationMap.get(nsURI);
-						if (uri != null) {
-							// If we find it, demand load the model.
-							//
-							Resource resource = resourceSet.getResource(uri, true);
+							protected EClass genPackageEClass;
 
-							// Locate the GenModel and fetech it's
-							// genPackages.
-							//
-							EObject genModel = (EObject) EcoreUtil.getObjectByType(resource.getContents(),
-									this.genModelEClass);
-							@SuppressWarnings("unchecked")
-							List<EObject> genPackages = (List<EObject>) genModel.eGet(this.genPackagesFeature);
-							for (EObject genPackage : genPackages) {
-								// Check if that package's Ecore Package
-								// has them matching namespace URI.
+							protected EStructuralFeature ecorePackageFeature;
+
+							protected Map<String, URI> ePackageNsURIToGenModelLocationMap;
+
+							@Override
+							public EPackage getPackage(String nsURI) {
+
+								// Initialize the metadata for accessing the
+								// GenModel reflective the first time.
 								//
-								EPackage dynamicEPackage = (EPackage) genPackage.eGet(this.ecorePackageFeature);
-								if (nsURI.equals(dynamicEPackage.getNsURI())) {
-									// If so, that's the package we want
-									// to return, and we add it to the
-									// registry so it's easy to find
-									// from now on.
-									//
-									ePackage = dynamicEPackage;
-									packageRegistry.put(nsURI, ePackage);
-									break;
+								if (this.genModelEClass == null) {
+									this.genModelEClass = (EClass) genModelEPackage.getEClassifier("GenModel");
+									this.genPackagesFeature = this.genModelEClass.getEStructuralFeature("genPackages");
+									this.genPackageEClass = (EClass) genModelEPackage.getEClassifier("GenPackage");
+									this.ecorePackageFeature = this.genPackageEClass
+											.getEStructuralFeature("ecorePackage");
 								}
+
+								// Initialize the map from registered package
+								// namespaces to their GenModel locations the
+								// first time.
+								//
+								if (this.ePackageNsURIToGenModelLocationMap == null) {
+									this.ePackageNsURIToGenModelLocationMap = EcorePlugin
+											.getEPackageNsURIToGenModelLocationMap(true);
+								}
+
+								// Look up the namespace URI in the map.
+								//
+								EPackage ePackage = null;
+								URI uri = this.ePackageNsURIToGenModelLocationMap.get(nsURI);
+								if (uri != null) {
+									// If we find it, demand load the model.
+									//
+									Resource resource = resourceSet.getResource(uri, true);
+
+									// Locate the GenModel and fetech it's
+									// genPackages.
+									//
+									EObject genModel = (EObject) EcoreUtil.getObjectByType(resource.getContents(),
+											this.genModelEClass);
+									@SuppressWarnings("unchecked")
+									List<EObject> genPackages = (List<EObject>) genModel.eGet(this.genPackagesFeature);
+									for (EObject genPackage : genPackages) {
+										// Check if that package's Ecore Package
+										// has them matching namespace URI.
+										//
+										EPackage dynamicEPackage = (EPackage) genPackage.eGet(this.ecorePackageFeature);
+										if (nsURI.equals(dynamicEPackage.getNsURI())) {
+											// If so, that's the package we want
+											// to return, and we add it to the
+											// registry so it's easy to find
+											// from now on.
+											//
+											ePackage = dynamicEPackage;
+											packageRegistry.put(nsURI, ePackage);
+											break;
+										}
+									}
+								}
+								return ePackage;
 							}
-						}
-						return ePackage;
-					}
-				});
+						});
 			}
 		}
 
@@ -1103,14 +1124,14 @@ implements IEditingDomainProvider, ISelectionProvider, IMenuListener, IViewerPro
 	}
 
 	/**
-	 * Returns a diagnostic describing the errors and warnings listed in the
-	 * resource and the specified exception (if any). <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
+	 * Returns a diagnostic describing the errors and warnings listed in the resource and the specified exception (if
+	 * any). <!-- begin-user-doc --> <!-- end-user-doc -->
 	 *
 	 * @generated
 	 */
 	@Override
 	public Diagnostic analyzeResourceProblems(Resource resource, Exception exception) {
+
 		boolean hasErrors = !resource.getErrors().isEmpty();
 		if (hasErrors || !resource.getWarnings().isEmpty()) {
 			BasicDiagnostic basicDiagnostic = new BasicDiagnostic(hasErrors ? Diagnostic.ERROR : Diagnostic.WARNING,
@@ -1129,13 +1150,14 @@ implements IEditingDomainProvider, ISelectionProvider, IMenuListener, IViewerPro
 	}
 
 	/**
-	 * This is the method used by the framework to install your own controls.
-	 * <!-- begin-user-doc --> <!-- end-user-doc -->
+	 * This is the method used by the framework to install your own controls. <!-- begin-user-doc --> <!-- end-user-doc
+	 * -->
 	 *
 	 * @generated
 	 */
 	@Override
 	public void createPages() {
+
 		// Creates the model from the editor input
 		//
 		this.createModel();
@@ -1184,10 +1206,12 @@ implements IEditingDomainProvider, ISelectionProvider, IMenuListener, IViewerPro
 		// area if there are more than one page
 		//
 		this.getContainer().addControlListener(new ControlAdapter() {
+
 			boolean guard = false;
 
 			@Override
 			public void controlResized(ControlEvent event) {
+
 				if (!this.guard) {
 					this.guard = true;
 					ClonableEcoreEditor.this.hideTabs();
@@ -1200,12 +1224,13 @@ implements IEditingDomainProvider, ISelectionProvider, IMenuListener, IViewerPro
 	}
 
 	/**
-	 * If there is just one page in the multi-page editor part, this hides the
-	 * single tab at the bottom. <!-- begin-user-doc --> <!-- end-user-doc -->
+	 * If there is just one page in the multi-page editor part, this hides the single tab at the bottom. <!--
+	 * begin-user-doc --> <!-- end-user-doc -->
 	 *
 	 * @generated
 	 */
 	protected void hideTabs() {
+
 		if (this.getPageCount() <= 1) {
 			this.setPageText(0, "");
 			if (this.getContainer() instanceof CTabFolder) {
@@ -1217,12 +1242,13 @@ implements IEditingDomainProvider, ISelectionProvider, IMenuListener, IViewerPro
 	}
 
 	/**
-	 * If there is more than one page in the multi-page editor part, this shows
-	 * the tabs at the bottom. <!-- begin-user-doc --> <!-- end-user-doc -->
+	 * If there is more than one page in the multi-page editor part, this shows the tabs at the bottom. <!--
+	 * begin-user-doc --> <!-- end-user-doc -->
 	 *
 	 * @generated
 	 */
 	protected void showTabs() {
+
 		if (this.getPageCount() > 1) {
 			this.setPageText(0, ClonableEcoreEditor.getString("_UI_SelectionPage_label"));
 			if (this.getContainer() instanceof CTabFolder) {
@@ -1234,13 +1260,13 @@ implements IEditingDomainProvider, ISelectionProvider, IMenuListener, IViewerPro
 	}
 
 	/**
-	 * This is used to track the active viewer. <!-- begin-user-doc --> <!--
-	 * end-user-doc -->
+	 * This is used to track the active viewer. <!-- begin-user-doc --> <!-- end-user-doc -->
 	 *
 	 * @generated
 	 */
 	@Override
 	protected void pageChange(int pageIndex) {
+
 		super.pageChange(pageIndex);
 
 		if (this.contentOutlinePage != null) {
@@ -1249,14 +1275,14 @@ implements IEditingDomainProvider, ISelectionProvider, IMenuListener, IViewerPro
 	}
 
 	/**
-	 * This is how the framework determines which interfaces we implement. <!--
-	 * begin-user-doc --> <!-- end-user-doc -->
+	 * This is how the framework determines which interfaces we implement. <!-- begin-user-doc --> <!-- end-user-doc -->
 	 *
 	 * @generated NOT
 	 */
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	@Override
 	public Object getAdapter(Class key) {
+
 		if (key.equals(IContentOutlinePage.class)) {
 			return this.showOutlineView() ? this.getContentOutlinePage() : null;
 		} else if (key.equals(IPropertySheetPage.class)) {
@@ -1278,19 +1304,20 @@ implements IEditingDomainProvider, ISelectionProvider, IMenuListener, IViewerPro
 	}
 
 	/**
-	 * This accesses a cached version of the content outliner. <!--
-	 * begin-user-doc --> <!-- end-user-doc -->
+	 * This accesses a cached version of the content outliner. <!-- begin-user-doc --> <!-- end-user-doc -->
 	 *
-	 * @generated NOT due to missing active editor Part, when the outline page
-	 *            is being created
+	 * @generated NOT due to missing active editor Part, when the outline page is being created
 	 */
 	public IContentOutlinePage getContentOutlinePage() {
+
 		if (this.contentOutlinePage == null) {
 			// The content outline is just a tree.
 			//
 			class MyContentOutlinePage extends ContentOutlinePage {
+
 				@Override
 				public void createControl(Composite parent) {
+
 					super.createControl(parent);
 					ClonableEcoreEditor.this.contentOutlineViewer = this.getTreeViewer();
 					ClonableEcoreEditor.this.contentOutlineViewer.addSelectionChangedListener(this);
@@ -1305,7 +1332,7 @@ implements IEditingDomainProvider, ISelectionProvider, IMenuListener, IViewerPro
 									ClonableEcoreEditor.this.contentOutlineViewer,
 									AgteleUIPlugin.getPlugin().getDialogSettings())));
 					ClonableEcoreEditor.this.contentOutlineViewer
-					.setInput(ClonableEcoreEditor.this.editingDomain.getResourceSet());
+							.setInput(ClonableEcoreEditor.this.editingDomain.getResourceSet());
 
 					new ColumnViewerInformationControlToolTipSupport(ClonableEcoreEditor.this.contentOutlineViewer,
 							new DiagnosticDecorator.EditingDomainLocationListener(
@@ -1333,12 +1360,14 @@ implements IEditingDomainProvider, ISelectionProvider, IMenuListener, IViewerPro
 				@Override
 				public void makeContributions(IMenuManager menuManager, IToolBarManager toolBarManager,
 						IStatusLineManager statusLineManager) {
+
 					super.makeContributions(menuManager, toolBarManager, statusLineManager);
 					ClonableEcoreEditor.this.contentOutlineStatusLineManager = statusLineManager;
 				}
 
 				@Override
 				public void setActionBars(IActionBars actionBars) {
+
 					super.setActionBars(actionBars);
 					ClonableEcoreEditor.this.getActionBarContributor().shareGlobalActions(this, actionBars);
 				}
@@ -1356,22 +1385,25 @@ implements IEditingDomainProvider, ISelectionProvider, IMenuListener, IViewerPro
 	}
 
 	/**
-	 * This accesses a cached version of the property sheet. <!-- begin-user-doc
-	 * --> <!-- end-user-doc -->
+	 * This accesses a cached version of the property sheet. <!-- begin-user-doc --> <!-- end-user-doc -->
 	 *
 	 * @generated
 	 */
 	public IPropertySheetPage getPropertySheetPage() {
+
 		PropertySheetPage propertySheetPage = new ExtendedPropertySheetPage(this.editingDomain,
 				ExtendedPropertySheetPage.Decoration.LIVE, AgteleUIPlugin.getPlugin().getDialogSettings()) {
+
 			@Override
 			public void setSelectionToViewer(List<?> selection) {
+
 				ClonableEcoreEditor.this.setSelectionToViewer(selection);
 				ClonableEcoreEditor.this.setFocus();
 			}
 
 			@Override
 			public void setActionBars(IActionBars actionBars) {
+
 				super.setActionBars(actionBars);
 				ClonableEcoreEditor.this.getActionBarContributor().shareGlobalActions(this, actionBars);
 			}
@@ -1383,12 +1415,13 @@ implements IEditingDomainProvider, ISelectionProvider, IMenuListener, IViewerPro
 	}
 
 	/**
-	 * This deals with how we want selection in the outliner to affect the other
-	 * views. <!-- begin-user-doc --> <!-- end-user-doc -->
+	 * This deals with how we want selection in the outliner to affect the other views. <!-- begin-user-doc --> <!--
+	 * end-user-doc -->
 	 *
 	 * @generated
 	 */
 	public void handleContentOutlineSelection(ISelection selection) {
+
 		if (this.selectionViewer != null && !selection.isEmpty() && selection instanceof IStructuredSelection) {
 			Iterator<?> selectedElements = ((IStructuredSelection) selection).iterator();
 			if (selectedElements.hasNext()) {
@@ -1410,24 +1443,26 @@ implements IEditingDomainProvider, ISelectionProvider, IMenuListener, IViewerPro
 	}
 
 	/**
-	 * This is for implementing {@link IEditorPart} and simply tests the command
-	 * stack. <!-- begin-user-doc --> <!-- end-user-doc -->
+	 * This is for implementing {@link IEditorPart} and simply tests the command stack. <!-- begin-user-doc --> <!--
+	 * end-user-doc -->
 	 *
 	 * @generated
 	 */
 	@Override
 	public boolean isDirty() {
+
 		return ((BasicCommandStack) this.editingDomain.getCommandStack()).isSaveNeeded();
 	}
 
 	/**
-	 * This is for implementing {@link IEditorPart} and simply saves the model
-	 * file. <!-- begin-user-doc --> <!-- end-user-doc -->
+	 * This is for implementing {@link IEditorPart} and simply saves the model file. <!-- begin-user-doc --> <!--
+	 * end-user-doc -->
 	 *
 	 * @generated NOT due to the need of updating each editors dirty state
 	 */
 	@Override
 	public void doSave(IProgressMonitor progressMonitor) {
+
 		// Save only resources that have actually changed.
 		//
 		final Map<Object, Object> saveOptions = new HashMap<>();
@@ -1438,15 +1473,15 @@ implements IEditingDomainProvider, ISelectionProvider, IMenuListener, IViewerPro
 	}
 
 	/**
-	 * This returns whether something has been persisted to the URI of the
-	 * specified resource. The implementation uses the URI converter from the
-	 * editor's resource set to try to open an input stream. <!-- begin-user-doc
-	 * --> <!-- end-user-doc -->
+	 * This returns whether something has been persisted to the URI of the specified resource. The implementation uses
+	 * the URI converter from the editor's resource set to try to open an input stream. <!-- begin-user-doc --> <!--
+	 * end-user-doc -->
 	 *
 	 * @generated
 	 */
 	@Override
 	protected boolean isPersisted(Resource resource) {
+
 		boolean result = false;
 		try {
 			InputStream stream = this.editingDomain.getResourceSet().getURIConverter()
@@ -1462,28 +1497,29 @@ implements IEditingDomainProvider, ISelectionProvider, IMenuListener, IViewerPro
 	}
 
 	/**
-	 * This always returns true because it is not currently supported. <!--
-	 * begin-user-doc --> <!-- end-user-doc -->
+	 * This always returns true because it is not currently supported. <!-- begin-user-doc --> <!-- end-user-doc -->
 	 *
 	 * @generated NOT due to suppressed saveAs when editor is cloned.
 	 */
 	@Override
 	public boolean isSaveAsAllowed() {
+
 		return super.isSaveAsAllowed();
 	}
 
 	public static final String ECORE_FILE_EXTENSION = "ecore";
+
 	public static final String EMOF_FILE_EXTENSION = "emof";
 
 	/**
-	 * This also changes the editor's input. <!-- begin-user-doc --> <!--
-	 * end-user-doc -->
+	 * This also changes the editor's input. <!-- begin-user-doc --> <!-- end-user-doc -->
 	 *
-	 * @generated NOT due to publishing the changed root resource to all opened
-	 *            editors and reregistering the common editing domain
+	 * @generated NOT due to publishing the changed root resource to all opened editors and reregistering the common
+	 *            editing domain
 	 */
 	@Override
 	public void doSaveAs() {
+
 		SaveAsDialog saveAsDialog = new SaveAsDialog(this.getSite().getShell());
 		saveAsDialog.create();
 		saveAsDialog.setMessage(ClonableEcoreEditor.getString("_UI_SaveAs_message"));
@@ -1512,7 +1548,7 @@ implements IEditingDomainProvider, ISelectionProvider, IMenuListener, IViewerPro
 				}
 
 				ClonableEditor.editingDomains
-				.remove(((IFileEditorInput) UIHelper.getCurrentEditorInput()).getFile().toString());
+						.remove(((IFileEditorInput) UIHelper.getCurrentEditorInput()).getFile().toString());
 				IFileEditorInput modelFile = new FileEditorInput(file);
 				ClonableEditor.editingDomains.put(modelFile.getFile().toString(), this.editingDomain);
 				this.setInputWithNotify(modelFile);
@@ -1526,10 +1562,11 @@ implements IEditingDomainProvider, ISelectionProvider, IMenuListener, IViewerPro
 	/**
 	 * <!-- begin-user-doc --> <!-- end-user-doc -->
 	 *
-	 * @generated NOT due to publishing the changed root resource to all opened
-	 *            editors and reregistering the common editing domain
+	 * @generated NOT due to publishing the changed root resource to all opened editors and reregistering the common
+	 *            editing domain
 	 */
 	protected void doSaveAs(URI uri, IEditorInput editorInput) {
+
 		ClonableEditor.editingDomains.remove(((IFileEditorInput) editorInput).getFile().toString());
 		this.editingDomain.getResourceSet().getResources().get(0).setURI(uri);
 		ClonableEditor.editingDomains.put(((IFileEditorInput) editorInput).getFile().toString(), this.editingDomain);
@@ -1540,7 +1577,7 @@ implements IEditingDomainProvider, ISelectionProvider, IMenuListener, IViewerPro
 		// super.init(null, editorInput);
 		IProgressMonitor progressMonitor = this.getActionBars().getStatusLineManager() != null
 				? this.getActionBars().getStatusLineManager().getProgressMonitor() : new NullProgressMonitor();
-				this.doSave(progressMonitor);
+		this.doSave(progressMonitor);
 	}
 
 	/**
@@ -1550,6 +1587,7 @@ implements IEditingDomainProvider, ISelectionProvider, IMenuListener, IViewerPro
 	 */
 	@Override
 	public void gotoMarker(IMarker marker) {
+
 		List<?> targetObjects = this.markerHelper.getTargetObjects(this.editingDomain, marker);
 		if (!targetObjects.isEmpty()) {
 			this.setSelectionToViewer(targetObjects);
@@ -1557,13 +1595,13 @@ implements IEditingDomainProvider, ISelectionProvider, IMenuListener, IViewerPro
 	}
 
 	/**
-	 * This is called during startup. <!-- begin-user-doc --> <!-- end-user-doc
-	 * -->
+	 * This is called during startup. <!-- begin-user-doc --> <!-- end-user-doc -->
 	 *
 	 * @generated
 	 */
 	@Override
 	public void init(IEditorSite site, IEditorInput editorInput) {
+
 		super.init(site, editorInput);
 
 		this.setSite(site);
@@ -1580,52 +1618,55 @@ implements IEditingDomainProvider, ISelectionProvider, IMenuListener, IViewerPro
 	 */
 	@Override
 	public void setFocus() {
+
 		this.getControl(this.getActivePage()).setFocus();
 	}
 
 	/**
-	 * This implements {@link org.eclipse.jface.viewers.ISelectionProvider}.
-	 * <!-- begin-user-doc --> <!-- end-user-doc -->
+	 * This implements {@link org.eclipse.jface.viewers.ISelectionProvider}. <!-- begin-user-doc --> <!-- end-user-doc
+	 * -->
 	 *
 	 * @generated
 	 */
 	@Override
 	public void addSelectionChangedListener(ISelectionChangedListener listener) {
+
 		this.selectionChangedListeners.add(listener);
 	}
 
 	/**
-	 * This implements {@link org.eclipse.jface.viewers.ISelectionProvider}.
-	 * <!-- begin-user-doc --> <!-- end-user-doc -->
+	 * This implements {@link org.eclipse.jface.viewers.ISelectionProvider}. <!-- begin-user-doc --> <!-- end-user-doc
+	 * -->
 	 *
 	 * @generated
 	 */
 	@Override
 	public void removeSelectionChangedListener(ISelectionChangedListener listener) {
+
 		this.selectionChangedListeners.remove(listener);
 	}
 
 	/**
-	 * This implements {@link org.eclipse.jface.viewers.ISelectionProvider} to
-	 * return this editor's overall selection. <!-- begin-user-doc --> <!--
-	 * end-user-doc -->
+	 * This implements {@link org.eclipse.jface.viewers.ISelectionProvider} to return this editor's overall selection.
+	 * <!-- begin-user-doc --> <!-- end-user-doc -->
 	 *
 	 * @generated
 	 */
 	@Override
 	public ISelection getSelection() {
+
 		return this.editorSelection;
 	}
 
 	/**
-	 * This implements {@link org.eclipse.jface.viewers.ISelectionProvider} to
-	 * set this editor's overall selection. Calling this result will notify the
-	 * listeners. <!-- begin-user-doc --> <!-- end-user-doc -->
+	 * This implements {@link org.eclipse.jface.viewers.ISelectionProvider} to set this editor's overall selection.
+	 * Calling this result will notify the listeners. <!-- begin-user-doc --> <!-- end-user-doc -->
 	 *
 	 * @generated NOT
 	 */
 	@Override
 	public void setSelection(ISelection selection) {
+
 		this.editorSelection = selection;
 
 		for (ISelectionChangedListener listener : new ArrayList<>(this.selectionChangedListeners)) {
@@ -1640,6 +1681,7 @@ implements IEditingDomainProvider, ISelectionProvider, IMenuListener, IViewerPro
 	 * @generated
 	 */
 	public void setStatusLineManager(ISelection selection) {
+
 		IStatusLineManager statusLineManager = this.currentViewer != null
 				&& this.currentViewer == this.contentOutlineViewer ? this.contentOutlineStatusLineManager
 						: this.getActionBars().getStatusLineManager();
@@ -1648,21 +1690,21 @@ implements IEditingDomainProvider, ISelectionProvider, IMenuListener, IViewerPro
 			if (selection instanceof IStructuredSelection) {
 				Collection<?> collection = ((IStructuredSelection) selection).toList();
 				switch (collection.size()) {
-				case 0: {
-					statusLineManager.setMessage(ClonableEcoreEditor.getString("_UI_NoObjectSelected"));
-					break;
-				}
-				case 1: {
-					String text = new AdapterFactoryItemDelegator(this.adapterFactory)
-							.getText(collection.iterator().next());
-					statusLineManager.setMessage(ClonableEcoreEditor.getString("_UI_SingleObjectSelected", text));
-					break;
-				}
-				default: {
-					statusLineManager.setMessage(ClonableEcoreEditor.getString("_UI_MultiObjectSelected",
-							Integer.toString(collection.size())));
-					break;
-				}
+					case 0: {
+						statusLineManager.setMessage(ClonableEcoreEditor.getString("_UI_NoObjectSelected"));
+						break;
+					}
+					case 1: {
+						String text = new AdapterFactoryItemDelegator(this.adapterFactory)
+								.getText(collection.iterator().next());
+						statusLineManager.setMessage(ClonableEcoreEditor.getString("_UI_SingleObjectSelected", text));
+						break;
+					}
+					default: {
+						statusLineManager.setMessage(ClonableEcoreEditor.getString("_UI_MultiObjectSelected",
+								Integer.toString(collection.size())));
+						break;
+					}
 				}
 			} else {
 				statusLineManager.setMessage("");
@@ -1671,34 +1713,34 @@ implements IEditingDomainProvider, ISelectionProvider, IMenuListener, IViewerPro
 	}
 
 	/**
-	 * This looks up a string in the plugin's plugin.properties file. <!--
-	 * begin-user-doc --> <!-- end-user-doc -->
+	 * This looks up a string in the plugin's plugin.properties file. <!-- begin-user-doc --> <!-- end-user-doc -->
 	 *
 	 * @generated
 	 */
 	private static String getString(String key) {
+
 		return AgteleUIPlugin.INSTANCE.getString(key);
 	}
 
 	/**
-	 * This looks up a string in plugin.properties, making a substitution. <!--
-	 * begin-user-doc --> <!-- end-user-doc -->
+	 * This looks up a string in plugin.properties, making a substitution. <!-- begin-user-doc --> <!-- end-user-doc -->
 	 *
 	 * @generated
 	 */
 	private static String getString(String key, Object s1) {
+
 		return AgteleUIPlugin.INSTANCE.getString(key, new Object[] { s1 });
 	}
 
 	/**
-	 * This implements {@link org.eclipse.jface.action.IMenuListener} to help
-	 * fill the context menus with contributions from the Edit menu. <!--
-	 * begin-user-doc --> <!-- end-user-doc -->
+	 * This implements {@link org.eclipse.jface.action.IMenuListener} to help fill the context menus with contributions
+	 * from the Edit menu. <!-- begin-user-doc --> <!-- end-user-doc -->
 	 *
 	 * @generated
 	 */
 	@Override
 	public void menuAboutToShow(IMenuManager menuManager) {
+
 		((IMenuListener) this.getEditorSite().getActionBarContributor()).menuAboutToShow(menuManager);
 	}
 
@@ -1708,6 +1750,7 @@ implements IEditingDomainProvider, ISelectionProvider, IMenuListener, IViewerPro
 	 * @generated
 	 */
 	public EditingDomainActionBarContributor getActionBarContributor() {
+
 		return (EditingDomainActionBarContributor) this.getEditorSite().getActionBarContributor();
 	}
 
@@ -1717,6 +1760,7 @@ implements IEditingDomainProvider, ISelectionProvider, IMenuListener, IViewerPro
 	 * @generated
 	 */
 	public IActionBars getActionBars() {
+
 		return this.getActionBarContributor().getActionBars();
 	}
 
@@ -1726,17 +1770,18 @@ implements IEditingDomainProvider, ISelectionProvider, IMenuListener, IViewerPro
 	 * @generated
 	 */
 	public AdapterFactory getAdapterFactory() {
+
 		return this.adapterFactory;
 	}
 
 	/**
 	 * <!-- begin-user-doc --> <!-- end-user-doc -->
 	 *
-	 * @generated NOT due to the invocation of the disposeFromEditorRegistry
-	 *            function
+	 * @generated NOT due to the invocation of the disposeFromEditorRegistry function
 	 */
 	@Override
 	public void dispose() {
+
 		this.updateProblemIndication = false;
 
 		ResourcesPlugin.getWorkspace().removeResourceChangeListener(this.resourceChangeListener);
@@ -1759,12 +1804,12 @@ implements IEditingDomainProvider, ISelectionProvider, IMenuListener, IViewerPro
 	}
 
 	/**
-	 * Returns whether the outline view should be presented to the user. <!--
-	 * begin-user-doc --> <!-- end-user-doc -->
+	 * Returns whether the outline view should be presented to the user. <!-- begin-user-doc --> <!-- end-user-doc -->
 	 *
 	 * @generated NOT enables the outline view
 	 */
 	protected boolean showOutlineView() {
+
 		return true;
 	}
 
@@ -1774,86 +1819,103 @@ implements IEditingDomainProvider, ISelectionProvider, IMenuListener, IViewerPro
 
 	@Override
 	protected Viewer getCurrentViewer() {
+
 		return this.currentViewer;
 	}
 
 	@Override
 	protected List<PropertySheetPage> getPropertySheetPages() {
+
 		return this.propertySheetPages;
 	}
 
 	@Override
 	protected ComposedAdapterFactory internalGetAdapterFactory() {
+
 		return this.adapterFactory;
 	}
 
 	@Override
 	protected Map<Resource, Diagnostic> getResourceToDiagnosticMap() {
+
 		return this.resourceToDiagnosticMap;
 	}
 
 	@Override
 	protected void setUpdateProblemIndication(boolean updateProblemIndication) {
+
 		this.updateProblemIndication = updateProblemIndication;
 	}
 
 	protected static AgteleUIPlugin getPluginStatic() {
+
 		return AgteleUIPlugin.INSTANCE;
 	}
 
 	@Override
 	protected AgteleUIPlugin getPlugin() {
+
 		return ClonableEcoreEditor.getPluginStatic();
 	}
 
 	@Override
 	protected Collection<Resource> getRemovedResources() {
+
 		return this.removedResources;
 	}
 
 	@Override
 	protected void setRemovedResources(Collection<Resource> removedResources) {
+
 		this.removedResources = removedResources;
 
 	}
 
 	@Override
 	protected Collection<Resource> getChangedResources() {
+
 		return this.changedResources;
 	}
 
 	@Override
 	protected void setChangedResources(Collection<Resource> changedResources) {
+
 		this.changedResources = changedResources;
 	}
 
 	@Override
 	protected Collection<Resource> getSavedResources() {
+
 		return this.savedResources;
 	}
 
 	@Override
 	protected void setSavedResources(Collection<Resource> savedResources) {
+
 		this.savedResources = savedResources;
 	}
 
 	@Override
 	protected void setAdapterFactory(ComposedAdapterFactory adapterFactory) {
+
 		this.adapterFactory = adapterFactory;
 	}
 
 	@Override
 	protected void setEditingDomain(AdapterFactoryEditingDomain editingDomain) {
+
 		this.editingDomain = editingDomain;
 	}
 
 	@Override
 	protected IResourceChangeListener getResourceChangeListener() {
+
 		return this.resourceChangeListener;
 	}
 
 	@Override
 	protected void setResourceChangeListener(IResourceChangeListener resourceChangeListener) {
+
 		this.resourceChangeListener = resourceChangeListener;
 	}
 
