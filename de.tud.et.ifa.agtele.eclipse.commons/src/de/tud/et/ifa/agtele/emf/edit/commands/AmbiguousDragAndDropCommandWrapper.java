@@ -170,6 +170,40 @@ public class AmbiguousDragAndDropCommandWrapper extends AbstractCommand implemen
 	}
 
 	@Override
+	public String getLabel() {
+
+		if (this.validCommands.isEmpty()) {
+			return "";
+		}
+
+		StringBuilder labelBuilder = new StringBuilder();
+		for (AbstractCommand validCommand : this.validCommands) {
+
+			if (!labelBuilder.toString().isEmpty()) {
+				labelBuilder.append("\n");
+			}
+
+			if (validCommand instanceof DragAndDropCommand) {
+				int operation = ((DragAndDropCommand) validCommand).getOperation();
+				if (operation == DragAndDropFeedback.DROP_MOVE) {
+					labelBuilder.append("Move here");
+					labelBuilder
+							.append(((DragAndDropCommand) validCommand).getLocation() < 0.5 ? " (Above)" : " (Below)");
+				} else if (operation == DragAndDropFeedback.DROP_COPY) {
+					labelBuilder.append("Copy here");
+					labelBuilder
+							.append(((DragAndDropCommand) validCommand).getLocation() < 0.5 ? " (Above)" : " (Below)");
+				} else {
+					labelBuilder.append(validCommand.getLabel());
+				}
+			} else {
+				labelBuilder.append(validCommand.getLabel());
+			}
+		}
+		return labelBuilder.toString();
+	}
+
+	@Override
 	public void redo() {
 
 		if (this.command != null) {
