@@ -33,6 +33,7 @@ Bundle-Activator: de.tud.et.ifa.agtele.ui.AgteleUIPlugin$Implementation
 Export-Package: de.tud.et.ifa.agtele.ui,
  de.tud.et.ifa.agtele.ui.editors,
  de.tud.et.ifa.agtele.ui.emf.edit,
+ de.tud.et.ifa.agtele.ui.emf.editor,
  de.tud.et.ifa.agtele.ui.interfaces,
  de.tud.et.ifa.agtele.ui.listeners,
  de.tud.et.ifa.agtele.ui.providers,
