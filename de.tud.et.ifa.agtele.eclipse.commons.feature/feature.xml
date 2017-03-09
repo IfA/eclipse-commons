@@ -13,7 +13,7 @@
       [Enter Copyright Description here.]
    </copyright>
 
-   <license url="https://eats3.et.tu-dresden.de/eclipse/LICENSE.txt">
+   <license url="https://agtele.eats.et.tu-dresden.de/eclipse/LICENSE.txt">
       All Rights reserved 2015 TU-Dresden Institute of Automation!
 It has not been decided yet, which (open-source) license this project and the related projects will be published with.
 For now, the use is granted in projects that are related to education and science at the Institute of Automation at TU-Dresden, under the following terms: &lt;br/&gt;
@@ -26,7 +26,7 @@ These terms will be replaced, once it has been decided, which public license to 
    </license>
 
    <url>
-      <update label="AG Tele Eclipse Commons Update Site" url="https://eats3.et.tu-dresden.de/projects/eclipse-commons/udpates"/>
+      <update label="AG Tele Eclipse Commons Update Site" url="https://agtele.eats.et.tu-dresden.de/projects/eclipse-commons/udpates"/>
    </url>
 
    <includes
