@@ -3,11 +3,21 @@
 		This generates the JavaDocs of the 'commons' and 'commons.ui' plugins and updates them on the web server.
     </description>
 	
-	<!-- the URl of the server -->
-	<property name="server-url" value="sftp://root@eats3.et.tu-dresden.de/"/>
+	<!-- the login to be used to connect to the server
+			(this should be configured in a global ANT property	named 'agtele.login' via 
+			Window -> Preferences -> Ant -> Runtime -> Properties -> Add Property...) -->
+		<property name="login" value="${agtele.login}" />
 	
-	<!-- the folder (on the server) that shall contain the update site -->
-	<property name="remote-path" value="/srv/projects/eclipse-commons/docs"/>
+	<!-- the 'group' to set to the contents of the docs via 'chgrp' 
+			(this should be configured in a global ANT property	named 'agtele.group' via 
+			Window -> Preferences -> Ant -> Runtime -> Properties -> Add Property...) -->
+		<property name="group" value="${agtele.group}" />
+	
+	<!-- the URl of the server -->
+		<property name="server-url" value="sftp://${login}@agtele.eats.et.tu-dresden.de/" />
+	
+	<!-- the folder (on the server) that shall contain the docs -->
+	<property name="remote-path" value="/data/projects/eclipse-commons/docs"/>
 	
 	<!-- whether to delete the local update site files at the end -->
 	<property name="delete-local" value="true" />
@@ -142,8 +152,8 @@
 			<!-- force overwrite -->
 			<arg value="option confirm off" />
 			
-			<!-- skip any problems -->
-			<!--<arg value="option batch continue" />-->
+			<!-- skip any problems (e.g. during changing the owner if we do not have permission) -->
+			<arg value="option batch continue" />
 			
 			<!-- copy the files -->
 			<arg value="put ${basedir}\docs.tar ${remote-path}/docs.tar" />
@@ -153,6 +163,12 @@
 			
 			<!-- delete the (remote) tarball -->
 			<arg value="call rm ${remote-path}/docs.tar" />
+			
+			<!-- change modifiers -->
+			<arg value="call chmod -R 0774 ${remote-path}/*" />
+
+			<!-- change group -->
+			<arg value="call chgrp -R ${group} ${remote-path}/*" />
 			
 			<!-- close the connection -->
 			<arg value="close" />
