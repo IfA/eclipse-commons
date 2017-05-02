@@ -18,6 +18,7 @@ import org.eclipse.emf.common.command.CommandWrapper;
 import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.EReference;
+import org.eclipse.emf.ecore.EcorePackage;
 import org.eclipse.emf.edit.command.AddCommand;
 import org.eclipse.emf.edit.command.CommandParameter;
 import org.eclipse.emf.edit.command.DragAndDropCommand;
@@ -34,7 +35,8 @@ import de.tud.et.ifa.agtele.emf.edit.commands.BasicDragAndDropSetCommand;
 import de.tud.et.ifa.agtele.emf.edit.commands.DragAndDropChangeContainingFeatureCommand;
 
 /**
- * This provides custom implementations for the '<em>createDragAndDropCommand(...)</em>' function provided by the
+ * This provides custom implementations for the
+ * '<em>createDragAndDropCommand(...)</em>' function provided by the
  * {@link ItemProviderAdapter}.
  *
  * @author mfreund
@@ -42,19 +44,21 @@ import de.tud.et.ifa.agtele.emf.edit.commands.DragAndDropChangeContainingFeature
 public interface IDragAndDropProvider {
 
 	/**
-	 * Create a custom {@link DragAndDropCommand}. The given '<em>strategy</em>' can be used to select one of multiple
-	 * possible commands to execute.
+	 * Create a custom {@link DragAndDropCommand}. The given '<em>strategy</em>'
+	 * can be used to select one of multiple possible commands to execute.
 	 * <p />
-	 * This will usually be called inside an implementation of '<em>createDragAndDropCommand(...)</em>' in a custom
-	 * ItemProvider instead of just calling '<em>super.createDragAndDropCommand(...)</em>'.
+	 * This will usually be called inside an implementation of
+	 * '<em>createDragAndDropCommand(...)</em>' in a custom ItemProvider instead
+	 * of just calling '<em>super.createDragAndDropCommand(...)</em>'.
 	 *
 	 * @param domain
-	 *            The {@link EditingDomain} that will be used to execute the command.
+	 *            The {@link EditingDomain} that will be used to execute the
+	 *            command.
 	 * @param owner
 	 *            The object on that the command will be executed.
 	 * @param location
-	 *            The location (between 0.0 and 1.0) in relation to the '<em>owner</em>' where the command will be
-	 *            executed.
+	 *            The location (between 0.0 and 1.0) in relation to the
+	 *            '<em>owner</em>' where the command will be executed.
 	 * @param operations
 	 *            The permitted operations.
 	 * @param operation
@@ -62,8 +66,8 @@ public interface IDragAndDropProvider {
 	 * @param collection
 	 *            The dragged elements.
 	 * @param strategy
-	 *            The {@link ICommandSelectionStrategy} that shall be applied to select an unambiguous command before
-	 *            execution.
+	 *            The {@link ICommandSelectionStrategy} that shall be applied to
+	 *            select an unambiguous command before execution.
 	 * @return The custom drag and drop command.
 	 */
 	@SuppressWarnings("unchecked")
@@ -106,8 +110,9 @@ public interface IDragAndDropProvider {
 			//
 			for (EReference ref : parent.eClass().getEAllReferences()) {
 				if ((ref.isContainment() || ref.getEOpposite() == null || !ref.getEOpposite().isContainment())
-						&& !ref.isDerived() && (collection.size() > 1 ? ref.isMany() : true) && eClassSet
-								.parallelStream().allMatch(eClass -> ref.getEReferenceType().isSuperTypeOf(eClass))) {
+						&& !ref.isDerived() && (collection.size() > 1 ? ref.isMany() : true)
+						&& (ref.getEReferenceType().equals(EcorePackage.Literals.EOBJECT) || eClassSet.parallelStream()
+								.allMatch(eClass -> ref.getEReferenceType().isSuperTypeOf(eClass)))) {
 
 					// If there is an 'IItemPropertyDescriptor' for the
 					// reference, we use this to check suitable
@@ -214,18 +219,21 @@ public interface IDragAndDropProvider {
 	}
 
 	/**
-	 * Based on the type of reference to set, creates either a {@link BasicDragAndDropSetCommand}, a
-	 * {@link BasicDragAndDropAddCommand}, or a {@link BasicDragAndDropCompoundCommand} (in case the collection needs to
-	 * be removed from an old feature first).
+	 * Based on the type of reference to set, creates either a
+	 * {@link BasicDragAndDropSetCommand}, a {@link BasicDragAndDropAddCommand},
+	 * or a {@link BasicDragAndDropCompoundCommand} (in case the collection
+	 * needs to be removed from an old feature first).
 	 *
 	 * @param domain
-	 *            The {@link EditingDomain} that will be used to execute the command.
+	 *            The {@link EditingDomain} that will be used to execute the
+	 *            command.
 	 * @param collection
 	 *            The dragged elements.
 	 * @param parent
 	 *            The {@link EObject} on that the command will be executed.
 	 * @param ref
-	 *            The {@link EReference} that to that the collection of objects shall be added/that shall be set.
+	 *            The {@link EReference} that to that the collection of objects
+	 *            shall be added/that shall be set.
 	 * @return The drag and drop command.
 	 */
 	default AbstractCommand createDragAndDropCommand(EditingDomain domain, Collection<EObject> collection,
