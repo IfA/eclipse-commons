@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feature
+      id="de.tud.et.ifa.agtele.eclipse.commons.feature"
+      label="Eclipse Commons"
+      version="1.0.1.qualifier"
+      provider-name="AG Tele">
+
+   <description url="http://www.example.com/description">
+      This feature includes the AG Tele Eclipse Commons.
+   </description>
+
+   <copyright url="http://www.example.com/copyright">
+      [Enter Copyright Description here.]
+   </copyright>
+
+   <license url="https://agtele.eats.et.tu-dresden.de/eclipse/LICENSE.txt">
+      All Rights reserved 2015 TU-Dresden Institute of Automation!
+It has not been decided yet, which (open-source) license this project and the related projects will be published with.
+For now, the use is granted in projects that are related to education and science at the Institute of Automation at TU-Dresden, under the following terms: &lt;br/&gt;
+ - You are not allowed to re-distribute any content of this project or feature or the software that is based on it. &lt;br/&gt;
+ - No commercial use. &lt;br/&gt;
+ - Changes on this project or feature itself are allowed only if the `Nutzungsvereinbarung` (`usage agreement`) of the Institute of Automation has been signed. &lt;br/&gt;
+ - For feature requests and questions please contact (Matthias Freund)[mailto://matthias.freund@tu-dresden.de]. &lt;br/&gt;
+ - This copyright notice must be preserved in this project, even if changes where made for adopting this project for your own project. &lt;br/&gt;
+These terms will be replaced, once it has been decided, which public license to issue.
+   </license>
+
+   <url>
+      <update label="AG Tele Eclipse Commons Update Site" url="https://agtele.eats.et.tu-dresden.de/projects/eclipse-commons/udpates"/>
+   </url>
+
+   <includes
+         id="org.eclipse.emf.common"
+         version="0.0.0"/>
+
+   <includes
+         id="org.eclipse.emf.ecore"
+         version="0.0.0"/>
+
+   <includes
+         id="org.eclipse.emf.edit"
+         version="0.0.0"/>
+
+   <includes
+         id="org.eclipse.xsd"
+         version="0.0.0"/>
+
+   <requires>
+      <import plugin="org.eclipse.core.runtime"/>
+      <import plugin="org.eclipse.swt"/>
+      <import plugin="org.eclipse.jface"/>
+      <import plugin="org.eclipse.core.resources"/>
+      <import plugin="org.eclipse.emf.ecore"/>
+      <import plugin="org.eclipse.xsd" version="2.11.0" match="greaterOrEqual"/>
+      <import plugin="org.eclipse.ui"/>
+      <import plugin="org.eclipse.emf.common"/>
+      <import plugin="org.eclipse.emf.common.ui"/>
+      <import plugin="org.eclipse.emf.edit"/>
+      <import plugin="org.eclipse.emf.edit.ui"/>
+   </requires>
+
+   <plugin
+         id="de.tud.et.ifa.agtele.eclipse.commons"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="de.tud.et.ifa.agtele.eclipse.commons.ui"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+</feature>
