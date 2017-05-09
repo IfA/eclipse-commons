@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+   <extension
+         point="org.eclipse.ui.views">
+      <category
+            id="de.tud.et.ifa.agtele.ui.views.category"
+            name="%_UI_ViewCategory_Name">
+      </category>
+      <view
+            category="de.tud.et.ifa.agtele.ui.views.category"
+            class="de.tud.et.ifa.agtele.ui.views.EMFModelHelpView"
+            icon="icons/help_view.gif"
+            id="de.tud.et.ifa.agtele.ui.views.EMFModelHelpView"
+            name="%_UI_EMFModelHelpView_Name">
+      </view>
+   </extension>   
+   <extension
+         point="org.eclipse.ui.perspectiveExtensions">
+      <perspectiveExtension
+            targetID="org.eclipse.jdt.ui.JavaPerspective">
+         <view
+               id="de.tud.et.ifa.agtele.ui.views.EMFModelHelpView"
+               ratio="0.5"
+               relationship="right"
+               relative="org.eclipse.ui.views.ProblemView">
+         </view>
+      </perspectiveExtension>
+   </extension>
+      <extension point="org.eclipse.ui.editors">
+      <editor
+            id="de.tud.et.ifa.agtele.ui.editors.EcoreEditorID"
+            name="AGTele Ecore Model Editor"
+            icon="icons/EcoreModelFile.gif"
+            class="de.tud.et.ifa.agtele.ui.editors.AgteleEcoreEditor"
+            contributorClass="org.eclipse.emf.ecore.presentation.EcoreActionBarContributor">
+         <contentTypeBinding contentTypeId="org.eclipse.emf.ecore"/>
+         <contentTypeBinding contentTypeId="org.eclipse.emf.emof"/>
+      </editor>
+   </extension>
+   
+   <extension point="org.eclipse.ui.editors">
+      <editor
+            id="de.tud.et.ifa.agtele.ui.editors.ReflectiveEcoreEditorID"
+            name="AGTele Reflective Ecore Model Editor"
+            icon="platform:/plugin/org.eclipse.emf.edit/icons/full/obj16/ModelFile.gif"
+            class="de.tud.et.ifa.agtele.ui.editors.AgteleEcoreEditor"
+            contributorClass="org.eclipse.emf.ecore.presentation.EcoreActionBarContributor$Reflective">
+         <contentTypeBinding contentTypeId="org.eclipse.emf.ecore.xmi"/>
+      </editor>
+   </extension>
+   <extension
+         point="org.eclipse.ui.menus">
+      <menuContribution
+            allPopups="false"
+            class="de.tud.et.ifa.agtele.ui.contributions.EcoreEditorMenuContribution"
+            locationURI="popup:de.tud.et.ifa.agtele.ui.editors.EcoreEditorID">
+      </menuContribution>
+      <menuContribution
+            allPopups="false"
+            class="de.tud.et.ifa.agtele.ui.contributions.EcoreEditorMenuContribution"
+            locationURI="popup:org.eclipse.emf.ecore.presentation.EcoreEditorID">
+      </menuContribution>
+      <menuContribution
+            allPopups="false"
+            class="de.tud.et.ifa.agtele.ui.contributions.OpenCodeMenuContribution"
+            locationURI="popup:org.eclipse.emf.codegen.ecore.genmodel.presentation.GenModelEditorID?after=open-actions">
+      </menuContribution>
+   </extension>
+   <extension
+         point="org.eclipse.ui.commands">
+      <command
+            defaultHandler="de.tud.et.ifa.agtele.ui.handlers.OpenGenModelHandler"
+            id="de.tud.et.ifa.agtele.ui.commands.OpenGenModel"
+            name="OpenGenModel">
+      </command>
+      <command
+            defaultHandler="de.tud.et.ifa.agtele.ui.handlers.OpenImplModelCodeHandler"
+            id="de.tud.et.ifa.agtele.ui.commands.OpenImplModelCode"
+            name="OpenImplModelCode">
+      </command>
+      <command
+            defaultHandler="de.tud.et.ifa.agtele.ui.handlers.OpenInterfaceModelCodeHandler"
+            id="de.tud.et.ifa.agtele.ui.commands.OpenInterfaceModelCode"
+            name="OpenInterfaceModelCode">
+      </command>
+      <command
+            defaultHandler="de.tud.et.ifa.agtele.ui.handlers.OpenEditCodeHandler"
+            id="de.tud.et.ifa.agtele.ui.commands.OpenEditCode"
+            name="OpenEditCode">
+      </command>
+      <command
+            defaultHandler="de.tud.et.ifa.agtele.ui.handlers.OpenEditorCodeHandler"
+            id="de.tud.et.ifa.agtele.ui.commands.OpenEditorCode"
+            name="OpenEditorCode">
+      </command>
+      <command
+            defaultHandler="de.tud.et.ifa.agtele.ui.handlers.OpenFactoryCodeHandler"
+            id="de.tud.et.ifa.agtele.ui.commands.OpenFactoryCode"
+            name="OpenFactoryCode">
+      </command>
+   </extension>
+</plugin>
