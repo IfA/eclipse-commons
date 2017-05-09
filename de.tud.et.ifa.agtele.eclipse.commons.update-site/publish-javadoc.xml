@@ -1,0 +1,189 @@
+<project name="MyProject" default="cleanup" basedir=".">
+    <description>
+		This generates the JavaDocs of the 'commons' and 'commons.ui' plugins and updates them on the web server.
+    </description>
+	
+	<!-- the login to be used to connect to the server
+			(this should be configured in a global ANT property	named 'agtele.login' via 
+			Window -> Preferences -> Ant -> Runtime -> Properties -> Add Property...) -->
+		<property name="login" value="${agtele.login}" />
+	
+	<!-- the 'group' to set to the contents of the docs via 'chgrp' 
+			(this should be configured in a global ANT property	named 'agtele.group' via 
+			Window -> Preferences -> Ant -> Runtime -> Properties -> Add Property...) -->
+		<property name="group" value="${agtele.group}" />
+	
+	<!-- the URl of the server -->
+		<property name="server-url" value="sftp://${login}@agtele.eats.et.tu-dresden.de/" />
+	
+	<!-- the folder (on the server) that shall contain the docs -->
+	<property name="remote-path" value="/data/projects/eclipse-commons/docs"/>
+	
+	<!-- whether to delete the local update site files at the end -->
+	<property name="delete-local" value="true" />
+	
+	<!-- a list of all the Jars that make up the classpath of the two plugins;
+		if additional dependencies are added to one of the plugins, the according Jars need to be added manually! --> 
+	<path id="pluginDependencies">
+		<!-- commons -->
+		<last><sort><fileset dir="${osgi.syspath}" includes="org.eclipse.core.runtime_*.jar" /></sort></last>
+		<last><sort><fileset dir="${osgi.syspath}" includes="javax.inject_*.jar" /></sort></last>
+		<last><sort><fileset dir="${osgi.syspath}" includes="org.eclipse.osgi_*.jar" /></sort></last>
+		<last><sort><fileset dir="${osgi.syspath}" includes="org.eclipse.osgi.compatibility.state_*.jar" /></sort></last>
+		<last><sort><fileset dir="${osgi.syspath}" includes="org.eclipse.equinox.common_*.jar" /></sort></last>
+		<last><sort><fileset dir="${osgi.syspath}" includes="org.eclipse.core.jobs_*.jar" /></sort></last>
+		<last><sort><fileset dir="${osgi.syspath}" includes="org.eclipse.equinox.registry_*.jar" /></sort></last>
+		<last><sort><fileset dir="${osgi.syspath}" includes="org.eclipse.equinox.preferences_*.jar" /></sort></last>
+		<last><sort><fileset dir="${osgi.syspath}" includes="org.eclipse.core.contenttype_*.jar" /></sort></last>
+		<last><sort><fileset dir="${osgi.syspath}" includes="org.eclipse.equinox.app_*.jar" /></sort></last>
+		<last><sort><fileset dir="${osgi.syspath}" includes="org.eclipse.swt_*.jar" /></sort></last>
+		<last><sort><fileset dir="${osgi.syspath}" includes="org.eclipse.swt.win32.win32.x86_64_*.jar" /></sort></last>
+		<last><sort><fileset dir="${osgi.syspath}" includes="org.eclipse.jface_*.jar" /></sort></last>
+		<last><sort><fileset dir="${osgi.syspath}" includes="org.eclipse.core.commands_*.jar" /></sort></last>
+		<last><sort><fileset dir="${osgi.syspath}" includes="org.eclipse.core.resources_*.jar" /></sort></last>
+		<last><sort><fileset dir="${osgi.syspath}" includes="org.eclipse.emf.ecore_*.jar" /></sort></last>
+		<last><sort><fileset dir="${osgi.syspath}" includes="org.eclipse.emf.common_*.jar" /></sort></last>
+		<last><sort><fileset dir="${osgi.syspath}" includes="org.eclipse.xsd_*.jar" /></sort></last>
+		<last><sort><fileset dir="${osgi.syspath}" includes="org.eclipse.emf.edit_*.jar" /></sort></last>
+		<last><sort><fileset dir="${osgi.syspath}" includes="org.eclipse.emf.ecore.change_*.jar" /></sort></last>
+		<last><sort><fileset dir="${osgi.syspath}" includes="org.eclipse.emf.compare_*.jar" /></sort></last>
+		<!-- commons.ui -->
+		<last><sort><fileset dir="${osgi.syspath}" includes="org.eclipse.ui_*.jar"/></sort></last>
+		<last><sort><fileset dir="${osgi.syspath}" includes="org.eclipse.swt_*.jar"/></sort></last>
+		<last><sort><fileset dir="${osgi.syspath}" includes="org.eclipse.swt.win32.win32.x86_64_*.jar"/></sort></last>
+		<last><sort><fileset dir="${osgi.syspath}" includes="org.eclipse.jface_*.jar"/></sort></last>
+		<last><sort><fileset dir="${osgi.syspath}" includes="org.eclipse.core.commands_*.jar"/></sort></last>
+		<last><sort><fileset dir="${osgi.syspath}" includes="org.eclipse.ui.workbench_*.jar"/></sort></last>
+		<last><sort><fileset dir="${osgi.syspath}" includes="org.eclipse.e4.ui.workbench3_*.jar"/></sort></last>
+		<last><sort><fileset dir="${osgi.syspath}" includes="org.eclipse.emf.common_*.jar"/></sort></last>
+		<last><sort><fileset dir="${osgi.syspath}" includes="org.eclipse.emf.common.ui_*.jar"/></sort></last>
+		<last><sort><fileset dir="${osgi.syspath}" includes="org.eclipse.core.runtime_*.jar"/></sort></last>
+		<last><sort><fileset dir="${osgi.syspath}" includes="javax.inject_*.jar"/></sort></last>
+		<last><sort><fileset dir="${osgi.syspath}" includes="org.eclipse.osgi_*.jar"/></sort></last>
+		<last><sort><fileset dir="${osgi.syspath}" includes="org.eclipse.osgi.compatibility.state_*.jar"/></sort></last>
+		<last><sort><fileset dir="${osgi.syspath}" includes="org.eclipse.equinox.common_*.jar"/></sort></last>
+		<last><sort><fileset dir="${osgi.syspath}" includes="org.eclipse.core.jobs_*.jar"/></sort></last>
+		<last><sort><fileset dir="${osgi.syspath}" includes="org.eclipse.equinox.registry_*.jar"/></sort></last>
+		<last><sort><fileset dir="${osgi.syspath}" includes="org.eclipse.equinox.preferences_*.jar"/></sort></last>
+		<last><sort><fileset dir="${osgi.syspath}" includes="org.eclipse.core.contenttype_*.jar"/></sort></last>
+		<last><sort><fileset dir="${osgi.syspath}" includes="org.eclipse.equinox.app_*.jar"/></sort></last>
+		<last><sort><fileset dir="${osgi.syspath}" includes="org.eclipse.emf.ecore_*.jar"/></sort></last>
+		<last><sort><fileset dir="${osgi.syspath}" includes="org.eclipse.emf.edit_*.jar"/></sort></last>
+		<last><sort><fileset dir="${osgi.syspath}" includes="org.eclipse.emf.ecore.change_*.jar"/></sort></last>
+		<last><sort><fileset dir="${osgi.syspath}" includes="org.eclipse.emf.edit.ui_*.jar"/></sort></last>
+		<last><sort><fileset dir="${osgi.syspath}" includes="org.eclipse.ui.views_*.jar"/></sort></last>
+		<last><sort><fileset dir="${osgi.syspath}" includes="org.eclipse.ui.ide_*.jar"/></sort></last>
+		<last><sort><fileset dir="${osgi.syspath}" includes="org.eclipse.emf.ecore.editor_*.jar"/></sort></last>
+		<last><sort><fileset dir="${osgi.syspath}" includes="org.eclipse.core.resources_*.jar"/></sort></last>
+		<last><sort><fileset dir="${osgi.syspath}" includes="org.eclipse.emf.ecore.xmi_*.jar"/></sort></last>
+		<last><sort><fileset dir="${osgi.syspath}" includes="org.eclipse.emf.ecore.edit_*.jar"/></sort></last>
+		<last><sort><fileset dir="${osgi.syspath}" includes="org.eclipse.emf.codegen_*.jar"/></sort></last>
+		<last><sort><fileset dir="${osgi.syspath}" includes="org.eclipse.emf.codegen.ecore_*.jar"/></sort></last>
+		<last><sort><fileset dir="${osgi.syspath}" includes="org.eclipse.core.expressions_*.jar"/></sort></last>
+		<last><sort><fileset dir="${osgi.syspath}" includes="org.eclipse.e4.core.commands_*.jar"/></sort></last>
+		<last><sort><fileset dir="${osgi.syspath}" includes="org.eclipse.e4.core.contexts_*.jar"/></sort></last>
+		<last><sort><fileset dir="${osgi.syspath}" includes="org.eclipse.emf.cdo.transfer.ui_*.jar"/></sort></last>
+	</path>
+	
+	<!-- ================================= 
+		          target: generate              
+		         ================================= -->
+	<target name="generate">
+		
+		<echo>Generating JavaDocs...</echo>
+	
+		<exec executable="javadoc"> <!--JDK is expected to be on the Windows path! -->
+			
+			<arg value="-protected"/>
+			
+			<arg value="-doctitle"/>
+			<arg value="AGTele Eclipse Commons Documentation"/>
+			
+			<!-- generate docs for everything in both plugins -->
+			<arg value="-subpackages"/>
+			<arg value="de.tud.et.ifa.agtele"/>
+			
+			<!-- the src folders of the 'commons' and the 'commons.ui' plugins 
+				(including and without an additional '.git' suffix in the paths to work with both options -->
+			<arg value="-sourcepath" />
+			<arg value="${basedir}${file.separator}..${file.separator}..${file.separator}de.tud.et.ifa.agtele.eclipse.commons.git${file.separator}src;${basedir}${file.separator}..${file.separator}..${file.separator}de.tud.et.ifa.agtele.eclipse.commons.ui.git${file.separator}src;${basedir}${file.separator}..${file.separator}..${file.separator}de.tud.et.ifa.agtele.eclipse.commons${file.separator}src;${basedir}${file.separator}..${file.separator}..${file.separator}de.tud.et.ifa.agtele.eclipse.commons.ui${file.separator}src" />
+			
+			<!-- the destination directory for the generated docs -->
+			<arg value="-d" />
+			<arg value="${basedir}${file.separator}docs" />
+			
+			<!-- the classpath is required to generated the docs without errors -->
+			<arg value="-classpath" />
+			<arg value="${toString:pluginDependencies}" />
+			
+			<!-- ensures that links to other JavaDocs are included in the generated HTML files -->
+			<arg value="-link" />
+			<arg value="http://docs.oracle.com/javase/8/docs/api/" />
+			<arg value="-link" />
+			<arg value="http://download.eclipse.org/modeling/emf/emf/javadoc/2.11/" />
+			<arg value="-link" />
+			<arg value="http://help.eclipse.org/neon/topic/org.eclipse.platform.doc.isv/reference/api/" />
+			
+			<!-- prevent 'self-closing element not allowed' errors -->
+			<arg value="-xDoclint:syntax" />
+			
+		</exec>
+		
+	</target>
+
+	<!-- ================================= 
+	          target: publish              
+	         ================================= -->
+	<target name="publish" depends="generate">
+		
+		<!-- create a tarball -->
+		<tar basedir="docs" destfile="docs.tar" />
+		
+		<echo>Publishing generated docs...</echo>
+		
+		<!-- copy the 'docs' and 'plugins' folder as well as 'artifacts.jar' and 'content.jar'
+			to the specified directory representing the update site -->
+		
+		<exec executable="WinSCP.com"> <!-- WinSCP.com is expected to be on the Windows path! -->
+			<arg value="/command" />
+			<!-- open a connection to the server -->
+			<arg value="open ${server-url}" />
+			
+			<!-- force overwrite -->
+			<arg value="option confirm off" />
+			
+			<!-- skip any problems (e.g. during changing the owner if we do not have permission) -->
+			<arg value="option batch continue" />
+			
+			<!-- copy the files -->
+			<arg value="put ${basedir}\docs.tar ${remote-path}/docs.tar" />
+			
+			<!-- unpack the tarball -->
+			<arg value="call tar xfv ${remote-path}/docs.tar -C ${remote-path}" />
+			
+			<!-- delete the (remote) tarball -->
+			<arg value="call rm ${remote-path}/docs.tar" />
+			
+			<!-- change modifiers -->
+			<arg value="call chmod -R 0774 ${remote-path}/*" />
+
+			<!-- change group -->
+			<arg value="call chgrp -R ${group} ${remote-path}/*" />
+			
+			<!-- close the connection -->
+			<arg value="close" />
+			<arg value="exit" />
+		</exec>
+		
+		<!-- delete the (local) tarball -->
+		<delete file="docs.tar" />
+	</target>
+	
+	<!-- ================================= 
+          target: cleanup              
+         ================================= -->
+    <target name="cleanup" depends="publish" if="${delete-local}">
+    	<delete dir="docs" />
+    </target>
+	
+</project>
