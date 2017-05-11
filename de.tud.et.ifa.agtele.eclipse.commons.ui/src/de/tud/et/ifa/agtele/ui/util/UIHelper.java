@@ -50,6 +50,9 @@ public interface UIHelper {
 
 		IWorkbench wb = PlatformUI.getWorkbench();
 		IWorkbenchWindow window = wb.getActiveWorkbenchWindow();
+		if (window == null) {
+			return null;
+		}
 		IWorkbenchPage page = window.getActivePage();
 		if (page == null) {
 			return null;
@@ -70,6 +73,9 @@ public interface UIHelper {
 
 		IWorkbench wb = PlatformUI.getWorkbench();
 		IWorkbenchWindow window = wb.getActiveWorkbenchWindow();
+		if (window == null) {
+			return null;
+		}
 		IWorkbenchPage page = window.getActivePage();
 		if (page == null) {
 			return null;
@@ -104,7 +110,7 @@ public interface UIHelper {
 
 		IWorkbench wb = PlatformUI.getWorkbench();
 		IWorkbenchWindow window = wb.getActiveWorkbenchWindow();
-		return window.getSelectionService().getSelection();
+		return window != null ? window.getSelectionService().getSelection() : null;
 	}
 
 	/**
