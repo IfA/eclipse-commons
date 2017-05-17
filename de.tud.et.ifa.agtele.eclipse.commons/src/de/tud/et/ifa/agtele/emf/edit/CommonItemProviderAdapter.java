@@ -3,6 +3,7 @@ package de.tud.et.ifa.agtele.emf.edit;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import org.eclipse.emf.common.command.Command;
@@ -18,13 +19,15 @@ import org.eclipse.emf.ecore.util.FeatureMapUtil;
 import org.eclipse.emf.edit.command.AddCommand;
 import org.eclipse.emf.edit.command.CommandParameter;
 import org.eclipse.emf.edit.domain.EditingDomain;
+import org.eclipse.emf.edit.provider.ComposedImage;
 import org.eclipse.emf.edit.provider.ItemProviderAdapter;
 
 /**
- * A special {@link ItemProviderAdapter} that encapsulates common functionalities.
+ * A special {@link ItemProviderAdapter} that encapsulates common
+ * functionalities.
  * <p />
- * In order to make use of it, the root item provider of your generated model must extend this instead
- * of the default '<em>ItemProviderAdapter</em>'.
+ * In order to make use of it, the root item provider of your generated model
+ * must extend this instead of the default '<em>ItemProviderAdapter</em>'.
  *
  * @author mfreund
  */
@@ -66,7 +69,7 @@ public class CommonItemProviderAdapter extends ItemProviderAdapter {
 			//
 			if (this.ownerList == null || this.collection == null || this.collection.size() == 0
 					|| this.index != CommandParameter.NO_INDEX
-					&& (this.index < 0 || this.index > this.ownerList.size())) {
+							&& (this.index < 0 || this.index > this.ownerList.size())) {
 				return false;
 			}
 
@@ -171,11 +174,104 @@ public class CommonItemProviderAdapter extends ItemProviderAdapter {
 	}
 
 	/**
+	 * A special {@link ComposedImage} where the last of the given images is be
+	 * shifted by a given x- and yOffset.
+	 * <p />
+	 * It can e.g. be used in {@link ItemProviderAdapter#getImage(Object)} to
+	 * return a decorated image. Usage examples:
+	 * <p />
+	 * <code>
+	 * <pre>
+	 * {@code
+	 * return new DecoratedComposedImage(Arrays.asList(
+	 * 		this.overlayImage(object, this.getResourceLocator().getImage("full/obj16/NameOfModelElement")),
+	 * 		this.getResourceLocator().getImage("full/obj16/NameOfDecorationImage")),
+	 * 		5, 0);
+	 *
+	 * return new DecoratedComposedImage(Arrays.asList(
+	 * 		this.overlayImage(object, this.getResourceLocator().getImage("full/obj16/NameOfModelElement")),
+	 * 		BundleContentHelper.getBundleImage("my.fancy.plugin", "icons/NameOfDecorationImage.gif"))),
+	 * 		5, 0);
+	 * }
+	 * </pre>
+	 * </code>
+	 *
+	 * @author mfreund
+	 */
+	protected static final class DecoratedComposedImage extends ComposedImage {
+
+		/**
+		 * The horizontal offset by which the last of the images shall be
+		 * shifted.
+		 */
+		private final int xOffset;
+
+		/**
+		 * The vertical offset by which the last of the images shall be shifted.
+		 */
+		private final int yOffset;
+
+		/**
+		 * This creates an instance.
+		 *
+		 * @param images
+		 *            The list of images that this image shall be composed of.
+		 * @param xOffset
+		 *            The horizontal offset by which the last of the images
+		 *            shall be shifted.
+		 * @param yOffSet
+		 *            The vertical offset by which the last of the images shall
+		 *            be shifted.
+		 */
+		public DecoratedComposedImage(Collection<?> images, int xOffset, int yOffSet) {
+			super(images);
+			this.xOffset = xOffset;
+			this.yOffset = yOffSet;
+		}
+
+		/**
+		 * @return the {@link #xOffset}
+		 */
+		public int getXOffset() {
+			return this.xOffset;
+		}
+
+		/**
+		 * @return the {@link #yOffset}
+		 */
+		public int getYOffset() {
+			return this.yOffset;
+		}
+
+		@Override
+		public List<ComposedImage.Point> getDrawPoints(Size size) {
+			List<ComposedImage.Point> result = super.getDrawPoints(size);
+			result.get(result.size() - 1).y = this.yOffset;
+			result.get(result.size() - 1).x = this.xOffset;
+			return result;
+		}
+
+		@Override
+		public boolean equals(Object that) {
+			return that instanceof DecoratedComposedImage
+					&& ((DecoratedComposedImage) that).getImages().equals(this.images)
+					&& ((DecoratedComposedImage) that).getXOffset() == this.getXOffset()
+					&& ((DecoratedComposedImage) that).getYOffset() == this.getYOffset();
+		}
+
+		@Override
+		public int hashCode() {
+			return this.images.hashCode() + this.xOffset + this.yOffset;
+		}
+	}
+
+	/**
 	 * This creates an instance.
 	 *
 	 * @param adapterFactory
-	 *            An instance is created from an adapter factory. The factory is used as a key so that we always know
-	 *            which factory created this adapter.
+	 *            An instance is created from an adapter factory. The factory is
+	 *            used as a key so that we always know which factory created
+	 *            this adapter.
 	 */
 	public CommonItemProviderAdapter(AdapterFactory adapterFactory) {
 		super(adapterFactory);
@@ -185,10 +281,11 @@ public class CommonItemProviderAdapter extends ItemProviderAdapter {
 	protected Command createDragAndDropCommand(EditingDomain domain, Object owner, float location, int operations,
 			int operation, Collection<?> collection) {
 
-		// If possible use the special functionality provided by the 'IDragAndDropProvider' interface...
-		if(this instanceof IDragAndDropProvider) {
-			return ((IDragAndDropProvider) this).createCustomDragAndDropCommand(domain, owner, location, operations, operation, collection,
-					((IDragAndDropProvider) this).getCommandSelectionStrategy());
+		// If possible use the special functionality provided by the
+		// 'IDragAndDropProvider' interface...
+		if (this instanceof IDragAndDropProvider) {
+			return ((IDragAndDropProvider) this).createCustomDragAndDropCommand(domain, owner, location, operations,
+					operation, collection, ((IDragAndDropProvider) this).getCommandSelectionStrategy());
 		} else {
 			return super.createDragAndDropCommand(domain, owner, location, operations, operation, collection);
 		}
