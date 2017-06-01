@@ -14,16 +14,30 @@ import org.eclipse.emf.edit.provider.ComposedImage;
 import org.eclipse.emf.edit.provider.IItemLabelProvider;
 import org.eclipse.emf.edit.ui.provider.AdapterFactoryLabelProvider;
 import org.eclipse.jface.viewers.StyledString;
+import org.eclipse.jface.viewers.StyledString.Styler;
+import org.eclipse.jface.viewers.Viewer;
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.graphics.Color;
+import org.eclipse.swt.graphics.Font;
+import org.eclipse.swt.graphics.FontData;
 import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.graphics.TextStyle;
+import org.eclipse.swt.widgets.Display;
 
 import de.tud.et.ifa.agtele.resources.BundleContentHelper;
 import de.tud.et.ifa.agtele.ui.providers.AgteleEcoreContentProvider.NonContainedChildWrapper;
 
-public class AgteleEcoreAdapterFactoryLabelProvider extends AdapterFactoryLabelProvider {
+public class AgteleEcoreAdapterFactoryLabelProvider extends AdapterFactoryLabelProvider.StyledLabelProvider {
 
-	public AgteleEcoreAdapterFactoryLabelProvider(AdapterFactory adapterFactory) {
-		super(adapterFactory);
+	public AgteleEcoreAdapterFactoryLabelProvider(AdapterFactory adapterFactory, Font defaultFont,
+			Color defaultForeground, Color defaultBackground) {
+		super(adapterFactory, defaultFont, defaultForeground, defaultBackground);
 	}
+
+	public AgteleEcoreAdapterFactoryLabelProvider(AdapterFactory adapterFactory, Viewer viewer) {
+		super(adapterFactory, viewer);
+	}
+
 
 	@Override
 	public Image getImage(Object object) {
@@ -119,38 +133,65 @@ public class AgteleEcoreAdapterFactoryLabelProvider extends AdapterFactoryLabelP
 
 	@Override
 	public String getText(Object object) {
-		String result = super.getText(object);
+		return this.getStyledText(object).getString();
+	}
+
+	@Override
+	public StyledString getStyledText(Object object) {
+		StyledString result;
 
 		if (AgteleEcoreAdapterFactoryLabelProvider.isChildInherited(object)
 				&& object instanceof NonContainedChildWrapper
 				&& ((NonContainedChildWrapper) object).getParentNode() instanceof EClass
 				&& ((NonContainedChildWrapper) object).getNoncontainedChild() instanceof EObject) {
-			result = super.getText(((NonContainedChildWrapper) object).getNoncontainedChild());
-			EClass eClass = (EClass) ((EObject) ((NonContainedChildWrapper) object).getNoncontainedChild())
+			Object nonContainedChild = ((NonContainedChildWrapper) object).getNoncontainedChild();
+			result = super.getStyledText(nonContainedChild);
+
+			EClass eClass = (EClass) ((EObject) nonContainedChild)
 					.eContainer();
 
-			result += " (inherited from '" + eClass.getName() + "' in " + eClass.getEPackage().getNsURI() + ")";
+			result.append(" (inherited from '" + eClass.getName() + "' in " + eClass.getEPackage().getNsURI() + ")",
+					StyledString.DECORATIONS_STYLER);
+
+			result.setStyle(0, result.length(), new InheritedFeatureStyler());
+		} else {
+			result = new StyledString(super.getText(object));
+			if (object instanceof EStructuralFeature && ((EStructuralFeature) object).isDerived()) {
+				result = this.modifyDerivedFeatureLabel(result);
+			}
 		}
 
 		return result;
 	}
 
-	@Override
-	public StyledString getStyledText(Object object) {
-		StyledString result = super.getStyledText(object);
+	/**
+	 * This method can be called in order to modify the label of a derived
+	 * feature.
+	 *
+	 * @param text
+	 * @return
+	 */
+	public String modifyDerivedFeatureLabel(String text) {
+		return this.modifyDerivedFeatureLabel(new StyledString(text)).getString();
+	}
 
-		if (AgteleEcoreAdapterFactoryLabelProvider.isChildInherited(object)
-				&& object instanceof NonContainedChildWrapper
-				&& ((NonContainedChildWrapper) object).getParentNode() instanceof EClass
-				&& ((NonContainedChildWrapper) object).getNoncontainedChild() instanceof EObject) {
-			result = super.getStyledText(((NonContainedChildWrapper) object).getNoncontainedChild());
-			EClass eClass = (EClass) ((EObject) ((NonContainedChildWrapper) object).getNoncontainedChild())
-					.eContainer();
+	/**
+	 * This method can be called in order to modify the label of a derived
+	 * feature.
+	 *
+	 * @param text
+	 * @return
+	 */
+	public StyledString modifyDerivedFeatureLabel(StyledString text) {
+		return new StyledString("/").append(text);
+	}
 
-			result.append(" (inherited from '" + eClass.getName() + "' in " + eClass.getEPackage().getNsURI() + ")",
-					StyledString.DECORATIONS_STYLER);
+	public static class InheritedFeatureStyler extends Styler {
+		@Override
+		public void applyStyles(TextStyle textStyle) {
+			Font italic = new Font(Display.getCurrent(), new FontData[] { new FontData("Arial", 8, SWT.ITALIC) });
+			textStyle.font = italic;
+			textStyle.foreground = new Color(Display.getCurrent(), 100, 100, 100);
 		}
-
-		return result;
 	}
 }
