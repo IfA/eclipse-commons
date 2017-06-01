@@ -7,6 +7,7 @@ import org.eclipse.emf.common.ui.viewer.ColumnViewerInformationControlToolTipSup
 import org.eclipse.emf.ecore.presentation.EcoreEditorPlugin;
 import org.eclipse.emf.edit.ui.celleditor.AdapterFactoryTreeEditor;
 import org.eclipse.emf.edit.ui.provider.DecoratingColumLabelProvider;
+import org.eclipse.emf.edit.ui.provider.DelegatingStyledCellLabelProvider;
 import org.eclipse.emf.edit.ui.provider.DiagnosticDecorator;
 import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.viewers.StructuredSelection;
@@ -154,14 +155,15 @@ public class AgteleEcoreEditor extends ClonableEcoreEditor implements IPersistab
 			this.setCurrentViewer(this.selectionViewer);
 
 			this.selectionViewer
-					.setContentProvider(new AgteleEcoreContentProvider(this.adapterFactory, this.selectionViewer));
+			.setContentProvider(new AgteleEcoreContentProvider(this.adapterFactory, this.selectionViewer));
 
-			this.selectionViewer.setLabelProvider(new DecoratingColumLabelProvider(
-					// Display containment references with a special icon to make them more distinguishable from
-					// non-containment references
-					new AgteleEcoreAdapterFactoryLabelProvider(this.adapterFactory),
-					new DiagnosticDecorator(this.editingDomain, this.selectionViewer,
-							EcoreEditorPlugin.getPlugin().getDialogSettings())));
+			this.selectionViewer.setLabelProvider(
+					new DelegatingStyledCellLabelProvider(new DecoratingColumLabelProvider.StyledLabelProvider(
+							// Display containment references with a special icon to make them more distinguishable from
+							// non-containment references
+							new AgteleEcoreAdapterFactoryLabelProvider(this.adapterFactory, this.selectionViewer),
+							new DiagnosticDecorator.Styled(this.editingDomain, this.selectionViewer,
+									EcoreEditorPlugin.getPlugin().getDialogSettings()))));
 			this.selectionViewer.setInput(this.editingDomain.getResourceSet());
 			this.selectionViewer.setSelection(
 					new StructuredSelection(this.editingDomain.getResourceSet().getResources().get(0)), true);
