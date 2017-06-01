@@ -191,7 +191,7 @@ public class AgteleEcoreAdapterFactoryLabelProvider extends AdapterFactoryLabelP
 		public void applyStyles(TextStyle textStyle) {
 			Font italic = new Font(Display.getCurrent(), new FontData[] { new FontData("Arial", 8, SWT.ITALIC) });
 			textStyle.font = italic;
-			textStyle.foreground = new Color(Display.getCurrent(), 100, 100, 100);
+			textStyle.foreground = new Color(Display.getCurrent(), 60, 60, 60);
 		}
 	}
 }

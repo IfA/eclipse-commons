@@ -5,9 +5,11 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.eclipse.emf.common.notify.AdapterFactory;
+import org.eclipse.emf.common.notify.Notification;
 import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.EOperation;
 import org.eclipse.emf.ecore.EStructuralFeature;
+import org.eclipse.emf.edit.provider.ViewerNotification;
 import org.eclipse.jface.viewers.StructuredViewer;
 import org.eclipse.ui.views.properties.IPropertySource;
 
@@ -51,6 +53,26 @@ public class AgteleEcoreContentProvider extends StateRestoringViewerContentProvi
 
 		AgteleEcoreContentProvider.instances.add(this);
 		AgteleEcoreContentProvider.inheritedContentVisible = AgteleEcoreContentProvider.getCurrentVisibilityState();
+	}
+
+	@Override
+	public void notifyChanged(Notification notification) {
+		//Update the inheriting classes in the view, when a inherited feature changes in the superclass
+		if (AgteleEcoreContentProvider.inheritedContentVisible && notification instanceof ViewerNotification) {
+			EClass changedClass = null;
+			ViewerNotification n = (ViewerNotification) notification;
+
+			if (n.getElement() instanceof EClass) {
+				changedClass = (EClass) n.getElement();
+			} else if (n.getElement() instanceof EStructuralFeature) {
+				changedClass = ((EStructuralFeature) n.getElement()).getEContainingClass();
+			}
+			if (changedClass != null && this.viewer != null) {
+				this.viewer.refresh();
+			}
+
+		}
+		super.notifyChanged(notification);
 	}
 
 	/**
