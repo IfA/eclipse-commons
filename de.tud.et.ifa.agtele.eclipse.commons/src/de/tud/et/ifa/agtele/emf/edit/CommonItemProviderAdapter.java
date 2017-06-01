@@ -198,7 +198,7 @@ public class CommonItemProviderAdapter extends ItemProviderAdapter {
 	 *
 	 * @author mfreund
 	 */
-	protected static final class DecoratedComposedImage extends ComposedImage {
+	public static final class DecoratedComposedImage extends ComposedImage {
 
 		/**
 		 * The horizontal offset by which the last of the images shall be
