@@ -119,17 +119,30 @@ public class AgteleEcoreAdapterFactoryLabelProvider extends AdapterFactoryLabelP
 
 	@Override
 	public String getText(Object object) {
-		String result = super.getText(object);
+		String result;
 
 		if (AgteleEcoreAdapterFactoryLabelProvider.isChildInherited(object)
 				&& object instanceof NonContainedChildWrapper
 				&& ((NonContainedChildWrapper) object).getParentNode() instanceof EClass
 				&& ((NonContainedChildWrapper) object).getNoncontainedChild() instanceof EObject) {
-			result = super.getText(((NonContainedChildWrapper) object).getNoncontainedChild());
-			EClass eClass = (EClass) ((EObject) ((NonContainedChildWrapper) object).getNoncontainedChild())
+			Object nonContainedChild = ((NonContainedChildWrapper) object).getNoncontainedChild();
+
+			result = super.getText(nonContainedChild);
+
+			if (nonContainedChild instanceof EStructuralFeature
+					&& ((EStructuralFeature) nonContainedChild).isDerived()) {
+				result = this.modifyDerivedFeatureLabel(result);
+			}
+
+			EClass eClass = (EClass) ((EObject) nonContainedChild)
 					.eContainer();
 
 			result += " (inherited from '" + eClass.getName() + "' in " + eClass.getEPackage().getNsURI() + ")";
+		} else {
+			result = super.getText(object);
+			if (object instanceof EStructuralFeature && ((EStructuralFeature) object).isDerived()) {
+				result = this.modifyDerivedFeatureLabel(result);
+			}
 		}
 
 		return result;
@@ -152,5 +165,16 @@ public class AgteleEcoreAdapterFactoryLabelProvider extends AdapterFactoryLabelP
 		}
 
 		return result;
+	}
+
+	/**
+	 * This method can be called in order to modify the label of a derived
+	 * feature.
+	 * 
+	 * @param text
+	 * @return
+	 */
+	public String modifyDerivedFeatureLabel(String text) {
+		return "/ " + text;
 	}
 }
