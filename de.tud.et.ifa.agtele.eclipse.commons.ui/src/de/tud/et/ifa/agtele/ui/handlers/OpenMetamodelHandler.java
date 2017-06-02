@@ -3,15 +3,23 @@
  */
 package de.tud.et.ifa.agtele.ui.handlers;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
+import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.emf.codegen.ecore.genmodel.GenBase;
 import org.eclipse.emf.codegen.ecore.genmodel.GenClass;
 import org.eclipse.emf.codegen.ecore.genmodel.GenPackage;
@@ -64,21 +72,36 @@ public class OpenMetamodelHandler extends AbstractHandler {
 		CompilationUnit root = (CompilationUnit) EditorUtility.getEditorInputJavaElement(UIHelper.getCurrentEditor(),
 				false);
 
+		IFile ecoreFile = null;
+		EObject metamodelElement = null;
+
 		// The list of currently opened Ecore files (potential targets for our
 		// selection)
 		//
 		List<IFile> ecoreFiles = UIHelper.getAllEditorInputs().stream().filter(
-				e -> e instanceof FileEditorInput && ((FileEditorInput) e).getFile().getFileExtension().equals("ecore"))
+				e -> e instanceof FileEditorInput && "ecore".equals(((FileEditorInput) e).getFile().getFileExtension()))
 				.map(e -> ((FileEditorInput) e).getFile()).collect(Collectors.toList());
-
-		IFile ecoreFile = null;
-		EObject metamodelElement = null;
 		for (IFile file : ecoreFiles) {
 			Optional<EObject> element = this.checkIsMetaModelForJavaClass(file, root);
 			if (element.isPresent()) {
 				ecoreFile = file;
 				metamodelElement = element.get();
 				break;
+			}
+		}
+
+		// As none of the opened Ecore files seem to match our selection, we now
+		// collect all Ecore files present in the workspace
+		//
+		if (ecoreFile == null) {
+			ecoreFiles = new ArrayList<>(this.collectEcoreMetamModels(ResourcesPlugin.getWorkspace().getRoot()));
+			for (IFile file : ecoreFiles) {
+				Optional<EObject> element = this.checkIsMetaModelForJavaClass(file, root);
+				if (element.isPresent()) {
+					ecoreFile = file;
+					metamodelElement = element.get();
+					break;
+				}
 			}
 		}
 
@@ -143,11 +166,48 @@ public class OpenMetamodelHandler extends AbstractHandler {
 
 		// Now, reveal and select the determined element in the Ecore editor
 		//
+		final EObject selectionToReveal = correspondingSelection;
 		if (ecoreEditor instanceof IViewerProvider) {
-			((IViewerProvider) ecoreEditor).getViewer().setSelection(new StructuredSelection(correspondingSelection));
+
+			// If we had to open a new editor instead of being able to reuse an
+			// existing one, the editor might not be completely opened yet.
+			// Thus, we use an asynchronous runnable to reveal the selection
+			UIHelper.getShell().getDisplay().asyncExec(() -> ((IViewerProvider) ecoreEditor).getViewer()
+					.setSelection(new StructuredSelection(selectionToReveal)));
+
 		}
 
 		return null;
+	}
+
+	/**
+	 * Recursively collects all Ecore metamodels ({@link IFile IFiles} with the
+	 * file ending '.ecore') in the given {@link IContainer}.
+	 *
+	 * @param container
+	 *            The {@link IContainer} to recursively process.
+	 * @return The list of {@link IFile IFiles} representing an Ecore metamodel.
+	 */
+	private Set<IFile> collectEcoreMetamModels(IContainer container) {
+
+		Set<IFile> ret = new HashSet<>();
+
+		try {
+			List<IResource> members = Arrays.asList(container.members());
+
+			for (IResource member : members) {
+				if (member instanceof IFile && ((IFile) member).getName().endsWith(".ecore")) {
+					ret.add((IFile) member);
+				} else if (member instanceof IContainer) {
+					ret.addAll(this.collectEcoreMetamModels((IContainer) member));
+				}
+			}
+
+		} catch (CoreException e) {
+			e.printStackTrace();
+		}
+
+		return ret;
 	}
 
 	/**
