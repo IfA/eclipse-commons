@@ -1,5 +1,10 @@
 package de.tud.et.ifa.agtele.ui.util;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
+
 import org.eclipse.core.resources.IFile;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.StructuredSelection;
@@ -61,6 +66,32 @@ public interface UIHelper {
 	}
 
 	/**
+	 * This returns all open {@link IEditorPart editors}.
+	 * <p />
+	 * <b>Important:</b> This must be called from the UI thread. If called from
+	 * a non-UI thread, it will throw an 'InvalidThreadAccessException'.
+	 *
+	 * @return The open {@link IEditorPart editors} or an empty list if there is
+	 *         no open editor.
+	 */
+	public static List<IEditorPart> getAllEditors() {
+
+		IWorkbench wb = PlatformUI.getWorkbench();
+		IWorkbenchWindow window = wb.getActiveWorkbenchWindow();
+		if (window == null) {
+			return new ArrayList<>();
+		}
+		IWorkbenchPage page = window.getActivePage();
+		if (page == null) {
+			return new ArrayList<>();
+		}
+
+		return Arrays.asList(page.getEditorReferences()).stream().map(r -> r.getEditor(false))
+				.collect(Collectors.toList());
+
+	}
+
+	/**
 	 * This returns the currently active {@link IWorkbenchPart part}.
 	 * <p />
 	 * <b>Important:</b> This must be called from the UI thread. If called from
@@ -96,6 +127,22 @@ public interface UIHelper {
 
 		IEditorPart editor = UIHelper.getCurrentEditor();
 		return editor == null ? null : editor.getEditorInput();
+	}
+
+	/**
+	 * This returns the {@link IEditorInput IEditorInputs} of all open editors.
+	 * <p />
+	 * <b>Important:</b> This must be called from the UI thread. If called from
+	 * a non-UI thread, it will throw an 'InvalidThreadAccessException'.
+	 *
+	 * @return The {@link IEditorInput IEditorInputs} or an empty list if the
+	 *         editor inputs could not be determined or if there is no open
+	 *         editor.
+	 */
+	public static List<IEditorInput> getAllEditorInputs() {
+
+		List<IEditorPart> editors = UIHelper.getAllEditors();
+		return editors.stream().map(IEditorPart::getEditorInput).collect(Collectors.toList());
 	}
 
 	/**
