@@ -15,12 +15,15 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.emf.codegen.ecore.genmodel.GenBase;
 import org.eclipse.emf.codegen.ecore.genmodel.GenClass;
 import org.eclipse.emf.codegen.ecore.genmodel.GenPackage;
+import org.eclipse.emf.common.ui.viewer.IViewerProvider;
 import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.EClass;
+import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.EPackage;
 import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.ecore.resource.ResourceSet;
 import org.eclipse.emf.ecore.resource.impl.ResourceSetImpl;
+import org.eclipse.emf.edit.domain.IEditingDomainProvider;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.internal.core.CompilationUnit;
@@ -29,7 +32,9 @@ import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.text.TextSelection;
 import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.swt.widgets.Shell;
+import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.part.FileEditorInput;
 
@@ -71,24 +76,67 @@ public class OpenMetamodelHandler extends AbstractHandler {
 				e -> e instanceof FileEditorInput && ((FileEditorInput) e).getFile().getFileExtension().equals("ecore"))
 				.map(e -> ((FileEditorInput) e).getFile()).collect(Collectors.toList());
 
-		Optional<IFile> ecoreFile = ecoreFiles.stream().filter(e -> this.checkIsMetaModelForJavaClass(e, root))
-				.findAny();
-
-		// We found an Ecore file so we open it
-		//
-		if (ecoreFile.isPresent()) {
-			try {
-				UIHelper.openEditor(ecoreFile.get());
-
-				return null;
-			} catch (PartInitException e1) {
-				e1.printStackTrace();
-				this.showError("Unable to open editor for associated Ecore metamodel!");
-				return null;
+		IFile ecoreFile = null;
+		EObject metamodelElement = null;
+		for (IFile file : ecoreFiles) {
+			Optional<EObject> element = this.checkIsMetaModelForJavaClass(file, root);
+			if (element.isPresent()) {
+				ecoreFile = file;
+				metamodelElement = element.get();
+				break;
 			}
 		}
 
-		this.showError("Unable to determine associated Ecore metamodel!");
+		// We found an Ecore file so we open it
+		//
+		if (ecoreFile == null) {
+			this.showError("Unable to determine associated Ecore metamodel!");
+
+			return null;
+		}
+
+		IEditorPart ecoreEditor;
+		try {
+			ecoreEditor = UIHelper.openEditor(ecoreFile);
+
+		} catch (PartInitException e1) {
+			e1.printStackTrace();
+			this.showError("Unable to open editor for associated Ecore metamodel!");
+			return null;
+		}
+
+		if (!(ecoreEditor instanceof IEditingDomainProvider)) {
+			return null;
+		}
+
+		// As the Ecore editor may have used a different resource set to load
+		// the Ecore metamodel,
+		// we have to first determine the resource that is equivalent to the
+		// resource opened in the Ecore editor
+		//
+		ResourceSet genModelEditorResourceSet = ((IEditingDomainProvider) ecoreEditor).getEditingDomain()
+				.getResourceSet();
+		Resource ecoreResource = genModelEditorResourceSet.getResource(metamodelElement.eResource().getURI(), true);
+
+		if (ecoreResource == null) {
+			return null;
+		}
+
+		// Now that we now the equivalent resources, we can determine the
+		// equivalent elements
+		//
+		String uriFragment = metamodelElement.eResource().getURIFragment(metamodelElement);
+		EObject correspondingSelection = ecoreResource.getEObject(uriFragment);
+
+		if (correspondingSelection == null) {
+			return null;
+		}
+
+		// Now, reveal and select the determined element in the Ecore editor
+		//
+		if (ecoreEditor instanceof IViewerProvider) {
+			((IViewerProvider) ecoreEditor).getViewer().setSelection(new StructuredSelection(correspondingSelection));
+		}
 
 		return null;
 	}
@@ -102,11 +150,11 @@ public class OpenMetamodelHandler extends AbstractHandler {
 	 *            The {@link IFile} defining the Ecore metamodel to check.
 	 * @param javaFile
 	 *            The {@link CompilationUnit Java file} to check.
-	 * @return '<em>true</em>' if the given <em>javaFile</em> was created based
-	 *         on the given {@link IFile Ecore metamodel}; '<em>false</em>'
-	 *         otherwise.
+	 * @return The {@link EObject metamodel element} associated with the given
+	 *         Java file or an empty optional if the metamodel was not
+	 *         responsible for the generation of the Java file.
 	 */
-	private boolean checkIsMetaModelForJavaClass(IFile ecoreFile, CompilationUnit javaFile) {
+	private Optional<EObject> checkIsMetaModelForJavaClass(IFile ecoreFile, CompilationUnit javaFile) {
 
 		ResourceSet resourceSet = new ResourceSetImpl();
 
@@ -118,11 +166,11 @@ public class OpenMetamodelHandler extends AbstractHandler {
 					true);
 		} catch (RuntimeException e) {
 			e.printStackTrace();
-			return false;
+			return Optional.empty();
 		}
 
 		if (!(res.getContents().get(0) instanceof EPackage)) {
-			return false;
+			return Optional.empty();
 		}
 
 		// All EPackages defined by the metamodel
@@ -157,7 +205,7 @@ public class OpenMetamodelHandler extends AbstractHandler {
 				GenClass genClass = (GenClass) genModelElement.get();
 
 				if (this.checkGenClassCreatedJavaFile(genClass, javaFile)) {
-					return true;
+					return Optional.of(eClass);
 				}
 
 			}
@@ -177,13 +225,13 @@ public class OpenMetamodelHandler extends AbstractHandler {
 				GenPackage genPackage = (GenPackage) genModelElement.get();
 
 				if (this.checkGenPackageCreatedJavaFile(genPackage, javaFile)) {
-					return true;
+					return Optional.of(ePackage);
 				}
 
 			}
 		}
 
-		return false;
+		return Optional.empty();
 	}
 
 	/**
