@@ -10,14 +10,19 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
+import org.eclipse.emf.codegen.ecore.genmodel.GenBase;
 import org.eclipse.emf.common.notify.Adapter;
 import org.eclipse.emf.common.notify.AdapterFactory;
+import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.EAttribute;
 import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.EClassifier;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.EPackage;
+import org.eclipse.emf.ecore.EStructuralFeature.Setting;
 import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.ecore.resource.ResourceSet;
 import org.eclipse.emf.ecore.util.EcoreUtil;
@@ -37,7 +42,8 @@ import org.eclipse.emf.edit.provider.IEditingDomainItemProvider;
 public interface AgteleEcoreUtil {
 
 	/**
-	 * Returns the {@link EditingDomain} of an {@link EObject} or null if none can be found
+	 * Returns the {@link EditingDomain} of an {@link EObject} or null if none
+	 * can be found
 	 *
 	 * @param object
 	 * @return The {@link EditingDomain} or null
@@ -65,7 +71,8 @@ public interface AgteleEcoreUtil {
 	}
 
 	/**
-	 * Returns the {@link AdapterFactoryItemDelegator} of an {@link EObject} or null if none can be found
+	 * Returns the {@link AdapterFactoryItemDelegator} of an {@link EObject} or
+	 * null if none can be found
 	 *
 	 * @param object
 	 * @return The {@link AdapterFactoryItemDelegator} or null
@@ -87,24 +94,27 @@ public interface AgteleEcoreUtil {
 	}
 
 	/**
-	 * Returns an adapter of the given <em>adapterClass</em> for the given <em>eObject</em>.
+	 * Returns an adapter of the given <em>adapterClass</em> for the given
+	 * <em>eObject</em>.
 	 * <p />
 	 * Note: This extends the functionality of the standard
-	 * {@link AdapterFactory#adapt(org.eclipse.emf.common.notify.Notifier, Object)} method by providing a second way of
-	 * retrieving an adapter if the <em>standard</em> way does not work.
+	 * {@link AdapterFactory#adapt(org.eclipse.emf.common.notify.Notifier, Object)}
+	 * method by providing a second way of retrieving an adapter if the
+	 * <em>standard</em> way does not work.
 	 *
 	 * @param <T>
 	 * @param eObject
 	 *            The {@link EObject} for which an adapter shall be retrieved.
 	 * @param adapterClass
 	 *            The key indicating the required type of adapter.
-	 * @return An adapter of the demanded <em>adapterClass</em> or <em>null</em> if no adapter (of the required type)
-	 *         could be retrieved.
+	 * @return An adapter of the demanded <em>adapterClass</em> or <em>null</em>
+	 *         if no adapter (of the required type) could be retrieved.
 	 */
 	@SuppressWarnings("unchecked")
 	public static <T> T adapt(EObject eObject, Class<T> adapterClass) {
 
-		// We need an AdapterFactoryItemDelegator in order to retrieve the AdapterFactory which we will use for the
+		// We need an AdapterFactoryItemDelegator in order to retrieve the
+		// AdapterFactory which we will use for the
 		// actual adaptation
 		//
 		AdapterFactoryItemDelegator delegator = AgteleEcoreUtil.getAdapterFactoryItemDelegatorFor(eObject);
@@ -116,29 +126,34 @@ public interface AgteleEcoreUtil {
 		// First, we try the 'standard' way of adapting
 		Adapter adapter = delegator.getAdapterFactory().adapt(eObject, adapterClass);
 
-		// If this does not work, we try an 'indirect' adaption by first retrieving an adapter of type
-		// 'IEditingDomainItemProvider' that we will then try to cast to the required type
+		// If this does not work, we try an 'indirect' adaption by first
+		// retrieving an adapter of type
+		// 'IEditingDomainItemProvider' that we will then try to cast to the
+		// required type
 		//
 		if (adapter == null) {
 			adapter = AgteleEcoreUtil.getAdapterFactoryItemDelegatorFor(eObject).getAdapterFactory().adapt(eObject,
 					IEditingDomainItemProvider.class);
 		}
 
-		// Finally, we check if the adapter that was found is really of the required type
+		// Finally, we check if the adapter that was found is really of the
+		// required type
 		//
 		return adapterClass.isAssignableFrom(adapter.getClass()) ? (T) adapter : null;
 	}
 
 	/**
-	 * Collects all sub- EClasses of a specific eClass in a collection of handed eClasses.
+	 * Collects all sub- EClasses of a specific eClass in a collection of handed
+	 * eClasses.
 	 *
 	 * @param classes
 	 *            The class collection to search for sub classes in
 	 * @param aClass
 	 *            The class to search sub classes for
 	 * @param includeGivenClass
-	 *            Set to <code>true</code>, if the given class shall be included. If the given class is abstract, it
-	 *            will only be added to the result, if includeAbstract is true.
+	 *            Set to <code>true</code>, if the given class shall be
+	 *            included. If the given class is abstract, it will only be
+	 *            added to the result, if includeAbstract is true.
 	 * @param includeAbstract
 	 *            Whether to include abstract subClasses too.
 	 * @return All found sub classes according to the specified options.
@@ -155,11 +170,13 @@ public interface AgteleEcoreUtil {
 	}
 
 	/**
-	 * Collects all sub- EClasses of a specific eClass within its respective root ePackage.
+	 * Collects all sub- EClasses of a specific eClass within its respective
+	 * root ePackage.
 	 *
 	 * @param includeGivenClass
-	 *            Set to <code>true</code>, if the given class shall be included. If the given class is abstract, it
-	 *            will only be added to the result, if includeAbstract is true.
+	 *            Set to <code>true</code>, if the given class shall be
+	 *            included. If the given class is abstract, it will only be
+	 *            added to the result, if includeAbstract is true.
 	 * @param aClass
 	 *            The class to search sub classes for
 	 * @param includeAbstract
@@ -176,8 +193,8 @@ public interface AgteleEcoreUtil {
 	}
 
 	/**
-	 * Collects all sub- EClasses of a specific eClass within its respective root ePackage. The given class is not
-	 * included.
+	 * Collects all sub- EClasses of a specific eClass within its respective
+	 * root ePackage. The given class is not included.
 	 *
 	 * @param aClass
 	 *            The class to search sub classes for
@@ -191,8 +208,8 @@ public interface AgteleEcoreUtil {
 	}
 
 	/**
-	 * Collects all sub- EClasses of a specific eClass within its respective root ePackage. Abstract sub classes are
-	 * included.
+	 * Collects all sub- EClasses of a specific eClass within its respective
+	 * root ePackage. Abstract sub classes are included.
 	 *
 	 * @param aClass
 	 *            The class to search sub classes for
@@ -204,7 +221,8 @@ public interface AgteleEcoreUtil {
 	}
 
 	/**
-	 * Collects all sub- EClasses of a specific eClass in a collection of handed eClasses.
+	 * Collects all sub- EClasses of a specific eClass in a collection of handed
+	 * eClasses.
 	 *
 	 * @param classes
 	 *            The class collection to search for sub classes in
@@ -237,8 +255,9 @@ public interface AgteleEcoreUtil {
 	}
 
 	/**
-	 * Collects all sub- EClasses of a specific eClass in a collection of handed eClasses. This implementation delegates
-	 * to .getAllSubClasses(Collection<EClass>, EClass, boolean)
+	 * Collects all sub- EClasses of a specific eClass in a collection of handed
+	 * eClasses. This implementation delegates to
+	 * .getAllSubClasses(Collection<EClass>, EClass, boolean)
 	 *
 	 * @param classes
 	 *            The class collection to search for sub classes in
@@ -295,10 +314,12 @@ public interface AgteleEcoreUtil {
 	}
 
 	/**
-	 * Collects a collection of all eClasses within a collection of given ePackages.
+	 * Collects a collection of all eClasses within a collection of given
+	 * ePackages.
 	 *
 	 * @param packages
-	 * @return The collection of eClasses within the given collection of ePackages.
+	 * @return The collection of eClasses within the given collection of
+	 *         ePackages.
 	 */
 	public static Collection<EClass> getAllPackageEClasses(Collection<EPackage> packages) {
 
@@ -319,7 +340,23 @@ public interface AgteleEcoreUtil {
 	}
 
 	/**
-	 * Returns the topmost package in the ePackage hierarchy of the given ePackage.
+	 * Collects a collection of all eClasses with the given <em>className</em>
+	 * within a collection of given ePackages.
+	 *
+	 * @param packages
+	 * @param className
+	 * @return The collection of eClasses within the given collection of
+	 *         ePackages that have the given className.
+	 */
+	public static Collection<EClass> getAllPackageEClasses(Collection<EPackage> packages, String className) {
+
+		return AgteleEcoreUtil.getAllPackageEClasses(packages).stream().filter(c -> className.equals(c.getName()))
+				.collect(Collectors.toList());
+	}
+
+	/**
+	 * Returns the topmost package in the ePackage hierarchy of the given
+	 * ePackage.
 	 *
 	 * @param p
 	 * @return The root ePackage.
@@ -346,10 +383,12 @@ public interface AgteleEcoreUtil {
 	}
 
 	/**
-	 * Returns the topmost packages in the ePackage hierarchy of the given list of ePackages.
+	 * Returns the topmost packages in the ePackage hierarchy of the given list
+	 * of ePackages.
 	 *
 	 * @param p
-	 *            The list of packages for that the root packages shall be determined.
+	 *            The list of packages for that the root packages shall be
+	 *            determined.
 	 * @return The root ePackage.
 	 */
 	public static HashSet<EPackage> getRootEPackages(Collection<EPackage> p) {
@@ -411,8 +450,9 @@ public interface AgteleEcoreUtil {
 	 * @param eClass
 	 * @param anObject
 	 * @param findRoot
-	 *            if true, the search begins at the local containment root of anObject, if false only instances of the
-	 *            given eClass are found, that are subsequent to the given eObject.
+	 *            if true, the search begins at the local containment root of
+	 *            anObject, if false only instances of the given eClass are
+	 *            found, that are subsequent to the given eObject.
 	 * @return All instances of the eClass
 	 */
 	public static Collection<EObject> getAllInstances(EClass eClass, EObject anObject, boolean findRoot) {
@@ -428,15 +468,16 @@ public interface AgteleEcoreUtil {
 	}
 
 	/**
-	 * This moves upward in the containment hierarchy of the given {@link EObject} and checks whether (at least) one of
-	 * its ancestors is an instance of the given {@link EClass type}.
+	 * This moves upward in the containment hierarchy of the given
+	 * {@link EObject} and checks whether (at least) one of its ancestors is an
+	 * instance of the given {@link EClass type}.
 	 *
 	 * @param child
 	 *            The {@link EObject} of which the containers shall be checked.
 	 * @param ancestorType
 	 *            The {@link EClass} to check against.
-	 * @return '<em><b>true</b></em>' if at least one of the ancestors is of the specified type; '<em><b>false</b></em>'
-	 *         otherwise.
+	 * @return '<em><b>true</b></em>' if at least one of the ancestors is of the
+	 *         specified type; '<em><b>false</b></em>' otherwise.
 	 */
 	public static boolean hasAncestorOfType(EObject child, EClass ancestorType) {
 
@@ -453,15 +494,17 @@ public interface AgteleEcoreUtil {
 	}
 
 	/**
-	 * This moves upward in the containment hierarchy of the given {@link EObject} and checks whether (at least) one of
-	 * its ancestors is an instance of the given {@link EClass type} or any of its sub-types.
+	 * This moves upward in the containment hierarchy of the given
+	 * {@link EObject} and checks whether (at least) one of its ancestors is an
+	 * instance of the given {@link EClass type} or any of its sub-types.
 	 *
 	 * @param child
 	 *            The {@link EObject} of which the containers shall be checked.
 	 * @param ancestorType
 	 *            The {@link EClass} to check against.
-	 * @return '<em><b>true</b></em>' if at least one of the ancestors is of the specified type or one of its sub-types;
-	 *         '<em><b>false</b></em>' otherwise.
+	 * @return '<em><b>true</b></em>' if at least one of the ancestors is of the
+	 *         specified type or one of its sub-types; '<em><b>false</b></em>'
+	 *         otherwise.
 	 */
 	public static boolean hasAncestorOfKind(EObject child, EClass ancestorType) {
 
@@ -482,14 +525,16 @@ public interface AgteleEcoreUtil {
 	}
 
 	/**
-	 * This moves upward in the containment hierarchy of the given {@link EObject} and returns the first ancestor that
-	 * is an instance of the given {@link EClass type}.
+	 * This moves upward in the containment hierarchy of the given
+	 * {@link EObject} and returns the first ancestor that is an instance of the
+	 * given {@link EClass type}.
 	 *
 	 * @param child
 	 *            The {@link EObject} of which the containers shall be checked.
 	 * @param ancestorType
 	 *            The {@link EClass} to check against.
-	 * @return The first ancestor that is of the specified type or '<em><b>null</b></em>' if there is no such ancestor.
+	 * @return The first ancestor that is of the specified type or
+	 *         '<em><b>null</b></em>' if there is no such ancestor.
 	 */
 	public static EObject getAncestorOfType(EObject child, EClass ancestorType) {
 
@@ -506,15 +551,16 @@ public interface AgteleEcoreUtil {
 	}
 
 	/**
-	 * This moves upward in the containment hierarchy of the given {@link EObject} and returns the first ancestor that
-	 * is an instance of the given {@link EClass type} or any of its sub-types.
+	 * This moves upward in the containment hierarchy of the given
+	 * {@link EObject} and returns the first ancestor that is an instance of the
+	 * given {@link EClass type} or any of its sub-types.
 	 *
 	 * @param child
 	 *            The {@link EObject} of which the containers shall be checked.
 	 * @param ancestorType
 	 *            The {@link EClass} to check against.
-	 * @return The first ancestor that is of the specified type or one of its sub-types or '<em><b>null</b></em>' if
-	 *         there is no such ancestor.
+	 * @return The first ancestor that is of the specified type or one of its
+	 *         sub-types or '<em><b>null</b></em>' if there is no such ancestor.
 	 */
 	public static EObject getAncestorOfKind(EObject child, EClass ancestorType) {
 
@@ -535,18 +581,21 @@ public interface AgteleEcoreUtil {
 	}
 
 	/**
-	 * For the given {@link EObject}, this returns the {@link EObject#eGet(org.eclipse.emf.ecore.EStructuralFeature)
-	 * value or values} of the given {@link EAttribute}.
+	 * For the given {@link EObject}, this returns the
+	 * {@link EObject#eGet(org.eclipse.emf.ecore.EStructuralFeature) value or
+	 * values} of the given {@link EAttribute}.
 	 * <p />
-	 * Note: As EAttributes can be {@link EAttribute#isMany() many-valued}, too, this will return either no value, a
-	 * single value, or a list of values. Note: The type of the entries inside the list will match the
+	 * Note: As EAttributes can be {@link EAttribute#isMany() many-valued}, too,
+	 * this will return either no value, a single value, or a list of values.
+	 * Note: The type of the entries inside the list will match the
 	 * {@link EAttribute#getEAttributeType() type} of the given EAttribute.
 	 *
 	 * @param eObject
 	 *            The {@link EObject} for that the values shall be returned.
 	 * @param eAttribute
 	 *            The {@link EAttribute} for that the values shall be returned.
-	 * @return The determined values (either an empty list, a list consisting of a single value, or mutliple values).
+	 * @return The determined values (either an empty list, a list consisting of
+	 *         a single value, or mutliple values).
 	 */
 	public static List<Object> getAttributeValueAsList(EObject eObject, EAttribute eAttribute) {
 
@@ -562,5 +611,72 @@ public interface AgteleEcoreUtil {
 			return new ArrayList<>(Arrays.asList(value));
 		}
 
+	}
+
+	/**
+	 * For a given element of an Ecore model, this returns the corresponding
+	 * GenModel element.
+	 *
+	 * @param ecoreModelElement
+	 *            An {@link EObject element} of an Ecore model.
+	 * @param resourceSet
+	 *            The {@link ResourceSet} that shall be used to load the
+	 *            GenModel or '<em>null</em>' if the ResourceSet containing the
+	 *            given <em>ecoreModelElement</em> shall be used.
+	 * @return The corresponding {@link GenBase GenModel element} or an empty
+	 *         optional if no corresponding GenModel or GenModel element could
+	 *         be determined.
+	 */
+	static Optional<GenBase> getGenModelElement(EObject ecoreModelElement, ResourceSet resourceSet) {
+
+		ResourceSet localResourceSet = resourceSet != null ? resourceSet
+				: ecoreModelElement.eResource().getResourceSet();
+
+		if (!(EcoreUtil.getRootContainer(ecoreModelElement) instanceof EPackage)
+				|| ecoreModelElement.eResource() == null) {
+			return Optional.empty();
+		}
+
+		// We assume that the associated GenModel is located in the same folder
+		// and has the same base name
+		//
+		URI genModelURI = ecoreModelElement.eResource().getURI().trimFileExtension().appendFileExtension("genmodel");
+
+		Resource genModelResource = localResourceSet.getResource(genModelURI, true);
+
+		if (genModelResource == null || !genModelResource.getErrors().isEmpty()) {
+			return Optional.empty();
+		}
+
+		// As we load the GenModel in a separate resource set, we have to first
+		// determine the resource that
+		// is equivalent to the resource opened in
+		// the Ecore editor
+		//
+		Resource ecoreResource = localResourceSet.getResource(ecoreModelElement.eResource().getURI(), true);
+
+		if (ecoreResource == null || ecoreResource.getContents().isEmpty()) {
+			return Optional.empty();
+		}
+
+		// Now, we can determine the equivalent elements in both loaded Ecore
+		// resources
+		//
+		String uriFragment = ecoreModelElement.eResource().getURIFragment(ecoreModelElement);
+		EObject correspondingElement = ecoreResource.getEObject(uriFragment);
+
+		if (correspondingElement == null) {
+			return Optional.empty();
+		}
+
+		// Finally, we can determine the element of the GenModel that
+		// describes/references the selected EObject
+		//
+		Optional<Setting> setting = EcoreUtil.UsageCrossReferencer.find(correspondingElement, genModelResource)
+				.parallelStream().filter(s -> s.getEObject() instanceof GenBase
+						&& correspondingElement.equals(((GenBase) s.getEObject()).getEcoreModelElement()))
+				.findAny();
+
+		return setting.isPresent() ? Optional.of((GenBase) setting.get().getEObject()) : Optional.empty();
 	}
 }
