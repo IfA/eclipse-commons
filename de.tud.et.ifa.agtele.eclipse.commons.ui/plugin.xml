@@ -55,6 +55,11 @@
             locationURI="popup:org.eclipse.emf.codegen.ecore.genmodel.presentation.GenModelEditorID?after=open-actions">
       </menuContribution>
       <menuContribution
+            allPopups="true"
+            class="de.tud.et.ifa.agtele.ui.contributions.OpenMetaModelContribution"
+            locationURI="popup:org.eclipse.jdt.ui.CompilationUnitEditor.EditorContext">
+      </menuContribution>
+      <menuContribution
             allPopups="false"
             locationURI="menu:org.eclipse.ui.main.menu">
          <menu
@@ -108,6 +113,11 @@
             defaultHandler="de.tud.et.ifa.agtele.ui.handlers.OpenFactoryCodeHandler"
             id="de.tud.et.ifa.agtele.ui.commands.OpenFactoryCode"
             name="OpenFactoryCode">
+      </command>
+      <command
+            defaultHandler="de.tud.et.ifa.agtele.ui.handlers.OpenMetamodelHandler"
+            id="de.tud.et.ifa.agtele.ui.commands.OpenMetamodel"
+            name="OpenMetamodel">
       </command>
       <command
             defaultHandler="de.tud.et.ifa.agtele.ui.handlers.ShowInheritedEcoreClassFeaturesCommandHandler"
