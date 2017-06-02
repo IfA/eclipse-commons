@@ -19,12 +19,16 @@ import org.eclipse.emf.common.ui.viewer.IViewerProvider;
 import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.EObject;
+import org.eclipse.emf.ecore.EOperation;
 import org.eclipse.emf.ecore.EPackage;
+import org.eclipse.emf.ecore.EStructuralFeature;
 import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.ecore.resource.ResourceSet;
 import org.eclipse.emf.ecore.resource.impl.ResourceSetImpl;
 import org.eclipse.emf.edit.domain.IEditingDomainProvider;
+import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.internal.core.CompilationUnit;
 import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
@@ -53,21 +57,12 @@ public class OpenMetamodelHandler extends AbstractHandler {
 
 		CompilationUnitEditor javaEditor = (CompilationUnitEditor) UIHelper.getCurrentEditor();
 
-		ISelection selection = javaEditor.getSelectionProvider().getSelection();
-
 		// In order to prevent manual parsing of the Java document, we make use
 		// of the CompilationUnit type that
 		// represents a structured Java document
 		//
 		CompilationUnit root = (CompilationUnit) EditorUtility.getEditorInputJavaElement(UIHelper.getCurrentEditor(),
 				false);
-
-		IJavaElement javaElement = null;
-		try {
-			javaElement = root.getElementAt(((TextSelection) selection).getOffset());
-		} catch (JavaModelException e) {
-			e.printStackTrace();
-		}
 
 		// The list of currently opened Ecore files (potential targets for our
 		// selection)
@@ -130,6 +125,20 @@ public class OpenMetamodelHandler extends AbstractHandler {
 
 		if (correspondingSelection == null) {
 			return null;
+		}
+
+		// Finally, we check if we want to select a more specialized element
+		// (e.g. an EAttribute of an EClass) instead
+		//
+		ISelection selection = javaEditor.getSelectionProvider().getSelection();
+		try {
+			IJavaElement javaElement = root.getElementAt(((TextSelection) selection).getOffset());
+			if (javaElement != null) {
+				correspondingSelection = this.getMoreSpecificSelection(correspondingSelection, root, javaElement);
+			}
+
+		} catch (JavaModelException e) {
+			e.printStackTrace();
 		}
 
 		// Now, reveal and select the determined element in the Ecore editor
@@ -372,6 +381,81 @@ public class OpenMetamodelHandler extends AbstractHandler {
 	 */
 	private String getJavaPathFromQualifiedName(String qualifiedName) {
 		return qualifiedName.replaceAll("\\.", "/") + ".java";
+	}
+
+	/**
+	 * Based on the given {@link EObject elementToSelect} that corresponds to
+	 * the given {@link CompilationUnit Java file} and on the
+	 * {@link IJavaElement} that the user selected in this file, we check if
+	 * there is a more specialized element to select.
+	 * <p />
+	 * E.g.: If the user selected an {@link EOperation}, we may reveal and
+	 * select this instead of the containing {@link EClass}.
+	 *
+	 * @param elementToSelect
+	 *            The {@link EClass} or {@link EPackage} that is associated with
+	 *            the given {@link CompilationUnit Java file}.
+	 * @param javaFile
+	 *            The {@link CompilationUnit Java file} based on which the user
+	 *            launch this handler.
+	 * @param javaElement
+	 *            The {@link IJavaElement element} of the given Java file that
+	 *            was selected by the user when launching this handler.
+	 * @return A more specialized {@link EObject element to select} or the given
+	 *         <em>elementToSelect</em> if no more specialized element could be
+	 *         determined.
+	 */
+	private EObject getMoreSpecificSelection(EObject elementToSelect, CompilationUnit javaFile,
+			IJavaElement javaElement) {
+
+		// If the user selected an EPackage, we cannot select anything more
+		// specialized.
+		//
+		if (!(elementToSelect instanceof EClass)) {
+			return elementToSelect;
+		}
+
+		EClass eClass = (EClass) elementToSelect;
+
+		if (javaElement instanceof IMethod) {
+
+			String methodName = javaElement.getElementName();
+
+			// Check if there is an EOperation corresponding to the selection
+			//
+			Optional<EOperation> eOperation = eClass.getEOperations().stream()
+					.filter(o -> methodName.equals(o.getName())).findAny();
+			if (eOperation.isPresent()) {
+				return eOperation.get();
+			}
+
+			// Check if there is an EAttribute or EReference corresponding to
+			// the selection
+			//
+			Optional<EStructuralFeature> eFeature = eClass.getEAllStructuralFeatures().stream()
+					.filter(o -> methodName.equalsIgnoreCase("get" + o.getName())
+							|| methodName.equalsIgnoreCase("set" + o.getName())
+							|| methodName.equalsIgnoreCase("add" + o.getName() + "propertydescriptor"))
+					.findAny();
+			if (eFeature.isPresent()) {
+				return eFeature.get();
+			}
+
+		} else if (javaElement instanceof IField) {
+
+			String fieldName = javaElement.getElementName();
+
+			// Check if there is an EAttribute or EReference corresponding to
+			// the selection
+			//
+			Optional<EStructuralFeature> eFeature = eClass.getEAllStructuralFeatures().stream()
+					.filter(o -> fieldName.equalsIgnoreCase(o.getName())).findAny();
+			if (eFeature.isPresent()) {
+				return eFeature.get();
+			}
+		}
+
+		return elementToSelect;
 	}
 
 	/**
