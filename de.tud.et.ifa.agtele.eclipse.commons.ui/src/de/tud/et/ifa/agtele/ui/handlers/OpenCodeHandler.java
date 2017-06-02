@@ -5,7 +5,6 @@ package de.tud.et.ifa.agtele.ui.handlers;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.Optional;
 
 import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.commands.ExecutionEvent;
@@ -28,10 +27,7 @@ import org.eclipse.emf.codegen.ecore.genmodel.impl.GenEnumLiteralImpl;
 import org.eclipse.emf.codegen.ecore.genmodel.impl.GenFeatureImpl;
 import org.eclipse.emf.codegen.ecore.genmodel.impl.GenOperationImpl;
 import org.eclipse.emf.codegen.ecore.genmodel.impl.GenPackageImpl;
-import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.EObject;
-import org.eclipse.emf.ecore.EPackage;
-import org.eclipse.emf.ecore.EStructuralFeature.Setting;
 import org.eclipse.emf.ecore.impl.EAttributeImpl;
 import org.eclipse.emf.ecore.impl.EClassImpl;
 import org.eclipse.emf.ecore.impl.EEnumImpl;
@@ -39,10 +35,8 @@ import org.eclipse.emf.ecore.impl.EEnumLiteralImpl;
 import org.eclipse.emf.ecore.impl.EOperationImpl;
 import org.eclipse.emf.ecore.impl.EPackageImpl;
 import org.eclipse.emf.ecore.impl.EReferenceImpl;
-import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.ecore.resource.ResourceSet;
 import org.eclipse.emf.ecore.resource.impl.ResourceSetImpl;
-import org.eclipse.emf.ecore.util.EcoreUtil;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.swt.widgets.Shell;
@@ -50,6 +44,7 @@ import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.part.FileEditorInput;
 
+import de.tud.et.ifa.agtele.emf.AgteleEcoreUtil;
 import de.tud.et.ifa.agtele.ui.util.UIHelper;
 
 /**
@@ -88,7 +83,8 @@ public abstract class OpenCodeHandler extends AbstractHandler {
 			GenEnumLiteralImpl.class);
 
 	/**
-	 * The {@link GenBase GenModel element} that was selected by the user or the is equivalent to the user's selection.
+	 * The {@link GenBase GenModel element} that was selected by the user or the
+	 * is equivalent to the user's selection.
 	 */
 	protected GenBase selectedElement;
 
@@ -140,7 +136,9 @@ public abstract class OpenCodeHandler extends AbstractHandler {
 		}
 
 		this.selectedElement = UIHelper.getFirstSelection() instanceof GenBase ? (GenBase) UIHelper.getFirstSelection()
-				: this.getGenModelElement((EObject) UIHelper.getFirstSelection());
+				: AgteleEcoreUtil
+						.getGenModelElement((EObject) UIHelper.getFirstSelection(), OpenCodeHandler.resourceSet)
+						.orElse(null);
 
 		if (this.selectedElement == null) {
 			this.showError("Unable to determine corresponding element in the GenModel");
@@ -204,7 +202,7 @@ public abstract class OpenCodeHandler extends AbstractHandler {
 		}
 
 		GenBase genModelElement = selection instanceof GenBase ? (GenBase) selection
-				: this.getGenModelElement((EObject) selection);
+				: AgteleEcoreUtil.getGenModelElement((EObject) selection, OpenCodeHandler.resourceSet).orElse(null);
 
 		IResource sourceDirectory = ResourcesPlugin.getWorkspace().getRoot()
 				.findMember(this.getDirectory(genModelElement));
@@ -256,67 +254,6 @@ public abstract class OpenCodeHandler extends AbstractHandler {
 		} else {
 			return null;
 		}
-	}
-
-	/**
-	 * For a given element of an Ecore model, this return the corresponding
-	 * GenModel element.
-	 *
-	 * @param ecoreModelElement
-	 *            An {@link EObject element} of an Ecore model.
-	 * @return The corresponding {@link GenBase GenModel element} or
-	 *         <em>null</em> if no corresponding GenModel or GenModel element
-	 *         could be determined.
-	 */
-	private GenBase getGenModelElement(EObject ecoreModelElement) {
-
-		if (!(EcoreUtil.getRootContainer(ecoreModelElement) instanceof EPackage)
-				|| ecoreModelElement.eResource() == null) {
-			return null;
-		}
-
-		// We assume that the associated GenModel is located in the same folder
-		// and has the same base name
-		//
-		URI genModelURI = ecoreModelElement.eResource().getURI().trimFileExtension().appendFileExtension("genmodel");
-
-		Resource genModelResource = OpenCodeHandler.resourceSet.getResource(genModelURI, true);
-
-		if (genModelResource == null || !genModelResource.getErrors().isEmpty()) {
-			return null;
-		}
-
-		// As we load the GenModel in a separate resource set, we have to first
-		// determine the resource that
-		// is equivalent to the resource opened in
-		// the Ecore editor
-		//
-		Resource ecoreResource = OpenCodeHandler.resourceSet.getResource(ecoreModelElement.eResource().getURI(), true);
-
-		if (ecoreResource == null || ecoreResource.getContents().isEmpty()) {
-			this.showError("Unable to determine corresponding element in the GenModel");
-			return null;
-		}
-
-		// Now, we can determine the equivalent elements in both loaded Ecore
-		// resources
-		//
-		String uriFragment = ecoreModelElement.eResource().getURIFragment(ecoreModelElement);
-		EObject correspondingElement = ecoreResource.getEObject(uriFragment);
-
-		if (correspondingElement == null) {
-			return null;
-		}
-
-		// Finally, we can determine the element of the GenModel that
-		// describes/references the selected EObject
-		//
-		Optional<Setting> setting = EcoreUtil.UsageCrossReferencer.find(correspondingElement, genModelResource)
-				.parallelStream().filter(s -> s.getEObject() instanceof GenBase
-						&& correspondingElement.equals(((GenBase) s.getEObject()).getEcoreModelElement()))
-				.findAny();
-
-		return setting.isPresent() ? (GenBase) setting.get().getEObject() : null;
 	}
 
 }
