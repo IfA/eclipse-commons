@@ -14,6 +14,9 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.eclipse.emf.codegen.ecore.genmodel.GenBase;
+import org.eclipse.emf.codegen.ecore.genmodel.GenClass;
+import org.eclipse.emf.codegen.ecore.genmodel.GenClassifier;
+import org.eclipse.emf.codegen.ecore.genmodel.GenPackage;
 import org.eclipse.emf.common.notify.Adapter;
 import org.eclipse.emf.common.notify.AdapterFactory;
 import org.eclipse.emf.common.util.URI;
@@ -297,6 +300,32 @@ public interface AgteleEcoreUtil {
 	}
 
 	/**
+	 * Collects all subGenPackages that are descendants of a given GenPackage.
+	 *
+	 * @param p
+	 * @return The collection of all sub packages of the given package.
+	 */
+	public static Collection<GenPackage> getAllSubPackages(GenPackage p) {
+
+		ArrayList<GenPackage> result = new ArrayList<>();
+
+		if (p != null) {
+			Collection<GenPackage> subPackages = p.getSubGenPackages();
+
+			if (subPackages != null && !subPackages.isEmpty()) {
+				result.addAll(subPackages);
+
+				Iterator<GenPackage> i = subPackages.iterator();
+				while (i.hasNext()) {
+					Collection<GenPackage> subSubPackages = AgteleEcoreUtil.getAllSubPackages(i.next());
+					result.addAll(subSubPackages);
+				}
+			}
+		}
+		return result;
+	}
+
+	/**
 	 * Collects all subPackages that are descendants of a given EPackage.
 	 *
 	 * @param p
@@ -306,6 +335,23 @@ public interface AgteleEcoreUtil {
 	public static Collection<EPackage> getAllSubPackages(EPackage p, boolean includeGiven) {
 
 		Collection<EPackage> result = new ArrayList<>();
+		if (includeGiven) {
+			result.add(p);
+		}
+		result.addAll(AgteleEcoreUtil.getAllSubPackages(p));
+		return result;
+	}
+
+	/**
+	 * Collects all subGenPackages that are descendants of a given GenPackage.
+	 *
+	 * @param p
+	 * @param includeGiven
+	 * @return The collection of all sub packages of the given package.
+	 */
+	public static Collection<GenPackage> getAllSubPackages(GenPackage p, boolean includeGiven) {
+
+		Collection<GenPackage> result = new ArrayList<>();
 		if (includeGiven) {
 			result.add(p);
 		}
@@ -340,6 +386,32 @@ public interface AgteleEcoreUtil {
 	}
 
 	/**
+	 * Collects a collection of all GenClasses within a collection of given
+	 * GenPackages.
+	 *
+	 * @param packages
+	 * @return The collection of GenClasses within the given collection of
+	 *         GenPackages.
+	 */
+	public static Collection<GenClass> getAllGenPackageGenClasses(Collection<GenPackage> packages) {
+
+		Collection<GenClass> result = new ArrayList<>();
+		Iterator<GenPackage> it = packages.iterator();
+
+		while (it.hasNext()) {
+			Collection<GenClassifier> c = it.next().getGenClassifiers();
+			Iterator<GenClassifier> i2 = c.iterator();
+			while (i2.hasNext()) {
+				GenClassifier aClassifier = i2.next();
+				if (aClassifier instanceof GenClass) {
+					result.add((GenClass) aClassifier);
+				}
+			}
+		}
+		return result;
+	}
+
+	/**
 	 * Collects a collection of all eClasses with the given <em>className</em>
 	 * within a collection of given ePackages.
 	 *
@@ -351,6 +423,21 @@ public interface AgteleEcoreUtil {
 	public static Collection<EClass> getAllPackageEClasses(Collection<EPackage> packages, String className) {
 
 		return AgteleEcoreUtil.getAllPackageEClasses(packages).stream().filter(c -> className.equals(c.getName()))
+				.collect(Collectors.toList());
+	}
+
+	/**
+	 * Collects a collection of all GenClasses with the given <em>className</em>
+	 * within a collection of given GenPackages.
+	 *
+	 * @param packages
+	 * @param className
+	 * @return The collection of GenClasses within the given collection of
+	 *         GenPackages that have the given className.
+	 */
+	public static Collection<GenClass> getAllGenPackageGenClasses(Collection<GenPackage> packages, String className) {
+
+		return AgteleEcoreUtil.getAllGenPackageGenClasses(packages).stream().filter(c -> className.equals(c.getName()))
 				.collect(Collectors.toList());
 	}
 
