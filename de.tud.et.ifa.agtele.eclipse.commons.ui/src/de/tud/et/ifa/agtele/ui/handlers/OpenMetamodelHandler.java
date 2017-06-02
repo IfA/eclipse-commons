@@ -20,8 +20,8 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.emf.codegen.ecore.genmodel.GenBase;
 import org.eclipse.emf.codegen.ecore.genmodel.GenClass;
+import org.eclipse.emf.codegen.ecore.genmodel.GenModel;
 import org.eclipse.emf.codegen.ecore.genmodel.GenPackage;
 import org.eclipse.emf.common.ui.viewer.IViewerProvider;
 import org.eclipse.emf.common.util.URI;
@@ -51,9 +51,12 @@ import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.part.FileEditorInput;
 
 import de.tud.et.ifa.agtele.emf.AgteleEcoreUtil;
+import de.tud.et.ifa.agtele.resources.ResourceHelper;
 import de.tud.et.ifa.agtele.ui.util.UIHelper;
 
 /**
+ * An {@link AbstractHandler} that, based on a selection in a Java file, opens
+ * an associated Ecore metamodel.
  *
  * @author mfreund
  */
@@ -81,25 +84,37 @@ public class OpenMetamodelHandler extends AbstractHandler {
 		List<IFile> ecoreFiles = UIHelper.getAllEditorInputs().stream().filter(
 				e -> e instanceof FileEditorInput && "ecore".equals(((FileEditorInput) e).getFile().getFileExtension()))
 				.map(e -> ((FileEditorInput) e).getFile()).collect(Collectors.toList());
-		for (IFile file : ecoreFiles) {
-			Optional<EObject> element = this.checkIsMetaModelForJavaClass(file, root);
+
+		// The list of GenModel files corresponding to the opened Ecore files
+		//
+		List<IFile> genModelFiles = ecoreFiles.stream()
+				.map(e -> e.getProject()
+						.findMember(e.getProjectRelativePath().removeFileExtension().addFileExtension("genmodel")))
+				.filter(g -> g instanceof IFile).map(g -> (IFile) g).collect(Collectors.toList());
+
+		// Check if one of those GenModel files was responsible for generating
+		// our Java class
+		//
+		for (IFile file : genModelFiles) {
+			Optional<EObject> element = this.checkIsGenModelForJavaClass(file, root);
 			if (element.isPresent()) {
-				ecoreFile = file;
 				metamodelElement = element.get();
+				ecoreFile = ResourceHelper.getFileForResource(metamodelElement.eResource());
 				break;
 			}
 		}
 
 		// As none of the opened Ecore files seem to match our selection, we now
-		// collect all Ecore files present in the workspace
+		// collect all GenModel files present in the workspace and check if one
+		// of those represents the Ecore metamodel we want to open
 		//
 		if (ecoreFile == null) {
-			ecoreFiles = new ArrayList<>(this.collectEcoreMetamModels(ResourcesPlugin.getWorkspace().getRoot()));
-			for (IFile file : ecoreFiles) {
-				Optional<EObject> element = this.checkIsMetaModelForJavaClass(file, root);
+			genModelFiles = new ArrayList<>(this.collectGenModels(ResourcesPlugin.getWorkspace().getRoot()));
+			for (IFile file : genModelFiles) {
+				Optional<EObject> element = this.checkIsGenModelForJavaClass(file, root);
 				if (element.isPresent()) {
-					ecoreFile = file;
 					metamodelElement = element.get();
+					ecoreFile = ResourceHelper.getFileForResource(metamodelElement.eResource());
 					break;
 				}
 			}
@@ -181,14 +196,14 @@ public class OpenMetamodelHandler extends AbstractHandler {
 	}
 
 	/**
-	 * Recursively collects all Ecore metamodels ({@link IFile IFiles} with the
-	 * file ending '.ecore') in the given {@link IContainer}.
+	 * Recursively collects all GenModel ({@link IFile IFiles} with the file
+	 * ending '.genmodel') in the given {@link IContainer}.
 	 *
 	 * @param container
 	 *            The {@link IContainer} to recursively process.
-	 * @return The list of {@link IFile IFiles} representing an Ecore metamodel.
+	 * @return The list of {@link IFile IFiles} representing a GenModel.
 	 */
-	private Set<IFile> collectEcoreMetamModels(IContainer container) {
+	private Set<IFile> collectGenModels(IContainer container) {
 
 		Set<IFile> ret = new HashSet<>();
 
@@ -196,10 +211,10 @@ public class OpenMetamodelHandler extends AbstractHandler {
 			List<IResource> members = Arrays.asList(container.members());
 
 			for (IResource member : members) {
-				if (member instanceof IFile && ((IFile) member).getName().endsWith(".ecore")) {
+				if (member instanceof IFile && ((IFile) member).getName().endsWith(".genmodel")) {
 					ret.add((IFile) member);
 				} else if (member instanceof IContainer) {
-					ret.addAll(this.collectEcoreMetamModels((IContainer) member));
+					ret.addAll(this.collectGenModels((IContainer) member));
 				}
 			}
 
@@ -211,42 +226,40 @@ public class OpenMetamodelHandler extends AbstractHandler {
 	}
 
 	/**
-	 * Check if the Ecore metamodel contained in/defined by the given
-	 * {@link IFile} was responsible for creating the given
-	 * {@link CompilationUnit Java file}.
+	 * Check if the {@link GenModel} defined by the given {@link IFile} was
+	 * responsible for creating the given {@link CompilationUnit Java file}.
 	 *
-	 * @param ecoreFile
-	 *            The {@link IFile} defining the Ecore metamodel to check.
+	 * @param genModelFile
+	 *            The {@link IFile} defining the {@link GenModel} to check.
 	 * @param javaFile
 	 *            The {@link CompilationUnit Java file} to check.
 	 * @return The {@link EObject metamodel element} associated with the given
 	 *         Java file or an empty optional if the metamodel was not
 	 *         responsible for the generation of the Java file.
 	 */
-	private Optional<EObject> checkIsMetaModelForJavaClass(IFile ecoreFile, CompilationUnit javaFile) {
+	private Optional<EObject> checkIsGenModelForJavaClass(IFile genModelFile, CompilationUnit javaFile) {
 
 		ResourceSet resourceSet = new ResourceSetImpl();
 
-		// Load the metamodel
+		// Load the GenModel
 		//
 		Resource res = null;
 		try {
-			res = resourceSet.getResource(URI.createPlatformResourceURI(ecoreFile.getFullPath().toString(), true),
+			res = resourceSet.getResource(URI.createPlatformResourceURI(genModelFile.getFullPath().toString(), true),
 					true);
 		} catch (RuntimeException e) {
 			e.printStackTrace();
 			return Optional.empty();
 		}
 
-		if (!(res.getContents().get(0) instanceof EPackage)) {
+		if (!(res.getContents().get(0) instanceof GenModel)) {
 			return Optional.empty();
 		}
 
-		// All EPackages defined by the metamodel
+		// All GenPackages defined in the GenModel
 		//
-		Collection<EPackage> ePackages = res.getContents().stream().filter(c -> c instanceof EPackage)
-				.flatMap(e -> AgteleEcoreUtil.getAllSubPackages((EPackage) e, true).stream())
-				.collect(Collectors.toSet());
+		Collection<GenPackage> genPackages = ((GenModel) res.getContents().get(0)).getGenPackages().stream()
+				.flatMap(e -> AgteleEcoreUtil.getAllSubPackages(e, true).stream()).collect(Collectors.toSet());
 
 		String mainTypeName = String.valueOf(javaFile.getMainTypeName());
 		JavaFileType type = JavaFileType.getFileType(mainTypeName);
@@ -257,44 +270,32 @@ public class OpenMetamodelHandler extends AbstractHandler {
 
 		if (type.isClassType()) {
 
-			// Collect all eClasses with the given metamodelElementName
+			// Collect all genClasses with the given metamodelElementName
 			//
-			Collection<EClass> eClasses = AgteleEcoreUtil.getAllPackageEClasses(ePackages, metamodelElementName);
+			Collection<GenClass> genClasses = AgteleEcoreUtil.getAllGenPackageGenClasses(genPackages,
+					metamodelElementName);
 
-			// Check if one of the found eClasses was responsible for generating
-			// the
-			// given javaFile
-			for (EClass eClass : eClasses) {
-
-				Optional<GenBase> genModelElement = AgteleEcoreUtil.getGenModelElement(eClass, resourceSet);
-				if (!genModelElement.isPresent() || !(genModelElement.get() instanceof GenClass)) {
-					continue;
-				}
-
-				GenClass genClass = (GenClass) genModelElement.get();
+			// Check if one of the found genClasses was responsible for
+			// generating
+			// the given javaFile
+			//
+			for (GenClass genClass : genClasses) {
 
 				if (this.checkGenClassCreatedJavaFile(genClass, javaFile)) {
-					return Optional.of(eClass);
+					return Optional.of(genClass.getEcoreClass());
 				}
 
 			}
 
 		} else if (type.isPackageType()) {
 
-			// Check if one of the found ePackages was responsible for
-			// generating the
-			// given javaFile
-			for (EPackage ePackage : ePackages) {
-
-				Optional<GenBase> genModelElement = AgteleEcoreUtil.getGenModelElement(ePackage, resourceSet);
-				if (!genModelElement.isPresent() || !(genModelElement.get() instanceof GenPackage)) {
-					continue;
-				}
-
-				GenPackage genPackage = (GenPackage) genModelElement.get();
+			// Check if one of the found genPackages was responsible for
+			// generating the given javaFile
+			//
+			for (GenPackage genPackage : genPackages) {
 
 				if (this.checkGenPackageCreatedJavaFile(genPackage, javaFile)) {
-					return Optional.of(ePackage);
+					return Optional.of(genPackage.getEcorePackage());
 				}
 
 			}
