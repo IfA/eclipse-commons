@@ -10,11 +10,15 @@ import org.eclipse.emf.edit.ui.provider.DecoratingColumLabelProvider;
 import org.eclipse.emf.edit.ui.provider.DelegatingStyledCellLabelProvider;
 import org.eclipse.emf.edit.ui.provider.DiagnosticDecorator;
 import org.eclipse.jface.dialogs.IDialogSettings;
+import org.eclipse.jface.viewers.ISelectionChangedListener;
+import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.swt.events.ControlAdapter;
 import org.eclipse.swt.events.ControlEvent;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorSite;
+import org.eclipse.ui.INavigationLocation;
+import org.eclipse.ui.INavigationLocationProvider;
 import org.eclipse.ui.IPartListener;
 import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.part.FileEditorInput;
@@ -27,6 +31,7 @@ import de.tud.et.ifa.agtele.ui.interfaces.IPersistable;
 import de.tud.et.ifa.agtele.ui.listeners.BasicJumpOnClickListener;
 import de.tud.et.ifa.agtele.ui.providers.AgteleEcoreAdapterFactoryLabelProvider;
 import de.tud.et.ifa.agtele.ui.providers.AgteleEcoreContentProvider;
+import de.tud.et.ifa.agtele.ui.util.TreeViewNavigationLocation;
 import de.tud.et.ifa.agtele.ui.widgets.TreeViewerGroup;
 
 /**
@@ -34,7 +39,7 @@ import de.tud.et.ifa.agtele.ui.widgets.TreeViewerGroup;
  *
  * @author cmartin
  */
-public class AgteleEcoreEditor extends ClonableEcoreEditor implements IPersistable, IDragAndDropProvider {
+public class AgteleEcoreEditor extends ClonableEcoreEditor implements IPersistable, IDragAndDropProvider, INavigationLocationProvider {
 
 	private TreeViewerGroup tree;
 
@@ -58,7 +63,6 @@ public class AgteleEcoreEditor extends ClonableEcoreEditor implements IPersistab
 
 		@Override
 		public void partClosed(IWorkbenchPart p) {
-
 			if (p == AgteleEcoreEditor.this && AgteleEcoreEditor.this.getEditorInput() instanceof FileEditorInput) {
 				AgteleEcoreEditor.this.doPersist();
 			}
@@ -149,7 +153,17 @@ public class AgteleEcoreEditor extends ClonableEcoreEditor implements IPersistab
 					new TreeViewerGroup.TreeViewerGroupToolbarAddButtonOption(),
 					new TreeViewerGroup.TreeViewerGroupToolbarToggleSplitEditorVerticallyButtonOption(),
 					new TreeViewerGroup.TreeViewerGroupAddToolPaletteOption.TreeViewerGroupAddToolPaletteToolbarHideEMFPaletteOption());
+			
+			//listen to changed tree view selections in order to hook into the navigation location
+			this.tree.getViewer().addSelectionChangedListener(new ISelectionChangedListener() {
+				@Override
+				public void selectionChanged(SelectionChangedEvent event) {
+					AgteleEcoreEditor.this.updateNavigationHistory();
+				}				
+			});
+			
 			this.selectionViewer = this.tree.getViewer();
+			
 			// Edited Section end
 			//
 			this.setCurrentViewer(this.selectionViewer);
@@ -255,9 +269,29 @@ public class AgteleEcoreEditor extends ClonableEcoreEditor implements IPersistab
 		AgteleEcoreEditor.this.persist(project);
 	}
 
+	//provide the command selection strategy for the drag and drop feature
+	//edited section start
 	@Override
 	public ICommandSelectionStrategy getCommandSelectionStrategy() {
 
 		return new UserChoiceCommandSelectionStrategy();
 	}
+	//hook into the back and forward navigation buttons of the ide
+	//
+	protected void updateNavigationHistory() {
+		this.getSite().getPage().getNavigationHistory().markLocation(this);
+	}
+
+	@Override
+	public INavigationLocation createEmptyNavigationLocation() {
+		return new TreeViewNavigationLocation(this, this.tree.getViewer());
+	}
+
+	@Override
+	public INavigationLocation createNavigationLocation() {
+		TreeViewNavigationLocation location =  new TreeViewNavigationLocation(this, this.tree.getViewer());
+		location.update();
+		return location;
+	}
+	//edited section end
 }
