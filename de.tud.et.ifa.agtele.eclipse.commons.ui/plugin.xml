@@ -124,5 +124,10 @@
             id="de.tud.et.ifa.agtele.eclipse.commons.ui.showInheritedEcoreClassFeaturesCommand"
             name="ShowInheritedEcoreClassFeaturesCommand">
       </command>
+      <command
+            defaultHandler="de.tud.et.ifa.agtele.ui.handlers.AddValidationEOperationHandler"
+            id="de.tud.et.ifa.agtele.ui.commands.AddValidationEOperation"
+            name="AddValidationEOperation">
+      </command>
    </extension>
 </plugin>
