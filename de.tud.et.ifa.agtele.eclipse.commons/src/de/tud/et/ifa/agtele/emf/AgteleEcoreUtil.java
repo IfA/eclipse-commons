@@ -20,12 +20,14 @@ import org.eclipse.emf.codegen.ecore.genmodel.GenPackage;
 import org.eclipse.emf.common.notify.Adapter;
 import org.eclipse.emf.common.notify.AdapterFactory;
 import org.eclipse.emf.common.util.URI;
+import org.eclipse.emf.ecore.EAnnotation;
 import org.eclipse.emf.ecore.EAttribute;
 import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.EClassifier;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.EPackage;
 import org.eclipse.emf.ecore.EStructuralFeature.Setting;
+import org.eclipse.emf.ecore.EcorePackage;
 import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.ecore.resource.ResourceSet;
 import org.eclipse.emf.ecore.util.EcoreUtil;
@@ -765,5 +767,24 @@ public interface AgteleEcoreUtil {
 				.findAny();
 
 		return setting.isPresent() ? Optional.of((GenBase) setting.get().getEObject()) : Optional.empty();
+	}
+	
+	/**
+	 * Checks if at least one classifier of the package contains a ecore annotation enabling the
+	 *  validation framework for the package by naming a constraint.
+	 * @param p The package to check.
+	 * @return
+	 */
+	public static boolean isValidationEnabledForEPackage(EPackage p) {
+		return p.getEClassifiers().stream().anyMatch(cl -> {
+			if (!(cl instanceof EClass)) {
+				return false;
+			}
+			EAnnotation ecoreAnnotation = cl.getEAnnotation(EcorePackage.eNS_URI);
+			if (ecoreAnnotation == null || ecoreAnnotation.getDetails().get("constraints") == null || ecoreAnnotation.getDetails().get("constraints").isEmpty()) {
+				return false;
+			}
+			return true;
+		});
 	}
 }

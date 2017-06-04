@@ -20,6 +20,7 @@ public class EcoreEditorMenuContribution extends ExtensionContributionFactory {
 		additions.addContributionItem(new Separator("begin-agtele-ecore-additions"), null);
 		new OpenGenModelMenuContribution().createContributionItems(serviceLocator, additions);
 		new OpenCodeMenuContribution().createContributionItems(serviceLocator, additions);
+		new AddValidationEOperationMenuContribution().createContributionItems(serviceLocator, additions);
 		additions.addContributionItem(new Separator("end-agtele-ecore-additions"), null);
 	}
 
