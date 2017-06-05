@@ -39,12 +39,15 @@ import org.eclipse.jdt.internal.core.CompilationUnit;
 import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.dialogs.StatusDialog;
 import org.eclipse.jface.text.TextSelection;
 import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.part.FileEditorInput;
+import org.eclipse.ui.statushandlers.StatusManager;
 
 import de.tud.et.ifa.agtele.emf.AgteleEcoreUtil;
 import de.tud.et.ifa.agtele.resources.ResourceHelper;
@@ -57,6 +60,7 @@ import de.tud.et.ifa.agtele.ui.util.UIHelper;
  * @author mfreund
  *
  */
+//TODO this class has to be refactored, there is too much dirtywork in order not to put any state into the single instance of this class. It would be better to create an 'executor' instance each time the handler is being executed
 @SuppressWarnings("restriction")
 public abstract class AbstractGeneratedEMFCodeHandler extends AbstractHandler {
 
@@ -539,15 +543,20 @@ public abstract class AbstractGeneratedEMFCodeHandler extends AbstractHandler {
 	}
 
 	/**
-	 * Show an error to the user by opening a {@link MessageDialog}.
+	 * Show an error to the user by sending an error to the status line.
 	 *
 	 * @param errorMessage
 	 *            The message to display to the user.
 	 */
 	protected void showError(String errorMessage) {
+		UIHelper.getCurrentEditor().getEditorSite().getActionBars().getStatusLineManager().setErrorMessage(errorMessage);
+	}
 	
-		Shell shell = UIHelper.getShell();
-		MessageDialog.openError(shell, "ERROR", errorMessage);
+	/**
+	 * Clears the error from the status line.
+	 */
+	protected void clearError() {
+		UIHelper.getCurrentEditor().getEditorSite().getActionBars().getStatusLineManager().setErrorMessage(null);
 	}
 
 	@Override
@@ -575,15 +584,17 @@ public abstract class AbstractGeneratedEMFCodeHandler extends AbstractHandler {
 	@Override
 	public Object execute(ExecutionEvent event) throws ExecutionException {
 	
+		clearError();
+		
 		IFile ecoreFile = null;
 		
-		CompilationUnitEditor javaEditor = (CompilationUnitEditor) UIHelper.getCurrentEditor();
+		final CompilationUnitEditor javaEditor = (CompilationUnitEditor) UIHelper.getCurrentEditor();
 	
 		// In order to prevent manual parsing of the Java document, we make use
 		// of the CompilationUnit type that
 		// represents a structured Java document
 		//
-		CompilationUnit root = determineCompilationUnit();
+		final CompilationUnit root = determineCompilationUnit();
 	
 		EObject metamodelElement = determineAssociatedMetamodelElement(root);
 		
@@ -650,21 +661,35 @@ public abstract class AbstractGeneratedEMFCodeHandler extends AbstractHandler {
 		// If we had to open a new editor instead of being able to reuse an
 		// existing one, the editor might not be completely opened yet.
 		// Thus, we use an asynchronous runnable to reveal the selection
-		UIHelper.getShell().getDisplay().asyncExec(() -> performAsyncActionOnEcoreEditor(ecoreEditor, specificCorrespondingElement, selection));
+		UIHelper.getShell().getDisplay().asyncExec(() -> performAsyncActionOnEcoreEditor(ecoreEditor, root, javaEditor, specificCorrespondingElement, selection));
 	
 		return null;
 	}
 
+	/**
+	 * Determines the @link {@link org.eclipse.jdt.core.dom.CompilationUnit}, if the current editor is a Java editor.
+	 * @return
+	 */
 	protected CompilationUnit determineCompilationUnit() {
 		return (CompilationUnit) EditorUtility.getEditorInputJavaElement(UIHelper.getCurrentEditor(),
+				false);
+	}
+	/**
+	 * Determines the @link {@link org.eclipse.jdt.core.dom.CompilationUnit}, if the current editor is a Java editor.
+	 * @param part The compilation unit editor part.
+	 * @return
+	 */
+	protected CompilationUnit determineCompilationUnit(IEditorPart part) {
+		return (CompilationUnit) EditorUtility.getEditorInputJavaElement(part,
 				false);
 	}
 	
 	/**
 	 * When the specific Ecore element has been determined, the concrete handler subclass shall determine, what is going to happen.
+	 * @param javaEditor 
 	 * @param specificEcoreElement
 	 */
-	abstract protected void performAsyncActionOnEcoreEditor (IEditorPart ecoreEditor, EObject specificEcoreElement, ISelection javaSelection);
+	abstract protected void performAsyncActionOnEcoreEditor (IEditorPart ecoreEditor, CompilationUnit compilationUnit, CompilationUnitEditor javaEditor, EObject specificEcoreElement, ISelection javaSelection);
 
 	/**
 	 * Tries to open the default editor for the specified ecore file. If the opening fails, the method displays an error using {@link #showError(String)}.

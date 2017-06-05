@@ -198,9 +198,6 @@ public class AddValidationEOperationHandler extends AbstractHandler {
 			g.getETypeArguments().add(EcoreFactory.eINSTANCE.createEGenericType());	
 			p2.setEType(EcorePackage.Literals.EMAP);
 			p2.setEGenericType(g);
-			
-//			p2.setEGenericType(g);
-			//g.getETypeParameter()
 			this.validationEOperation.getEParameters().add(p2);
 			EAnnotation genAnnotation = EcoreFactory.eINSTANCE.createEAnnotation();
 			genAnnotation.setSource(GenModelPackage.eNS_URI);

@@ -56,7 +56,7 @@
       </menuContribution>
       <menuContribution
             allPopups="true"
-            class="de.tud.et.ifa.agtele.ui.contributions.OpenMetaModelContribution"
+            class="de.tud.et.ifa.agtele.ui.contributions.CompilationUnitEditorMenuContribution"
             locationURI="popup:org.eclipse.jdt.ui.CompilationUnitEditor.EditorContext">
       </menuContribution>
       <menuContribution
