@@ -56,7 +56,7 @@
       </menuContribution>
       <menuContribution
             allPopups="true"
-            class="de.tud.et.ifa.agtele.ui.contributions.OpenMetaModelContribution"
+            class="de.tud.et.ifa.agtele.ui.contributions.CompilationUnitEditorMenuContribution"
             locationURI="popup:org.eclipse.jdt.ui.CompilationUnitEditor.EditorContext">
       </menuContribution>
       <menuContribution
@@ -128,6 +128,11 @@
             defaultHandler="de.tud.et.ifa.agtele.ui.handlers.AddValidationEOperationHandler"
             id="de.tud.et.ifa.agtele.ui.commands.AddValidationEOperation"
             name="AddValidationEOperation">
+      </command>
+      <command
+            defaultHandler="de.tud.et.ifa.agtele.ui.handlers.PushCodeToEcoreHandler"
+            id="de.tud.et.ifa.agtele.ui.commands.PushCodeToEcoreHandler"
+            name="PushCodeToEcoreHandler">
       </command>
    </extension>
 </plugin>

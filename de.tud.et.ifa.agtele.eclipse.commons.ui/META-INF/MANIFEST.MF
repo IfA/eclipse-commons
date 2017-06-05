@@ -26,7 +26,8 @@ Require-Bundle: org.eclipse.ui,
  org.eclipse.swt,
  org.eclipse.jdt.ui;bundle-version="3.12.1",
  org.eclipse.jdt.core;bundle-version="3.12.1",
- org.eclipse.jface.text;bundle-version="3.11.1"
+ org.eclipse.jface.text;bundle-version="3.11.1",
+ org.eclipse.jface
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ActivationPolicy: lazy
 Bundle-Activator: de.tud.et.ifa.agtele.ui.AgteleUIPlugin$Implementation

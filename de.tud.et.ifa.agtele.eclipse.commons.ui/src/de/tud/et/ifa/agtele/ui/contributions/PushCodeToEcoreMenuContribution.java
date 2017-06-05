@@ -15,7 +15,7 @@ import de.tud.et.ifa.agtele.ui.handlers.OpenMetamodelHandler;
  *
  * @author baron
  */
-public class AddValidationEOperationMenuContribution extends ExtensionContributionFactory {
+public class PushCodeToEcoreMenuContribution extends ExtensionContributionFactory {
 
 	private static final String BUNDLE_ID = "de.tud.et.ifa.agtele.eclipse.commons.ui";
 
@@ -24,17 +24,17 @@ public class AddValidationEOperationMenuContribution extends ExtensionContributi
 
 		// This represents the 'Add Validation EOperation' menu entry
 		//
-		CommandContributionItemParameter addValidationEOperationCommandParameter = new CommandContributionItemParameter(
-				serviceLocator, "", "de.tud.et.ifa.agtele.ui.commands.AddValidationEOperation", SWT.PUSH);
-		addValidationEOperationCommandParameter.label = "Add Validation EOperation";
-		addValidationEOperationCommandParameter.icon = BundleContentHelper
-				.getBundleImageDescriptor(AddValidationEOperationMenuContribution.BUNDLE_ID, "icons/AddValidationEOperation.gif");
-		addValidationEOperationCommandParameter.tooltip = "Adds a new validation EOperation to the containing EClass";
-		addValidationEOperationCommandParameter.visibleEnabled = true;
+		CommandContributionItemParameter pushCodeToEcoreCommandParameter = new CommandContributionItemParameter(
+				serviceLocator, "", "de.tud.et.ifa.agtele.ui.commands.PushCodeToEcoreHandler", SWT.PUSH);
+		pushCodeToEcoreCommandParameter.label = "Push Code To Ecore";
+		pushCodeToEcoreCommandParameter.icon = BundleContentHelper
+				.getBundleImageDescriptor(PushCodeToEcoreMenuContribution.BUNDLE_ID, "icons/PushToEcore.gif");
+		pushCodeToEcoreCommandParameter.tooltip = "Pushes the code section of this Java EMF Code to the corresponding Ecore model, if possible.";
+		pushCodeToEcoreCommandParameter.visibleEnabled = true;
 
 		// Add the menu entries to the menu
 		//
-		additions.addContributionItem(new CommandContributionItem(addValidationEOperationCommandParameter), null);
+		additions.addContributionItem(new CommandContributionItem(pushCodeToEcoreCommandParameter), null);
 	}
 
 }
