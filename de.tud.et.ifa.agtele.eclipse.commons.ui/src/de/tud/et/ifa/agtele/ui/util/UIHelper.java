@@ -142,7 +142,8 @@ public interface UIHelper {
 	public static List<IEditorInput> getAllEditorInputs() {
 
 		List<IEditorPart> editors = UIHelper.getAllEditors();
-		return editors.stream().map(IEditorPart::getEditorInput).collect(Collectors.toList());
+		return editors.stream().filter(e -> {return e != null && e instanceof IEditorPart;}).collect(Collectors.toList()).stream()
+				.map(IEditorPart::getEditorInput).collect(Collectors.toList());
 	}
 
 	/**
