@@ -24,17 +24,17 @@ public class AddValidationEOperationMenuContribution extends ExtensionContributi
 
 		// This represents the 'Add Validation EOperation' menu entry
 		//
-		CommandContributionItemParameter openMetamodelCommandParameter = new CommandContributionItemParameter(
+		CommandContributionItemParameter addValidationEOperationCommandParameter = new CommandContributionItemParameter(
 				serviceLocator, "", "de.tud.et.ifa.agtele.ui.commands.AddValidationEOperation", SWT.PUSH);
-		openMetamodelCommandParameter.label = "Add Validation EOperation";
-		openMetamodelCommandParameter.icon = BundleContentHelper
+		addValidationEOperationCommandParameter.label = "Add Validation EOperation";
+		addValidationEOperationCommandParameter.icon = BundleContentHelper
 				.getBundleImageDescriptor(AddValidationEOperationMenuContribution.BUNDLE_ID, "icons/AddValidationEOperation.gif");
-		openMetamodelCommandParameter.tooltip = "Adds a new validation EOperation to the containing EClass";
-		openMetamodelCommandParameter.visibleEnabled = true;
+		addValidationEOperationCommandParameter.tooltip = "Adds a new validation EOperation to the containing EClass";
+		addValidationEOperationCommandParameter.visibleEnabled = true;
 
 		// Add the menu entries to the menu
 		//
-		additions.addContributionItem(new CommandContributionItem(openMetamodelCommandParameter), null);
+		additions.addContributionItem(new CommandContributionItem(addValidationEOperationCommandParameter), null);
 	}
 
 }
