@@ -101,13 +101,12 @@ public class PushCodeToEcoreHandler extends AbstractGeneratedEMFCodeHandler {
 				detailsKey = "get";
 				code = this.compileImplementation(code, compilationUnit, true, false);	
 			} 
+//			//The eIsSet expression cannot be pushed to the ecore, without further work on identifying the ecore element from the selection within the java method
 //			else if (name.startsWith("eIsSet")) {
 //				detailsKey = "isSet";
 //				// determine the expression, it should follow: case --.CLASS_NAME__FEATURE_NAME:\n return 
 //			}		
 		} else if (specificEcoreElement instanceof EAttribute && javaElement instanceof SourceField) {
-			//TODO check if this is the initializer
-			//TODO determine the expression, it should follow: protected DATA_TYPE attributeName;
 			detailsKey = "init";
 			try {
 				code = ((SourceField)javaElement).getSource();
@@ -134,9 +133,25 @@ public class PushCodeToEcoreHandler extends AbstractGeneratedEMFCodeHandler {
 		dom.getCommandStack().execute(cmd);
 		
 		if (ecoreEditor instanceof IViewerProvider) {
+			
+			//set the selection in the ecore editor either to the details key or the manipulated annotation
+			Object target = null;			
 			Object entrySet[] = cmd.getManipulatedAnnotation().getDetails().entrySet().toArray();
+			if (code != null) {
+				target = entrySet[cmd.getManipulatedAnnotation().getDetails().indexOfKey(detailsKey)];
+			} else if (cmd.getManipulatedAnnotation() != null) {
+				target = cmd.getManipulatedAnnotation();
+			} else {
+				target = specificEcoreElement;
+			}
+			
 			((IViewerProvider) ecoreEditor).getViewer()
-				.setSelection(new StructuredSelection(entrySet[cmd.getManipulatedAnnotation().getDetails().indexOfKey(detailsKey)]), true);
+				.setSelection(new StructuredSelection(target), true);
+			if (code != null) {
+				this.showStatus("Pushed the java code to the ecore model, to enable getters, setters, initializers or isSet evaluations, use custom emitter templates");
+			} else {
+				this.showStatus("Cleared the java code from the ecore model. Run the generator in order to get the default implementation.");
+			}
 		}
 	}
 		
@@ -359,7 +374,7 @@ public class PushCodeToEcoreHandler extends AbstractGeneratedEMFCodeHandler {
 		@Override
 		public void undo() {
 			if (this.code == null) {
-				if (!this.createdAnnotation) {
+				if (!this.createdAnnotation && this.previousCode != null) {
 					this.annotation.getDetails().put(this.keyName, this.previousCode);
 				}
 			} else if (this.createdAnnotation) {

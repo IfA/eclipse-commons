@@ -553,6 +553,14 @@ public abstract class AbstractGeneratedEMFCodeHandler extends AbstractHandler {
 	}
 	
 	/**
+	 * Sets a status message to the status bar.
+	 * @param statusMessage
+	 */
+	protected void showStatus(String statusMessage) {
+		UIHelper.getCurrentEditor().getEditorSite().getActionBars().getStatusLineManager().setMessage(statusMessage);
+	}
+	
+	/**
 	 * Clears the error from the status line.
 	 */
 	protected void clearError() {
