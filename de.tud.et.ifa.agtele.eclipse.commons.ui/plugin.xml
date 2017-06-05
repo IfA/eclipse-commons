@@ -129,5 +129,10 @@
             id="de.tud.et.ifa.agtele.ui.commands.AddValidationEOperation"
             name="AddValidationEOperation">
       </command>
+      <command
+            defaultHandler="de.tud.et.ifa.agtele.ui.handlers.PushCodeToEcoreHandler"
+            id="de.tud.et.ifa.agtele.ui.commands.PushCodeToEcoreHandler"
+            name="PushCodeToEcoreHandler">
+      </command>
    </extension>
 </plugin>
