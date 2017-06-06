@@ -83,15 +83,13 @@ public class PushCodeToEcoreHandler extends AbstractGeneratedEMFCodeHandler {
 			code = this.compileImplementation(code, compilationUnit, true, false);	
 		} else if ((specificEcoreElement instanceof EReference || specificEcoreElement instanceof EAttribute) && javaElement instanceof IMethod) {
 			IMethod method = ((IMethod)javaElement);
-			if (detailsKey != null) {
-				try {
-					code = method.getSource();
-				} catch (JavaModelException e) {
-					this.bringEditorToFront((IEditorPart) javaEditor);
-					e.printStackTrace();
-					showError("Could not retrieve method source code.");
-					return;
-				}
+			try {
+				code = method.getSource();
+			} catch (JavaModelException e) {
+				this.bringEditorToFront((IEditorPart) javaEditor);
+				e.printStackTrace();
+				showError("Could not retrieve method source code.");
+				return;
 			}
 			String name = method.getElementName();
 			if (name.startsWith("set")) {
