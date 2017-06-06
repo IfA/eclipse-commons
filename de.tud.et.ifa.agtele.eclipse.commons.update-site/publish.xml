@@ -47,8 +47,8 @@
 			<!-- copy the files -->
 			<arg value="put ${basedir}\content.jar ${remote-path}" />
 			<arg value="put ${basedir}\artifacts.jar ${remote-path}" />
-			<arg value="put ${basedir}\features/ ${remote-path}" />
-			<arg value="put ${basedir}\plugins/ ${remote-path}" />
+			<arg value="put ${basedir}\features\ ${remote-path}" />
+			<arg value="put ${basedir}\plugins\ ${remote-path}" />
 
 			<!-- change modifiers -->
 			<arg value="call chmod 0774 ${remote-path}content.jar" />
