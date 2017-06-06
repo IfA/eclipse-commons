@@ -41,8 +41,19 @@ import de.tud.et.ifa.agtele.ui.util.UIHelper;
 /**
  * This implementation of the {@link AbstractGeneratedEMFCodeHandler} aims to import a code section
  * to the opened ecore model. 
+ * Supported sections in the model code implementation classes are:<br/>
+ *   -  feature getter/setter method body: 'get', 'set' genannotation details key</br>
+ *   -  feature basifGetter/basicSetter method body: 'basicGet', 'basicSet' genannotation details key</br>
+ *   -  operation method body: 'body' genannotation details key</br>
+ *   -  attribute field initialization expression: 'init' genannotation details key</br>
+ *   -  eIsSet expression: 'isSet' genannotation details key (the details key is supported by generator templates, but no automatic push to ecore feature is available)
+ * Supported sections in the edit code implementation classes are:<br/>
+ *   -  property descriptor add method body: 'propertyDescriptor' genannotation details key</br>
  * 
- * As implementation source, only implementation classes from the emf 'model' code are accepted.
+ * In order to get the genmodel annotation details entries to work with the emf java generator (except for the body annotations of eOperations),
+ * enable the dynamic templates in the genmodel and point the templates directory property to the templates directory included in the 
+ * 
+ * As implementation source, only implementation classes from the emf 'model' ore 'item provider' code are accepted.
  * 
  * @author baron
  */
@@ -64,62 +75,82 @@ public class PushCodeToEcoreHandler extends AbstractGeneratedEMFCodeHandler {
 			e.printStackTrace();
 		}
 		
+		String mainTypeName = String.valueOf(compilationUnit.getMainTypeName());
+		EMFGeneratedJavaFileType type = EMFGeneratedJavaFileType.getFileType(mainTypeName);
+		
 		EditingDomain dom = AgteleEcoreUtil.getEditingDomainFor(specificEcoreElement);
 
 		String detailsKey = null;
 		String code = null;
 		
-		if (specificEcoreElement instanceof EOperation) {
-			detailsKey = "body";
-			IMethod method = ((IMethod)javaElement);
-			try {
-				code = method.getSource();
-			} catch (JavaModelException e) {
-				this.bringEditorToFront((IEditorPart) javaEditor);
-				e.printStackTrace();
-				showError("Could not retrieve method source code.");
-				return;
-			}
-			code = this.compileImplementation(code, compilationUnit, true, false);	
-		} else if ((specificEcoreElement instanceof EReference || specificEcoreElement instanceof EAttribute) && javaElement instanceof IMethod) {
-			IMethod method = ((IMethod)javaElement);
-			try {
-				code = method.getSource();
-			} catch (JavaModelException e) {
-				this.bringEditorToFront((IEditorPart) javaEditor);
-				e.printStackTrace();
-				showError("Could not retrieve method source code.");
-				return;
-			}
-			String name = method.getElementName();
-			if (name.startsWith("set")) {
-				detailsKey = "set";
+		if (type.isClassImplementationType()) {
+			if (specificEcoreElement instanceof EOperation) {
+				detailsKey = "body";
+				IMethod method = ((IMethod)javaElement);
+				try {
+					code = method.getSource();
+				} catch (JavaModelException e) {
+					this.bringEditorToFront((IEditorPart) javaEditor);
+					e.printStackTrace();
+					showError("Could not retrieve method source code.");
+					return;
+				}
 				code = this.compileImplementation(code, compilationUnit, true, false);	
-			} else if (name.startsWith("get")) {
-				detailsKey = "get";
-				code = this.compileImplementation(code, compilationUnit, true, false);	
-			} 
-//			//The eIsSet expression cannot be pushed to the ecore, without further work on identifying the ecore element from the selection within the java method
-//			else if (name.startsWith("eIsSet")) {
-//				detailsKey = "isSet";
-//				// determine the expression, it should follow: case --.CLASS_NAME__FEATURE_NAME:\n return 
-//			}		
-		} else if (specificEcoreElement instanceof EAttribute && javaElement instanceof SourceField) {
-			detailsKey = "init";
-			try {
-				code = ((SourceField)javaElement).getSource();
-			} catch (JavaModelException e) {
+			} else if ((specificEcoreElement instanceof EReference || specificEcoreElement instanceof EAttribute) && javaElement instanceof IMethod) {
+				IMethod method = ((IMethod)javaElement);
+				try {
+					code = method.getSource();
+				} catch (JavaModelException e) {
+					this.bringEditorToFront((IEditorPart) javaEditor);
+					e.printStackTrace();
+					showError("Could not retrieve method source code.");
+					return;
+				}
+				String name = method.getElementName();
+				if (name.startsWith("set")) {
+					detailsKey = "set";
+					code = this.compileImplementation(code, compilationUnit, true, false);	
+				} else if (name.startsWith("get")) {
+					detailsKey = "get";
+					code = this.compileImplementation(code, compilationUnit, true, false);	
+				} 
+	//			//The eIsSet expression cannot be pushed to the ecore, without further work on identifying the ecore element from the selection within the java method
+	//			else if (name.startsWith("eIsSet")) {
+	//				detailsKey = "isSet";
+	//				// determine the expression, it should follow: case --.CLASS_NAME__FEATURE_NAME:\n return 
+	//			}		
+			} else if (specificEcoreElement instanceof EAttribute && javaElement instanceof SourceField) {
+				detailsKey = "init";
+				try {
+					code = ((SourceField)javaElement).getSource();
+				} catch (JavaModelException e) {
+					this.bringEditorToFront((IEditorPart) javaEditor);
+					e.printStackTrace();
+					showError("Could not retrieve field initialization source code.");
+					return;
+				}
+				code = this.compileImplementation(code, compilationUnit, false, true);	
+				
+			} else {
 				this.bringEditorToFront((IEditorPart) javaEditor);
-				e.printStackTrace();
-				showError("Could not retrieve field initialization source code.");
+				showError("Could not handle selection or ecore target element, this is probably due to a section of the source code, that cannot be pushed to the ecore model.");
 				return;
 			}
-			code = this.compileImplementation(code, compilationUnit, false, true);	
-			
-		} else {
-			this.bringEditorToFront((IEditorPart) javaEditor);
-			showError("Could not handle selection or ecore target element, this is probably due to a section of the source code, that cannot be pushed to the ecore model.");
-			return;
+		} else if (type.isEditItemProviderType()) {
+			if (javaElement instanceof IMethod && (
+					specificEcoreElement instanceof EAttribute || (specificEcoreElement instanceof EReference && !((EReference)specificEcoreElement).isContainment()))
+					) {
+				detailsKey = "propertyDescriptor";
+				try {
+					code = ((IMethod)javaElement).getSource();
+				} catch (JavaModelException e) {
+					this.bringEditorToFront((IEditorPart) javaEditor);
+					e.printStackTrace();
+					showError("Could not retrieve add property descriptor source code.");
+					return;
+				}
+				code = this.compileImplementation(code, compilationUnit, true, false);	
+			}			
 		}
 		
 		if (detailsKey == null) {
@@ -292,7 +323,7 @@ public class PushCodeToEcoreHandler extends AbstractGeneratedEMFCodeHandler {
 			String mainTypeName = String.valueOf(cUnit.getMainTypeName());
 			EMFGeneratedJavaFileType type = EMFGeneratedJavaFileType.getFileType(mainTypeName);
 			
-			return type.isClassImplementationType();
+			return type.isClassImplementationType() || type.isEditItemProviderType();
 		}
 		return false;
 		

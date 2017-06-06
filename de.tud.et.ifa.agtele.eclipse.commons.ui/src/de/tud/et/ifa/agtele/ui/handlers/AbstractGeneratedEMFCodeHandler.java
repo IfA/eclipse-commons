@@ -148,7 +148,7 @@ public abstract class AbstractGeneratedEMFCodeHandler extends AbstractHandler {
 					|| this.equals(FACTORYIMPLY) || this.equals(PACKAGEIMPL) || this.equals(ADAPTERFACTORY)
 					|| this.equals(SWITCH) || this.equals(VALIDATOR);
 		}
-			
+		
 		/**
 		 * Whether this {@link EMFGeneratedJavaFileType} represents an element of the
 		 * generated 'edit' code.
@@ -157,6 +157,16 @@ public abstract class AbstractGeneratedEMFCodeHandler extends AbstractHandler {
 		 */
 		public boolean isEditType() {
 			return this.equals(ITEMPROVIDER) || this.equals(ITEMPROVIDERADAPTERFACTORY);
+		}
+			
+		/**
+		 * Whether this {@link EMFGeneratedJavaFileType} represents an element of the
+		 * generated 'edit' item provider code.
+		 *
+		 * @return
+		 */
+		public boolean isEditItemProviderType() {
+			return this.equals(ITEMPROVIDER);
 		}
 	
 		/**
