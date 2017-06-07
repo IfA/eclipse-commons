@@ -113,6 +113,12 @@ public class PushCodeToEcoreHandler extends AbstractGeneratedEMFCodeHandler {
 				} else if (name.startsWith("get")) {
 					detailsKey = "get";
 					code = this.compileImplementation(code, compilationUnit, true, false);	
+				} else if (name.startsWith("basicSet")) {
+					detailsKey = "basicSet";
+					code = this.compileImplementation(code, compilationUnit, true, false);	
+				} else if (name.startsWith("basicGet")) {
+					detailsKey = "basicGet";
+					code = this.compileImplementation(code, compilationUnit, true, false);	
 				} 
 	//			//The eIsSet expression cannot be pushed to the ecore, without further work on identifying the ecore element from the selection within the java method
 	//			else if (name.startsWith("eIsSet")) {
