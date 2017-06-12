@@ -3,7 +3,6 @@
  */
 package de.tud.et.ifa.agtele.ui.handlers;
 
-import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.emf.common.ui.viewer.IViewerProvider;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.jdt.internal.core.CompilationUnit;
@@ -13,9 +12,10 @@ import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.ui.IEditorPart;
 
 /**
- * An {@link AbstractGeneratedEMFCodeHandler} that simply sets focus to the ecore element corresponding to the 
- * selection in the java editor, provided by the {@link AbstractGeneratedEMFCodeHandler}
- * 
+ * An {@link AbstractGeneratedEMFCodeHandler} that simply sets focus to the
+ * Ecore element corresponding to the selection in the java editor, provided by
+ * the {@link AbstractGeneratedEMFCodeHandler}
+ *
  *
  * @author mfreund
  */
@@ -23,12 +23,12 @@ import org.eclipse.ui.IEditorPart;
 public class OpenMetamodelHandler extends AbstractGeneratedEMFCodeHandler {
 
 	@Override
-	protected void performAsyncActionOnEcoreEditor(IEditorPart ecoreEditor, CompilationUnit compilationUnit, CompilationUnitEditor javaEditor, EObject specificEcoreElement,
-			ISelection javaSelection) {
+	protected void performAsyncActionOnEcoreEditor(IEditorPart ecoreEditor, CompilationUnit compilationUnit,
+			CompilationUnitEditor javaEditor, EObject specificEcoreElement, ISelection javaSelection) {
 
 		if (ecoreEditor instanceof IViewerProvider) {
-			((IViewerProvider) ecoreEditor).getViewer()
-				.setSelection(new StructuredSelection(specificEcoreElement), true);
+			((IViewerProvider) ecoreEditor).getViewer().setSelection(new StructuredSelection(specificEcoreElement),
+					true);
 		}
 	}
 }

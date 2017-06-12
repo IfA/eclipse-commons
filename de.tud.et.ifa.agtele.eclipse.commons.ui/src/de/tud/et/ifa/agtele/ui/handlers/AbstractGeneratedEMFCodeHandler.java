@@ -17,10 +17,11 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.Path;
 import org.eclipse.emf.codegen.ecore.genmodel.GenClass;
 import org.eclipse.emf.codegen.ecore.genmodel.GenModel;
 import org.eclipse.emf.codegen.ecore.genmodel.GenPackage;
-import org.eclipse.emf.common.ui.viewer.IViewerProvider;
 import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.EObject;
@@ -38,16 +39,11 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.internal.core.CompilationUnit;
 import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
-import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.jface.dialogs.StatusDialog;
 import org.eclipse.jface.text.TextSelection;
 import org.eclipse.jface.viewers.ISelection;
-import org.eclipse.swt.SWT;
-import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.part.FileEditorInput;
-import org.eclipse.ui.statushandlers.StatusManager;
 
 import de.tud.et.ifa.agtele.emf.AgteleEcoreUtil;
 import de.tud.et.ifa.agtele.resources.ResourceHelper;
@@ -57,10 +53,15 @@ import de.tud.et.ifa.agtele.ui.util.UIHelper;
 /**
  * An {@link AbstractHandler} that, based on a selection in a Java file, opens
  * an associated Ecore metamodel.
+ *
  * @author mfreund
  *
  */
-//TODO this class has to be refactored, there is too much dirtywork in order not to put any state into the single instance of this class. It would be better to create an 'executor' instance each time the handler is being executed
+// TODO this class might have to be refactored, there is too much dirtywork in
+// order
+// not to put any state into the single instance of this class. It might be
+// better to create an 'executor' instance each time the handler is being
+// executed
 @SuppressWarnings("restriction")
 public abstract class AbstractGeneratedEMFCodeHandler extends AbstractHandler {
 
@@ -71,7 +72,7 @@ public abstract class AbstractGeneratedEMFCodeHandler extends AbstractHandler {
 	 */
 	@SuppressWarnings("javadoc")
 	public enum EMFGeneratedJavaFileType {
-	
+
 		// model
 		INTERFACE(""), FACTORY("Factory"), PACKAGE("Package"), IMPL("Impl"), FACTORYIMPLY("FactoryImpl"), PACKAGEIMPL(
 				"PackageImpl"), ADAPTERFACTORY("AdapterFactory"), SWITCH("Switch"), VALIDATOR("Validator"),
@@ -79,13 +80,13 @@ public abstract class AbstractGeneratedEMFCodeHandler extends AbstractHandler {
 		ITEMPROVIDER("ItemProvider"), ITEMPROVIDERADAPTERFACTORY("ItemProviderAdapterFactory"),
 		// editor
 		EDITOR("Editor"), ACTIONBARCONTRIBUTOR("ActionBarContributor");
-	
+
 		private final String fileEnding;
-	
+
 		EMFGeneratedJavaFileType(String fileEnding) {
 			this.fileEnding = fileEnding;
 		}
-	
+
 		/**
 		 * Returns the special file ending associated with this
 		 * {@link EMFGeneratedJavaFileType}.
@@ -95,9 +96,10 @@ public abstract class AbstractGeneratedEMFCodeHandler extends AbstractHandler {
 		public String getFileEnding() {
 			return this.fileEnding;
 		}
-	
+
 		/**
-		 * Return the {@link EMFGeneratedJavaFileType} of the java file with the given name.
+		 * Return the {@link EMFGeneratedJavaFileType} of the java file with the
+		 * given name.
 		 *
 		 * @param javaFileName
 		 *            The name of a java file (including or excluding the
@@ -105,9 +107,9 @@ public abstract class AbstractGeneratedEMFCodeHandler extends AbstractHandler {
 		 * @return The {@link EMFGeneratedJavaFileType}.
 		 */
 		public static EMFGeneratedJavaFileType getFileType(String javaFileName) {
-	
+
 			String f = javaFileName.replaceAll(".java$", "");
-	
+
 			if (f.endsWith(ACTIONBARCONTRIBUTOR.fileEnding)) {
 				return ACTIONBARCONTRIBUTOR;
 			} else if (f.endsWith(EDITOR.fileEnding)) {
@@ -136,10 +138,10 @@ public abstract class AbstractGeneratedEMFCodeHandler extends AbstractHandler {
 				return EMFGeneratedJavaFileType.INTERFACE;
 			}
 		}
-	
+
 		/**
-		 * Whether this {@link EMFGeneratedJavaFileType} represents an element of the
-		 * generated 'model' code.
+		 * Whether this {@link EMFGeneratedJavaFileType} represents an element
+		 * of the generated 'model' code.
 		 *
 		 * @return
 		 */
@@ -148,40 +150,40 @@ public abstract class AbstractGeneratedEMFCodeHandler extends AbstractHandler {
 					|| this.equals(FACTORYIMPLY) || this.equals(PACKAGEIMPL) || this.equals(ADAPTERFACTORY)
 					|| this.equals(SWITCH) || this.equals(VALIDATOR);
 		}
-		
+
 		/**
-		 * Whether this {@link EMFGeneratedJavaFileType} represents an element of the
-		 * generated 'edit' code.
+		 * Whether this {@link EMFGeneratedJavaFileType} represents an element
+		 * of the generated 'edit' code.
 		 *
 		 * @return
 		 */
 		public boolean isEditType() {
 			return this.equals(ITEMPROVIDER) || this.equals(ITEMPROVIDERADAPTERFACTORY);
 		}
-			
+
 		/**
-		 * Whether this {@link EMFGeneratedJavaFileType} represents an element of the
-		 * generated 'edit' item provider code.
+		 * Whether this {@link EMFGeneratedJavaFileType} represents an element
+		 * of the generated 'edit' item provider code.
 		 *
 		 * @return
 		 */
 		public boolean isEditItemProviderType() {
 			return this.equals(ITEMPROVIDER);
 		}
-	
+
 		/**
-		 * Whether this {@link EMFGeneratedJavaFileType} represents an element of the
-		 * generated 'editor' code.
+		 * Whether this {@link EMFGeneratedJavaFileType} represents an element
+		 * of the generated 'editor' code.
 		 *
 		 * @return
 		 */
 		public boolean isEditorType() {
 			return this.equals(EDITOR) || this.equals(ACTIONBARCONTRIBUTOR);
 		}
-	
+
 		/**
-		 * Whether this {@link EMFGeneratedJavaFileType} represents an element that was
-		 * generated based on an {@link EClass}.
+		 * Whether this {@link EMFGeneratedJavaFileType} represents an element
+		 * that was generated based on an {@link EClass}.
 		 *
 		 * @return
 		 */
@@ -190,25 +192,25 @@ public abstract class AbstractGeneratedEMFCodeHandler extends AbstractHandler {
 		}
 
 		/**
-		 * Whether this {@link EMFGeneratedJavaFileType} represents a class implementation within the
-		 * generated 'model' code.
+		 * Whether this {@link EMFGeneratedJavaFileType} represents a class
+		 * implementation within the generated 'model' code.
 		 *
 		 * @return
 		 */
 		public boolean isClassImplementationType() {
 			return this.equals(IMPL);
 		}
-		
+
 		/**
-		 * Whether this {@link EMFGeneratedJavaFileType} represents an element that was
-		 * generated based on an {@link EPackage}.
+		 * Whether this {@link EMFGeneratedJavaFileType} represents an element
+		 * that was generated based on an {@link EPackage}.
 		 *
 		 * @return
 		 */
 		public boolean isPackageType() {
 			return !this.isClassType();
 		}
-	
+
 		/**
 		 * Returns the base of the given <em>javaFileName</em>.
 		 *
@@ -225,10 +227,6 @@ public abstract class AbstractGeneratedEMFCodeHandler extends AbstractHandler {
 		}
 	}
 
-	public AbstractGeneratedEMFCodeHandler() {
-		super();
-	}
-
 	/**
 	 * Recursively collects all GenModel ({@link IFile IFiles} with the file
 	 * ending '.genmodel') in the given {@link IContainer}.
@@ -238,12 +236,12 @@ public abstract class AbstractGeneratedEMFCodeHandler extends AbstractHandler {
 	 * @return The list of {@link IFile IFiles} representing a GenModel.
 	 */
 	protected Set<IFile> collectGenModels(IContainer container) {
-	
+
 		Set<IFile> ret = new HashSet<>();
-	
+
 		try {
 			List<IResource> members = Arrays.asList(container.members());
-	
+
 			for (IResource member : members) {
 				if (member instanceof IFile && ((IFile) member).getName().endsWith(".genmodel")) {
 					ret.add((IFile) member);
@@ -251,11 +249,11 @@ public abstract class AbstractGeneratedEMFCodeHandler extends AbstractHandler {
 					ret.addAll(this.collectGenModels((IContainer) member));
 				}
 			}
-	
+
 		} catch (CoreException e) {
 			e.printStackTrace();
 		}
-	
+
 		return ret;
 	}
 
@@ -272,9 +270,9 @@ public abstract class AbstractGeneratedEMFCodeHandler extends AbstractHandler {
 	 *         responsible for the generation of the Java file.
 	 */
 	protected Optional<EObject> checkIsGenModelForJavaClass(IFile genModelFile, CompilationUnit javaFile) {
-	
+
 		ResourceSet resourceSet = new ResourceSetImpl();
-	
+
 		// Load the GenModel
 		//
 		Resource res = null;
@@ -285,56 +283,56 @@ public abstract class AbstractGeneratedEMFCodeHandler extends AbstractHandler {
 			e.printStackTrace();
 			return Optional.empty();
 		}
-	
+
 		if (!(res.getContents().get(0) instanceof GenModel)) {
 			return Optional.empty();
 		}
-	
+
 		// All GenPackages defined in the GenModel
 		//
 		Collection<GenPackage> genPackages = ((GenModel) res.getContents().get(0)).getGenPackages().stream()
 				.flatMap(e -> AgteleEcoreUtil.getAllSubPackages(e, true).stream()).collect(Collectors.toSet());
-	
+
 		String mainTypeName = String.valueOf(javaFile.getMainTypeName());
 		EMFGeneratedJavaFileType type = EMFGeneratedJavaFileType.getFileType(mainTypeName);
-	
+
 		// The name of the metamodel element we will open
 		//
 		String metamodelElementName = EMFGeneratedJavaFileType.getBaseName(mainTypeName);
-	
+
 		if (type.isClassType()) {
-	
+
 			// Collect all genClasses with the given metamodelElementName
 			//
 			Collection<GenClass> genClasses = AgteleEcoreUtil.getAllGenPackageGenClasses(genPackages,
 					metamodelElementName);
-	
+
 			// Check if one of the found genClasses was responsible for
 			// generating
 			// the given javaFile
 			//
 			for (GenClass genClass : genClasses) {
-	
+
 				if (this.checkGenClassCreatedJavaFile(genClass, javaFile)) {
 					return Optional.of(genClass.getEcoreClass());
 				}
-	
+
 			}
-	
+
 		} else if (type.isPackageType()) {
-	
+
 			// Check if one of the found genPackages was responsible for
 			// generating the given javaFile
 			//
 			for (GenPackage genPackage : genPackages) {
-	
+
 				if (this.checkGenPackageCreatedJavaFile(genPackage, javaFile)) {
 					return Optional.of(genPackage.getEcorePackage());
 				}
-	
+
 			}
 		}
-	
+
 		return Optional.empty();
 	}
 
@@ -350,41 +348,65 @@ public abstract class AbstractGeneratedEMFCodeHandler extends AbstractHandler {
 	 *         on the given {@link GenClass}; '<em>false</em>' otherwise.
 	 */
 	public boolean checkGenClassCreatedJavaFile(GenClass genClass, CompilationUnit javaFile) {
-	
-		String javaFileResource = javaFile.getResource().getFullPath().toString();
-	
+
+		IPath actualJavaFilePath = javaFile.getResource().getFullPath();
+
 		// The type of the given javaFile
 		//
-		EMFGeneratedJavaFileType type = EMFGeneratedJavaFileType.getFileType(String.valueOf(javaFile.getMainTypeName()));
-	
+		EMFGeneratedJavaFileType type = EMFGeneratedJavaFileType
+				.getFileType(String.valueOf(javaFile.getMainTypeName()));
+
 		if (type == null) {
 			return false;
 		}
-	
+
+		IPath expectedJavaFilePath;
+
+		// Construct the expected path (based on the GenModel settings) for the
+		// GenClass
+		//
 		if (type.isModelType()) {
-	
-			String modelDirectory = genClass.getGenModel().getModelDirectory();
-	
-			if (type.equals(EMFGeneratedJavaFileType.INTERFACE) && javaFileResource.equals(
-					modelDirectory + "/" + this.getJavaPathFromQualifiedName(genClass.getQualifiedInterfaceName()))) {
-				return true;
-			} else if (type.equals(EMFGeneratedJavaFileType.IMPL) && javaFileResource.equals(
-					modelDirectory + "/" + this.getJavaPathFromQualifiedName(genClass.getQualifiedClassName()))) {
-				return true;
+
+			IPath modelDirectoryPath = new Path(genClass.getGenModel().getModelDirectory());
+
+			if (type.equals(EMFGeneratedJavaFileType.INTERFACE)) {
+				expectedJavaFilePath = modelDirectoryPath
+						.append(this.getJavaPathFromQualifiedName(genClass.getQualifiedInterfaceName()));
+
+			} else if (type.equals(EMFGeneratedJavaFileType.IMPL)) {
+				expectedJavaFilePath = modelDirectoryPath
+						.append(this.getJavaPathFromQualifiedName(genClass.getQualifiedClassName()));
+
+			} else {
+				return false;
 			}
-	
+
 		} else if (type.isEditType()) {
-	
-			String editDirectory = genClass.getGenModel().getEditDirectory();
-	
-			if (type.equals(EMFGeneratedJavaFileType.ITEMPROVIDER) && javaFileResource.equals(editDirectory + "/"
-					+ this.getJavaPathFromQualifiedName(genClass.getQualifiedProviderClassName()))) {
-				return true;
+
+			IPath editDirectoryPath = new Path(genClass.getGenModel().getEditDirectory());
+
+			if (type.equals(EMFGeneratedJavaFileType.ITEMPROVIDER)) {
+				expectedJavaFilePath = editDirectoryPath
+						.append(this.getJavaPathFromQualifiedName(genClass.getQualifiedProviderClassName()));
+
+			} else {
+				return false;
 			}
-	
+
+		} else {
+
+			return false;
 		}
-	
-		return false;
+
+		// Check if both file paths point to the same actual file
+		//
+		URI actualJavaFileURI = ResourceHelper
+				.convertPlatformToFileURI(URI.createPlatformResourceURI(actualJavaFilePath.toString(), true));
+		URI expectedJavaFileURI = ResourceHelper
+				.convertPlatformToFileURI(URI.createPlatformResourceURI(expectedJavaFilePath.toString(), true));
+		return actualJavaFileURI != null && expectedJavaFileURI != null
+				&& actualJavaFileURI.deresolve(expectedJavaFileURI).isEmpty();
+
 	}
 
 	/**
@@ -399,68 +421,99 @@ public abstract class AbstractGeneratedEMFCodeHandler extends AbstractHandler {
 	 *         on the given {@link GenPackage}; '<em>false</em>' otherwise.
 	 */
 	public boolean checkGenPackageCreatedJavaFile(GenPackage genPackage, CompilationUnit javaFile) {
-	
-		String javaFileResource = javaFile.getResource().getFullPath().toString();
-	
+
+		IPath actualJavaFilePath = javaFile.getResource().getFullPath();
+
 		// The type of the given javaFile
 		//
-		EMFGeneratedJavaFileType type = EMFGeneratedJavaFileType.getFileType(String.valueOf(javaFile.getMainTypeName()));
-	
+		EMFGeneratedJavaFileType type = EMFGeneratedJavaFileType
+				.getFileType(String.valueOf(javaFile.getMainTypeName()));
+
 		if (type == null) {
 			return false;
 		}
-	
+
+		IPath expectedJavaFilePath;
+
+		// Construct the expected path (based on the GenModel settings) for the
+		// GenPackage
+		//
 		if (type.isModelType()) {
-	
-			String modelDirectory = genPackage.getGenModel().getModelDirectory();
-	
-			if (type.equals(EMFGeneratedJavaFileType.FACTORY) && javaFileResource.equals(modelDirectory + "/"
-					+ this.getJavaPathFromQualifiedName(genPackage.getQualifiedFactoryInterfaceName()))) {
-				return true;
-			} else if (type.equals(EMFGeneratedJavaFileType.PACKAGE) && javaFileResource.equals(modelDirectory + "/"
-					+ this.getJavaPathFromQualifiedName(genPackage.getQualifiedPackageInterfaceName()))) {
-				return true;
-			} else if (type.equals(EMFGeneratedJavaFileType.FACTORYIMPLY) && javaFileResource.equals(modelDirectory + "/"
-					+ this.getJavaPathFromQualifiedName(genPackage.getQualifiedFactoryClassName()))) {
-				return true;
-			} else if (type.equals(EMFGeneratedJavaFileType.PACKAGEIMPL) && javaFileResource.equals(modelDirectory + "/"
-					+ this.getJavaPathFromQualifiedName(genPackage.getQualifiedPackageClassName()))) {
-				return true;
-			} else if (type.equals(EMFGeneratedJavaFileType.ADAPTERFACTORY) && javaFileResource.equals(modelDirectory + "/"
-					+ this.getJavaPathFromQualifiedName(genPackage.getQualifiedAdapterFactoryClassName()))) {
-				return true;
-			} else if (type.equals(EMFGeneratedJavaFileType.SWITCH) && javaFileResource.equals(modelDirectory + "/"
-					+ this.getJavaPathFromQualifiedName(genPackage.getQualifiedSwitchClassName()))) {
-				return true;
-			} else if (type.equals(EMFGeneratedJavaFileType.VALIDATOR) && javaFileResource.equals(modelDirectory + "/"
-					+ this.getJavaPathFromQualifiedName(genPackage.getQualifiedValidatorClassName()))) {
-				return true;
+
+			IPath modelDirectoryPath = new Path(genPackage.getGenModel().getModelDirectory());
+
+			if (type.equals(EMFGeneratedJavaFileType.FACTORY)) {
+				expectedJavaFilePath = modelDirectoryPath
+						.append(this.getJavaPathFromQualifiedName(genPackage.getQualifiedFactoryInterfaceName()));
+
+			} else if (type.equals(EMFGeneratedJavaFileType.PACKAGE)) {
+				expectedJavaFilePath = modelDirectoryPath
+						.append(this.getJavaPathFromQualifiedName(genPackage.getQualifiedPackageInterfaceName()));
+
+			} else if (type.equals(EMFGeneratedJavaFileType.FACTORYIMPLY)) {
+				expectedJavaFilePath = modelDirectoryPath
+						.append(this.getJavaPathFromQualifiedName(genPackage.getQualifiedFactoryClassName()));
+
+			} else if (type.equals(EMFGeneratedJavaFileType.PACKAGEIMPL)) {
+				expectedJavaFilePath = modelDirectoryPath
+						.append(this.getJavaPathFromQualifiedName(genPackage.getQualifiedPackageClassName()));
+
+			} else if (type.equals(EMFGeneratedJavaFileType.ADAPTERFACTORY)) {
+				expectedJavaFilePath = modelDirectoryPath
+						.append(this.getJavaPathFromQualifiedName(genPackage.getQualifiedAdapterFactoryClassName()));
+
+			} else if (type.equals(EMFGeneratedJavaFileType.SWITCH)) {
+				expectedJavaFilePath = modelDirectoryPath
+						.append(this.getJavaPathFromQualifiedName(genPackage.getQualifiedSwitchClassName()));
+
+			} else if (type.equals(EMFGeneratedJavaFileType.VALIDATOR)) {
+				expectedJavaFilePath = modelDirectoryPath
+						.append(this.getJavaPathFromQualifiedName(genPackage.getQualifiedValidatorClassName()));
+
+			} else {
+				return false;
 			}
-	
+
 		} else if (type.isEditType()) {
-	
-			String editDirectory = genPackage.getGenModel().getEditDirectory();
-	
-			if (type.equals(EMFGeneratedJavaFileType.ITEMPROVIDERADAPTERFACTORY)
-					&& javaFileResource.equals(editDirectory + "/" + this.getJavaPathFromQualifiedName(
-							genPackage.getQualifiedItemProviderAdapterFactoryClassName()))) {
-				return true;
+
+			IPath editDirectoryPath = new Path(genPackage.getGenModel().getEditDirectory());
+
+			if (type.equals(EMFGeneratedJavaFileType.ITEMPROVIDERADAPTERFACTORY)) {
+				expectedJavaFilePath = editDirectoryPath.append(this
+						.getJavaPathFromQualifiedName(genPackage.getQualifiedItemProviderAdapterFactoryClassName()));
+
+			} else {
+				return false;
 			}
-	
+
 		} else if (type.isEditorType()) {
-	
-			String editorDirectory = genPackage.getGenModel().getEditorDirectory();
-	
-			if (type.equals(EMFGeneratedJavaFileType.EDITOR) && javaFileResource.equals(editorDirectory + "/"
-					+ this.getJavaPathFromQualifiedName(genPackage.getQualifiedEditorClassName()))) {
-				return true;
-			} else if (type.equals(EMFGeneratedJavaFileType.ACTIONBARCONTRIBUTOR) && javaFileResource.equals(editorDirectory + "/"
-					+ this.getJavaPathFromQualifiedName(genPackage.getQualifiedActionBarContributorClassName()))) {
-				return true;
+
+			IPath editorDirectoryPath = new Path(genPackage.getGenModel().getEditorDirectory());
+
+			if (type.equals(EMFGeneratedJavaFileType.EDITOR)) {
+				expectedJavaFilePath = editorDirectoryPath
+						.append(this.getJavaPathFromQualifiedName(genPackage.getQualifiedEditorClassName()));
+
+			} else if (type.equals(EMFGeneratedJavaFileType.ACTIONBARCONTRIBUTOR)) {
+				expectedJavaFilePath = editorDirectoryPath.append(
+						this.getJavaPathFromQualifiedName(genPackage.getQualifiedActionBarContributorClassName()));
+
+			} else {
+				return false;
 			}
+
+		} else {
+			return false;
 		}
-	
-		return false;
+
+		// Check if both file paths point to the same actual file
+		//
+		URI actualJavaFileURI = ResourceHelper
+				.convertPlatformToFileURI(URI.createPlatformResourceURI(actualJavaFilePath.toString(), true));
+		URI expectedJavaFileURI = ResourceHelper
+				.convertPlatformToFileURI(URI.createPlatformResourceURI(expectedJavaFilePath.toString(), true));
+		return actualJavaFileURI != null && expectedJavaFileURI != null
+				&& actualJavaFileURI.deresolve(expectedJavaFileURI).isEmpty();
 	}
 
 	/**
@@ -500,21 +553,22 @@ public abstract class AbstractGeneratedEMFCodeHandler extends AbstractHandler {
 	 *         <em>elementToSelect</em> if no more specialized element could be
 	 *         determined.
 	 */
-	protected EObject getMoreSpecificSelection(EObject elementToSelect, CompilationUnit javaFile, IJavaElement javaElement) {
-	
+	protected EObject getMoreSpecificSelection(EObject elementToSelect, CompilationUnit javaFile,
+			IJavaElement javaElement) {
+
 		// If the user selected an EPackage, we cannot select anything more
 		// specialized.
 		//
 		if (!(elementToSelect instanceof EClass)) {
 			return elementToSelect;
 		}
-	
+
 		EClass eClass = (EClass) elementToSelect;
-	
+
 		if (javaElement instanceof IMethod) {
-	
+
 			String methodName = javaElement.getElementName();
-	
+
 			// Check if there is an EOperation corresponding to the selection
 			//
 			Optional<EOperation> eOperation = eClass.getEOperations().stream()
@@ -522,7 +576,7 @@ public abstract class AbstractGeneratedEMFCodeHandler extends AbstractHandler {
 			if (eOperation.isPresent()) {
 				return eOperation.get();
 			}
-	
+
 			// Check if there is an EAttribute or EReference corresponding to
 			// the selection
 			//
@@ -534,11 +588,11 @@ public abstract class AbstractGeneratedEMFCodeHandler extends AbstractHandler {
 			if (eFeature.isPresent()) {
 				return eFeature.get();
 			}
-	
+
 		} else if (javaElement instanceof IField) {
-	
+
 			String fieldName = javaElement.getElementName();
-	
+
 			// Check if there is an EAttribute or EReference corresponding to
 			// the selection
 			//
@@ -548,7 +602,7 @@ public abstract class AbstractGeneratedEMFCodeHandler extends AbstractHandler {
 				return eFeature.get();
 			}
 		}
-	
+
 		return elementToSelect;
 	}
 
@@ -559,17 +613,19 @@ public abstract class AbstractGeneratedEMFCodeHandler extends AbstractHandler {
 	 *            The message to display to the user.
 	 */
 	protected void showError(String errorMessage) {
-		UIHelper.getCurrentEditor().getEditorSite().getActionBars().getStatusLineManager().setErrorMessage(errorMessage);
+		UIHelper.getCurrentEditor().getEditorSite().getActionBars().getStatusLineManager()
+				.setErrorMessage(errorMessage);
 	}
-	
+
 	/**
 	 * Sets a status message to the status bar.
+	 *
 	 * @param statusMessage
 	 */
 	protected void showStatus(String statusMessage) {
 		UIHelper.getCurrentEditor().getEditorSite().getActionBars().getStatusLineManager().setMessage(statusMessage);
 	}
-	
+
 	/**
 	 * Clears the error from the status line.
 	 */
@@ -579,161 +635,173 @@ public abstract class AbstractGeneratedEMFCodeHandler extends AbstractHandler {
 
 	@Override
 	public boolean isEnabled() {
-	
+
 		// test if the menu is actually shown in an Editor
 		if (!(UIHelper.getCurrentEditorInput() instanceof FileEditorInput)) {
 			return false;
 		}
-	
+
 		// test if the menu is shown in a Java editor
 		if (!(UIHelper.getCurrentEditor() instanceof CompilationUnitEditor)) {
 			return false;
 		}
-	
+
 		return super.isEnabled();
 	}
 
 	/**
-	 * This implementation of the execute method provides the following hooks for subclasses to specify the behavior:
-	 * {@link #showError(String)}, {@link #determineAssociatedMetamodelElement(CompilationUnit)},
-	 * {@link #openEcoreEditor(IFile)}, {@link #getMoreSpecificSelection(EObject, CompilationUnit, IJavaElement)},
-	 * {@link #performAsyncActionOnEcoreEditor(IEditorPart, EObject, ISelection)}
+	 * This implementation of the execute method provides the following hooks
+	 * for subclasses to specify the behavior: {@link #showError(String)},
+	 * {@link #determineAssociatedMetamodelElement(CompilationUnit)},
+	 * {@link #openEcoreEditor(IFile)},
+	 * {@link #getMoreSpecificSelection(EObject, CompilationUnit, IJavaElement)},
+	 * {@link #performAsyncActionOnEcoreEditor(IEditorPart, CompilationUnit, CompilationUnitEditor, EObject, ISelection)}
 	 */
 	@Override
 	public Object execute(ExecutionEvent event) throws ExecutionException {
-	
-		clearError();
-		
+
+		this.clearError();
+
 		IFile ecoreFile = null;
-		
+
 		final CompilationUnitEditor javaEditor = (CompilationUnitEditor) UIHelper.getCurrentEditor();
-	
+
 		// In order to prevent manual parsing of the Java document, we make use
 		// of the CompilationUnit type that
 		// represents a structured Java document
 		//
-		final CompilationUnit root = determineCompilationUnit();
-	
-		EObject metamodelElement = determineAssociatedMetamodelElement(root);
-		
+		final CompilationUnit root = this.determineCompilationUnit();
+
+		EObject metamodelElement = this.determineAssociatedMetamodelElement(root);
+
 		if (metamodelElement != null) {
 			ecoreFile = ResourceHelper.getFileForResource(metamodelElement.eResource());
-		}	
-		
+		}
+
 		// We found an Ecore file so we open it
 		//
 		if (ecoreFile == null) {
 			this.showError("Unable to determine associated Ecore metamodel!");
-	
+
 			return null;
 		}
-			
-		IEditorPart ecoreEditor = openEcoreEditor(ecoreFile);
-		
+
+		IEditorPart ecoreEditor = this.openEcoreEditor(ecoreFile);
+
 		if (ecoreEditor == null) {
 			return null;
-		}		
-	
+		}
+
 		// As the Ecore editor may have used a different resource set to load
 		// the Ecore metamodel,
 		// we have to first determine the resource that is equivalent to the
 		// resource opened in the Ecore editor
 		//
-		ResourceSet ecoreEditorResourceSet = ((IEditingDomainProvider) ecoreEditor).getEditingDomain()
-				.getResourceSet();
+		ResourceSet ecoreEditorResourceSet = ((IEditingDomainProvider) ecoreEditor).getEditingDomain().getResourceSet();
 		Resource ecoreResource = ecoreEditorResourceSet.getResource(metamodelElement.eResource().getURI(), true);
-	
+
 		if (ecoreResource == null) {
 			return null;
 		}
-	
+
 		// Now that we know the equivalent resources, we can determine the
 		// equivalent elements
 		//
 		String uriFragment = metamodelElement.eResource().getURIFragment(metamodelElement);
 		EObject correspondingSelection = ecoreResource.getEObject(uriFragment);
-	
+
 		if (correspondingSelection == null) {
 			return null;
 		}
-	
+
 		// Finally, we check if we want to select a more specialized element
 		// (e.g. an EAttribute of an EClass) instead
 		//
 		final ISelection selection = javaEditor.getSelectionProvider().getSelection();
-		
+
 		try {
 			IJavaElement javaElement = root.getElementAt(((TextSelection) selection).getOffset());
 			if (javaElement != null) {
 				correspondingSelection = this.getMoreSpecificSelection(correspondingSelection, root, javaElement);
 			}
-	
+
 		} catch (JavaModelException e) {
 			e.printStackTrace();
 		}
-	
+
 		// Now, reveal and select the determined element in the Ecore editor
 		//
 		final EObject specificCorrespondingElement = correspondingSelection;
-	
+
 		// If we had to open a new editor instead of being able to reuse an
 		// existing one, the editor might not be completely opened yet.
 		// Thus, we use an asynchronous runnable to reveal the selection
-		UIHelper.getShell().getDisplay().asyncExec(() -> performAsyncActionOnEcoreEditor(ecoreEditor, root, javaEditor, specificCorrespondingElement, selection));
-	
+		UIHelper.getShell().getDisplay().asyncExec(() -> this.performAsyncActionOnEcoreEditor(ecoreEditor, root,
+				javaEditor, specificCorrespondingElement, selection));
+
 		return null;
 	}
 
 	/**
-	 * Determines the @link {@link org.eclipse.jdt.core.dom.CompilationUnit}, if the current editor is a Java editor.
+	 * Determines the @link {@link org.eclipse.jdt.core.dom.CompilationUnit}, if
+	 * the current editor is a Java editor.
+	 *
 	 * @return
 	 */
 	protected CompilationUnit determineCompilationUnit() {
-		return (CompilationUnit) EditorUtility.getEditorInputJavaElement(UIHelper.getCurrentEditor(),
-				false);
+		return (CompilationUnit) EditorUtility.getEditorInputJavaElement(UIHelper.getCurrentEditor(), false);
 	}
+
 	/**
-	 * Determines the @link {@link org.eclipse.jdt.core.dom.CompilationUnit}, if the current editor is a Java editor.
-	 * @param part The compilation unit editor part.
+	 * Determines the @link {@link org.eclipse.jdt.core.dom.CompilationUnit}, if
+	 * the current editor is a Java editor.
+	 *
+	 * @param part
+	 *            The compilation unit editor part.
 	 * @return
 	 */
 	protected CompilationUnit determineCompilationUnit(IEditorPart part) {
-		return (CompilationUnit) EditorUtility.getEditorInputJavaElement(part,
-				false);
+		return (CompilationUnit) EditorUtility.getEditorInputJavaElement(part, false);
 	}
-	
-	/**
-	 * When the specific Ecore element has been determined, the concrete handler subclass shall determine, what is going to happen.
-	 * @param javaEditor 
-	 * @param specificEcoreElement
-	 */
-	abstract protected void performAsyncActionOnEcoreEditor (IEditorPart ecoreEditor, CompilationUnit compilationUnit, CompilationUnitEditor javaEditor, EObject specificEcoreElement, ISelection javaSelection);
 
 	/**
-	 * Tries to open the default editor for the specified ecore file. If the opening fails, the method displays an error using {@link #showError(String)}.
-	 * The editor is accepted only, if it is an {@link IEditingDomainProvider}. If the default editor is not capable to use, 
-	 * the {@link AgteleEcoreEditor} will be opened.
+	 * When the specific Ecore element has been determined, the concrete handler
+	 * subclass shall determine, what is going to happen.
+	 *
+	 * @param javaEditor
+	 * @param specificEcoreElement
+	 */
+	abstract protected void performAsyncActionOnEcoreEditor(IEditorPart ecoreEditor, CompilationUnit compilationUnit,
+			CompilationUnitEditor javaEditor, EObject specificEcoreElement, ISelection javaSelection);
+
+	/**
+	 * Tries to open the default editor for the specified ecore file. If the
+	 * opening fails, the method displays an error using
+	 * {@link #showError(String)}. The editor is accepted only, if it is an
+	 * {@link IEditingDomainProvider}. If the default editor is not capable to
+	 * use, the {@link AgteleEcoreEditor} will be opened.
+	 *
 	 * @param ecoreFile
-	 * @return the opened ecore editor 
+	 * @return the opened ecore editor
 	 */
 	protected IEditorPart openEcoreEditor(IFile ecoreFile) {
 		IEditorPart ecoreEditor;
 		List<IEditorPart> openEditors = UIHelper.getAllEditors();
 		try {
-			ecoreEditor = UIHelper.openEditor(ecoreFile);	
+			ecoreEditor = UIHelper.openEditor(ecoreFile);
 		} catch (PartInitException e1) {
 			e1.printStackTrace();
 			this.showError("Unable to open editor for associated Ecore metamodel!");
 			return null;
 		}
-	
+
 		if (!(ecoreEditor instanceof IEditingDomainProvider)) {
 			if (!openEditors.contains(ecoreEditor)) {
 				ecoreEditor.getEditorSite().getPage().closeEditor(ecoreEditor, false);
 			}
-			
+
 			try {
-				ecoreEditor = UIHelper.openEditor(ecoreFile, "de.tud.et.ifa.agtele.ui.editors.EcoreEditorID");	
+				ecoreEditor = UIHelper.openEditor(ecoreFile, "de.tud.et.ifa.agtele.ui.editors.EcoreEditorID");
 			} catch (PartInitException e1) {
 				e1.printStackTrace();
 				this.showError("Unable to open ecore editor for associated Ecore metamodel!");
@@ -748,8 +816,11 @@ public abstract class AbstractGeneratedEMFCodeHandler extends AbstractHandler {
 	}
 
 	/**
-	 * Determines a metamodel element for the compilation unit specified. Opened Ecore editors will be preferred over all available genmodels.
-	 * @param root The compilation unit to determine the metamodel element for.
+	 * Determines a metamodel element for the compilation unit specified. Opened
+	 * Ecore editors will be preferred over all available genmodels.
+	 *
+	 * @param root
+	 *            The compilation unit to determine the metamodel element for.
 	 * @return
 	 */
 	protected EObject determineAssociatedMetamodelElement(CompilationUnit root) {
@@ -759,14 +830,14 @@ public abstract class AbstractGeneratedEMFCodeHandler extends AbstractHandler {
 		List<IFile> ecoreFiles = UIHelper.getAllEditorInputs().stream().filter(
 				e -> e instanceof FileEditorInput && "ecore".equals(((FileEditorInput) e).getFile().getFileExtension()))
 				.map(e -> ((FileEditorInput) e).getFile()).collect(Collectors.toList());
-	
+
 		// The list of GenModel files corresponding to the opened Ecore files
 		//
 		List<IFile> genModelFiles = ecoreFiles.stream()
 				.map(e -> e.getProject()
 						.findMember(e.getProjectRelativePath().removeFileExtension().addFileExtension("genmodel")))
 				.filter(g -> g instanceof IFile).map(g -> (IFile) g).collect(Collectors.toList());
-	
+
 		// Check if one of those GenModel files was responsible for generating
 		// our Java class
 		//
