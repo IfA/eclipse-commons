@@ -768,7 +768,7 @@ public interface AgteleEcoreUtil {
 
 		return setting.isPresent() ? Optional.of((GenBase) setting.get().getEObject()) : Optional.empty();
 	}
-	
+
 	/**
 	 * Checks if at least one classifier of the package contains a ecore annotation enabling the
 	 *  validation framework for the package by naming a constraint.
@@ -786,5 +786,43 @@ public interface AgteleEcoreUtil {
 			}
 			return true;
 		});
+	}
+
+	/**
+	 * Returns a collection of the chain of containers, an element is contained
+	 * at its bottom. Delegates to {@link #getAllContainers(EObject, boolean)}.
+	 * 
+	 * @param obj
+	 * @return
+	 */
+	public static Collection<EObject> getAllContainers(EObject obj) {
+		return AgteleEcoreUtil.getAllContainers(obj, false);
+	}
+
+	/**
+	 * Returns a collection of the chain of containers, an element is contained
+	 * at its bottom
+	 * 
+	 * @param obj
+	 * @param includeSelf
+	 *            whether to include the object specified itself
+	 * @return
+	 */
+	public static Collection<EObject> getAllContainers(EObject obj, boolean includeSelf) {
+		ArrayList<EObject> result = new ArrayList<>();
+		if (obj != null) {
+			EObject current = obj;
+
+			if (includeSelf) {
+				result.add(current);
+			}
+
+			while (current.eContainer() != null) {
+				result.add(current.eContainer());
+			}
+
+			return result;
+		}
+		return null;
 	}
 }
