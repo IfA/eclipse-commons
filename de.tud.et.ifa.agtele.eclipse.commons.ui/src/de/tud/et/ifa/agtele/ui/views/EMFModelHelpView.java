@@ -54,7 +54,7 @@ public class EMFModelHelpView extends ViewPart implements IPersistable {
 		this.linkEditor = AgteleUIPlugin.getPlugin().getDialogSettings().getBoolean("link");
 		if (this.linkEditor) {
 			PlatformUI.getWorkbench().getActiveWorkbenchWindow().getSelectionService()
-					.addSelectionListener(this.selectionListener);
+			.addSelectionListener(this.selectionListener);
 		}
 
 	}
@@ -90,7 +90,7 @@ public class EMFModelHelpView extends ViewPart implements IPersistable {
 	@Override
 	public void dispose() {
 		PlatformUI.getWorkbench().getActiveWorkbenchWindow().getSelectionService()
-				.removeSelectionListener(this.selectionListener);
+		.removeSelectionListener(this.selectionListener);
 		AgteleUIPlugin.getPlugin().getDialogSettings().put("link", this.linkEditor);
 
 		AgteleUIPlugin.getPlugin().getDialogSettings().put("browserText", this.currentText);
@@ -115,10 +115,10 @@ public class EMFModelHelpView extends ViewPart implements IPersistable {
 				EMFModelHelpView.this.linkEditor = !EMFModelHelpView.this.linkEditor;
 				if (EMFModelHelpView.this.linkEditor) {
 					PlatformUI.getWorkbench().getActiveWorkbenchWindow().getSelectionService()
-							.addSelectionListener(EMFModelHelpView.this.selectionListener);
+					.addSelectionListener(EMFModelHelpView.this.selectionListener);
 				} else {
 					PlatformUI.getWorkbench().getActiveWorkbenchWindow().getSelectionService()
-							.removeSelectionListener(EMFModelHelpView.this.selectionListener);
+					.removeSelectionListener(EMFModelHelpView.this.selectionListener);
 				}
 				EMFModelHelpView.this.linkAction.setChecked(EMFModelHelpView.this.linkEditor);
 			}
@@ -156,12 +156,9 @@ public class EMFModelHelpView extends ViewPart implements IPersistable {
 			EMFModelHelpView helpView = (EMFModelHelpView) PlatformUI.getWorkbench().getActiveWorkbenchWindow()
 					.getActivePage().showView(EMFModelHelpView.ID, null, IWorkbenchPage.VIEW_VISIBLE);
 
-			if (!text.equals(helpView.currentText)) {
-				helpView.browser.setText(text);
-				helpView.currentText = text;
-			} else {
-				return;
-			}
+			helpView.browser.setText(text);
+			helpView.currentText = text;
+
 		} catch (PartInitException e) {
 			e.printStackTrace();
 		}
