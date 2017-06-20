@@ -14,7 +14,8 @@ import de.tud.et.ifa.agtele.resources.BundleContentHelper;
 import de.tud.et.ifa.agtele.ui.listeners.SelectionListener2;
 
 /**
- * A {@link TreeViewerGroup} that can be minimized (and restored) when placed inside a {@link MinimizableSashForm}.
+ * A {@link TreeViewerGroup} that can be minimized (and restored) when placed
+ * inside a {@link MinimizableSashForm}.
  *
  * @author mfreund
  *
@@ -37,8 +38,8 @@ public class MinimizableTreeViewerGroup extends TreeViewerGroup implements IMini
 	private boolean isMinimized;
 
 	/**
-	 * The {@link ToolItem} that toggles the state of the tree viewer group between <em>minimized</em> and
-	 * <em>normal</em>.
+	 * The {@link ToolItem} that toggles the state of the tree viewer group
+	 * between <em>minimized</em> and <em>normal</em>.
 	 */
 	private ToolItem minimizeItem;
 
@@ -57,12 +58,14 @@ public class MinimizableTreeViewerGroup extends TreeViewerGroup implements IMini
 	 * @param editingDomain
 	 *            The editing domain that is used for the viewer.
 	 * @param dialogSettings
-	 *            The dialog settings belonging to the editor (e.g. XYZPlugin..getPlugin().getDialogSettings()).
+	 *            The dialog settings belonging to the editor (e.g.
+	 *            XYZPlugin..getPlugin().getDialogSettings()).
 	 * @param groupText
-	 *            The label of the group widget that hold all other widgets. If this is null no surrounding group will
-	 *            created.
+	 *            The label of the group widget that hold all other widgets. If
+	 *            this is null no surrounding group will created.
 	 * @param options
-	 *            A set of options that are used to alter the default composition of the TreeViewerGroup
+	 *            A set of options that are used to alter the default
+	 *            composition of the TreeViewerGroup
 	 */
 	public MinimizableTreeViewerGroup(MinimizableSashForm parent, ComposedAdapterFactory adapterFactory,
 			EditingDomain editingDomain, IDialogSettings dialogSettings, String groupText,
@@ -90,7 +93,8 @@ public class MinimizableTreeViewerGroup extends TreeViewerGroup implements IMini
 		this.minimizeItem.setImage(this.minimizeImage);
 		this.minimizeItem.setToolTipText("Minimize");
 
-		// either minimize or restore the control depending on the 'minimized' state
+		// either minimize or restore the control depending on the 'minimized'
+		// state
 		this.minimizeItem.addSelectionListener((SelectionListener2) e -> {
 
 			if (MinimizableTreeViewerGroup.this.isMinimized) {
@@ -117,8 +121,16 @@ public class MinimizableTreeViewerGroup extends TreeViewerGroup implements IMini
 	@Override
 	public int getMinimizedHeight() {
 
+		// Do not mess with the 'normal' minimized height if we are in a
+		// 'invisible' state
+		//
+		if (!this.isVisible()) {
+			return 0;
+		}
+
 		if (this.minimizedHeight == -1) {
-			// in the 'minimized' state, we do not want to display the tree viewer
+			// in the 'minimized' state, we do not want to display the tree
+			// viewer
 			this.minimizedHeight = this.group.getSize().y - this.treeViewer.getTree().getSize().y;
 		}
 
@@ -139,6 +151,16 @@ public class MinimizableTreeViewerGroup extends TreeViewerGroup implements IMini
 		this.isMinimized = false;
 		this.minimizeItem.setImage(this.minimizeImage);
 		this.minimizeItem.setToolTipText("Minimize");
+	}
+
+	@Override
+	public void setVisible(boolean visible) {
+		super.setVisible(visible);
+
+		// Restore the layout of the parent sash form if a child component is
+		// made visible/invisible
+		//
+		((MinimizableSashForm) MinimizableTreeViewerGroup.this.parent).restoreLayout();
 	}
 
 }
