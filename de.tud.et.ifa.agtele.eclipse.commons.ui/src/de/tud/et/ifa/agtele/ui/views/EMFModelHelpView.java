@@ -49,12 +49,14 @@ public class EMFModelHelpView extends ViewPart implements IPersistable {
 	 * The constructor.
 	 */
 	public EMFModelHelpView() {
-		this.selectionListener = (IWorkbenchPart iw, ISelection selection) -> {EMFModelHelpView.showHelp(selection);};
+		this.selectionListener = (IWorkbenchPart iw, ISelection selection) -> {
+			EMFModelHelpView.showHelp(selection, false);
+		};
 
 		this.linkEditor = AgteleUIPlugin.getPlugin().getDialogSettings().getBoolean("link");
 		if (this.linkEditor) {
 			PlatformUI.getWorkbench().getActiveWorkbenchWindow().getSelectionService()
-					.addSelectionListener(this.selectionListener);
+			.addSelectionListener(this.selectionListener);
 		}
 
 	}
@@ -75,7 +77,7 @@ public class EMFModelHelpView extends ViewPart implements IPersistable {
 			this.browser.setText(this.currentText);
 		}
 		if (this.linkEditor) {
-			EMFModelHelpView.show();
+			EMFModelHelpView.show(false);
 		}
 	}
 
@@ -90,7 +92,7 @@ public class EMFModelHelpView extends ViewPart implements IPersistable {
 	@Override
 	public void dispose() {
 		PlatformUI.getWorkbench().getActiveWorkbenchWindow().getSelectionService()
-				.removeSelectionListener(this.selectionListener);
+		.removeSelectionListener(this.selectionListener);
 		AgteleUIPlugin.getPlugin().getDialogSettings().put("link", this.linkEditor);
 
 		AgteleUIPlugin.getPlugin().getDialogSettings().put("browserText", this.currentText);
@@ -115,10 +117,10 @@ public class EMFModelHelpView extends ViewPart implements IPersistable {
 				EMFModelHelpView.this.linkEditor = !EMFModelHelpView.this.linkEditor;
 				if (EMFModelHelpView.this.linkEditor) {
 					PlatformUI.getWorkbench().getActiveWorkbenchWindow().getSelectionService()
-							.addSelectionListener(EMFModelHelpView.this.selectionListener);
+					.addSelectionListener(EMFModelHelpView.this.selectionListener);
 				} else {
 					PlatformUI.getWorkbench().getActiveWorkbenchWindow().getSelectionService()
-							.removeSelectionListener(EMFModelHelpView.this.selectionListener);
+					.removeSelectionListener(EMFModelHelpView.this.selectionListener);
 				}
 				EMFModelHelpView.this.linkAction.setChecked(EMFModelHelpView.this.linkEditor);
 			}
@@ -129,20 +131,25 @@ public class EMFModelHelpView extends ViewPart implements IPersistable {
 
 	/**
 	 * Opens the view and shows help based on the current selection
+	 * @param activateView
+	 *            bring view to front on text update
 	 */
-	public static void show() {
-		EMFModelHelpView.showHelp(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getSelectionService().getSelection());
+	public static void show(Boolean activateView) {
+		EMFModelHelpView.showHelp(
+				PlatformUI.getWorkbench().getActiveWorkbenchWindow().getSelectionService().getSelection(),
+				activateView);
 	}
 
 	/**
-	 * Opens the {@link EMFModelHelpView}, generates the help page for the given
-	 * AminoUI {@link EObject} and displays it
+	 * Opens the {@link EMFModelHelpView}, generates the help page for the given AminoUI {@link EObject} and displays it
 	 *
 	 * @param eObject
 	 *            AminoUI model element
+	 * @param activateView
+	 *            bring view to front on text update
 	 */
-	public static void showHelp(EObject eObject) {
-		EMFModelHelpView.showText(EMFModelHelpView.getHtml(eObject));
+	public static void showHelp(EObject eObject, Boolean activateView) {
+		EMFModelHelpView.showText(EMFModelHelpView.getHtml(eObject), activateView);
 	}
 
 	/**
@@ -150,18 +157,22 @@ public class EMFModelHelpView extends ViewPart implements IPersistable {
 	 *
 	 * @param text
 	 *            text to be displayed
+	 * @param activateView
+	 *            bring view to front on text update
 	 */
-	public static void showText(String text) {
+	public static void showText(String text, Boolean activateView) {
 		try {
-			EMFModelHelpView helpView = (EMFModelHelpView) PlatformUI.getWorkbench().getActiveWorkbenchWindow()
-					.getActivePage().showView(EMFModelHelpView.ID, null, IWorkbenchPage.VIEW_VISIBLE);
+			int viewMode = IWorkbenchPage.VIEW_CREATE;
 
-			if (!text.equals(helpView.currentText)) {
-				helpView.browser.setText(text);
-				helpView.currentText = text;
-			} else {
-				return;
+			if (activateView) {
+				viewMode = IWorkbenchPage.VIEW_ACTIVATE;
 			}
+			EMFModelHelpView helpView = (EMFModelHelpView) PlatformUI.getWorkbench().getActiveWorkbenchWindow()
+					.getActivePage().showView(EMFModelHelpView.ID, null, viewMode);
+
+			helpView.browser.setText(text);
+			helpView.currentText = text;
+
 		} catch (PartInitException e) {
 			e.printStackTrace();
 		}
@@ -173,13 +184,13 @@ public class EMFModelHelpView extends ViewPart implements IPersistable {
 	 *
 	 * @param selection
 	 */
-	private static void showHelp(ISelection selection) {
+	private static void showHelp(ISelection selection, Boolean activateView) {
 		if (selection instanceof StructuredSelection) {
 			StructuredSelection structuredSelection = (StructuredSelection) selection;
 			// show Help if one EObject is selected
 			if (structuredSelection.size() == 1) {
 				if (structuredSelection.getFirstElement() instanceof EObject) {
-					EMFModelHelpView.showHelp((EObject) structuredSelection.getFirstElement());
+					EMFModelHelpView.showHelp((EObject) structuredSelection.getFirstElement(), activateView);
 				}
 			}
 			// else show nothing new
@@ -193,7 +204,8 @@ public class EMFModelHelpView extends ViewPart implements IPersistable {
 				}
 				if (!structuredSelection.isEmpty()) {
 					EMFModelHelpView.showText(
-							AgteleUIPlugin.getPlugin().getString("_UI_EMFModelHelpView_TooManyElementsSelected"));
+							AgteleUIPlugin.getPlugin().getString("_UI_EMFModelHelpView_TooManyElementsSelected"),
+							false);
 				}
 			}
 		}
@@ -232,7 +244,7 @@ public class EMFModelHelpView extends ViewPart implements IPersistable {
 
 		@Override
 		public void helpRequested(HelpEvent e) {
-			EMFModelHelpView.show();
+			EMFModelHelpView.show(true);
 		}
 	}
 }
