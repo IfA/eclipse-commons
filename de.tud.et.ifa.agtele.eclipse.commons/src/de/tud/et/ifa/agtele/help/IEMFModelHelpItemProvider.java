@@ -584,7 +584,7 @@ public interface IEMFModelHelpItemProvider {
 				else if (itemPropertyDescriptor.getFeature(null) instanceof EReference) {
 					EReference ncRef = (EReference) itemPropertyDescriptor.getFeature(null);
 
-					if (ncRef.getName() != null) {
+					if (ncRef.getName() == null) {
 						continue;
 					}
 
