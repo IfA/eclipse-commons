@@ -2,7 +2,10 @@ package de.tud.et.ifa.agtele.ui.views;
 
 import java.util.Iterator;
 
+import org.eclipse.emf.ecore.EAttribute;
 import org.eclipse.emf.ecore.EObject;
+import org.eclipse.emf.ecore.EReference;
+import org.eclipse.emf.edit.provider.ItemProvider;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IToolBarManager;
 import org.eclipse.jface.viewers.ISelection;
@@ -26,9 +29,20 @@ import de.tud.et.ifa.agtele.resources.BundleContentHelper;
 import de.tud.et.ifa.agtele.ui.AgteleUIPlugin;
 
 /**
- * This view displays Amino UIs help contents
+ * This {@link ViewPart view} provides help contents for {@link EObject
+ * EObjects} by displaying information about their {@link EObject#eClass()
+ * EClass} as well as about corresponding {@link EAttribute EAttributes} and
+ * {@link EReference EReferences}. <br />
+ * <b>Note</b>: In order to enable this for your meta-model, your generated
+ * {@link ItemProvider ItemProviders} (resp. the root ItemProvider) need to
+ * implement the {@link IEMFModelHelpItemProvider} interface. <br />
+ * <b>Note</b>: The view is able to display the content of 'documentation'
+ * annotations specified in your meta-model. However, you need to set the
+ * 'Suppress GenModel Annotations' setting in your genmodel to 'false' for this
+ * to work! Otherwise, the 'documentation' annotations are not present in the
+ * generated package impls and can thus not be evaluated by the 'EMF Model Help
+ * View'.
  */
-
 public class EMFModelHelpView extends ViewPart implements IPersistable {
 
 	/**
@@ -56,7 +70,7 @@ public class EMFModelHelpView extends ViewPart implements IPersistable {
 		this.linkEditor = AgteleUIPlugin.getPlugin().getDialogSettings().getBoolean("link");
 		if (this.linkEditor) {
 			PlatformUI.getWorkbench().getActiveWorkbenchWindow().getSelectionService()
-			.addSelectionListener(this.selectionListener);
+					.addSelectionListener(this.selectionListener);
 		}
 
 	}
@@ -92,7 +106,7 @@ public class EMFModelHelpView extends ViewPart implements IPersistable {
 	@Override
 	public void dispose() {
 		PlatformUI.getWorkbench().getActiveWorkbenchWindow().getSelectionService()
-		.removeSelectionListener(this.selectionListener);
+				.removeSelectionListener(this.selectionListener);
 		AgteleUIPlugin.getPlugin().getDialogSettings().put("link", this.linkEditor);
 
 		AgteleUIPlugin.getPlugin().getDialogSettings().put("browserText", this.currentText);
@@ -117,10 +131,10 @@ public class EMFModelHelpView extends ViewPart implements IPersistable {
 				EMFModelHelpView.this.linkEditor = !EMFModelHelpView.this.linkEditor;
 				if (EMFModelHelpView.this.linkEditor) {
 					PlatformUI.getWorkbench().getActiveWorkbenchWindow().getSelectionService()
-					.addSelectionListener(EMFModelHelpView.this.selectionListener);
+							.addSelectionListener(EMFModelHelpView.this.selectionListener);
 				} else {
 					PlatformUI.getWorkbench().getActiveWorkbenchWindow().getSelectionService()
-					.removeSelectionListener(EMFModelHelpView.this.selectionListener);
+							.removeSelectionListener(EMFModelHelpView.this.selectionListener);
 				}
 				EMFModelHelpView.this.linkAction.setChecked(EMFModelHelpView.this.linkEditor);
 			}
@@ -131,6 +145,7 @@ public class EMFModelHelpView extends ViewPart implements IPersistable {
 
 	/**
 	 * Opens the view and shows help based on the current selection
+	 *
 	 * @param activateView
 	 *            bring view to front on text update
 	 */
@@ -141,7 +156,8 @@ public class EMFModelHelpView extends ViewPart implements IPersistable {
 	}
 
 	/**
-	 * Opens the {@link EMFModelHelpView}, generates the help page for the given AminoUI {@link EObject} and displays it
+	 * Opens the {@link EMFModelHelpView}, generates the help page for the given
+	 * AminoUI {@link EObject} and displays it
 	 *
 	 * @param eObject
 	 *            AminoUI model element
