@@ -26,6 +26,8 @@ import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.EClassifier;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.EPackage;
+import org.eclipse.emf.ecore.EReference;
+import org.eclipse.emf.ecore.EStructuralFeature;
 import org.eclipse.emf.ecore.EStructuralFeature.Setting;
 import org.eclipse.emf.ecore.EcorePackage;
 import org.eclipse.emf.ecore.resource.Resource;
@@ -672,29 +674,31 @@ public interface AgteleEcoreUtil {
 	/**
 	 * For the given {@link EObject}, this returns the
 	 * {@link EObject#eGet(org.eclipse.emf.ecore.EStructuralFeature) value or
-	 * values} of the given {@link EAttribute}.
+	 * values} of the given {@link EStructuralFeature}.
 	 * <p />
-	 * Note: As EAttributes can be {@link EAttribute#isMany() many-valued}, too,
-	 * this will return either no value, a single value, or a list of values.
-	 * Note: The type of the entries inside the list will match the
-	 * {@link EAttribute#getEAttributeType() type} of the given EAttribute.
+	 * Note: As EStructuralFeatures can be {@link EStructuralFeature#isMany()
+	 * many-valued}, this will return either no value, a single value, or a list
+	 * of values. Note: The type of the entries inside the list will match the
+	 * type of the given {@link EAttribute#getEAttributeType() EAttribute} or
+	 * {@link EReference#getEReferenceType() EReference}.
 	 *
 	 * @param eObject
 	 *            The {@link EObject} for that the values shall be returned.
-	 * @param eAttribute
-	 *            The {@link EAttribute} for that the values shall be returned.
+	 * @param eFeature
+	 *            The {@link EStructuralFeature} for that the values shall be
+	 *            returned.
 	 * @return The determined values (either an empty list, a list consisting of
 	 *         a single value, or mutliple values).
 	 */
-	public static List<Object> getAttributeValueAsList(EObject eObject, EAttribute eAttribute) {
+	public static List<Object> getStructuralFeatureValueAsList(EObject eObject, EStructuralFeature eFeature) {
 
-		final Object value = eObject.eGet(eAttribute);
+		final Object value = eObject.eGet(eFeature);
 
 		if (value == null) {
 			return new ArrayList<>(Collections.emptyList());
 		}
 
-		if (eAttribute.isMany()) {
+		if (eFeature.isMany()) {
 			return new ArrayList<>((Collection<?>) value);
 		} else {
 			return new ArrayList<>(Arrays.asList(value));
@@ -770,9 +774,12 @@ public interface AgteleEcoreUtil {
 	}
 
 	/**
-	 * Checks if at least one classifier of the package contains a ecore annotation enabling the
-	 *  validation framework for the package by naming a constraint.
-	 * @param p The package to check.
+	 * Checks if at least one classifier of the package contains a ecore
+	 * annotation enabling the validation framework for the package by naming a
+	 * constraint.
+	 *
+	 * @param p
+	 *            The package to check.
 	 * @return
 	 */
 	public static boolean isValidationEnabledForEPackage(EPackage p) {
@@ -781,7 +788,8 @@ public interface AgteleEcoreUtil {
 				return false;
 			}
 			EAnnotation ecoreAnnotation = cl.getEAnnotation(EcorePackage.eNS_URI);
-			if (ecoreAnnotation == null || ecoreAnnotation.getDetails().get("constraints") == null || ecoreAnnotation.getDetails().get("constraints").isEmpty()) {
+			if (ecoreAnnotation == null || ecoreAnnotation.getDetails().get("constraints") == null
+					|| ecoreAnnotation.getDetails().get("constraints").isEmpty()) {
 				return false;
 			}
 			return true;
@@ -791,7 +799,7 @@ public interface AgteleEcoreUtil {
 	/**
 	 * Returns a collection of the chain of containers, an element is contained
 	 * at its bottom. Delegates to {@link #getAllContainers(EObject, boolean)}.
-	 * 
+	 *
 	 * @param obj
 	 * @return
 	 */
@@ -802,7 +810,7 @@ public interface AgteleEcoreUtil {
 	/**
 	 * Returns a collection of the chain of containers, an element is contained
 	 * at its bottom
-	 * 
+	 *
 	 * @param obj
 	 * @param includeSelf
 	 *            whether to include the object specified itself
