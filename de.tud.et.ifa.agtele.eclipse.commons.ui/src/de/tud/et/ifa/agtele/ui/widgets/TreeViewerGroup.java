@@ -395,9 +395,20 @@ public class TreeViewerGroup extends FilteredTree implements IPersistable {
 					@Override
 					public String getToolTipText(Object element) {
 
+						String documentation = "";
+
+						if (element instanceof EObject && ((EObject) element).eClass() != null) {
+							documentation = "<b>Element Type: " + ((EObject) element).eClass().getName() + "</b>";
+
+							String eClassDoc = EcoreUtil.getDocumentation(((EObject) element).eClass());
+							if (eClassDoc != null && !eClassDoc.isEmpty()) {
+								documentation += "<p /><b>Documentation: </b>" + eClassDoc;
+							}
+						}
+
 						String toolTip = super.getToolTipText(element);
-						return toolTip == null ? element instanceof EObject
-								? "Element Type: " + ((EObject) element).eClass().getName() : null : toolTip;
+
+						return toolTip == null || toolTip.isEmpty() ? documentation : toolTip + "<p />" + documentation;
 					}
 				}));
 		treeViewer.setContentProvider(new StateRestoringViewerContentProvider(this.adapterFactory, treeViewer));
