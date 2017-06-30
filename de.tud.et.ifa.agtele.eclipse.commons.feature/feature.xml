@@ -27,23 +27,11 @@ These terms will be replaced, once it has been decided, which public license to 
 
    <url>
       <update label="AG Tele Eclipse Commons Update Site" url="https://agtele.eats.et.tu-dresden.de/projects/eclipse-commons/udpates"/>
+      <discovery label="Eclipse Neon Release" url="http://download.eclipse.org/eclipse/updates/4.6"/>
+      <discovery label="Eclipse Neon Release" url="http://download.eclipse.org/eclipse/updates/4.6/"/>
+      <discovery label="Eclipse Oxygen Release" url="http://download.eclipse.org/eclipse/updates/4.7"/>
+      <discovery label="Eclipse Oxygen Release" url="http://download.eclipse.org/eclipse/updates/4.7/"/>
    </url>
-
-   <includes
-         id="org.eclipse.emf.common"
-         version="0.0.0"/>
-
-   <includes
-         id="org.eclipse.emf.ecore"
-         version="0.0.0"/>
-
-   <includes
-         id="org.eclipse.emf.edit"
-         version="0.0.0"/>
-
-   <includes
-         id="org.eclipse.xsd"
-         version="0.0.0"/>
 
    <requires>
       <import plugin="org.eclipse.core.runtime"/>
