@@ -26,7 +26,7 @@ These terms will be replaced, once it has been decided, which public license to 
    </license>
 
    <url>
-      <update label="AG Tele Eclipse Commons Update Site" url="https://agtele.eats.et.tu-dresden.de/projects/eclipse-commons/udpates"/>
+      <update label="AG Tele Eclipse Commons Update Site" url="https://agtele.eats.et.tu-dresden.de/projects/eclipse-commons/updates"/>
       <discovery label="Eclipse Neon Release" url="http://download.eclipse.org/eclipse/updates/4.6"/>
       <discovery label="Eclipse Neon Release" url="http://download.eclipse.org/eclipse/updates/4.6/"/>
       <discovery label="Eclipse Oxygen Release" url="http://download.eclipse.org/eclipse/updates/4.7"/>
