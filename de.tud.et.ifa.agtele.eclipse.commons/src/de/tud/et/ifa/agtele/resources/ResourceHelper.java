@@ -487,6 +487,35 @@ public class ResourceHelper {
 	}
 
 	/**
+	 * For a given {@link URI}, returns an Eclipse {@link IFile} that represents this URI.
+	 *
+	 * @param uri
+	 *            The {@link URI} for which the file shall be returned.
+	 * @return The {@link IFile} representing the uri or '<em>null</em>' if no file could be determined.
+	 */
+	public static IFile getFileForURI(URI uri) {
+
+		URI fileBasedUri = ResourceHelper.convertPlatformToFileURI(uri);
+
+		if (fileBasedUri == null) {
+			return null;
+		}
+
+		try {
+
+			IFile[] files = ResourcesPlugin.getWorkspace().getRoot()
+					.findFilesForLocationURI(new java.net.URI(fileBasedUri.toString()));
+
+			return files.length == 0 ? null : files[0];
+
+		} catch (Exception e) {
+			e.printStackTrace();
+			return null;
+		}
+
+	}
+
+	/**
 	 * For a given EMF {@link Resource}, returns an Eclipse {@link IFile} that represents this resource.
 	 *
 	 * @param resource
@@ -495,23 +524,7 @@ public class ResourceHelper {
 	 */
 	public static IFile getFileForResource(Resource resource) {
 
-		try {
-
-			URI resourceURI = ResourceHelper.convertPlatformToFileURI(resource.getURI());
-
-			if (resourceURI == null) {
-				return null;
-			}
-
-			IFile[] files = ResourcesPlugin.getWorkspace().getRoot()
-					.findFilesForLocationURI(new java.net.URI(resourceURI.toString()));
-
-			return files.length == 0 ? null : files[0];
-
-		} catch (Exception e) {
-			e.printStackTrace();
-			return null;
-		}
+		return ResourceHelper.getFileForURI(resource.getURI());
 
 	}
 
@@ -527,6 +540,10 @@ public class ResourceHelper {
 	 *         could be determined.
 	 */
 	public static URI convertPlatformToFileURI(URI uri) {
+
+		if (uri == null) {
+			return null;
+		}
 
 		if (uri.isFile() && uri.hasAbsolutePath()) {
 
