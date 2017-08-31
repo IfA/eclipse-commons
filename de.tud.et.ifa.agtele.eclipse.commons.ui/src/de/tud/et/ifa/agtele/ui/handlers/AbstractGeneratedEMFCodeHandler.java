@@ -51,8 +51,7 @@ import de.tud.et.ifa.agtele.ui.editors.AgteleEcoreEditor;
 import de.tud.et.ifa.agtele.ui.util.UIHelper;
 
 /**
- * An {@link AbstractHandler} that, based on a selection in a Java file, opens
- * an associated Ecore metamodel.
+ * An {@link AbstractHandler} that, based on a selection in a Java file, opens an associated Ecore metamodel.
  *
  * @author mfreund
  *
@@ -84,26 +83,25 @@ public abstract class AbstractGeneratedEMFCodeHandler extends AbstractHandler {
 		private final String fileEnding;
 
 		EMFGeneratedJavaFileType(String fileEnding) {
+
 			this.fileEnding = fileEnding;
 		}
 
 		/**
-		 * Returns the special file ending associated with this
-		 * {@link EMFGeneratedJavaFileType}.
+		 * Returns the special file ending associated with this {@link EMFGeneratedJavaFileType}.
 		 *
 		 * @return The {@link #fileEnding}.
 		 */
 		public String getFileEnding() {
+
 			return this.fileEnding;
 		}
 
 		/**
-		 * Return the {@link EMFGeneratedJavaFileType} of the java file with the
-		 * given name.
+		 * Return the {@link EMFGeneratedJavaFileType} of the java file with the given name.
 		 *
 		 * @param javaFileName
-		 *            The name of a java file (including or excluding the
-		 *            trailing '.java').
+		 *            The name of a java file (including or excluding the trailing '.java').
 		 * @return The {@link EMFGeneratedJavaFileType}.
 		 */
 		public static EMFGeneratedJavaFileType getFileType(String javaFileName) {
@@ -140,74 +138,78 @@ public abstract class AbstractGeneratedEMFCodeHandler extends AbstractHandler {
 		}
 
 		/**
-		 * Whether this {@link EMFGeneratedJavaFileType} represents an element
-		 * of the generated 'model' code.
+		 * Whether this {@link EMFGeneratedJavaFileType} represents an element of the generated 'model' code.
 		 *
 		 * @return
 		 */
 		public boolean isModelType() {
+
 			return this.equals(INTERFACE) || this.equals(FACTORY) || this.equals(PACKAGE) || this.equals(IMPL)
 					|| this.equals(FACTORYIMPLY) || this.equals(PACKAGEIMPL) || this.equals(ADAPTERFACTORY)
 					|| this.equals(SWITCH) || this.equals(VALIDATOR);
 		}
 
 		/**
-		 * Whether this {@link EMFGeneratedJavaFileType} represents an element
-		 * of the generated 'edit' code.
+		 * Whether this {@link EMFGeneratedJavaFileType} represents an element of the generated 'edit' code.
 		 *
 		 * @return
 		 */
 		public boolean isEditType() {
+
 			return this.equals(ITEMPROVIDER) || this.equals(ITEMPROVIDERADAPTERFACTORY);
 		}
 
 		/**
-		 * Whether this {@link EMFGeneratedJavaFileType} represents an element
-		 * of the generated 'edit' item provider code.
+		 * Whether this {@link EMFGeneratedJavaFileType} represents an element of the generated 'edit' item provider
+		 * code.
 		 *
 		 * @return
 		 */
 		public boolean isEditItemProviderType() {
+
 			return this.equals(ITEMPROVIDER);
 		}
 
 		/**
-		 * Whether this {@link EMFGeneratedJavaFileType} represents an element
-		 * of the generated 'editor' code.
+		 * Whether this {@link EMFGeneratedJavaFileType} represents an element of the generated 'editor' code.
 		 *
 		 * @return
 		 */
 		public boolean isEditorType() {
+
 			return this.equals(EDITOR) || this.equals(ACTIONBARCONTRIBUTOR);
 		}
 
 		/**
-		 * Whether this {@link EMFGeneratedJavaFileType} represents an element
-		 * that was generated based on an {@link EClass}.
+		 * Whether this {@link EMFGeneratedJavaFileType} represents an element that was generated based on an
+		 * {@link EClass}.
 		 *
 		 * @return
 		 */
 		public boolean isClassType() {
+
 			return this.equals(INTERFACE) || this.equals(IMPL) || this.equals(ITEMPROVIDER);
 		}
 
 		/**
-		 * Whether this {@link EMFGeneratedJavaFileType} represents a class
-		 * implementation within the generated 'model' code.
+		 * Whether this {@link EMFGeneratedJavaFileType} represents a class implementation within the generated 'model'
+		 * code.
 		 *
 		 * @return
 		 */
 		public boolean isClassImplementationType() {
+
 			return this.equals(IMPL);
 		}
 
 		/**
-		 * Whether this {@link EMFGeneratedJavaFileType} represents an element
-		 * that was generated based on an {@link EPackage}.
+		 * Whether this {@link EMFGeneratedJavaFileType} represents an element that was generated based on an
+		 * {@link EPackage}.
 		 *
 		 * @return
 		 */
 		public boolean isPackageType() {
+
 			return !this.isClassType();
 		}
 
@@ -216,11 +218,11 @@ public abstract class AbstractGeneratedEMFCodeHandler extends AbstractHandler {
 		 *
 		 * @param javaFileName
 		 *            The name of a Java File.
-		 * @return The given <em>javaFileName</em> without any optional trailing
-		 *         '.java' and without the special {@link #getFileEnding()} of
-		 *         its {@link EMFGeneratedJavaFileType type}.
+		 * @return The given <em>javaFileName</em> without any optional trailing '.java' and without the special
+		 *         {@link #getFileEnding()} of its {@link EMFGeneratedJavaFileType type}.
 		 */
 		public static String getBaseName(String javaFileName) {
+
 			EMFGeneratedJavaFileType type = EMFGeneratedJavaFileType.getFileType(javaFileName);
 			String ret = javaFileName.replaceAll(".java$", "");
 			return type == null ? ret : ret.replaceAll(type.getFileEnding() + "$", "");
@@ -228,8 +230,8 @@ public abstract class AbstractGeneratedEMFCodeHandler extends AbstractHandler {
 	}
 
 	/**
-	 * Recursively collects all GenModel ({@link IFile IFiles} with the file
-	 * ending '.genmodel') in the given {@link IContainer}.
+	 * Recursively collects all GenModel ({@link IFile IFiles} with the file ending '.genmodel') in the given
+	 * {@link IContainer}.
 	 *
 	 * @param container
 	 *            The {@link IContainer} to recursively process.
@@ -258,16 +260,15 @@ public abstract class AbstractGeneratedEMFCodeHandler extends AbstractHandler {
 	}
 
 	/**
-	 * Check if the {@link GenModel} defined by the given {@link IFile} was
-	 * responsible for creating the given {@link CompilationUnit Java file}.
+	 * Check if the {@link GenModel} defined by the given {@link IFile} was responsible for creating the given
+	 * {@link CompilationUnit Java file}.
 	 *
 	 * @param genModelFile
 	 *            The {@link IFile} defining the {@link GenModel} to check.
 	 * @param javaFile
 	 *            The {@link CompilationUnit Java file} to check.
-	 * @return The {@link EObject metamodel element} associated with the given
-	 *         Java file or an empty optional if the metamodel was not
-	 *         responsible for the generation of the Java file.
+	 * @return The {@link EObject metamodel element} associated with the given Java file or an empty optional if the
+	 *         metamodel was not responsible for the generation of the Java file.
 	 */
 	protected Optional<EObject> checkIsGenModelForJavaClass(IFile genModelFile, CompilationUnit javaFile) {
 
@@ -337,15 +338,14 @@ public abstract class AbstractGeneratedEMFCodeHandler extends AbstractHandler {
 	}
 
 	/**
-	 * This checks if the given {@link GenClass} was responsible for creating
-	 * the given <em>javaFile</em>.
+	 * This checks if the given {@link GenClass} was responsible for creating the given <em>javaFile</em>.
 	 *
 	 * @param genClass
 	 *            The {@link GenClass} to check.
 	 * @param javaFile
 	 *            The {@link CompilationUnit Java file} to check.
-	 * @return '<em>true</em>' if the given <em>javaFile</em> was created based
-	 *         on the given {@link GenClass}; '<em>false</em>' otherwise.
+	 * @return '<em>true</em>' if the given <em>javaFile</em> was created based on the given {@link GenClass};
+	 *         '<em>false</em>' otherwise.
 	 */
 	public boolean checkGenClassCreatedJavaFile(GenClass genClass, CompilationUnit javaFile) {
 
@@ -410,15 +410,14 @@ public abstract class AbstractGeneratedEMFCodeHandler extends AbstractHandler {
 	}
 
 	/**
-	 * This checks if the given {@link GenPackage} was responsible for creating
-	 * the given <em>javaFile</em>.
+	 * This checks if the given {@link GenPackage} was responsible for creating the given <em>javaFile</em>.
 	 *
 	 * @param genPackage
 	 *            The {@link GenPackage} to check.
 	 * @param javaFile
 	 *            The {@link CompilationUnit Java file} to check.
-	 * @return '<em>true</em>' if the given <em>javaFile</em> was created based
-	 *         on the given {@link GenPackage}; '<em>false</em>' otherwise.
+	 * @return '<em>true</em>' if the given <em>javaFile</em> was created based on the given {@link GenPackage};
+	 *         '<em>false</em>' otherwise.
 	 */
 	public boolean checkGenPackageCreatedJavaFile(GenPackage genPackage, CompilationUnit javaFile) {
 
@@ -517,41 +516,37 @@ public abstract class AbstractGeneratedEMFCodeHandler extends AbstractHandler {
 	}
 
 	/**
-	 * Computes the path to the Java file for the given qualified name of a Java
-	 * class.
+	 * Computes the path to the Java file for the given qualified name of a Java class.
 	 * <p />
-	 * Example: Calling this with 'my.fancy.JavaClass' will return
-	 * 'my/fancy/JavaClass.java'.
+	 * Example: Calling this with 'my.fancy.JavaClass' will return 'my/fancy/JavaClass.java'.
 	 *
 	 * @param qualifiedName
 	 *            The qualified name of a Java class.
 	 * @return The path to the Java file.
 	 */
 	private String getJavaPathFromQualifiedName(String qualifiedName) {
+
 		return qualifiedName.replaceAll("\\.", "/") + ".java";
 	}
 
 	/**
-	 * Based on the given {@link EObject elementToSelect} that corresponds to
-	 * the given {@link CompilationUnit Java file} and on the
-	 * {@link IJavaElement} that the user selected in this file, we check if
-	 * there is a more specialized element to select.
+	 * Based on the given {@link EObject elementToSelect} that corresponds to the given {@link CompilationUnit Java
+	 * file} and on the {@link IJavaElement} that the user selected in this file, we check if there is a more
+	 * specialized element to select.
 	 * <p />
-	 * E.g.: If the user selected an {@link EOperation}, we may reveal and
-	 * select this instead of the containing {@link EClass}.
+	 * E.g.: If the user selected an {@link EOperation}, we may reveal and select this instead of the containing
+	 * {@link EClass}.
 	 *
 	 * @param elementToSelect
-	 *            The {@link EClass} or {@link EPackage} that is associated with
-	 *            the given {@link CompilationUnit Java file}.
+	 *            The {@link EClass} or {@link EPackage} that is associated with the given {@link CompilationUnit Java
+	 *            file}.
 	 * @param javaFile
-	 *            The {@link CompilationUnit Java file} based on which the user
-	 *            launch this handler.
+	 *            The {@link CompilationUnit Java file} based on which the user launch this handler.
 	 * @param javaElement
-	 *            The {@link IJavaElement element} of the given Java file that
-	 *            was selected by the user when launching this handler.
-	 * @return A more specialized {@link EObject element to select} or the given
-	 *         <em>elementToSelect</em> if no more specialized element could be
-	 *         determined.
+	 *            The {@link IJavaElement element} of the given Java file that was selected by the user when launching
+	 *            this handler.
+	 * @return A more specialized {@link EObject element to select} or the given <em>elementToSelect</em> if no more
+	 *         specialized element could be determined.
 	 */
 	protected EObject getMoreSpecificSelection(EObject elementToSelect, CompilationUnit javaFile,
 			IJavaElement javaElement) {
@@ -565,9 +560,21 @@ public abstract class AbstractGeneratedEMFCodeHandler extends AbstractHandler {
 
 		EClass eClass = (EClass) elementToSelect;
 
-		if (javaElement instanceof IMethod) {
+		IJavaElement baseJavaElement = javaElement;
 
-			String methodName = javaElement.getElementName();
+		if (javaFile.findPrimaryType() != null) {
+			// If the user selected something in an internal/anonymous class, we first need to determine the containing
+			// element (class or method) in the primary type defined in the given compilation unit.
+			//
+			while (baseJavaElement.getParent() != null
+					&& !javaFile.findPrimaryType().equals(baseJavaElement.getParent().getPrimaryElement())) {
+				baseJavaElement = baseJavaElement.getParent();
+			}
+		}
+
+		if (baseJavaElement instanceof IMethod) {
+
+			String methodName = baseJavaElement.getElementName();
 
 			// Check if there is an EOperation corresponding to the selection
 			//
@@ -589,9 +596,9 @@ public abstract class AbstractGeneratedEMFCodeHandler extends AbstractHandler {
 				return eFeature.get();
 			}
 
-		} else if (javaElement instanceof IField) {
+		} else if (baseJavaElement instanceof IField) {
 
-			String fieldName = javaElement.getElementName();
+			String fieldName = baseJavaElement.getElementName();
 
 			// Check if there is an EAttribute or EReference corresponding to
 			// the selection
@@ -613,6 +620,7 @@ public abstract class AbstractGeneratedEMFCodeHandler extends AbstractHandler {
 	 *            The message to display to the user.
 	 */
 	protected void showError(String errorMessage) {
+
 		UIHelper.getCurrentEditor().getEditorSite().getActionBars().getStatusLineManager()
 				.setErrorMessage(errorMessage);
 	}
@@ -623,6 +631,7 @@ public abstract class AbstractGeneratedEMFCodeHandler extends AbstractHandler {
 	 * @param statusMessage
 	 */
 	protected void showStatus(String statusMessage) {
+
 		UIHelper.getCurrentEditor().getEditorSite().getActionBars().getStatusLineManager().setMessage(statusMessage);
 	}
 
@@ -630,6 +639,7 @@ public abstract class AbstractGeneratedEMFCodeHandler extends AbstractHandler {
 	 * Clears the error from the status line.
 	 */
 	protected void clearError() {
+
 		UIHelper.getCurrentEditor().getEditorSite().getActionBars().getStatusLineManager().setErrorMessage(null);
 	}
 
@@ -650,11 +660,9 @@ public abstract class AbstractGeneratedEMFCodeHandler extends AbstractHandler {
 	}
 
 	/**
-	 * This implementation of the execute method provides the following hooks
-	 * for subclasses to specify the behavior: {@link #showError(String)},
-	 * {@link #determineAssociatedMetamodelElement(CompilationUnit)},
-	 * {@link #openEcoreEditor(IFile)},
-	 * {@link #getMoreSpecificSelection(EObject, CompilationUnit, IJavaElement)},
+	 * This implementation of the execute method provides the following hooks for subclasses to specify the behavior:
+	 * {@link #showError(String)}, {@link #determineAssociatedMetamodelElement(CompilationUnit)},
+	 * {@link #openEcoreEditor(IFile)}, {@link #getMoreSpecificSelection(EObject, CompilationUnit, IJavaElement)},
 	 * {@link #performAsyncActionOnEcoreEditor(IEditorPart, CompilationUnit, CompilationUnitEditor, EObject, ISelection)}
 	 */
 	@Override
@@ -743,30 +751,30 @@ public abstract class AbstractGeneratedEMFCodeHandler extends AbstractHandler {
 	}
 
 	/**
-	 * Determines the @link {@link org.eclipse.jdt.core.dom.CompilationUnit}, if
-	 * the current editor is a Java editor.
+	 * Determines the @link {@link org.eclipse.jdt.core.dom.CompilationUnit}, if the current editor is a Java editor.
 	 *
 	 * @return
 	 */
 	protected CompilationUnit determineCompilationUnit() {
+
 		return (CompilationUnit) EditorUtility.getEditorInputJavaElement(UIHelper.getCurrentEditor(), false);
 	}
 
 	/**
-	 * Determines the @link {@link org.eclipse.jdt.core.dom.CompilationUnit}, if
-	 * the current editor is a Java editor.
+	 * Determines the @link {@link org.eclipse.jdt.core.dom.CompilationUnit}, if the current editor is a Java editor.
 	 *
 	 * @param part
 	 *            The compilation unit editor part.
 	 * @return
 	 */
 	protected CompilationUnit determineCompilationUnit(IEditorPart part) {
+
 		return (CompilationUnit) EditorUtility.getEditorInputJavaElement(part, false);
 	}
 
 	/**
-	 * When the specific Ecore element has been determined, the concrete handler
-	 * subclass shall determine, what is going to happen.
+	 * When the specific Ecore element has been determined, the concrete handler subclass shall determine, what is going
+	 * to happen.
 	 *
 	 * @param javaEditor
 	 * @param specificEcoreElement
@@ -775,16 +783,15 @@ public abstract class AbstractGeneratedEMFCodeHandler extends AbstractHandler {
 			CompilationUnitEditor javaEditor, EObject specificEcoreElement, ISelection javaSelection);
 
 	/**
-	 * Tries to open the default editor for the specified ecore file. If the
-	 * opening fails, the method displays an error using
-	 * {@link #showError(String)}. The editor is accepted only, if it is an
-	 * {@link IEditingDomainProvider}. If the default editor is not capable to
-	 * use, the {@link AgteleEcoreEditor} will be opened.
+	 * Tries to open the default editor for the specified ecore file. If the opening fails, the method displays an error
+	 * using {@link #showError(String)}. The editor is accepted only, if it is an {@link IEditingDomainProvider}. If the
+	 * default editor is not capable to use, the {@link AgteleEcoreEditor} will be opened.
 	 *
 	 * @param ecoreFile
 	 * @return the opened ecore editor
 	 */
 	protected IEditorPart openEcoreEditor(IFile ecoreFile) {
+
 		IEditorPart ecoreEditor;
 		List<IEditorPart> openEditors = UIHelper.getAllEditors();
 		try {
@@ -816,14 +823,15 @@ public abstract class AbstractGeneratedEMFCodeHandler extends AbstractHandler {
 	}
 
 	/**
-	 * Determines a metamodel element for the compilation unit specified. Opened
-	 * Ecore editors will be preferred over all available genmodels.
+	 * Determines a metamodel element for the compilation unit specified. Opened Ecore editors will be preferred over
+	 * all available genmodels.
 	 *
 	 * @param root
 	 *            The compilation unit to determine the metamodel element for.
 	 * @return
 	 */
 	protected EObject determineAssociatedMetamodelElement(CompilationUnit root) {
+
 		// The list of currently opened Ecore files (potential targets for our
 		// selection)
 		//

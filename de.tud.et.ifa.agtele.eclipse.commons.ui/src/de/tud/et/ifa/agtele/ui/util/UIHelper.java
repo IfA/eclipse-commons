@@ -28,15 +28,15 @@ import org.eclipse.ui.part.FileEditorInput;
 public interface UIHelper {
 
 	/**
-	 * Returns the {@link Shell} from the active workbench window or a new one.
+	 * Returns the {@link Shell} from the active workbench window or a new one. <br />
 	 * <br />
-	 * <br />
-	 * <b>Important:</b> This must be called from the UI thread. If called from
-	 * a non-UI thread, it will throw an 'InvalidThreadAccessException'.
+	 * <b>Important:</b> This must be called from the UI thread. If called from a non-UI thread, it will throw an
+	 * 'InvalidThreadAccessException'.
 	 *
 	 * @return The {@link Shell} from the active workbench window or a new one.
 	 */
 	public static Shell getShell() {
+
 		IWorkbench workbench = PlatformUI.getWorkbench();
 		IWorkbenchWindow window = workbench.getActiveWorkbenchWindow();
 		return window != null && window.getShell() != null ? window.getShell() : new Shell();
@@ -45,11 +45,10 @@ public interface UIHelper {
 	/**
 	 * This returns the currently active {@link IEditorPart editor}.
 	 * <p />
-	 * <b>Important:</b> This must be called from the UI thread. If called from
-	 * a non-UI thread, it will throw an 'InvalidThreadAccessException'.
+	 * <b>Important:</b> This must be called from the UI thread. If called from a non-UI thread, it will throw an
+	 * 'InvalidThreadAccessException'.
 	 *
-	 * @return The currently active {@link IEditorPart editor} or
-	 *         '<em><b>null</b></em>' if there is no open editor.
+	 * @return The currently active {@link IEditorPart editor} or '<em><b>null</b></em>' if there is no open editor.
 	 */
 	public static IEditorPart getCurrentEditor() {
 
@@ -68,11 +67,10 @@ public interface UIHelper {
 	/**
 	 * This returns all open {@link IEditorPart editors}.
 	 * <p />
-	 * <b>Important:</b> This must be called from the UI thread. If called from
-	 * a non-UI thread, it will throw an 'InvalidThreadAccessException'.
+	 * <b>Important:</b> This must be called from the UI thread. If called from a non-UI thread, it will throw an
+	 * 'InvalidThreadAccessException'.
 	 *
-	 * @return The open {@link IEditorPart editors} or an empty list if there is
-	 *         no open editor.
+	 * @return The open {@link IEditorPart editors} or an empty list if there is no open editor.
 	 */
 	public static List<IEditorPart> getAllEditors() {
 
@@ -94,11 +92,10 @@ public interface UIHelper {
 	/**
 	 * This returns the currently active {@link IWorkbenchPart part}.
 	 * <p />
-	 * <b>Important:</b> This must be called from the UI thread. If called from
-	 * a non-UI thread, it will throw an 'InvalidThreadAccessException'.
+	 * <b>Important:</b> This must be called from the UI thread. If called from a non-UI thread, it will throw an
+	 * 'InvalidThreadAccessException'.
 	 *
-	 * @return The currently active {@link IWorkbenchPart part} or
-	 *         '<em><b>null</b></em>' if there is no open part.
+	 * @return The currently active {@link IWorkbenchPart part} or '<em><b>null</b></em>' if there is no open part.
 	 */
 	public static IWorkbenchPart getCurrentPart() {
 
@@ -117,11 +114,11 @@ public interface UIHelper {
 	/**
 	 * This returns the {@link IEditorInput} of the currently active editor.
 	 * <p />
-	 * <b>Important:</b> This must be called from the UI thread. If called from
-	 * a non-UI thread, it will throw an 'InvalidThreadAccessException'.
+	 * <b>Important:</b> This must be called from the UI thread. If called from a non-UI thread, it will throw an
+	 * 'InvalidThreadAccessException'.
 	 *
-	 * @return The {@link IEditorInput} or '<em><b>null</b></em>' if the editor
-	 *         input could not be determined or if there is no open editor.
+	 * @return The {@link IEditorInput} or '<em><b>null</b></em>' if the editor input could not be determined or if
+	 *         there is no open editor.
 	 */
 	public static IEditorInput getCurrentEditorInput() {
 
@@ -132,25 +129,25 @@ public interface UIHelper {
 	/**
 	 * This returns the {@link IEditorInput IEditorInputs} of all open editors.
 	 * <p />
-	 * <b>Important:</b> This must be called from the UI thread. If called from
-	 * a non-UI thread, it will throw an 'InvalidThreadAccessException'.
+	 * <b>Important:</b> This must be called from the UI thread. If called from a non-UI thread, it will throw an
+	 * 'InvalidThreadAccessException'.
 	 *
-	 * @return The {@link IEditorInput IEditorInputs} or an empty list if the
-	 *         editor inputs could not be determined or if there is no open
-	 *         editor.
+	 * @return The {@link IEditorInput IEditorInputs} or an empty list if the editor inputs could not be determined or
+	 *         if there is no open editor.
 	 */
 	public static List<IEditorInput> getAllEditorInputs() {
 
 		List<IEditorPart> editors = UIHelper.getAllEditors();
-		return editors.stream().filter(e -> {return e != null && e instanceof IEditorPart;}).collect(Collectors.toList()).stream()
-				.map(IEditorPart::getEditorInput).collect(Collectors.toList());
+		return editors.stream().filter(e -> {
+			return e != null && e instanceof IEditorPart;
+		}).collect(Collectors.toList()).stream().map(IEditorPart::getEditorInput).collect(Collectors.toList());
 	}
 
 	/**
 	 * This returns the current {@link ISelection}.
 	 * <p />
-	 * <b>Important:</b> This must be called from the UI thread. If called from
-	 * a non-UI thread, it will throw an 'InvalidThreadAccessException'.
+	 * <b>Important:</b> This must be called from the UI thread. If called from a non-UI thread, it will throw an
+	 * 'InvalidThreadAccessException'.
 	 *
 	 * @return The current {@link ISelection}.
 	 */
@@ -162,16 +159,13 @@ public interface UIHelper {
 	}
 
 	/**
-	 * This returns the first element of the current
-	 * {@link StructuredSelection}.
+	 * This returns the first element of the current {@link StructuredSelection}.
 	 * <p />
-	 * <b>Important:</b> This must be called from the UI thread. If called from
-	 * a non-UI thread, it will throw an 'InvalidThreadAccessException'.
+	 * <b>Important:</b> This must be called from the UI thread. If called from a non-UI thread, it will throw an
+	 * 'InvalidThreadAccessException'.
 	 *
-	 * @return The first element of the current {@link StructuredSelection} or
-	 *         <em>null</em> if either nothing is selected or if the
-	 *         {@link #getCurrentSelection() current selection} is not a
-	 *         {@link StructuredSelection}.
+	 * @return The first element of the current {@link StructuredSelection} or <em>null</em> if either nothing is
+	 *         selected or if the {@link #getCurrentSelection() current selection} is not a {@link StructuredSelection}.
 	 */
 	public static Object getFirstSelection() {
 
@@ -184,8 +178,7 @@ public interface UIHelper {
 	}
 
 	/**
-	 * This opens an editor identified by a given 'editorID' for a given
-	 * {@link IEditorInput}.
+	 * This opens an editor identified by a given 'editorID' for a given {@link IEditorInput}.
 	 *
 	 * @see #openEditor(IEditorInput, IEditorDescriptor)
 	 * @see #openEditor(IFile, String)
@@ -197,8 +190,7 @@ public interface UIHelper {
 	 * @param editorID
 	 *            The id of the editor to use.
 	 *
-	 * @return The opened {@link IEditorPart} or <em>null</em> if no editor
-	 *         could be opened.
+	 * @return The opened {@link IEditorPart} or <em>null</em> if no editor could be opened.
 	 * @throws PartInitException
 	 *             If the editor could not be created or initialized.
 	 */
@@ -212,8 +204,7 @@ public interface UIHelper {
 	}
 
 	/**
-	 * This opens an editor identified by a given {@link IEditorDescriptor} for
-	 * a given {@link IEditorInput}.
+	 * This opens an editor identified by a given {@link IEditorDescriptor} for a given {@link IEditorInput}.
 	 *
 	 * @see #openEditor(IEditorInput, String)
 	 * @see #openEditor(IFile, String)
@@ -225,8 +216,7 @@ public interface UIHelper {
 	 * @param editorDescriptor
 	 *            An {@link IEditorDescriptor} of the editor to use.
 	 *
-	 * @return The opened {@link IEditorPart} or <em>null</em> if no editor
-	 *         could be opened.
+	 * @return The opened {@link IEditorPart} or <em>null</em> if no editor could be opened.
 	 * @throws PartInitException
 	 *             If the editor could not be created or initialized.
 	 */
@@ -241,8 +231,7 @@ public interface UIHelper {
 	}
 
 	/**
-	 * This opens an editor identified by a given 'editorID' for a given
-	 * {@link IFile}.
+	 * This opens an editor identified by a given 'editorID' for a given {@link IFile}.
 	 *
 	 * @see #openEditor(IEditorInput, String)
 	 * @see #openEditor(IEditorInput, IEditorDescriptor)
@@ -254,8 +243,7 @@ public interface UIHelper {
 	 * @param editorID
 	 *            The id of the editor to use.
 	 *
-	 * @return The opened {@link IEditorPart} or <em>null</em> if no editor
-	 *         could be opened.
+	 * @return The opened {@link IEditorPart} or <em>null</em> if no editor could be opened.
 	 * @throws PartInitException
 	 *             If the editor could not be created or initialized.
 	 */
@@ -269,8 +257,7 @@ public interface UIHelper {
 	}
 
 	/**
-	 * This opens an editor identified by a given {@link IEditorDescriptor} for
-	 * a given {@link IFile}.
+	 * This opens an editor identified by a given {@link IEditorDescriptor} for a given {@link IFile}.
 	 *
 	 * @see #openEditor(IEditorInput, String)
 	 * @see #openEditor(IEditorInput, IEditorDescriptor)
@@ -282,8 +269,7 @@ public interface UIHelper {
 	 * @param editorDescriptor
 	 *            An {@link IEditorDescriptor} of the editor to use.
 	 *
-	 * @return The opened {@link IEditorPart} or <em>null</em> if no editor
-	 *         could be opened.
+	 * @return The opened {@link IEditorPart} or <em>null</em> if no editor could be opened.
 	 * @throws PartInitException
 	 *             If the editor could not be created or initialized.
 	 */
@@ -308,8 +294,7 @@ public interface UIHelper {
 	 * @param editorInput
 	 *            The {@link IFile} on which to open the editor.
 	 *
-	 * @return The opened {@link IEditorPart} or <em>null</em> if no editor
-	 *         could be opened.
+	 * @return The opened {@link IEditorPart} or <em>null</em> if no editor could be opened.
 	 * @throws PartInitException
 	 *             If the editor could not be created or initialized.
 	 */
@@ -322,7 +307,15 @@ public interface UIHelper {
 		IEditorDescriptor editorDescriptor = PlatformUI.getWorkbench().getEditorRegistry()
 				.getDefaultEditor(editorInput.getName());
 
-		return page.openEditor(new FileEditorInput(editorInput), editorDescriptor.getId());
+		// If there is no default editor for the given input, use the standard text editor instead.
+		//
+		if (editorDescriptor == null) {
+			editorDescriptor = PlatformUI.getWorkbench().getEditorRegistry()
+					.findEditor("org.eclipse.ui.DefaultTextEditor");
+		}
+
+		return editorDescriptor != null ? page.openEditor(new FileEditorInput(editorInput), editorDescriptor.getId())
+				: null;
 	}
 
 }
