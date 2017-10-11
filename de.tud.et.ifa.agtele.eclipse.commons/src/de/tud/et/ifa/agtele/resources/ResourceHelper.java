@@ -532,6 +532,8 @@ public class ResourceHelper {
 	 * For a given platform-scheme absolute {@link URI}, this returns a file-scheme absolute URI.
 	 * <p />
 	 * Note: If the given URI is already a file-scheme absolute URI, it is simply returned.
+	 * <p />
+	 * Note: This class can only be used if the OSGi plugin is available because it makes use of {@link FileLocator}.
 	 *
 	 * @param uri
 	 *            The URI to be converted.
@@ -568,6 +570,23 @@ public class ResourceHelper {
 			//
 			return null;
 		}
+	}
+
+	/**
+	 * This returns a {@link URI} representing the given '<em>path</em>'.
+	 * <p />
+	 * Note: The path must either be absolute or relative to the workspace root (of the form
+	 * '<em>/project-name/path</em>').
+	 *
+	 * @param path
+	 *            The path for that the URI shall be returned.
+	 * @return The {@link URI} representing the given '<em>path</em>'.
+	 */
+	public static URI getURIForPathString(String path) {
+
+		return new File(path).isAbsolute() ? URI.createFileURI(new File(path).getAbsolutePath())
+				: URI.createPlatformResourceURI(path, true);
+
 	}
 
 }
