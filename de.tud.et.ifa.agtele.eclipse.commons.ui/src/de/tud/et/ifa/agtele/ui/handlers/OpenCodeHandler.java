@@ -6,7 +6,6 @@ package de.tud.et.ifa.agtele.ui.handlers;
 import java.util.Arrays;
 import java.util.List;
 
-import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.core.commands.IHandler;
@@ -37,9 +36,6 @@ import org.eclipse.emf.ecore.impl.EPackageImpl;
 import org.eclipse.emf.ecore.impl.EReferenceImpl;
 import org.eclipse.emf.ecore.resource.ResourceSet;
 import org.eclipse.emf.ecore.resource.impl.ResourceSetImpl;
-import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.jface.viewers.StructuredSelection;
-import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.part.FileEditorInput;
@@ -48,29 +44,25 @@ import de.tud.et.ifa.agtele.emf.AgteleEcoreUtil;
 import de.tud.et.ifa.agtele.ui.util.UIHelper;
 
 /**
- * An {@link IHandler} that, based on a selection in an Ecore model or GenModel,
- * opens an associated Java file.
+ * An {@link IHandler} that, based on a selection in an Ecore model or GenModel, opens an associated Java file.
  * <p />
- * Clients can overwrite {@link #getAllowedElementTypes()} to restrict the list
- * of types on which the handler may be executed.
+ * Clients can overwrite {@link #getAllowedElementTypes()} to restrict the list of types on which the handler may be
+ * executed.
  * <p />
- * Clients can specify {@link #getDirectory(GenBase)} and
- * {@link #getQualifiedClassName(GenBase)} in order to customize the concrete
- * Java class to be opened.
+ * Clients can specify {@link #getDirectory(GenBase)} and {@link #getQualifiedClassName(GenBase)} in order to customize
+ * the concrete Java class to be opened.
  *
  * @author mfreund
  */
-public abstract class OpenCodeHandler extends AbstractHandler {
+public abstract class OpenCodeHandler extends OpenGenModelHandler {
 
 	/**
 	 * The resource set that we use to load GenModels if necessary.
 	 * <p />
-	 * By using a separate resource set, potential errors that occur during the
-	 * loading of GenModels are not reflected in the resource set of the
-	 * original editor.
+	 * By using a separate resource set, potential errors that occur during the loading of GenModels are not reflected
+	 * in the resource set of the original editor.
 	 * <p />
-	 * By using a static resource set, resources will not have to be loaded
-	 * again and again (on every right click).
+	 * By using a static resource set, resources will not have to be loaded again and again (on every right click).
 	 */
 	private static ResourceSet resourceSet = new ResourceSetImpl();
 
@@ -83,8 +75,7 @@ public abstract class OpenCodeHandler extends AbstractHandler {
 			GenEnumLiteralImpl.class);
 
 	/**
-	 * The {@link GenBase GenModel element} that was selected by the user or the
-	 * is equivalent to the user's selection.
+	 * The {@link GenBase GenModel element} that was selected by the user or that is equivalent to the user's selection.
 	 */
 	protected GenBase selectedElement;
 
@@ -94,36 +85,32 @@ public abstract class OpenCodeHandler extends AbstractHandler {
 	protected IEditorPart editor;
 
 	/**
-	 * This returns the qualified name of the Java class to open for the given
-	 * {@link GenBase GenModel element}.
+	 * This returns the qualified name of the Java class to open for the given {@link GenBase GenModel element}.
 	 *
 	 * @param element
-	 *            The {@link GenBase GenModel element} for which the Java class
-	 *            name shall be returned.
-	 * @return The qualified Java class name in the form
-	 *         '<em>fully.qualified.ClassName</em>.
+	 *            The {@link GenBase GenModel element} for which the Java class name shall be returned.
+	 * @return The qualified Java class name in the form '<em>fully.qualified.ClassName</em>.
 	 */
 	protected abstract String getQualifiedClassName(GenBase element);
 
 	/**
-	 * This returns the path of the directory containing the Java files
-	 * specified by {@link #getQualifiedClassName(GenBase)} in a
-	 * workspace-relative form (i.e. <em>/project-name/src</em>).
+	 * This returns the path of the directory containing the Java files specified by
+	 * {@link #getQualifiedClassName(GenBase)} in a workspace-relative form (i.e. <em>/project-name/src</em>).
 	 *
 	 * @param selectedElement
-	 *            The {@link GenBase GenModel element} The {@link GenBase
-	 *            GenModel element} selected by the user.
+	 *            The {@link GenBase GenModel element} The {@link GenBase GenModel element} selected by the user.
 	 * @return The path of the directory containing the Java files.
 	 */
 	protected abstract String getDirectory(GenBase selectedElement);
 
 	/**
-	 * This returns the list of types on which we allow this handler to be
-	 * executed.
+	 * This returns the list of types on which we allow this handler to be executed.
 	 *
 	 * @return The list of types on which we allow this handler to be executed.
 	 */
+	@Override
 	protected List<Class<?>> getAllowedElementTypes() {
+
 		return OpenCodeHandler.allowedElementTypes;
 	}
 
@@ -135,10 +122,21 @@ public abstract class OpenCodeHandler extends AbstractHandler {
 			return null;
 		}
 
-		this.selectedElement = UIHelper.getFirstSelection() instanceof GenBase ? (GenBase) UIHelper.getFirstSelection()
-				: AgteleEcoreUtil
-						.getGenModelElement((EObject) UIHelper.getFirstSelection(), OpenCodeHandler.resourceSet)
-						.orElse(null);
+		Object selection = UIHelper.getFirstSelection();
+
+		// First, we try to determine the corresponding element without manually opening the GenModel editor
+		//
+		this.selectedElement = selection instanceof GenBase ? (GenBase) selection
+				: AgteleEcoreUtil.getGenModelElement((EObject) selection, OpenCodeHandler.resourceSet).orElse(null);
+
+		// However, this sometimes does not work because the GenModel is not always automatically populated with
+		// elements that have recently been added to an Ecore metamodel (this is true especially for eOperations). In
+		// this case, we need to open the GenModel in an editor (which will generate the necessary missing elements) and
+		// determine the corresponding GenModel element via this editor
+		if (this.selectedElement == null) {
+
+			this.selectedElement = this.openGenModelAndSelectElement();
+		}
 
 		if (this.selectedElement == null) {
 			this.showError("Unable to determine corresponding element in the GenModel");
@@ -182,66 +180,14 @@ public abstract class OpenCodeHandler extends AbstractHandler {
 
 	}
 
-	@Override
-	public boolean isEnabled() {
-
-		if (!(UIHelper.getCurrentEditorInput() instanceof FileEditorInput)) {
-			return false;
-		}
-
-		if (!(UIHelper.getCurrentSelection() instanceof StructuredSelection)
-				|| ((StructuredSelection) UIHelper.getCurrentSelection()).size() != 1) {
-			return false;
-		}
-
-		Object selection = UIHelper.getFirstSelection();
-
-		if (!this.getAllowedElementTypes().parallelStream().filter(t -> t.isInstance(selection)).findAny()
-				.isPresent()) {
-			return false;
-		}
-
-		GenBase genModelElement = selection instanceof GenBase ? (GenBase) selection
-				: AgteleEcoreUtil.getGenModelElement((EObject) selection, OpenCodeHandler.resourceSet).orElse(null);
-
-		IResource sourceDirectory = ResourcesPlugin.getWorkspace().getRoot()
-				.findMember(this.getDirectory(genModelElement));
-		if (sourceDirectory == null || !sourceDirectory.exists()) {
-			return false;
-		}
-
-		GenBase elementToOpen = this.getElementToOpen(genModelElement);
-
-		if (elementToOpen == null || this.getQualifiedClassName(elementToOpen) == null) {
-			return false;
-		}
-
-		return super.isEnabled();
-	}
-
 	/**
-	 * Show an error to the user by opening a {@link MessageDialog}.
-	 *
-	 * @param errorMessage
-	 *            The message to display to the user.
-	 */
-	protected void showError(String errorMessage) {
-
-		Shell shell = UIHelper.getShell();
-		MessageDialog.openError(shell, "ERROR", errorMessage);
-	}
-
-	/**
-	 * Based on the given {@link GenBase GenModel element} that was selected by
-	 * the user, this returns the GenModel element based on which the
-	 * {@link #getQualifiedClassName(GenBase) Java class to be opened} will be
-	 * determined.
+	 * Based on the given {@link GenBase GenModel element} that was selected by the user, this returns the GenModel
+	 * element based on which the {@link #getQualifiedClassName(GenBase) Java class to be opened} will be determined.
 	 *
 	 * @param selectedElement
-	 *            The {@link GenBase GenModel} element that was selected by the
-	 *            user.
-	 * @return The {@link GenBase GenModel element} that shall be used as the
-	 *         basis for {@link #getQualifiedClassName(GenBase)}.
+	 *            The {@link GenBase GenModel} element that was selected by the user.
+	 * @return The {@link GenBase GenModel element} that shall be used as the basis for
+	 *         {@link #getQualifiedClassName(GenBase)}.
 	 */
 	protected GenBase getElementToOpen(GenBase selectedElement) {
 

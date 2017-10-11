@@ -11,8 +11,6 @@ import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.core.commands.IHandler;
 import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.ResourcesPlugin;
-import org.eclipse.core.runtime.IPath;
 import org.eclipse.emf.codegen.ecore.genmodel.GenBase;
 import org.eclipse.emf.codegen.ecore.genmodel.GenModel;
 import org.eclipse.emf.common.ui.viewer.IViewerProvider;
@@ -36,16 +34,15 @@ import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.part.FileEditorInput;
 
+import de.tud.et.ifa.agtele.resources.ResourceHelper;
 import de.tud.et.ifa.agtele.ui.util.UIHelper;
 
 /**
- * An {@link IHandler} that, based on a selection in an Ecore model, opens the
- * associated GenModel and selects the element in the GenModel that is
- * associated with the selected element in the Ecore model.
+ * An {@link IHandler} that, based on a selection in an Ecore model, opens the associated GenModel and selects the
+ * element in the GenModel that is associated with the selected element in the Ecore model.
  * <p />
- * Note: This assumes that the GenModel associated with an Ecore model is
- * located in the same folder and has the same base name (i.e.
- * <em>basename.ecore</em> -> <em>basename.genmodel</em>).
+ * Note: This assumes that the GenModel associated with an Ecore model is located in the same folder and has the same
+ * base name (i.e. <em>basename.ecore</em> -> <em>basename.genmodel</em>).
  *
  * @author mfreund
  */
@@ -54,21 +51,41 @@ public class OpenGenModelHandler extends AbstractHandler {
 	/**
 	 * The list of types on which we allow this handler to be executed.
 	 * <p />
-	 * This are those elements of the Ecore metameta-model that are also
-	 * represented in a GenModel.
+	 * This are those elements of the Ecore metameta-model that are also represented in a GenModel.
 	 */
 	private static final List<Class<?>> allowedElementTypes = Arrays.asList(EPackageImpl.class, EClassImpl.class,
 			EAttributeImpl.class, EReferenceImpl.class, EOperationImpl.class, EEnumImpl.class, EEnumLiteralImpl.class);
 
+	/**
+	 * This returns the list of types on which we allow this handler to be executed.
+	 *
+	 * @return The list of types on which we allow this handler to be executed.
+	 */
+	protected List<Class<?>> getAllowedElementTypes() {
+
+		return OpenGenModelHandler.allowedElementTypes;
+	}
+
 	/*
 	 * (non-Javadoc)
 	 *
-	 * @see
-	 * org.eclipse.core.commands.IHandler#execute(org.eclipse.core.commands.
-	 * ExecutionEvent)
+	 * @see org.eclipse.core.commands.IHandler#execute(org.eclipse.core.commands. ExecutionEvent)
 	 */
 	@Override
 	public Object execute(ExecutionEvent event) throws ExecutionException {
+
+		this.openGenModelAndSelectElement();
+
+		return null;
+	}
+
+	/**
+	 * Based on the current selection, opens the associated GenModel and selects the element in the GenModel that is
+	 * associated with the selected element.
+	 *
+	 * @return The selected {@link GenBase GenModel element} or 'null' anything went wrong.
+	 */
+	protected GenBase openGenModelAndSelectElement() {
 
 		if (!(UIHelper.getCurrentEditorInput() instanceof FileEditorInput)) {
 			this.showError("Unable to determine associated GenModel");
@@ -88,7 +105,8 @@ public class OpenGenModelHandler extends AbstractHandler {
 
 		EObject selectedElement = (EObject) UIHelper.getFirstSelection();
 
-		IFile genModelFile = this.getGenModelFile(editorInput);
+		IFile genModelFile = ResourceHelper
+				.getFileForPath(editorInput.getPath().removeFileExtension().addFileExtension("genmodel"));
 
 		if (genModelFile == null) {
 			this.showError("Error while determining the associated GenModel file");
@@ -153,15 +171,17 @@ public class OpenGenModelHandler extends AbstractHandler {
 			return null;
 		}
 
+		GenBase correspondingGenModelElement = (GenBase) references.iterator().next().getEObject();
+
 		// Now, reveal and select the determined element in the new GenModel
 		// editor
 		//
 		if (genModelEditor instanceof IViewerProvider) {
 			((IViewerProvider) genModelEditor).getViewer()
-					.setSelection(new StructuredSelection(references.iterator().next().getEObject()));
+					.setSelection(new StructuredSelection(correspondingGenModelElement));
 		}
 
-		return null;
+		return correspondingGenModelElement;
 	}
 
 	/*
@@ -186,13 +206,14 @@ public class OpenGenModelHandler extends AbstractHandler {
 		// test if the current selection is an EObject
 		Object selection = UIHelper.getFirstSelection();
 
-		if (!OpenGenModelHandler.allowedElementTypes.parallelStream().filter(t -> t.isInstance(selection)).findAny()
+		if (!this.getAllowedElementTypes().parallelStream().filter(t -> t.isInstance(selection)).findAny()
 				.isPresent()) {
 			return false;
 		}
 
 		// test if a genmodel actually exists
-		IFile genModelFile = this.getGenModelFile((FileEditorInput) UIHelper.getCurrentEditorInput());
+		IFile genModelFile = ResourceHelper.getFileForPath(((FileEditorInput) UIHelper.getCurrentEditorInput())
+				.getPath().removeFileExtension().addFileExtension("genmodel"));
 
 		if (!genModelFile.exists()) {
 			return false;
@@ -203,31 +224,12 @@ public class OpenGenModelHandler extends AbstractHandler {
 	}
 
 	/**
-	 * Get the genmodel as IFile based on the current EditorInput
-	 *
-	 * @param editorInput
-	 * @return
-	 */
-	private IFile getGenModelFile(FileEditorInput editorInput) {
-		// We assume that the associated GenModel is located in the same folder
-		// and has the same base name
-		//
-		IPath genModelPath = editorInput.getPath().removeFileExtension().addFileExtension("genmodel");
-
-		// Get an IFile for the path (even if this is not 'null', it does not
-		// mean that the file physically exists!)
-		//
-		IFile genModelFile = ResourcesPlugin.getWorkspace().getRoot().getFileForLocation(genModelPath);
-		return genModelFile;
-	}
-
-	/**
 	 * Show an error to the user by opening a {@link MessageDialog}.
 	 *
 	 * @param errorMessage
 	 *            The message to display to the user.
 	 */
-	private void showError(String errorMessage) {
+	protected void showError(String errorMessage) {
 
 		Shell shell = UIHelper.getShell();
 		MessageDialog.openError(shell, "ERROR", errorMessage);
