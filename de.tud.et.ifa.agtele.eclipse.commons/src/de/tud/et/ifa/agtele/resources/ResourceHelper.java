@@ -26,6 +26,7 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.FileLocator;
+import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.resource.Resource;
@@ -512,6 +513,19 @@ public class ResourceHelper {
 			e.printStackTrace();
 			return null;
 		}
+
+	}
+
+	/**
+	 * For a given {@link IPath}, returns an Eclipse {@link IFile} that represents this path.
+	 *
+	 * @param path
+	 *            The {@link IPath} for which the file shall be returned.
+	 * @return The {@link IFile} representing the path or '<em>null</em>' if no file could be determined.
+	 */
+	public static IFile getFileForPath(IPath path) {
+
+		return ResourcesPlugin.getWorkspace().getRoot().getFileForLocation(path);
 
 	}
 
