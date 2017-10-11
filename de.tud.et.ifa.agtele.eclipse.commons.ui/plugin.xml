@@ -138,5 +138,10 @@
             id="de.tud.et.ifa.agtele.ui.commands.PushCodeToEcoreHandler"
             name="PushCodeToEcoreHandler">
       </command>
+      <command
+            defaultHandler="de.tud.et.ifa.agtele.ui.handlers.AddDocumentationAnnotationHandler"
+            id="de.tud.et.ifa.agtele.ui.commands.AddDocumentationAnnotation"
+            name="AddDocumentationAnnotation">
+      </command>
    </extension>
 </plugin>
