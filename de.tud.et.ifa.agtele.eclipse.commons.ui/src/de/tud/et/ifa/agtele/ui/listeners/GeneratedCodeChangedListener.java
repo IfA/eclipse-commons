@@ -157,7 +157,50 @@ public class GeneratedCodeChangedListener extends WorkspaceCommandListener {
 			return;
 		}
 
-		IEditorPart editor = UIHelper.getCurrentEditor();
+		IEditorPart currentEditor = UIHelper.getCurrentEditor();
+
+		if (commandId.equals(IWorkbenchCommandConstants.FILE_SAVE)) {
+
+			// Only handle the current editor
+			//
+			this.handleEditorBeforeSave(currentEditor);
+
+		} else if (commandId.equals(IWorkbenchCommandConstants.FILE_SAVE_ALL)) {
+
+			// Handle all open editors
+			//
+			for (IEditorPart editor : UIHelper.getAllEditors()) {
+
+				if (GeneratedCodeChangedListener.getMode() == GeneratedCodeChangedListenerMode.USER) {
+
+					// Bring the editor to the top to allow the user identify the changes
+					//
+					UIHelper.activateEditor(editor);
+				}
+
+				this.handleEditorBeforeSave(editor);
+			}
+
+			if (GeneratedCodeChangedListener.getMode() == GeneratedCodeChangedListenerMode.USER) {
+
+				// Bring the 'currentEditor' back to the top
+				//
+				UIHelper.activateEditor(currentEditor);
+			}
+		}
+
+	}
+
+	/**
+	 * This will do the actual work: If the given {@link IEditorPart editor} is a Java editor, check if any methods that
+	 * are tagged with '@generated' have been {@link #getChangedMethodsWithGeneratedTag(ITypeRoot, ITextFileBuffer)
+	 * changed} and, if this is the case, {@link #handleChangedMethodsWithGeneratedTag(List, ITextFileBuffer) react}
+	 * accordingly.
+	 *
+	 * @param editor
+	 *            The {@link IEditorPart editor} that shall be handled.
+	 */
+	protected void handleEditorBeforeSave(IEditorPart editor) {
 
 		if (!(editor instanceof CompilationUnitEditor) || ((CompilationUnitEditor) editor).getViewer() == null) {
 			return;
@@ -209,7 +252,6 @@ public class GeneratedCodeChangedListener extends WorkspaceCommandListener {
 			AgteleUIPlugin.getPlugin().getLog().log(new Status(Status.ERROR, "de.tud.et.ifa.agtele.eclipse.commons.ui",
 					e.getMessage() != null ? e.getMessage() : e.toString(), e));
 		}
-
 	}
 
 	/**
