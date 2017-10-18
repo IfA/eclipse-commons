@@ -379,9 +379,15 @@ public class GeneratedCodeChangedListener extends WorkspaceCommandListener {
 
 			if (GeneratedCodeChangedListener.getMode() == GeneratedCodeChangedListenerMode.USER) {
 
+				StringBuilder methodIdentifier = new StringBuilder(sourceMethod.getElementName()).append("(");
+				if (sourceMethod.getNumberOfParameters() > 0) {
+					methodIdentifier.append("...");
+				}
+				methodIdentifier.append(")");
+
 				// If we are instead in USER mode, present a dialog to the user
 				//
-				AddNotToGeneratedTagDialog dialog = new AddNotToGeneratedTagDialog(sourceMethod.getElementName(),
+				AddNotToGeneratedTagDialog dialog = new AddNotToGeneratedTagDialog(methodIdentifier.toString(),
 						methods.size() - i - 1);
 				dialog.create();
 
@@ -638,10 +644,8 @@ public class GeneratedCodeChangedListener extends WorkspaceCommandListener {
 		public void create() {
 
 			super.create();
-			this.setTitle("Add 'NOT' to '@generated' tag?");
-			this.setMessage("The method '" + this.methodIdentifier
-					+ "' is tagged with '@generated' but was changed manually. Shall this tag be changed to '@generated NOT'?",
-					IMessageProvider.WARNING);
+			this.setTitle("Method '" + this.methodIdentifier + "' was changed!");
+			this.setMessage("Change '@generated' tag to '@generated NOT'?", IMessageProvider.WARNING);
 		}
 
 		@Override
@@ -678,6 +682,11 @@ public class GeneratedCodeChangedListener extends WorkspaceCommandListener {
 				this.doNotAskAnyMoreButton
 						.setText("Remember my decision (" + this.pendingRequests + " additional changes)");
 			}
+
+			Label lblInfo = new Label(container, SWT.WRAP);
+			lblInfo.setLayoutData(new GridData(SWT.LEFT, SWT.BOTTOM, true, true, 2, 1));
+			lblInfo.setText(
+					"Note: This dialog can be disabled via \"Agtele Settings -> Add 'NOT' to changed '@generated' methods\"!");
 
 			return area;
 		}
