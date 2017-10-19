@@ -39,6 +39,8 @@ import org.eclipse.jface.dialogs.TitleAreaDialog;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IRegion;
+import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
@@ -55,6 +57,7 @@ import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.commands.ICommandService;
 
 import de.tud.et.ifa.agtele.ui.AgteleUIPlugin;
+import de.tud.et.ifa.agtele.ui.handlers.PushCodeToEcoreHandler;
 import de.tud.et.ifa.agtele.ui.util.UIHelper;
 
 /**
@@ -158,6 +161,7 @@ public class GeneratedCodeChangedListener extends WorkspaceCommandListener {
 		}
 
 		IEditorPart currentEditor = UIHelper.getCurrentEditor();
+		ISelection currentSelection = UIHelper.getCurrentSelection();
 
 		if (commandId.equals(IWorkbenchCommandConstants.FILE_SAVE)) {
 
@@ -181,14 +185,14 @@ public class GeneratedCodeChangedListener extends WorkspaceCommandListener {
 				this.handleEditorBeforeSave(editor);
 			}
 
-			if (GeneratedCodeChangedListener.getMode() == GeneratedCodeChangedListenerMode.USER) {
-
-				// Bring the 'currentEditor' back to the top
-				//
-				UIHelper.activateEditor(currentEditor);
-			}
 		}
 
+		// Reset the original UI state (bring the 'currentEditor' back to the top and reset the 'currentSelection')
+		//
+		UIHelper.activateEditor(currentEditor);
+		if (currentEditor instanceof ISelectionProvider) {
+			((ISelectionProvider) currentEditor).setSelection(currentSelection);
+		}
 	}
 
 	/**
@@ -452,6 +456,7 @@ public class GeneratedCodeChangedListener extends WorkspaceCommandListener {
 
 			// The user chose 'Yes' -> add NOT tag
 			//
+			// FIXME also enable 'pushing to ecore' and 'creating Gen method' instead
 			if (doNotAskAnyMore) {
 				for (SourceMethod m : methods.subList(i, methods.size())) {
 					this.addNotTag(m, textFileBuffer, explanation);
@@ -487,6 +492,34 @@ public class GeneratedCodeChangedListener extends WorkspaceCommandListener {
 
 		textFileBuffer.getDocument().replace(method.getSourceRange().getOffset(), method.getSourceRange().getLength(),
 				newSource);
+
+	}
+
+	/**
+	 * Invoke the {@link PushCodeToEcoreHandler}.
+	 * <p />
+	 * Note: The 'pushToEcore' handler is invoked asynchronously in order not to interrupt the current save process.
+	 *
+	 * @param method
+	 *            The {@link SourceMethod} to which the 'NOT' shall be added.
+	 * @param textFileBuffer
+	 *            The {@link ITextFileBuffer} buffering the contents of the Java file representing the given
+	 *            <em>method</em>.
+	 */
+	protected void pushToEcore(SourceMethod method, ITextFileBuffer textFileBuffer) {
+
+		UIHelper.getShell().getDisplay().asyncExec(() -> {
+
+			try {
+
+				new PushCodeToEcoreHandler().execute(new ExecutionEvent());
+
+			} catch (ExecutionException e) {
+				AgteleUIPlugin.getPlugin().getLog()
+						.log(new Status(Status.ERROR, "de.tud.et.ifa.agtele.eclipse.commons.ui",
+								e.getMessage() != null ? e.getMessage() : e.toString(), e));
+			}
+		});
 	}
 
 	@Override
