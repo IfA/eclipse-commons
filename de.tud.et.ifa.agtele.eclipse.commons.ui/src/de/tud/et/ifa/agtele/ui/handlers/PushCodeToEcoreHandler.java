@@ -35,7 +35,7 @@ import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.ui.IEditorPart;
 
 import de.tud.et.ifa.agtele.emf.AgteleEcoreUtil;
-import de.tud.et.ifa.agtele.ui.handlers.AbstractGeneratedEMFCodeHandler.EMFGeneratedJavaFileType;
+import de.tud.et.ifa.agtele.ui.emf.EMFGeneratedJavaFileType;
 import de.tud.et.ifa.agtele.ui.util.UIHelper;
 
 /**
