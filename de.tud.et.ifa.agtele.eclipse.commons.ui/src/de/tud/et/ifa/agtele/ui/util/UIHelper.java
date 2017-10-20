@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.swt.widgets.Shell;
@@ -20,6 +21,8 @@ import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.part.FileEditorInput;
+
+import de.tud.et.ifa.agtele.ui.AgteleUIPlugin;
 
 /**
  * This provides convenience methods related to the Eclipse UI.
@@ -340,6 +343,18 @@ public interface UIHelper {
 		if (page != null) {
 			page.activate(editor);
 		}
+	}
+
+	/**
+	 * Logs the given {@link Throwable} to the error log of the {@link AgteleUIPlugin}.
+	 *
+	 * @param throwable
+	 *            The {@link Throwable} to log.
+	 */
+	public static void log(Throwable throwable) {
+
+		AgteleUIPlugin.getPlugin().getLog().log(new Status(Status.ERROR, AgteleUIPlugin.PLUGIN_ID,
+				throwable.getMessage() != null ? throwable.getMessage() : throwable.toString(), throwable));
 	}
 
 }
