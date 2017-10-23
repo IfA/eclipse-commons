@@ -47,6 +47,9 @@
 		<last><sort><fileset dir="${osgi.syspath}" includes="org.eclipse.emf.edit_*.jar" /></sort></last>
 		<last><sort><fileset dir="${osgi.syspath}" includes="org.eclipse.emf.ecore.change_*.jar" /></sort></last>
 		<last><sort><fileset dir="${osgi.syspath}" includes="org.eclipse.emf.compare_*.jar" /></sort></last>
+		<last><sort><fileset dir="${osgi.syspath}" includes="org.eclipse.emf.codegen_*.jar" /></sort></last>
+		<last><sort><fileset dir="${osgi.syspath}" includes="org.eclipse.emf.codegen.ecore_*.jar" /></sort></last>
+		<last><sort><fileset dir="${osgi.syspath}" includes="org.eclipse.emf.ecore.xmi_*.jar" /></sort></last>
 		<!-- commons.ui -->
 		<last><sort><fileset dir="${osgi.syspath}" includes="org.eclipse.ui_*.jar"/></sort></last>
 		<last><sort><fileset dir="${osgi.syspath}" includes="org.eclipse.swt_*.jar"/></sort></last>
@@ -83,6 +86,24 @@
 		<last><sort><fileset dir="${osgi.syspath}" includes="org.eclipse.e4.core.commands_*.jar"/></sort></last>
 		<last><sort><fileset dir="${osgi.syspath}" includes="org.eclipse.e4.core.contexts_*.jar"/></sort></last>
 		<last><sort><fileset dir="${osgi.syspath}" includes="org.eclipse.emf.cdo.transfer.ui_*.jar"/></sort></last>
+		<last><sort><fileset dir="${osgi.syspath}" includes="org.eclipse.emf.compare_*.jar"/></sort></last>
+		<last><sort><fileset dir="${osgi.syspath}" includes="org.eclipse.ocl.ecore_*.jar"/></sort></last>
+		<last><sort><fileset dir="${osgi.syspath}" includes="org.eclipse.xsd_*.jar"/></sort></last>
+		<last><sort><fileset dir="${osgi.syspath}" includes="org.eclipse.jdt.compiler.apt_*.jar"/></sort></last>
+		<last><sort><fileset dir="${osgi.syspath}" includes="org.eclipse.ocl.common_*.jar"/></sort></last>
+		<last><sort><fileset dir="${osgi.syspath}" includes="org.eclipse.text_*.jar"/></sort></last>
+		<last><sort><fileset dir="${osgi.syspath}" includes="org.eclipse.e4.ui.css.swt.theme_*.jar"/></sort></last>
+		<last><sort><fileset dir="${osgi.syspath}" includes="org.eclipse.e4.ui.workbench_*.jar"/></sort></last>
+		<last><sort><fileset dir="${osgi.syspath}" includes="org.eclipse.jdt.compiler.tool_*.jar"/></sort></last>
+		<last><sort><fileset dir="${osgi.syspath}" includes="org.eclipse.jdt.core.manipulation_*.jar"/></sort></last>
+		<last><sort><fileset dir="${osgi.syspath}" includes="org.eclipse.jdt.core_*.jar"/></sort></last>
+		<last><sort><fileset dir="${osgi.syspath}" includes="org.eclipse.debug.core_*.jar"/></sort></last>
+		<last><sort><fileset dir="${osgi.syspath}" includes="org.eclipse.ocl_*.jar"/></sort></last>
+		<last><sort><fileset dir="${osgi.syspath}" includes="org.eclipse.jface.text_*.jar"/></sort></last>
+		<last><sort><fileset dir="${osgi.syspath}" includes="lpg.runtime.java_*.jar"/></sort></last>
+		<last><sort><fileset dir="${osgi.syspath}" includes="org.eclipse.ui.console_*.jar"/></sort></last>
+		<last><sort><fileset dir="${osgi.syspath}" includes="org.eclipse.core.filebuffers_*.jar"/></sort></last>
+		<last><sort><fileset dir="${osgi.syspath}" includes="org.eclipse.jdt.ui_*.jar"/></sort></last>
 	</path>
 	
 	<!-- ================================= 
@@ -91,6 +112,8 @@
 	<target name="generate">
 		
 		<echo>Generating JavaDocs...</echo>
+		
+		<echo>${basedir}${file.separator}..${file.separator}..${file.separator}de.tud.et.ifa.agtele.eclipse.commons.git${file.separator}src;${basedir}${file.separator}..${file.separator}..${file.separator}de.tud.et.ifa.agtele.eclipse.commons.ui.git${file.separator}src;${basedir}${file.separator}..${file.separator}..${file.separator}de.tud.et.ifa.agtele.eclipse.commons${file.separator}src;${basedir}${file.separator}..${file.separator}..${file.separator}de.tud.et.ifa.agtele.eclipse.commons.ui${file.separator}src</echo>
 	
 		<exec executable="javadoc"> <!--JDK is expected to be on the Windows path! -->
 			
@@ -106,7 +129,7 @@
 			<!-- the src folders of the 'commons' and the 'commons.ui' plugins 
 				(including and without an additional '.git' suffix in the paths to work with both options -->
 			<arg value="-sourcepath" />
-			<arg value="${basedir}${file.separator}..${file.separator}..${file.separator}de.tud.et.ifa.agtele.eclipse.commons.git${file.separator}src;${basedir}${file.separator}..${file.separator}..${file.separator}de.tud.et.ifa.agtele.eclipse.commons.ui.git${file.separator}src;${basedir}${file.separator}..${file.separator}..${file.separator}de.tud.et.ifa.agtele.eclipse.commons${file.separator}src;${basedir}${file.separator}..${file.separator}..${file.separator}de.tud.et.ifa.agtele.eclipse.commons.ui${file.separator}src" />
+			<arg value="${basedir}${file.separator}..${file.separator}de.tud.et.ifa.agtele.eclipse.commons${file.separator}src;${basedir}${file.separator}..${file.separator}de.tud.et.ifa.agtele.eclipse.commons.ui${file.separator}src" />
 			
 			<!-- the destination directory for the generated docs -->
 			<arg value="-d" />
