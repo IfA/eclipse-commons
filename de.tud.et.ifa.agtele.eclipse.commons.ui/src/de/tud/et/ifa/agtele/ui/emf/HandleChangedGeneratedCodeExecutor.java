@@ -137,13 +137,11 @@ public class HandleChangedGeneratedCodeExecutor {
 	 *
 	 * @param askUser
 	 *            Whether the user shall be asked what to do with changed methods.
-	 * @return A Map that, for each of the handled {@link SourceMethod methods}, provides either a
-	 *         {@link PushCodeToEcoreResult} if the method was {@link #pushToEcore(SourceMethod) pushed to Ecore} or an
-	 *         empty Optional if {@link #addNotTag(SourceMethod, Optional) a NOT tag was added} instead.
+	 * @return A {@link HandleChangedGeneratedCodeExecutionResult} indicating the result of the execution.
 	 * @throws CoreException
 	 * @throws BadLocationException
 	 */
-	public Map<SourceMethod, Optional<PushCodeToEcoreResult>> execute(boolean askUser)
+	public HandleChangedGeneratedCodeExecutionResult execute(boolean askUser)
 			throws CoreException, BadLocationException {
 
 		ITextFileBufferManager fileBufferManager = FileBuffers.getTextFileBufferManager();
@@ -161,7 +159,8 @@ public class HandleChangedGeneratedCodeExecutor {
 		if (!this.textFileBuffer.isDirty()) {
 			// Nothing to do as there are no changes that we need to check
 			//
-			return new HashMap<>();
+			return new HandleChangedGeneratedCodeExecutionResult((IEditorPart) this.javaEditor, this.ecoreEditor,
+					new HashMap<>());
 		}
 
 		// All methods that are tagged with '@generated' and have been changed by the user since the last save
@@ -322,13 +321,14 @@ public class HandleChangedGeneratedCodeExecutor {
 	 *             If an exception occurs while accessing the resource corresponding to the given buffer.
 	 * @throws BadLocationException
 	 */
-	protected Map<SourceMethod, Optional<PushCodeToEcoreResult>> handleChangedMethodsWithGeneratedTag(
-			List<SourceMethod> methods, boolean askUser) throws JavaModelException, BadLocationException {
+	protected HandleChangedGeneratedCodeExecutionResult handleChangedMethodsWithGeneratedTag(List<SourceMethod> methods,
+			boolean askUser) throws JavaModelException, BadLocationException {
 
 		if (methods.isEmpty()) {
 			// Nothing to be done
 			//
-			return new HashMap<>();
+			return new HandleChangedGeneratedCodeExecutionResult((IEditorPart) this.javaEditor, this.ecoreEditor,
+					new HashMap<>());
 		}
 
 		Map<SourceMethod, Optional<PushCodeToEcoreResult>> resultMap = new HashMap<>();
@@ -391,7 +391,8 @@ public class HandleChangedGeneratedCodeExecutor {
 
 		}
 
-		return resultMap;
+		return new HandleChangedGeneratedCodeExecutionResult((IEditorPart) this.javaEditor, this.ecoreEditor,
+				resultMap);
 	}
 
 	/**
@@ -447,7 +448,10 @@ public class HandleChangedGeneratedCodeExecutor {
 
 		} catch (Exception e) {
 			throw new HandleChangedGeneratedCodeExecutorException(e);
+		} finally {
+			UIHelper.activateEditor((IEditorPart) this.javaEditor);
 		}
+
 	}
 
 	/**
@@ -715,5 +719,81 @@ public class HandleChangedGeneratedCodeExecutor {
 			super(cause);
 		}
 
+	}
+
+	/**
+	 * A simple POJO indicating the result of an {@link HandleChangedGeneratedCodeExecutor#execute(boolean) execution}
+	 * of a {@link HandleChangedGeneratedCodeExecutor}.
+	 *
+	 * @author mfreund
+	 */
+	public class HandleChangedGeneratedCodeExecutionResult {
+
+		/**
+		 * This create an instance.
+		 *
+		 * @param editor
+		 * @param ecoreEditor
+		 * @param pushedMethods
+		 */
+		public HandleChangedGeneratedCodeExecutionResult(IEditorPart editor, IEditorPart ecoreEditor,
+				Map<SourceMethod, Optional<PushCodeToEcoreResult>> pushedMethods) {
+
+			super();
+			this.editor = editor;
+			this.ecoreEditor = ecoreEditor;
+			this.pushedMethods = pushedMethods;
+		}
+
+		/**
+		 * The {@link IEditorPart} on which the save was performed.
+		 */
+		protected IEditorPart editor;
+
+		/**
+		 * If at least one method was {@link HandleChangedGeneratedCodeExecutor pushed to ecore}, this contains the
+		 * {@link IEditorPart editor} used for the push.
+		 */
+		protected IEditorPart ecoreEditor;
+
+		/**
+		 * A Map that, for each of the handled {@link SourceMethod methods}, provides either a
+		 * {@link PushCodeToEcoreResult} if the method was {@link #pushToEcore(SourceMethod) pushed to Ecore} or an
+		 * empty Optional if {@link #addNotTag(SourceMethod, Optional) a NOT tag was added} instead.
+		 */
+		protected Map<SourceMethod, Optional<PushCodeToEcoreResult>> pushedMethods;
+
+		/**
+		 * @return the {@link #editor}
+		 */
+		public IEditorPart getEditor() {
+
+			return this.editor;
+		}
+
+		/**
+		 * @return the {@link #editor} if it is a {@link CompilationUnitEditor} or an empty Optional otherwise
+		 */
+		public Optional<CompilationUnitEditor> getJavaEditor() {
+
+			return this.editor instanceof CompilationUnitEditor ? Optional.of((CompilationUnitEditor) this.editor)
+					: Optional.empty();
+		}
+
+		/**
+		 * @return the {@link #ecoreEditor}
+		 */
+		public Optional<IEditorPart> getEcoreEditor() {
+
+			return Optional.ofNullable(this.ecoreEditor);
+		}
+
+		/**
+		 * @return the {@link #pushedMethods}
+		 */
+		public Map<SourceMethod, Optional<PushCodeToEcoreResult>> getPushedMethods() {
+
+			return this.pushedMethods;
+		}
 	}
 }
