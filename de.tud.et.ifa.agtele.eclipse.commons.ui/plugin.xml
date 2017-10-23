@@ -74,6 +74,41 @@
                   label="Show inherited Class Features"
                   style="toggle">
             </command>
+            <menu
+                  id="de.tud.et.ifa.agtele.eclipse.commons.ui.changeGeneratedCodeChangedListenerBehaviorMenu"
+                  label="React to changed &apos;@generated&apos; methods"
+                  tooltip="Customize the behavior of the listener that reacts to manual changes to &apos;@generated&apos; methods.">
+            <command
+                  commandId="de.tud.et.ifa.agtele.eclipse.commons.ui.changeGeneratedCodeChangedListenerBehaviorCommand"
+                  label="User"
+                  style="radio"
+                  tooltip="On a per-change basis, let the user decide (via a dialog) whether to react to.">
+                   <parameter
+                     name="org.eclipse.ui.commands.radioStateParameter"
+                     value="0">
+               </parameter>
+            </command>
+            <command
+                  commandId="de.tud.et.ifa.agtele.eclipse.commons.ui.changeGeneratedCodeChangedListenerBehaviorCommand"
+                  label="Automatic"
+                  style="radio"
+                  tooltip="Automatically react to changes (push to Ecore or - if not possible - add a &apos;NOT&apos; to the &apos;@generated&apos; tag.)">
+                   <parameter
+                     name="org.eclipse.ui.commands.radioStateParameter"
+                     value="1">
+               </parameter>
+            </command>
+            <command
+                  commandId="de.tud.et.ifa.agtele.eclipse.commons.ui.changeGeneratedCodeChangedListenerBehaviorCommand"
+                  label="Off"
+                  style="radio"
+                  tooltip="Turn off the listener.">
+               <parameter
+                     name="org.eclipse.ui.commands.radioStateParameter"
+                     value="2">
+               </parameter>
+            </command>
+         </menu>
          </menu>
       </menuContribution>
       <menuContribution
@@ -84,6 +119,8 @@
                label="Show inherited Class Features"
                style="toggle">
          </command>
+         
+         
       </menuContribution>
    </extension>
    <extension
@@ -143,5 +180,25 @@
             id="de.tud.et.ifa.agtele.ui.commands.AddDocumentationAnnotation"
             name="AddDocumentationAnnotation">
       </command>
+      <command
+            defaultHandler="de.tud.et.ifa.agtele.ui.handlers.ChangeGeneratedCodeChangedListenerBehaviorHandler"
+            id="de.tud.et.ifa.agtele.eclipse.commons.ui.changeGeneratedCodeChangedListenerBehaviorCommand"
+            name="ChangeGeneratedCodeChangedListenerBehaviorCommand">
+         <commandParameter
+               id="org.eclipse.ui.commands.radioStateParameter"
+               name="State"
+               optional="false">
+         </commandParameter>
+         <state
+               class="org.eclipse.ui.handlers.RadioState:0"
+               id="org.eclipse.ui.commands.radioState">
+         </state>
+      </command>
+   </extension>
+   <extension
+         point="org.eclipse.ui.startup">
+      <startup
+            class="de.tud.et.ifa.agtele.ui.StartupClass">
+      </startup>
    </extension>
 </plugin>

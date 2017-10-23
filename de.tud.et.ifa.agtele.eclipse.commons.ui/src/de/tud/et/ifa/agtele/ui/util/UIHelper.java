@@ -16,6 +16,7 @@ import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchPart;
+import org.eclipse.ui.IWorkbenchPartSite;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
@@ -46,50 +47,21 @@ public interface UIHelper {
 	}
 
 	/**
-	 * This returns the currently active {@link IEditorPart editor}.
+	 * Returns the active {@link IWorkbenchPage} from the active {@link IWorkbenchWindow}.
 	 * <p />
 	 * <b>Important:</b> This must be called from the UI thread. If called from a non-UI thread, it will throw an
 	 * 'InvalidThreadAccessException'.
 	 *
-	 * @return The currently active {@link IEditorPart editor} or '<em><b>null</b></em>' if there is no open editor.
+	 * @return The currently active {@link IWorkbenchPage} or '<em><b>null</b></em>' if there is no open window/page.
 	 */
-	public static IEditorPart getCurrentEditor() {
+	public static IWorkbenchPage getCurrentPage() {
 
 		IWorkbench wb = PlatformUI.getWorkbench();
 		IWorkbenchWindow window = wb.getActiveWorkbenchWindow();
 		if (window == null) {
 			return null;
 		}
-		IWorkbenchPage page = window.getActivePage();
-		if (page == null) {
-			return null;
-		}
-		return page.getActiveEditor();
-	}
-
-	/**
-	 * This returns all open {@link IEditorPart editors}.
-	 * <p />
-	 * <b>Important:</b> This must be called from the UI thread. If called from a non-UI thread, it will throw an
-	 * 'InvalidThreadAccessException'.
-	 *
-	 * @return The open {@link IEditorPart editors} or an empty list if there is no open editor.
-	 */
-	public static List<IEditorPart> getAllEditors() {
-
-		IWorkbench wb = PlatformUI.getWorkbench();
-		IWorkbenchWindow window = wb.getActiveWorkbenchWindow();
-		if (window == null) {
-			return new ArrayList<>();
-		}
-		IWorkbenchPage page = window.getActivePage();
-		if (page == null) {
-			return new ArrayList<>();
-		}
-
-		return Arrays.asList(page.getEditorReferences()).stream().map(r -> r.getEditor(false))
-				.collect(Collectors.toList());
-
+		return window.getActivePage();
 	}
 
 	/**
@@ -102,16 +74,39 @@ public interface UIHelper {
 	 */
 	public static IWorkbenchPart getCurrentPart() {
 
-		IWorkbench wb = PlatformUI.getWorkbench();
-		IWorkbenchWindow window = wb.getActiveWorkbenchWindow();
-		if (window == null) {
-			return null;
-		}
-		IWorkbenchPage page = window.getActivePage();
-		if (page == null) {
-			return null;
-		}
-		return page.getActivePart();
+		IWorkbenchPage page = UIHelper.getCurrentPage();
+		return page != null ? page.getActivePart() : null;
+	}
+
+	/**
+	 * This returns the currently active {@link IEditorPart editor}.
+	 * <p />
+	 * <b>Important:</b> This must be called from the UI thread. If called from a non-UI thread, it will throw an
+	 * 'InvalidThreadAccessException'.
+	 *
+	 * @return The currently active {@link IEditorPart editor} or '<em><b>null</b></em>' if there is no open editor.
+	 */
+	public static IEditorPart getCurrentEditor() {
+
+		IWorkbenchPage page = UIHelper.getCurrentPage();
+		return page != null ? page.getActiveEditor() : null;
+	}
+
+	/**
+	 * This returns all open {@link IEditorPart editors}.
+	 * <p />
+	 * <b>Important:</b> This must be called from the UI thread. If called from a non-UI thread, it will throw an
+	 * 'InvalidThreadAccessException'.
+	 *
+	 * @return The open {@link IEditorPart editors} or an empty list if there is no open editor.
+	 */
+	public static List<IEditorPart> getAllEditors() {
+
+		IWorkbenchPage page = UIHelper.getCurrentPage();
+		return page == null ? new ArrayList<>()
+				: Arrays.asList(page.getEditorReferences()).stream().map(r -> r.getEditor(false))
+						.collect(Collectors.toList());
+
 	}
 
 	/**
@@ -141,9 +136,8 @@ public interface UIHelper {
 	public static List<IEditorInput> getAllEditorInputs() {
 
 		List<IEditorPart> editors = UIHelper.getAllEditors();
-		return editors.stream().filter(e -> {
-			return e != null && e instanceof IEditorPart;
-		}).collect(Collectors.toList()).stream().map(IEditorPart::getEditorInput).collect(Collectors.toList());
+		return editors.stream().filter(e -> e != null && e instanceof IEditorPart).collect(Collectors.toList()).stream()
+				.map(IEditorPart::getEditorInput).collect(Collectors.toList());
 	}
 
 	/**
@@ -182,6 +176,9 @@ public interface UIHelper {
 
 	/**
 	 * This opens an editor identified by a given 'editorID' for a given {@link IEditorInput}.
+	 * <p />
+	 * <b>Important:</b> This must be called from the UI thread. If called from a non-UI thread, it will throw an
+	 * 'InvalidThreadAccessException'.
 	 *
 	 * @see #openEditor(IEditorInput, IEditorDescriptor)
 	 * @see #openEditor(IFile, String)
@@ -199,15 +196,16 @@ public interface UIHelper {
 	 */
 	public static IEditorPart openEditor(IEditorInput editorInput, String editorID) throws PartInitException {
 
-		IWorkbench wb = PlatformUI.getWorkbench();
-		IWorkbenchWindow window = wb.getActiveWorkbenchWindow();
-		IWorkbenchPage page = window.getActivePage();
+		IWorkbenchPage page = UIHelper.getCurrentPage();
 
-		return page.openEditor(editorInput, editorID);
+		return page != null ? page.openEditor(editorInput, editorID) : null;
 	}
 
 	/**
 	 * This opens an editor identified by a given {@link IEditorDescriptor} for a given {@link IEditorInput}.
+	 * <p />
+	 * <b>Important:</b> This must be called from the UI thread. If called from a non-UI thread, it will throw an
+	 * 'InvalidThreadAccessException'.
 	 *
 	 * @see #openEditor(IEditorInput, String)
 	 * @see #openEditor(IFile, String)
@@ -226,15 +224,16 @@ public interface UIHelper {
 	public static IEditorPart openEditor(IEditorInput editorInput, IEditorDescriptor editorDescriptor)
 			throws PartInitException {
 
-		IWorkbench wb = PlatformUI.getWorkbench();
-		IWorkbenchWindow window = wb.getActiveWorkbenchWindow();
-		IWorkbenchPage page = window.getActivePage();
+		IWorkbenchPage page = UIHelper.getCurrentPage();
 
-		return page.openEditor(editorInput, editorDescriptor.getId());
+		return page != null ? page.openEditor(editorInput, editorDescriptor.getId()) : null;
 	}
 
 	/**
 	 * This opens an editor identified by a given 'editorID' for a given {@link IFile}.
+	 * <p />
+	 * <b>Important:</b> This must be called from the UI thread. If called from a non-UI thread, it will throw an
+	 * 'InvalidThreadAccessException'.
 	 *
 	 * @see #openEditor(IEditorInput, String)
 	 * @see #openEditor(IEditorInput, IEditorDescriptor)
@@ -252,15 +251,16 @@ public interface UIHelper {
 	 */
 	public static IEditorPart openEditor(IFile editorInput, String editorID) throws PartInitException {
 
-		IWorkbench wb = PlatformUI.getWorkbench();
-		IWorkbenchWindow window = wb.getActiveWorkbenchWindow();
-		IWorkbenchPage page = window.getActivePage();
+		IWorkbenchPage page = UIHelper.getCurrentPage();
 
-		return page.openEditor(new FileEditorInput(editorInput), editorID);
+		return page != null ? page.openEditor(new FileEditorInput(editorInput), editorID) : null;
 	}
 
 	/**
 	 * This opens an editor identified by a given {@link IEditorDescriptor} for a given {@link IFile}.
+	 * <p />
+	 * <b>Important:</b> This must be called from the UI thread. If called from a non-UI thread, it will throw an
+	 * 'InvalidThreadAccessException'.
 	 *
 	 * @see #openEditor(IEditorInput, String)
 	 * @see #openEditor(IEditorInput, IEditorDescriptor)
@@ -279,15 +279,16 @@ public interface UIHelper {
 	public static IEditorPart openEditor(IFile editorInput, IEditorDescriptor editorDescriptor)
 			throws PartInitException {
 
-		IWorkbench wb = PlatformUI.getWorkbench();
-		IWorkbenchWindow window = wb.getActiveWorkbenchWindow();
-		IWorkbenchPage page = window.getActivePage();
+		IWorkbenchPage page = UIHelper.getCurrentPage();
 
-		return page.openEditor(new FileEditorInput(editorInput), editorDescriptor.getId());
+		return page != null ? page.openEditor(new FileEditorInput(editorInput), editorDescriptor.getId()) : null;
 	}
 
 	/**
 	 * This opens the default editor for a given {@link IFile}.
+	 * <p />
+	 * <b>Important:</b> This must be called from the UI thread. If called from a non-UI thread, it will throw an
+	 * 'InvalidThreadAccessException'.
 	 *
 	 * @see #openEditor(IEditorInput, String)
 	 * @see #openEditor(IEditorInput, IEditorDescriptor)
@@ -303,9 +304,7 @@ public interface UIHelper {
 	 */
 	public static IEditorPart openEditor(IFile editorInput) throws PartInitException {
 
-		IWorkbench wb = PlatformUI.getWorkbench();
-		IWorkbenchWindow window = wb.getActiveWorkbenchWindow();
-		IWorkbenchPage page = window.getActivePage();
+		IWorkbenchPage page = UIHelper.getCurrentPage();
 
 		IEditorDescriptor editorDescriptor = PlatformUI.getWorkbench().getEditorRegistry()
 				.getDefaultEditor(editorInput.getName());
@@ -317,8 +316,33 @@ public interface UIHelper {
 					.findEditor("org.eclipse.ui.DefaultTextEditor");
 		}
 
-		return editorDescriptor != null ? page.openEditor(new FileEditorInput(editorInput), editorDescriptor.getId())
+		return editorDescriptor != null && page != null
+				? page.openEditor(new FileEditorInput(editorInput), editorDescriptor.getId())
 				: null;
+	}
+
+	/**
+	 * This activates the given {@link IEditorPart editor}.
+	 * <p />
+	 * <b>Important:</b> This must be called from the UI thread. If called from a non-UI thread, it will throw an
+	 * 'InvalidThreadAccessException'.
+	 *
+	 * @param editor
+	 *            The {@link IEditorPart} to activate.
+	 */
+	public static void activateEditor(IEditorPart editor) {
+
+		IWorkbenchPartSite site = editor.getSite();
+
+		if (site == null) {
+			return;
+		}
+
+		IWorkbenchPage page = site.getPage();
+
+		if (page != null) {
+			page.activate(editor);
+		}
 	}
 
 	/**
