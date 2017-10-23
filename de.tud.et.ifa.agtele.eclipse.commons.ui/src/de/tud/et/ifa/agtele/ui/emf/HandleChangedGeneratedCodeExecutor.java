@@ -578,16 +578,17 @@ public class HandleChangedGeneratedCodeExecutor {
 		public void create() {
 
 			super.create();
-			this.setTitle("Method '" + this.methodIdentifier + "' was changed!");
-			this.setMessage("Change '@generated' tag to '@generated NOT'?", IMessageProvider.WARNING);
+			this.setTitle("Generated method '" + this.methodIdentifier + "' was changed!");
+			this.setMessage("Push to Ecore or - if not possible - change '@generated' tag to '@generated NOT'?",
+					IMessageProvider.WARNING);
 		}
 
 		@Override
 		protected void createButtonsForButtonBar(Composite parent) {
 
 			// create OK and Cancel buttons (as default) but change their labels
-			this.createButton(parent, IDialogConstants.OK_ID, "Yes (Add NOT tag)", true);
-			this.createButton(parent, IDialogConstants.CANCEL_ID, "No", false);
+			this.createButton(parent, IDialogConstants.OK_ID, "Push to Ecore/Add NOT tag", true);
+			this.createButton(parent, IDialogConstants.CANCEL_ID, "Ignore", false);
 		}
 
 		@Override
@@ -603,11 +604,13 @@ public class HandleChangedGeneratedCodeExecutor {
 			container.setLayout(layout);
 
 			Label lblAdditionalTextoptional = new Label(container, SWT.NONE);
-			lblAdditionalTextoptional.setToolTipText("An explanation why this method was changed manually");
+			lblAdditionalTextoptional.setToolTipText(
+					"An explanation why this method was changed manually (will only be used if 'NOT' tag is used)");
 			lblAdditionalTextoptional.setText("Additional text (optional):");
 
 			this.addNotTagExplanationText = new Text(container, SWT.BORDER);
-			this.addNotTagExplanationText.setToolTipText("An explanation why this method was changed manually");
+			this.addNotTagExplanationText.setToolTipText(
+					"An explanation why this method was changed manually (will only be used if 'NOT' tag is used)");
 			this.addNotTagExplanationText.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
 
 			if (this.pendingRequests > 0) {
@@ -620,7 +623,7 @@ public class HandleChangedGeneratedCodeExecutor {
 			Label lblInfo = new Label(container, SWT.WRAP);
 			lblInfo.setLayoutData(new GridData(SWT.LEFT, SWT.BOTTOM, true, true, 2, 1));
 			lblInfo.setText(
-					"Note: This dialog can be disabled via \"Agtele Settings -> Add 'NOT' to changed '@generated' methods\"!");
+					"Note: This dialog can be disabled via \"Agtele Settings -> React to changed '@generated' methods\"!");
 
 			return area;
 		}
