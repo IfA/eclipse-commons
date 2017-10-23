@@ -470,7 +470,7 @@ public class HandleChangedGeneratedCodeExecutor {
 		method.getJavaModel().getChildren();
 
 		String newSource = oldSource.replaceFirst("@generated",
-				"@generated NOT" + (explanation.isPresent() ? " " + explanation : ""));
+				"@generated NOT" + (explanation.isPresent() ? " " + explanation.get() : ""));
 
 		this.textFileBuffer.getDocument().replace(method.getSourceRange().getOffset(),
 				method.getSourceRange().getLength(), newSource);
