@@ -90,9 +90,9 @@
             </command>
             <command
                   commandId="de.tud.et.ifa.agtele.eclipse.commons.ui.changeGeneratedCodeChangedListenerBehaviorCommand"
-                  label="Automatic"
+                  label="Automatic (Add NOT tag)"
                   style="radio"
-                  tooltip="Automatically react to changes (push to Ecore or - if not possible - add a &apos;NOT&apos; to the &apos;@generated&apos; tag.)">
+                  tooltip="Automatically react to changes by adding a &apos;NOT&apos; to the &apos;@generated&apos; tag as well as a TODO for the user.">
                    <parameter
                      name="org.eclipse.ui.commands.radioStateParameter"
                      value="1">

@@ -52,6 +52,7 @@ import org.eclipse.ui.PartInitException;
 
 import de.tud.et.ifa.agtele.ui.editors.AgteleEcoreEditor;
 import de.tud.et.ifa.agtele.ui.emf.PushCodeToEcoreExecutor.PushCodeToEcoreResult;
+import de.tud.et.ifa.agtele.ui.listeners.SelectionListener2;
 import de.tud.et.ifa.agtele.ui.util.UIHelper;
 
 /**
@@ -340,6 +341,8 @@ public class HandleChangedGeneratedCodeExecutor {
 			// Assume we are in GeneratedCodeChangedListenerMode#AUTOMATIC mode
 			//
 			boolean addNotTag = true;
+			boolean pushToEcore = false;
+			boolean addTodo = true;
 			Optional<String> explanation = Optional.empty();
 			boolean doNotAskAnyMore = true;
 
@@ -361,12 +364,14 @@ public class HandleChangedGeneratedCodeExecutor {
 
 				explanation = dialog.getAddNotTagExplanation();
 				doNotAskAnyMore = dialog.isDoNotAskAnyMore();
+				addTodo = dialog.isAddTodo();
+				pushToEcore = result == IDialogConstants.OPEN_ID;
 				addNotTag = result == Window.OK;
 			}
 
 			// The user chose 'No' -> do nothing
 			//
-			if (!addNotTag) {
+			if (!addNotTag && !pushToEcore) {
 				if (doNotAskAnyMore) {
 					break;
 				} else {
@@ -378,14 +383,15 @@ public class HandleChangedGeneratedCodeExecutor {
 			//
 			if (doNotAskAnyMore) {
 				for (SourceMethod m : methods.subList(i, methods.size())) {
-					Optional<PushCodeToEcoreResult> result = this.handleChangedMethodWithGeneratedTag(m, explanation);
+					Optional<PushCodeToEcoreResult> result = this.handleChangedMethodWithGeneratedTag(m, pushToEcore,
+							addTodo, explanation);
 					resultMap.put(m, result);
 				}
 				break;
 
 			} else {
 				Optional<PushCodeToEcoreResult> result = this.handleChangedMethodWithGeneratedTag(sourceMethod,
-						explanation);
+						pushToEcore, addTodo, explanation);
 				resultMap.put(sourceMethod, result);
 			}
 
@@ -396,11 +402,18 @@ public class HandleChangedGeneratedCodeExecutor {
 	}
 
 	/**
-	 * Handles a changed method by first trying to {@link #pushToEcore(SourceMethod) push the changes to the Ecore
-	 * metamodel} and, if this is not successful, {@link #addNotTag(SourceMethod, Optional) adding a 'NOT' tag} instead.
+	 * Handles a changed method by trying to {@link #pushToEcore(SourceMethod) push the changes to the Ecore metamodel}
+	 * if <em>pushToEcore</em> is set to '<em>true</em>' and, if this is not successful or if <em>pushToEcore</em> is
+	 * set to '<em>false</em>', {@link #addNotTag(SourceMethod, Optional) adding a 'NOT' tag} instead.
 	 *
 	 * @param method
 	 *            The {@link SourceMethod} to handle.
+	 * @param pushToEcore
+	 *            Whether the executor shall try to {@link #pushToEcore(SourceMethod) push the changes to the Ecore
+	 *            metamodel}.
+	 * @param addTodo
+	 *            Whether a 'TO DO' tag shall be added to the JavaDoc reminding the user to integrate these changes into
+	 *            the Ecore metamodel.
 	 * @param explanation
 	 *            An optional additional String explaining while the generated method body was changed.
 	 * @return A {@link PushCodeToEcoreResult} if the {@link #pushToEcore(SourceMethod) push to Ecore} was successful or
@@ -409,16 +422,22 @@ public class HandleChangedGeneratedCodeExecutor {
 	 * @throws BadLocationException
 	 */
 	protected Optional<PushCodeToEcoreResult> handleChangedMethodWithGeneratedTag(SourceMethod method,
-			Optional<String> explanation) throws JavaModelException, BadLocationException {
+			boolean pushToEcore, boolean addTodo, Optional<String> explanation)
+			throws JavaModelException, BadLocationException {
 
-		try {
-			return Optional.of(this.pushToEcore(method));
+		if (pushToEcore) {
 
-		} catch (HandleChangedGeneratedCodeExecutorException e) {
+			try {
+				return Optional.of(this.pushToEcore(method));
 
-			this.addNotTag(method, explanation);
-			return Optional.empty();
+			} catch (HandleChangedGeneratedCodeExecutorException e) {
+				// Nothing to do, just use 'addNotTag' instead
+				//
+			}
 		}
+
+		this.addNotTag(method, addTodo, explanation);
+		return Optional.empty();
 
 	}
 
@@ -459,18 +478,25 @@ public class HandleChangedGeneratedCodeExecutor {
 	 *
 	 * @param method
 	 *            The {@link SourceMethod} to which the 'NOT' shall be added.
+	 * @param addTodo
+	 *            Whether a 'TO DO' tag shall be added to the JavaDoc reminding the user to integrate these changes into
+	 *            the Ecore metamodel.
 	 * @param explanation
 	 *            An optional additional String that will be appended to the 'NOT' explaining while the generated method
 	 *            body was changed.
 	 */
-	protected void addNotTag(SourceMethod method, Optional<String> explanation)
+	protected void addNotTag(SourceMethod method, boolean addTodo, Optional<String> explanation)
 			throws JavaModelException, BadLocationException {
 
 		String oldSource = method.getSource();
 		method.getJavaModel().getChildren();
 
+		String todoString = addTodo
+				? "TODO Don't forget to incorporate your manual changes into the Ecore metamodel!\n*"
+				: "";
+
 		String newSource = oldSource.replaceFirst("@generated",
-				"@generated NOT" + (explanation.isPresent() ? " " + explanation : ""));
+				todoString + "@generated NOT" + (explanation.isPresent() ? " " + explanation.get() : ""));
 
 		this.textFileBuffer.getDocument().replace(method.getSourceRange().getOffset(),
 				method.getSourceRange().getLength(), newSource);
@@ -534,6 +560,16 @@ public class HandleChangedGeneratedCodeExecutor {
 		protected String addNotTagExplanation;
 
 		/**
+		 * A {@link Button} that allows the user to trigger the additional generation of a 'to do' in the JavaDoc.
+		 */
+		protected Button addTodoButton;
+
+		/**
+		 * A boolean indicating whether the user checked the {@link #addTodoButton}.
+		 */
+		protected boolean addTodo;
+
+		/**
 		 * A {@link Button} that allows the user to prevent further inquiries during the current save action.
 		 */
 		protected Button doNotAskAnyMoreButton;
@@ -572,6 +608,7 @@ public class HandleChangedGeneratedCodeExecutor {
 
 			this.addNotTagExplanation = "";
 			this.doNotAskAnyMore = false;
+			this.addTodo = false;
 		}
 
 		@Override
@@ -586,8 +623,14 @@ public class HandleChangedGeneratedCodeExecutor {
 		@Override
 		protected void createButtonsForButtonBar(Composite parent) {
 
-			// create OK and Cancel buttons (as default) but change their labels
-			this.createButton(parent, IDialogConstants.OK_ID, "Push to Ecore/Add NOT tag", true);
+			Button pushToEcoreButton = this.createButton(parent, IDialogConstants.OPEN_ID, "Push to Ecore", false);
+			pushToEcoreButton.addSelectionListener((SelectionListener2) e -> {
+				AddNotToGeneratedTagDialog.this.saveInput();
+				AddNotToGeneratedTagDialog.this.setReturnCode(IDialogConstants.OPEN_ID);
+				AddNotToGeneratedTagDialog.this.close();
+
+			});
+			this.createButton(parent, IDialogConstants.OK_ID, "Add NOT tag", true);
 			this.createButton(parent, IDialogConstants.CANCEL_ID, "Ignore", false);
 		}
 
@@ -612,6 +655,13 @@ public class HandleChangedGeneratedCodeExecutor {
 			this.addNotTagExplanationText.setToolTipText(
 					"An explanation why this method was changed manually (will only be used if 'NOT' tag is used)");
 			this.addNotTagExplanationText.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
+
+			this.addTodoButton = new Button(container, SWT.CHECK);
+			this.addTodoButton.setSelection(true);
+			this.addTodoButton.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1));
+			this.addTodoButton.setText("Create TODO");
+			this.addTodoButton.setToolTipText(
+					"Checking this will create a 'TODO' in the JavaDoc reminding the user to integrate the manual changes into the Ecore model");
 
 			if (this.pendingRequests > 0) {
 				this.doNotAskAnyMoreButton = new Button(container, SWT.CHECK);
@@ -640,6 +690,7 @@ public class HandleChangedGeneratedCodeExecutor {
 
 			this.addNotTagExplanation = this.addNotTagExplanationText.getText();
 			this.doNotAskAnyMore = this.doNotAskAnyMoreButton != null && this.doNotAskAnyMoreButton.getSelection();
+			this.addTodo = this.addTodoButton.getSelection();
 		}
 
 		@Override
@@ -677,6 +728,16 @@ public class HandleChangedGeneratedCodeExecutor {
 		public boolean isDoNotAskAnyMore() {
 
 			return this.doNotAskAnyMore;
+		}
+
+		/**
+		 * Whether the user selected the {@link #addTodoButton}.
+		 *
+		 * @return the {@link #addTodo}
+		 */
+		public boolean isAddTodo() {
+
+			return this.addTodo;
 		}
 
 	}
