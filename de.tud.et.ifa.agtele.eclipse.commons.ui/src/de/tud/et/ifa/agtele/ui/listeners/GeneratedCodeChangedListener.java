@@ -28,6 +28,7 @@ import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.ITypeRoot;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.SourceRange;
+import org.eclipse.jdt.internal.core.CompilationUnit;
 import org.eclipse.jdt.internal.core.SourceMethod;
 import org.eclipse.jdt.internal.core.SourceType;
 import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
@@ -57,6 +58,9 @@ import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.commands.ICommandService;
 
 import de.tud.et.ifa.agtele.ui.AgteleUIPlugin;
+import de.tud.et.ifa.agtele.ui.emf.GeneratedEMFCodeHelper;
+import de.tud.et.ifa.agtele.ui.emf.PushCodeToEcoreExecutor;
+import de.tud.et.ifa.agtele.ui.emf.PushCodeToEcoreExecutor.PushCodeToEcoreExecutorException;
 import de.tud.et.ifa.agtele.ui.handlers.PushCodeToEcoreHandler;
 import de.tud.et.ifa.agtele.ui.util.UIHelper;
 
@@ -222,6 +226,8 @@ public class GeneratedCodeChangedListener extends WorkspaceCommandListener {
 			return;
 		}
 
+		GeneratedEMFCodeHelper helper = new GeneratedEMFCodeHelper((CompilationUnit) root);
+
 		try {
 
 			ITextFileBufferManager fileBufferManager = FileBuffers.getTextFileBufferManager();
@@ -233,7 +239,7 @@ public class GeneratedCodeChangedListener extends WorkspaceCommandListener {
 
 			// The TextFileBuffer that knows about all changes to the document
 			//
-			ITextFileBuffer textFileBuffer = fileBufferManager.getTextFileBuffer(root.getPath(),
+			ITextFileBuffer textFileBuffer = fileBufferManager.getTextFileBuffer(helper.getCompilationUnit().getPath(),
 					LocationKind.NORMALIZE);
 
 			if (!textFileBuffer.isDirty()) {
@@ -249,7 +255,7 @@ public class GeneratedCodeChangedListener extends WorkspaceCommandListener {
 
 			// Add 'NOT' to the '@generated' tag if necessary
 			//
-			this.handleChangedMethodsWithGeneratedTag(changedMethodsWithGeneratedTag, textFileBuffer);
+			this.handleChangedMethodsWithGeneratedTag(changedMethodsWithGeneratedTag, helper, textFileBuffer);
 
 		} catch (Exception e) {
 
@@ -397,6 +403,9 @@ public class GeneratedCodeChangedListener extends WorkspaceCommandListener {
 	 *
 	 * @param methods
 	 *            A list of changed {@link SourceMethod methods} tagged with '@generated'.
+	 * @param helper
+	 *            The {@link GeneratedEMFCodeHelper} representing the CompilationUnit containing the given
+	 *            <em>methods</em>.
 	 * @param textFileBuffer
 	 *            The {@link ITextFileBuffer} buffering the contents of the Java file representing the given
 	 *            <em>methods</em>.
@@ -404,8 +413,8 @@ public class GeneratedCodeChangedListener extends WorkspaceCommandListener {
 	 *             If an exception occurs while accessing the resource corresponding to the given buffer.
 	 * @throws BadLocationException
 	 */
-	protected void handleChangedMethodsWithGeneratedTag(List<SourceMethod> methods, ITextFileBuffer textFileBuffer)
-			throws JavaModelException, BadLocationException {
+	protected void handleChangedMethodsWithGeneratedTag(List<SourceMethod> methods, GeneratedEMFCodeHelper helper,
+			ITextFileBuffer textFileBuffer) throws JavaModelException, BadLocationException {
 
 		if (methods.isEmpty()) {
 			// Nothing to be done
@@ -459,14 +468,44 @@ public class GeneratedCodeChangedListener extends WorkspaceCommandListener {
 			// FIXME also enable 'pushing to ecore' and 'creating Gen method' instead
 			if (doNotAskAnyMore) {
 				for (SourceMethod m : methods.subList(i, methods.size())) {
-					this.addNotTag(m, textFileBuffer, explanation);
+					this.handleChangedMethodWithGeneratedTag(m, helper, textFileBuffer, explanation);
 				}
 				break;
 
 			} else {
-				this.addNotTag(sourceMethod, textFileBuffer, explanation);
+				this.handleChangedMethodWithGeneratedTag(sourceMethod, helper, textFileBuffer, explanation);
 			}
 		}
+	}
+
+	/**
+	 * Handles a changed method by first trying to {@link #pushToEcore(SourceMethod, ITextFileBuffer) push the changes
+	 * to the Ecore metamodel} and, if this is not successful,
+	 * {@link #addNotTag(SourceMethod, ITextFileBuffer, Optional) adding a 'NOT' tag} instead.
+	 *
+	 * @param method
+	 *            The {@link SourceMethod} to handle.
+	 * @param helper
+	 *            The {@link GeneratedEMFCodeHelper} representing the CompilationUnit containing the given
+	 *            <em>methods</em>.
+	 * @param textFileBuffer
+	 *            The {@link ITextFileBuffer} buffering the contents of the Java file representing the given
+	 *            <em>method</em>.
+	 * @param explanation
+	 *            An optional additional String explaining while the generated method body was changed.
+	 */
+	protected void handleChangedMethodWithGeneratedTag(SourceMethod method, GeneratedEMFCodeHelper helper,
+			ITextFileBuffer textFileBuffer, Optional<String> explanation)
+			throws JavaModelException, BadLocationException {
+
+		try {
+			this.pushToEcore(method, helper, textFileBuffer);
+
+		} catch (PushCodeToEcoreExecutorException e) {
+
+			this.addNotTag(method, textFileBuffer, explanation);
+		}
+
 	}
 
 	/**
@@ -502,24 +541,22 @@ public class GeneratedCodeChangedListener extends WorkspaceCommandListener {
 	 *
 	 * @param method
 	 *            The {@link SourceMethod} to which the 'NOT' shall be added.
+	 * @param helper
+	 *            The {@link GeneratedEMFCodeHelper} representing the CompilationUnit containing the given
+	 *            <em>methods</em>.
 	 * @param textFileBuffer
 	 *            The {@link ITextFileBuffer} buffering the contents of the Java file representing the given
 	 *            <em>method</em>.
+	 * @throws PushCodeToEcoreExecutorException
+	 *             If something went wrong, e.g. if the required associated metamodel element could not be determined or
+	 *             if the given <em>method</em> is not pushable.
 	 */
-	protected void pushToEcore(SourceMethod method, ITextFileBuffer textFileBuffer) {
+	protected void pushToEcore(SourceMethod method, GeneratedEMFCodeHelper helper, ITextFileBuffer textFileBuffer)
+			throws PushCodeToEcoreExecutorException {
 
-		UIHelper.getShell().getDisplay().asyncExec(() -> {
+		PushCodeToEcoreExecutor executor = new PushCodeToEcoreExecutor(helper, null);
 
-			try {
-
-				new PushCodeToEcoreHandler().execute(new ExecutionEvent());
-
-			} catch (ExecutionException e) {
-				AgteleUIPlugin.getPlugin().getLog()
-						.log(new Status(Status.ERROR, "de.tud.et.ifa.agtele.eclipse.commons.ui",
-								e.getMessage() != null ? e.getMessage() : e.toString(), e));
-			}
-		});
+		executor.pushToEcore(method);
 	}
 
 	@Override
