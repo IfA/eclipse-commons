@@ -28,7 +28,9 @@ import org.eclipse.jdt.core.ITypeRoot;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.SourceRange;
 import org.eclipse.jdt.internal.core.CompilationUnit;
+import org.eclipse.jdt.internal.core.SourceField;
 import org.eclipse.jdt.internal.core.SourceMethod;
+import org.eclipse.jdt.internal.core.SourceRefElement;
 import org.eclipse.jdt.internal.core.SourceType;
 import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
@@ -69,9 +71,9 @@ public class HandleChangedGeneratedCodeExecutor {
 	 * A regex that can be used to check if the JavaDoc of a method is equipped with the '@generated' tag. Also, it can
 	 * be used to separate the JavaDoc (group 1) of the actual source (group 2) of a Java element.
 	 */
-	protected static final String JAVADOC_WITH_GENERATED_TAG_REGEX = "(/\\*\\*[\\s\\S]*" + // JavaDoc beginning
-			"\\*[\\s]*@generated(?![\\s]+NOT)" + // '@generated' tag (starting a new line; not followed by 'NOT')
-			"[\\s\\S]*\\*/)" // JavaDoc ending
+	protected static final String JAVADOC_WITH_GENERATED_TAG_REGEX = "(/\\*(?:[^*]|(?:\\*+[^*/]))*" // JavaDoc beginning
+			+ "\\*[\\s]*@generated(?![\\s]+NOT)" // '@generated' tag (starting a new line; not followed by 'NOT')
+			+ "(?:[^*]|(?:\\*+[^*/]))*\\*+/)" // JavaDoc ending
 			+ "([\\s\\S]+)"; // Actual content of the method
 
 	/**
@@ -132,9 +134,9 @@ public class HandleChangedGeneratedCodeExecutor {
 	}
 
 	/**
-	 * This will do the actual work: Check if any methods that are tagged with '@generated' have been
-	 * {@link #getChangedMethodsWithGeneratedTag() changed} and, if this is the case,
-	 * {@link #handleChangedMethodsWithGeneratedTag(List, boolean) react} accordingly.
+	 * This will do the actual work: Check if any elements that are tagged with '@generated' have been
+	 * {@link #getChangedElementsWithGeneratedTag() changed} and, if this is the case,
+	 * {@link #handleChangedGeneratedElements(List, boolean) react} accordingly.
 	 *
 	 * @param askUser
 	 *            Whether the user shall be asked what to do with changed methods.
@@ -164,36 +166,30 @@ public class HandleChangedGeneratedCodeExecutor {
 					new HashMap<>());
 		}
 
-		// All methods that are tagged with '@generated' and have been changed by the user since the last save
+		// All elements that are tagged with '@generated' and have been changed by the user since the last save
 		//
-		List<SourceMethod> changedMethodsWithGeneratedTag = this.getChangedMethodsWithGeneratedTag();
+		List<SourceRefElement> changedElementsWithGeneratedTag = this.getChangedElementsWithGeneratedTag();
 
 		// Add 'NOT' to the '@generated' tag if necessary
 		//
-		return this.handleChangedMethodsWithGeneratedTag(changedMethodsWithGeneratedTag, askUser);
+		return this.handleChangedGeneratedElements(changedElementsWithGeneratedTag, askUser);
 
 	}
 
 	/**
-	 * Determine all {@link SourceMethod methods} inside the Java file represented by the {@link #helper} that 1. are
-	 * tagged with '@generated' and 2. have been changed since the last save.
+	 * Determine all {@link SourceRefElement Java elements} inside the Java file represented by the {@link #helper} that
+	 * 1. are tagged with '@generated' and 2. have been changed since the last save.
 	 * <p />
 	 * Note: This uses
 	 * {@link EditorUtility#calculateChangedLineRegions(ITextFileBuffer, org.eclipse.core.runtime.IProgressMonitor)} to
 	 * determine the changed regions. This however does not report deleted lines as changes but only added or changed
 	 * lines!
 	 *
-	 * @param typeRoot
-	 *            The {@link ITypeRoot} representing the logical model of the Java file whose contents shall be
-	 *            analyzed.
-	 * @param textFileBuffer
-	 *            The {@link ITextFileBuffer} buffering the contents of the Java file representing the given
-	 *            <em>typeRoot</em>.
-	 * @return A list of changed {@link SourceMethod methods} tagged with '@generated'.
+	 * @return A list of changed {@link SourceRefElement elements} tagged with '@generated'.
 	 * @throws CoreException
 	 *             If an exception occurs while accessing the resource corresponding to the given buffer.
 	 */
-	protected List<SourceMethod> getChangedMethodsWithGeneratedTag() throws CoreException {
+	protected List<SourceRefElement> getChangedElementsWithGeneratedTag() throws CoreException {
 
 		// This represents the main class inside the Java document
 		//
@@ -204,13 +200,20 @@ public class HandleChangedGeneratedCodeExecutor {
 			return new ArrayList<>();
 		}
 
-		// The list of Java methods that are tagged with '@generated' (but not with '@generate NOT')
+		// A list of all Java elements that we will check for an '@generated' tag
 		//
-		List<SourceMethod> methodsWithGeneratedTag = Arrays.asList(sourceType.get().getMethods()).stream()
-				.filter(m -> m instanceof SourceMethod).map(m -> (SourceMethod) m).filter(this::isTaggedWithGenerated)
+		List<SourceRefElement> elementsToCheck = new ArrayList<>();
+		elementsToCheck.add(sourceType.get());
+		elementsToCheck.addAll(
+				Arrays.asList(sourceType.get().getChildren()).stream().filter(e -> e instanceof SourceRefElement)
+						.map(e -> (SourceRefElement) e).collect(Collectors.toList()));
+
+		// The list of Java elements that are tagged with '@generated' (but not with '@generate NOT')
+		//
+		List<SourceRefElement> elementsWithGeneratedTag = elementsToCheck.stream().filter(this::isTaggedWithGenerated)
 				.collect(Collectors.toList());
 
-		if (methodsWithGeneratedTag.isEmpty()) {
+		if (elementsWithGeneratedTag.isEmpty()) {
 			// Nothing to be done as there are no methods tagged with '@generated'
 			//
 			return new ArrayList<>();
@@ -230,24 +233,24 @@ public class HandleChangedGeneratedCodeExecutor {
 
 		// Check if any changes have been made to methods that are tagged with '@generated'
 		//
-		return methodsWithGeneratedTag.stream().filter(m -> this.hasMethodBeenChanged(m, changedRegions))
+		return elementsWithGeneratedTag.stream().filter(m -> this.hasElementBeenChanged(m, changedRegions))
 				.collect(Collectors.toList());
 	}
 
 	/**
-	 * Whether the given {@link IMethod} is tagged with '@generated' (but not with '@generated NOT').
+	 * Whether the given {@link SourceRefElement} is tagged with '@generated' (but not with '@generated NOT').
 	 *
-	 * @param method
-	 *            The {@link IMethod} to check.
-	 * @return '<em>true</em>' if the given {@link IMethod} is tagged with '@generated'.
+	 * @param javaElement
+	 *            The {@link SourceRefElement} to check.
+	 * @return '<em>true</em>' if the given {@link SourceRefElement} is tagged with '@generated'.
 	 */
-	protected boolean isTaggedWithGenerated(IMethod method) {
+	protected boolean isTaggedWithGenerated(SourceRefElement javaElement) {
 
 		try {
 			// Theoretically, it should be better to only query '#getJavadocRange'. However, this seems to sometimes
-			// return 'null' although there is a JavaDoc for the method.
+			// return 'null' although there is a JavaDoc for the elemet.
 			//
-			String source = ((SourceMethod) method).getSource();
+			String source = javaElement.getSource();
 
 			return source != null && this.javaDocPattern.matcher(source).matches();
 
@@ -259,25 +262,25 @@ public class HandleChangedGeneratedCodeExecutor {
 	}
 
 	/**
-	 * Whether the given {@link SourceMethod} has been changed since the last save.
+	 * Whether the given {@link SourceRefElement} has been changed since the last save.
 	 *
+	 * @param javaElement
+	 *            The {@link SourceRefElement} to check.
 	 * @param changedRegions
 	 *            The list of changed {@link IRegion regions}.
-	 * @param method
-	 *            The {@link IMethod} to check.
 	 *
-	 * @return '<em>true</em>' if the given {@link IMethod} has been changed.
+	 * @return '<em>true</em>' if the given {@link SourceRefElement} has been changed.
 	 */
-	protected boolean hasMethodBeenChanged(SourceMethod method, List<IRegion> changedRegions) {
+	protected boolean hasElementBeenChanged(SourceRefElement javaElement, List<IRegion> changedRegions) {
 
 		try {
 
-			ISourceRange sourceRange = method.getSourceRange();
+			ISourceRange sourceRange = javaElement.getSourceRange();
 
-			// We are not interested in changes to the JavaDoc of a method but only in changes to the actual source. In
-			// order to determine this, we use the 'javaDocPattern' from above.
+			// We are not interested in changes to the JavaDoc of an element but only in changes to the actual source.
+			// In order to determine this, we use the 'javaDocPattern' from above.
 			//
-			Matcher matcher = this.javaDocPattern.matcher(method.getSource());
+			Matcher matcher = this.javaDocPattern.matcher(javaElement.getSource());
 
 			if (!matcher.matches()) {
 				// This should not happen because we have checked this before as part of 'isTaggedWithGenerated'
@@ -286,11 +289,18 @@ public class HandleChangedGeneratedCodeExecutor {
 			}
 
 			String javaDoc = matcher.group(1);
+			String source = matcher.group(2);
+
+			// For classes (SourceType), we do not consider all changes to the source but only changes affecting the
+			// class definition (i.e. changed extends and imports).
+			//
+			int sourceLength = javaElement instanceof SourceType ? source.indexOf('{')
+					: sourceRange.getLength() - javaDoc.length();
 
 			SourceRange sourceRangeWithoutJavadoc = new SourceRange(sourceRange.getOffset() + javaDoc.length(),
-					sourceRange.getLength() - javaDoc.length());
+					sourceLength);
 
-			// Check if any of the changed regions overlap with the determined range of the method source
+			// Check if any of the changed regions overlap with the determined range of the source of the Java element
 			//
 			return changedRegions.parallelStream()
 					.anyMatch(cr -> sourceRangeWithoutJavadoc.getOffset() <= cr.getOffset()
@@ -307,38 +317,35 @@ public class HandleChangedGeneratedCodeExecutor {
 	}
 
 	/**
-	 * Determine all {@link SourceMethod methods} inside the given {@link ITypeRoot} that 1. are tagged with 'TODO Don't
-	 * forget to incorporate your manual changes into the Ecore metamodel!
+	 * Handle all of the given {@link SourceRefElement Java elements} by either {@link #pushToEcore(SourceMethod)
+	 * pushing them to Ecore}, {@link #addNotTag(SourceMethod, boolean, Optional) adding a NOT to the '@generated' tag}
+	 * or ignoring them.
 	 *
-	 * @generated NOT' and 2. have been changed since the last save.
-	 *
-	 * @param methods
-	 *            A list of changed {@link SourceMethod methods} tagged with '@generated'.
+	 * @param javaElements
+	 *            A list of changed {@link SourceRefElement Java elements} tagged with '@generated'.
 	 * @param askUser
 	 *            Whether the user shall be asked what to do with changed methods. If this is set to '<em>false</em>'
 	 *            all of the given <em>methods</em> are handled automatically.
-	 * @return A Map that, for each of the given <em>methods</em>, provides either a {@link PushCodeToEcoreResult} if
-	 *         the {@link #pushToEcore(SourceMethod) push to Ecore} was successful or an empty Optional if
-	 *         {@link #addNotTag(SourceMethod, Optional) a NOT tag was added} instead.
+	 * @return A {@link HandleChangedGeneratedCodeExecutionResult} representing the result of the handling process.
 	 * @throws JavaModelException
 	 *             If an exception occurs while accessing the resource corresponding to the given buffer.
 	 * @throws BadLocationException
 	 */
-	protected HandleChangedGeneratedCodeExecutionResult handleChangedMethodsWithGeneratedTag(List<SourceMethod> methods,
-			boolean askUser) throws JavaModelException, BadLocationException {
+	protected HandleChangedGeneratedCodeExecutionResult handleChangedGeneratedElements(
+			List<SourceRefElement> javaElements, boolean askUser) throws JavaModelException, BadLocationException {
 
-		if (methods.isEmpty()) {
+		if (javaElements.isEmpty()) {
 			// Nothing to be done
 			//
 			return new HandleChangedGeneratedCodeExecutionResult((IEditorPart) this.javaEditor, this.ecoreEditor,
 					new HashMap<>());
 		}
 
-		Map<SourceMethod, Optional<PushCodeToEcoreResult>> resultMap = new HashMap<>();
+		Map<SourceRefElement, Optional<PushCodeToEcoreResult>> resultMap = new HashMap<>();
 
-		for (int i = 0; i < methods.size(); i++) {
+		for (int i = 0; i < javaElements.size(); i++) {
 
-			SourceMethod sourceMethod = methods.get(i);
+			SourceRefElement javaElement = javaElements.get(i);
 
 			// Assume we are in GeneratedCodeChangedListenerMode#AUTOMATIC mode
 			//
@@ -352,8 +359,8 @@ public class HandleChangedGeneratedCodeExecutor {
 
 				// If we are instead in USER mode, present a dialog to the user
 				//
-				HandleChangedGeneratedCodeDialog dialog = new HandleChangedGeneratedCodeDialog(sourceMethod,
-						this.helper, methods.size() - i - 1);
+				HandleChangedGeneratedCodeDialog dialog = new HandleChangedGeneratedCodeDialog(javaElement, this.helper,
+						javaElements.size() - i - 1);
 				dialog.create();
 
 				int result = dialog.open();
@@ -378,17 +385,17 @@ public class HandleChangedGeneratedCodeExecutor {
 			// The user chose 'Yes' -> push to ecore/add NOT tag
 			//
 			if (doNotAskAnyMore) {
-				for (SourceMethod m : methods.subList(i, methods.size())) {
-					Optional<PushCodeToEcoreResult> result = this.handleChangedMethodWithGeneratedTag(m, pushToEcore,
-							addTodo, explanation);
+				for (SourceRefElement m : javaElements.subList(i, javaElements.size())) {
+					Optional<PushCodeToEcoreResult> result = this.handleChangedGeneratedElement(m, pushToEcore, addTodo,
+							explanation);
 					resultMap.put(m, result);
 				}
 				break;
 
 			} else {
-				Optional<PushCodeToEcoreResult> result = this.handleChangedMethodWithGeneratedTag(sourceMethod,
-						pushToEcore, addTodo, explanation);
-				resultMap.put(sourceMethod, result);
+				Optional<PushCodeToEcoreResult> result = this.handleChangedGeneratedElement(javaElement, pushToEcore,
+						addTodo, explanation);
+				resultMap.put(javaElement, result);
 			}
 
 		}
@@ -398,33 +405,35 @@ public class HandleChangedGeneratedCodeExecutor {
 	}
 
 	/**
-	 * Handles a changed method by trying to {@link #pushToEcore(SourceMethod) push the changes to the Ecore metamodel}
-	 * if <em>pushToEcore</em> is set to '<em>true</em>' and, if this is not successful or if <em>pushToEcore</em> is
-	 * set to '<em>false</em>', {@link #addNotTag(SourceMethod, Optional) adding a 'NOT' tag} instead.
+	 * Handles a changed {@link SourceRefElement Java element} by trying to {@link #pushToEcore(SourceRefElement) push
+	 * the changes to the Ecore metamodel} if <em>pushToEcore</em> is set to '<em>true</em>' and, if this is not
+	 * successful or if <em>pushToEcore</em> is set to '<em>false</em>', {@link #addNotTag(SourceRefElement, Optional)
+	 * adding a 'NOT' tag} instead.
 	 *
-	 * @param method
-	 *            The {@link SourceMethod} to handle.
+	 * @param javaElement
+	 *            The {@link SourceRefElement} to handle.
 	 * @param pushToEcore
-	 *            Whether the executor shall try to {@link #pushToEcore(SourceMethod) push the changes to the Ecore
+	 *            Whether the executor shall try to {@link #pushToEcore(SourceRefElement) push the changes to the Ecore
 	 *            metamodel}.
 	 * @param addTodo
 	 *            Whether a 'TO DO' tag shall be added to the JavaDoc reminding the user to integrate these changes into
 	 *            the Ecore metamodel.
 	 * @param explanation
-	 *            An optional additional String explaining while the generated method body was changed.
-	 * @return A {@link PushCodeToEcoreResult} if the {@link #pushToEcore(SourceMethod) push to Ecore} was successful or
-	 *         an empty Optional if {@link #addNotTag(SourceMethod, Optional) a NOT tag was added} instead.
+	 *            An optional additional String explaining while the generated element body was changed.
+	 * @return A {@link PushCodeToEcoreResult} if the {@link #pushToEcore(SourceRefElement) push to Ecore} was
+	 *         successful or an empty Optional if {@link #addNotTag(SourceRefElement, Optional) a NOT tag was added}
+	 *         instead.
 	 * @throws JavaModelException
 	 * @throws BadLocationException
 	 */
-	protected Optional<PushCodeToEcoreResult> handleChangedMethodWithGeneratedTag(SourceMethod method,
+	protected Optional<PushCodeToEcoreResult> handleChangedGeneratedElement(SourceRefElement javaElement,
 			boolean pushToEcore, boolean addTodo, Optional<String> explanation)
 			throws JavaModelException, BadLocationException {
 
 		if (pushToEcore) {
 
 			try {
-				return Optional.of(this.pushToEcore(method));
+				return Optional.of(this.pushToEcore(javaElement));
 
 			} catch (HandleChangedGeneratedCodeExecutorException e) {
 				// Nothing to do, just use 'addNotTag' instead
@@ -432,22 +441,22 @@ public class HandleChangedGeneratedCodeExecutor {
 			}
 		}
 
-		this.addNotTag(method, addTodo, explanation);
+		this.addNotTag(javaElement, addTodo, explanation);
 		return Optional.empty();
 
 	}
 
 	/**
-	 * Pushes the code of the given {@link SourceMethod} to the Ecore metamodel.
+	 * Pushes the code of the given {@link SourceRefElement} to the Ecore metamodel.
 	 *
-	 * @param method
-	 *            The {@link SourceMethod} to be pushed.
+	 * @param javaElement
+	 *            The {@link SourceRefElement} to be pushed.
 	 * @return The {@link PushCodeToEcoreResult} of the push.
 	 * @throws HandleChangedGeneratedCodeExecutorException
 	 *             If something went wrong, e.g. if the required associated metamodel element could not be determined or
-	 *             if the given <em>method</em> is not pushable.
+	 *             if the given <em>javaElement</em> is not pushable.
 	 */
-	protected PushCodeToEcoreResult pushToEcore(SourceMethod method)
+	protected PushCodeToEcoreResult pushToEcore(SourceRefElement javaElement)
 			throws HandleChangedGeneratedCodeExecutorException {
 
 		try {
@@ -459,7 +468,7 @@ public class HandleChangedGeneratedCodeExecutor {
 			PushCodeToEcoreExecutor executor = new PushCodeToEcoreExecutor(this.helper,
 					((IEditingDomainProvider) this.ecoreEditor).getEditingDomain().getResourceSet());
 
-			return executor.pushToEcore(method);
+			return executor.pushToEcore(javaElement);
 
 		} catch (Exception e) {
 			throw new HandleChangedGeneratedCodeExecutorException(e);
@@ -470,32 +479,32 @@ public class HandleChangedGeneratedCodeExecutor {
 	}
 
 	/**
-	 * Add a 'NOT' to the '@generated' tag of the given {@link SourceMethod}.
+	 * Add a 'NOT' to the '@generated' tag of the given {@link SourceRefElement}.
 	 *
-	 * @param method
-	 *            The {@link SourceMethod} to which the 'NOT' shall be added.
+	 * @param javaElement
+	 *            The {@link SourceRefElement} to which the 'NOT' shall be added.
 	 * @param addTodo
 	 *            Whether a 'TO DO' tag shall be added to the JavaDoc reminding the user to integrate these changes into
 	 *            the Ecore metamodel.
 	 * @param explanation
-	 *            An optional additional String that will be appended to the 'NOT' explaining while the generated method
-	 *            body was changed.
+	 *            An optional additional String that will be appended to the 'NOT' explaining while the generated
+	 *            element body was changed.
 	 */
-	protected void addNotTag(SourceMethod method, boolean addTodo, Optional<String> explanation)
+	protected void addNotTag(SourceRefElement javaElement, boolean addTodo, Optional<String> explanation)
 			throws JavaModelException, BadLocationException {
 
-		String oldSource = method.getSource();
-		method.getJavaModel().getChildren();
+		String oldSource = javaElement.getSource();
+		javaElement.getJavaModel().getChildren();
 
 		String todoString = addTodo
-				? "TODO Don't forget to incorporate your manual changes into the Ecore metamodel!\n*"
+				? "TODO Don't forget to incorporate your manual changes into the Ecore metamodel!\n\t * "
 				: "";
 
 		String newSource = oldSource.replaceFirst("@generated",
 				todoString + "@generated NOT" + (explanation.isPresent() ? " " + explanation.get() : ""));
 
-		this.textFileBuffer.getDocument().replace(method.getSourceRange().getOffset(),
-				method.getSourceRange().getLength(), newSource);
+		this.textFileBuffer.getDocument().replace(javaElement.getSourceRange().getOffset(),
+				javaElement.getSourceRange().getLength(), newSource);
 
 	}
 
@@ -537,7 +546,7 @@ public class HandleChangedGeneratedCodeExecutor {
 	}
 
 	/**
-	 * A {@link Dialog} that allows the user to choose whether manually changed generated methods shall be pushed to
+	 * A {@link Dialog} that allows the user to choose whether manually changed generated elements shall be pushed to
 	 * Ecore or if their '@generated' tag shall be changed to '@generated NOT'.
 	 *
 	 * @author mfreund
@@ -545,9 +554,9 @@ public class HandleChangedGeneratedCodeExecutor {
 	public class HandleChangedGeneratedCodeDialog extends TitleAreaDialog {
 
 		/**
-		 * The {@link SourceMethod} that is the subject of this dialog.
+		 * The {@link SourceRefElement} that is the subject of this dialog.
 		 */
-		protected final SourceMethod sourceMethod;
+		protected final SourceRefElement javaElement;
 
 		/**
 		 * The {@link GeneratedEMFCodeHelper} representing the Java file from the {@link #javaEditor}.
@@ -594,8 +603,8 @@ public class HandleChangedGeneratedCodeExecutor {
 		/**
 		 * This creates an instance.
 		 *
-		 * @param sourceMethod
-		 *            The method that is the subject of this dialog.
+		 * @param javaElement
+		 *            The {@link SourceRefElement} that is the subject of this dialog.
 		 * @param helper
 		 *            The {@link GeneratedEMFCodeHelper} representing the Java file that the given {@link SourceMethod}
 		 *            is a part of.
@@ -603,12 +612,12 @@ public class HandleChangedGeneratedCodeExecutor {
 		 *            An Integer indicating the number of further inquiries that will happen during the current save
 		 *            action (the rest of the changed methods).
 		 */
-		public HandleChangedGeneratedCodeDialog(SourceMethod sourceMethod, GeneratedEMFCodeHelper helper,
+		public HandleChangedGeneratedCodeDialog(SourceRefElement javaElement, GeneratedEMFCodeHelper helper,
 				int pendingRequests) {
 
 			super(UIHelper.getShell());
 
-			this.sourceMethod = sourceMethod;
+			this.javaElement = javaElement;
 			this.helper = helper;
 
 			this.pendingRequests = pendingRequests;
@@ -623,11 +632,34 @@ public class HandleChangedGeneratedCodeExecutor {
 
 			super.create();
 
-			StringBuilder methodIdentifier = new StringBuilder(this.sourceMethod.getElementName()).append("(")
-					.append(this.sourceMethod.getNumberOfParameters() > 0 ? "..." : "").append(")");
-
-			this.setTitle("Generated method '" + methodIdentifier.toString() + "' was changed!");
+			this.setTitle(this.compileTitle());
 			this.setMessage("Push to Ecore or change '@generated' tag to '@generated NOT'?", IMessageProvider.WARNING);
+		}
+
+		/**
+		 * Compile a meaningful title for this dialog based on the concrete type of the {@link #javaElement}.
+		 *
+		 * @return The title for the dialog.
+		 */
+		protected String compileTitle() {
+
+			String type = "element";
+			StringBuilder name = new StringBuilder(this.javaElement.getElementName());
+
+			if (this.javaElement instanceof SourceMethod) {
+				type = "method";
+				name.append("(").append(((IMethod) this.javaElement).getNumberOfParameters() > 0 ? "..." : "")
+						.append(")");
+			} else if (this.javaElement instanceof SourceField) {
+				type = "field";
+			} else if (this.javaElement instanceof SourceType) {
+				type = "class";
+			}
+
+			StringBuilder title = new StringBuilder("Generated ").append(type).append(" '").append(name)
+					.append("' was changed!");
+
+			return title.toString();
 		}
 
 		@Override
@@ -640,7 +672,7 @@ public class HandleChangedGeneratedCodeExecutor {
 				HandleChangedGeneratedCodeDialog.this.close();
 
 			});
-			if (!new PushCodeToEcoreExecutor(this.helper, null).isPushable(this.sourceMethod)) {
+			if (!new PushCodeToEcoreExecutor(this.helper, null).isPushable(this.javaElement)) {
 				pushToEcoreButton.setEnabled(false);
 			}
 			this.createButton(parent, IDialogConstants.OK_ID, "Add NOT tag", true);
@@ -661,12 +693,12 @@ public class HandleChangedGeneratedCodeExecutor {
 
 			Label lblAdditionalTextoptional = new Label(container, SWT.NONE);
 			lblAdditionalTextoptional.setToolTipText(
-					"An explanation why this method was changed manually (will only be used if 'NOT' tag is used)");
+					"An explanation why this element was changed manually (will only be used if 'NOT' tag is used)");
 			lblAdditionalTextoptional.setText("Additional text (optional):");
 
 			this.addNotTagExplanationText = new Text(container, SWT.BORDER);
 			this.addNotTagExplanationText.setToolTipText(
-					"An explanation why this method was changed manually (will only be used if 'NOT' tag is used)");
+					"An explanation why this element was changed manually (will only be used if 'NOT' tag is used)");
 			this.addNotTagExplanationText.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
 
 			this.addTodoButton = new Button(container, SWT.CHECK);
@@ -686,7 +718,7 @@ public class HandleChangedGeneratedCodeExecutor {
 			Label lblInfo = new Label(container, SWT.WRAP);
 			lblInfo.setLayoutData(new GridData(SWT.LEFT, SWT.BOTTOM, true, true, 2, 1));
 			lblInfo.setText(
-					"Note: This dialog can be disabled via \"Agtele Settings -> React to changed '@generated' methods\"!");
+					"Note: This dialog can be disabled via \"Agtele Settings -> React to changed '@generated' elements\"!");
 
 			return area;
 		}
@@ -811,15 +843,15 @@ public class HandleChangedGeneratedCodeExecutor {
 		 *
 		 * @param editor
 		 * @param ecoreEditor
-		 * @param pushedMethods
+		 * @param pushedElements
 		 */
 		public HandleChangedGeneratedCodeExecutionResult(IEditorPart editor, IEditorPart ecoreEditor,
-				Map<SourceMethod, Optional<PushCodeToEcoreResult>> pushedMethods) {
+				Map<SourceRefElement, Optional<PushCodeToEcoreResult>> pushedElements) {
 
 			super();
 			this.editor = editor;
 			this.ecoreEditor = ecoreEditor;
-			this.pushedMethods = pushedMethods;
+			this.pushedElements = pushedElements;
 		}
 
 		/**
@@ -834,11 +866,11 @@ public class HandleChangedGeneratedCodeExecutor {
 		protected IEditorPart ecoreEditor;
 
 		/**
-		 * A Map that, for each of the handled {@link SourceMethod methods}, provides either a
-		 * {@link PushCodeToEcoreResult} if the method was {@link #pushToEcore(SourceMethod) pushed to Ecore} or an
-		 * empty Optional if {@link #addNotTag(SourceMethod, Optional) a NOT tag was added} instead.
+		 * A Map that, for each of the handled {@link SourceRefElement Java elements}, provides either a
+		 * {@link PushCodeToEcoreResult} if the method was {@link #pushToEcore(SourceRefElement) pushed to Ecore} or an
+		 * empty Optional if {@link #addNotTag(SourceRefElement, Optional) a NOT tag was added} instead.
 		 */
-		protected Map<SourceMethod, Optional<PushCodeToEcoreResult>> pushedMethods;
+		protected Map<SourceRefElement, Optional<PushCodeToEcoreResult>> pushedElements;
 
 		/**
 		 * @return the {@link #editor}
@@ -866,11 +898,11 @@ public class HandleChangedGeneratedCodeExecutor {
 		}
 
 		/**
-		 * @return the {@link #pushedMethods}
+		 * @return the {@link #pushedElements}
 		 */
-		public Map<SourceMethod, Optional<PushCodeToEcoreResult>> getPushedMethods() {
+		public Map<SourceRefElement, Optional<PushCodeToEcoreResult>> getPushedElements() {
 
-			return this.pushedMethods;
+			return this.pushedElements;
 		}
 	}
 }
