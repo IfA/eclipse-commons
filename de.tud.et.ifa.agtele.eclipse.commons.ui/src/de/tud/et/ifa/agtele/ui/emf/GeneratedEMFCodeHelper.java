@@ -114,6 +114,16 @@ public class GeneratedEMFCodeHelper {
 	}
 
 	/**
+	 * Returns the {@link EMFGeneratedJavaFileType type} of the Java file represented by this helper.
+	 *
+	 * @return The {@link EMFGeneratedJavaFileType type}.
+	 */
+	public EMFGeneratedJavaFileType getFileType() {
+
+		return EMFGeneratedJavaFileType.getFileType(this.getJavaFile().getName());
+	}
+
+	/**
 	 * Returns the {@link EObject} associated with the {@link #compilationUnit CompilationUnit} that this helper is
 	 * based on.
 	 *

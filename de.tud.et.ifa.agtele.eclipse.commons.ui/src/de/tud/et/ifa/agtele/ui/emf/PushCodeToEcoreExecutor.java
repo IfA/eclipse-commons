@@ -3,6 +3,7 @@
  */
 package de.tud.et.ifa.agtele.ui.emf;
 
+import org.eclipse.emf.ecore.EAnnotation;
 import org.eclipse.emf.ecore.EAttribute;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.EOperation;
@@ -61,6 +62,87 @@ public class PushCodeToEcoreExecutor {
 	}
 
 	/**
+	 * Based on the {@link GeneratedEMFCodeHelper#getFileType() fileType} of the Java file represented by the
+	 * {@link #helper} and the concrete sub-type of the {@link IJavaElement} represented by the given
+	 * {@link ISelection}, decide if this element can be pushed to the Ecore metamodel.
+	 *
+	 * @see #isPushable(IJavaElement)
+	 *
+	 * @param javaSelection
+	 *            The {@link ISelection} indicating the {@link IJavaElement} that shall be checked.
+	 * @return '<em>true</em>' if the given {@link IJavaElement} can be pushed (if a call to
+	 *         {@link #compileImplementation(String, CompilationUnit, boolean, boolean)} should produce a valid result);
+	 *         '<em>false</em>' otherwise.
+	 */
+	public boolean isPushable(ISelection javaSelection) {
+
+		IJavaElement javaElement = null;
+		try {
+			javaElement = this.helper.getCompilationUnit().getElementAt(((TextSelection) javaSelection).getOffset());
+		} catch (JavaModelException e) {
+			return false;
+		}
+
+		return this.isPushable(javaElement);
+	}
+
+	/**
+	 * Based on the {@link GeneratedEMFCodeHelper#getFileType() fileType} of the Java file represented by the
+	 * {@link #helper} and the concrete sub-type of the given {@link IJavaElement}, decide if this element can be pushed
+	 * to the Ecore metamodel.
+	 *
+	 * @see #isPushable(ISelection)
+	 *
+	 * @param javaElement
+	 *            The {@link IJavaElement} that shall be checked.
+	 * @return '<em>true</em>' if the given {@link IJavaElement} can be pushed (if a call to
+	 *         {@link #compileImplementation(String, CompilationUnit, boolean, boolean)} should produce a valid result);
+	 *         '<em>false</em>' otherwise.
+	 */
+	public boolean isPushable(IJavaElement javaElement) {
+
+		EMFGeneratedJavaFileType type = this.helper.getFileType();
+
+		EObject specificEcoreElement;
+		try {
+			specificEcoreElement = this.helper.getMoreSpecificSelection(javaElement);
+		} catch (GeneratedEMFCodeHelperException e) {
+			return false;
+		}
+
+		if (type.isClassImplementationType()) {
+
+			if (specificEcoreElement instanceof EOperation) {
+				return true;
+
+			} else if ((specificEcoreElement instanceof EReference || specificEcoreElement instanceof EAttribute)
+					&& javaElement instanceof IMethod) {
+
+				IMethod method = (IMethod) javaElement;
+				String name = method.getElementName();
+
+				// The eIsSet expression cannot be pushed to the ecore, without further work on identifying the
+				// ecore element from the selection within the java method
+				//
+				return name.startsWith("set") || name.startsWith("get") || name.startsWith("basicSet")
+						|| name.startsWith("basicGet");
+
+			} else if (specificEcoreElement instanceof EAttribute && javaElement instanceof SourceField) {
+				return true;
+
+			}
+
+		} else if (type.isEditItemProviderType()) {
+
+			return javaElement instanceof IMethod
+					&& (specificEcoreElement instanceof EAttribute || specificEcoreElement instanceof EReference
+							&& !((EReference) specificEcoreElement).isContainment());
+		}
+
+		return false;
+	}
+
+	/**
 	 * Push the code represented by the given {@link ISelection} to the associated Ecore metamodel.
 	 *
 	 * @see #pushToEcore(IJavaElement)
@@ -96,9 +178,17 @@ public class PushCodeToEcoreExecutor {
 	 */
 	public PushCodeToEcoreResult pushToEcore(IJavaElement javaElement) throws PushCodeToEcoreExecutorException {
 
-		String mainTypeName = String.valueOf(this.helper.getCompilationUnit().getMainTypeName());
-		EMFGeneratedJavaFileType type = EMFGeneratedJavaFileType.getFileType(mainTypeName);
+		if (!this.isPushable(javaElement)) {
+			throw new PushCodeToEcoreExecutorException(
+					"The JavaElement '" + javaElement.getElementName() + "' cannot be pushed to Ecore!");
+		}
 
+		// The basis for the annotation to be created
+		//
+		String[] annotationDescriptor = this.getAnnotationDescriptor(javaElement);
+
+		// The target element for the annotation
+		//
 		EObject specificEcoreElement;
 		try {
 			specificEcoreElement = this.helper.getMoreSpecificSelection(javaElement);
@@ -108,6 +198,54 @@ public class PushCodeToEcoreExecutor {
 
 		if (this.resourceSet != null) {
 			specificEcoreElement = AgteleEcoreUtil.getEquivalentElementFrom(specificEcoreElement, this.resourceSet);
+		}
+
+		// The command that will do the actual work (create the annotation)
+		//
+		AddImplementationEcoreAnnotationCommand cmd = new AddImplementationEcoreAnnotationCommand(
+				(ETypedElement) specificEcoreElement, annotationDescriptor[0], annotationDescriptor[1]);
+
+		EditingDomain dom = AgteleEcoreUtil.getEditingDomainFor(specificEcoreElement);
+		dom.getCommandStack().execute(cmd);
+
+		// Set the selection in the ecore editor either to the details key or the manipulated annotation
+		//
+		Object target = null;
+		Object entrySet[] = cmd.getManipulatedAnnotation().getDetails().entrySet().toArray();
+		if (annotationDescriptor[1] != null) {
+			target = entrySet[cmd.getManipulatedAnnotation().getDetails().indexOfKey(annotationDescriptor[0])];
+		} else if (cmd.getManipulatedAnnotation() != null) {
+			target = cmd.getManipulatedAnnotation();
+		} else {
+			target = specificEcoreElement;
+		}
+
+		return new PushCodeToEcoreResult(target, annotationDescriptor[1] != null
+				? "Pushed the java code to the ecore model, to enable getters, setters, initializers or isSet evaluations, use custom emitter templates"
+				: "Cleared the java code from the ecore model. Run the generator in order to get the default implementation.");
+	}
+
+	/**
+	 * For the given {@link IJavaElement} (that is part of the Java file represented by the {@link #helper}), return a
+	 * descriptor for the {@link EAnnotation} to create during the push.
+	 *
+	 * @param javaElement
+	 *            The {@link IJavaElement} for which to return the descriptor.
+	 * @return A String array containing exactly two elements: The first element represents the <em>key</em> for the
+	 *         annotation to create whereas the second element represents its <em>value</em> (the Java code representing
+	 *         the implementation of the given {@link IJavaElement}).
+	 * @throws PushCodeToEcoreExecutorException
+	 *             If the descriptor could not be created.
+	 */
+	protected String[] getAnnotationDescriptor(IJavaElement javaElement) throws PushCodeToEcoreExecutorException {
+
+		EMFGeneratedJavaFileType type = this.helper.getFileType();
+
+		EObject specificEcoreElement;
+		try {
+			specificEcoreElement = this.helper.getMoreSpecificSelection(javaElement);
+		} catch (GeneratedEMFCodeHelperException e1) {
+			throw new PushCodeToEcoreExecutorException(e1);
 		}
 
 		String detailsKey = null;
@@ -179,27 +317,7 @@ public class PushCodeToEcoreExecutor {
 				code = this.compileImplementation(code, this.helper.getCompilationUnit(), true, false);
 			}
 		}
-
-		AddImplementationEcoreAnnotationCommand cmd = new AddImplementationEcoreAnnotationCommand(
-				(ETypedElement) specificEcoreElement, detailsKey, code);
-
-		EditingDomain dom = AgteleEcoreUtil.getEditingDomainFor(specificEcoreElement);
-		dom.getCommandStack().execute(cmd);
-
-		// set the selection in the ecore editor either to the details key or the manipulated annotation
-		Object target = null;
-		Object entrySet[] = cmd.getManipulatedAnnotation().getDetails().entrySet().toArray();
-		if (code != null) {
-			target = entrySet[cmd.getManipulatedAnnotation().getDetails().indexOfKey(detailsKey)];
-		} else if (cmd.getManipulatedAnnotation() != null) {
-			target = cmd.getManipulatedAnnotation();
-		} else {
-			target = specificEcoreElement;
-		}
-
-		return new PushCodeToEcoreResult(target, code != null
-				? "Pushed the java code to the ecore model, to enable getters, setters, initializers or isSet evaluations, use custom emitter templates"
-				: "Cleared the java code from the ecore model. Run the generator in order to get the default implementation.");
+		return new String[] { detailsKey, code };
 	}
 
 	/**
@@ -215,30 +333,33 @@ public class PushCodeToEcoreExecutor {
 	protected String compileImplementation(String code, CompilationUnit compilationUnit, boolean isMethod,
 			boolean isInitialization) {
 
-		IImportDeclaration imports[] = null;
+		String compiledCode = code;
+
+		IImportDeclaration[] imports = null;
 		try {
 			imports = compilationUnit.getImports();
 		} catch (JavaModelException e) {
 			UIHelper.log(e);
-			return code;
+			return compiledCode;
 		}
 
 		// remove leading comments
-		code = code.trim();
-		while (code.startsWith("/*")) {
-			code = code.substring(code.indexOf("*/") + 2).trim();
+		compiledCode = compiledCode.trim();
+		while (compiledCode.startsWith("/*")) {
+			compiledCode = compiledCode.substring(compiledCode.indexOf("*/") + 2).trim();
 		}
 
 		// get implementation body
 		if (isMethod) {
-			code = code.substring(code.indexOf("{") + 1, code.lastIndexOf("}")); // do not trim here, we want the
-																					// whitespace at the beginning of
-																					// the line
+
+			// do not trim here, we want the whitespace at the beginning of the line
+			compiledCode = compiledCode.substring(compiledCode.indexOf("{") + 1, compiledCode.lastIndexOf("}"));
+
 		} else if (isInitialization) {
-			if (!code.contains("=")) {
+			if (!compiledCode.contains("=")) {
 				return null;
 			}
-			code = code.substring(code.indexOf("=") + 1);
+			compiledCode = compiledCode.substring(compiledCode.indexOf("=") + 1);
 		}
 
 		// make type Symbols fully qualified
@@ -251,12 +372,12 @@ public class PushCodeToEcoreExecutor {
 			String packageName = importDeclaration.substring(0, lastDotIndex);
 			String typeName = importDeclaration.substring(lastDotIndex + 1);
 
-			code = code.replaceAll("([\\(\\[\\{\\s<])" + typeName + "([\\s\\)>\\.])",
+			compiledCode = compiledCode.replaceAll("([\\(\\[\\{\\s<])" + typeName + "([\\s\\)>\\.])",
 					"$1<%" + packageName + "." + typeName + "%>$2");
 		}
 
 		if (isInitialization) {
-			return code;
+			return compiledCode;
 		}
 
 		// remove preceding whitespace
@@ -266,21 +387,21 @@ public class PushCodeToEcoreExecutor {
 		int minSpaceCount = 999999;
 		String[] lines;
 		String nl;
-		if (code.contains("\n\r")) {
-			lines = code.split("\n\r");
+		if (compiledCode.contains("\n\r")) {
+			lines = compiledCode.split("\n\r");
 			nl = "\n\r";
-		} else if (code.contains("\r\n")) {
-			lines = code.split("\r\n");
+		} else if (compiledCode.contains("\r\n")) {
+			lines = compiledCode.split("\r\n");
 			nl = "\r\n";
-		} else if (code.contains("\r")) {
-			lines = code.split("\r");
+		} else if (compiledCode.contains("\r")) {
+			lines = compiledCode.split("\r");
 			nl = "\r";
 		} else {
-			lines = code.split("\n");
+			lines = compiledCode.split("\n");
 			nl = "\n";
 		}
 		if (lines.length <= 1) {
-			result = code;
+			result = compiledCode;
 		} else {
 			for (String line2 : lines) {
 				String s = line2;
@@ -304,7 +425,7 @@ public class PushCodeToEcoreExecutor {
 
 		// remove a the minimal count of whitespace characters
 		if (minSpaceCount >= 999999) {
-			result = code;
+			result = compiledCode;
 		} else {
 			for (String line2 : lines) {
 				String s = line2;
