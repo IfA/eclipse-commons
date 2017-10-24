@@ -307,8 +307,10 @@ public class HandleChangedGeneratedCodeExecutor {
 	}
 
 	/**
-	 * Determine all {@link SourceMethod methods} inside the given {@link ITypeRoot} that 1. are tagged with
-	 * '@generated' and 2. have been changed since the last save.
+	 * Determine all {@link SourceMethod methods} inside the given {@link ITypeRoot} that 1. are tagged with 'TODO Don't
+	 * forget to incorporate your manual changes into the Ecore metamodel!
+	 *
+	 * @generated NOT' and 2. have been changed since the last save.
 	 *
 	 * @param methods
 	 *            A list of changed {@link SourceMethod methods} tagged with '@generated'.
@@ -348,16 +350,10 @@ public class HandleChangedGeneratedCodeExecutor {
 
 			if (askUser) {
 
-				StringBuilder methodIdentifier = new StringBuilder(sourceMethod.getElementName()).append("(");
-				if (sourceMethod.getNumberOfParameters() > 0) {
-					methodIdentifier.append("...");
-				}
-				methodIdentifier.append(")");
-
 				// If we are instead in USER mode, present a dialog to the user
 				//
-				AddNotToGeneratedTagDialog dialog = new AddNotToGeneratedTagDialog(methodIdentifier.toString(),
-						methods.size() - i - 1);
+				HandleChangedGeneratedCodeDialog dialog = new HandleChangedGeneratedCodeDialog(sourceMethod,
+						this.helper, methods.size() - i - 1);
 				dialog.create();
 
 				int result = dialog.open();
@@ -541,12 +537,22 @@ public class HandleChangedGeneratedCodeExecutor {
 	}
 
 	/**
-	 * A {@link Dialog} that allows the user to choose whether the '@generated' tag of a manually changed method shall
-	 * be changed to '@generated NOT'.
+	 * A {@link Dialog} that allows the user to choose whether manually changed generated methods shall be pushed to
+	 * Ecore or if their '@generated' tag shall be changed to '@generated NOT'.
 	 *
 	 * @author mfreund
 	 */
-	public class AddNotToGeneratedTagDialog extends TitleAreaDialog {
+	public class HandleChangedGeneratedCodeDialog extends TitleAreaDialog {
+
+		/**
+		 * The {@link SourceMethod} that is the subject of this dialog.
+		 */
+		protected final SourceMethod sourceMethod;
+
+		/**
+		 * The {@link GeneratedEMFCodeHelper} representing the Java file from the {@link #javaEditor}.
+		 */
+		protected final GeneratedEMFCodeHelper helper;
 
 		/**
 		 * A {@link Text} that allows the user to enter an explanation text why the generated method was changed
@@ -580,11 +586,6 @@ public class HandleChangedGeneratedCodeExecutor {
 		protected boolean doNotAskAnyMore;
 
 		/**
-		 * A String that allows the user to identify the method that is the subject of this dialog.
-		 */
-		protected String methodIdentifier;
-
-		/**
 		 * An Integer indicating the number of further inquiries that will happen during the current save action (the
 		 * rest of the changed methods).
 		 */
@@ -593,17 +594,23 @@ public class HandleChangedGeneratedCodeExecutor {
 		/**
 		 * This creates an instance.
 		 *
-		 * @param methodIdentifier
-		 *            A String that allows the user to identify the method that is the subject of this dialog.
+		 * @param sourceMethod
+		 *            The method that is the subject of this dialog.
+		 * @param helper
+		 *            The {@link GeneratedEMFCodeHelper} representing the Java file that the given {@link SourceMethod}
+		 *            is a part of.
 		 * @param pendingRequests
 		 *            An Integer indicating the number of further inquiries that will happen during the current save
 		 *            action (the rest of the changed methods).
 		 */
-		public AddNotToGeneratedTagDialog(String methodIdentifier, int pendingRequests) {
+		public HandleChangedGeneratedCodeDialog(SourceMethod sourceMethod, GeneratedEMFCodeHelper helper,
+				int pendingRequests) {
 
 			super(UIHelper.getShell());
 
-			this.methodIdentifier = methodIdentifier;
+			this.sourceMethod = sourceMethod;
+			this.helper = helper;
+
 			this.pendingRequests = pendingRequests;
 
 			this.addNotTagExplanation = "";
@@ -615,9 +622,12 @@ public class HandleChangedGeneratedCodeExecutor {
 		public void create() {
 
 			super.create();
-			this.setTitle("Generated method '" + this.methodIdentifier + "' was changed!");
-			this.setMessage("Push to Ecore or - if not possible - change '@generated' tag to '@generated NOT'?",
-					IMessageProvider.WARNING);
+
+			StringBuilder methodIdentifier = new StringBuilder(this.sourceMethod.getElementName()).append("(")
+					.append(this.sourceMethod.getNumberOfParameters() > 0 ? "..." : "").append(")");
+
+			this.setTitle("Generated method '" + methodIdentifier.toString() + "' was changed!");
+			this.setMessage("Push to Ecore or change '@generated' tag to '@generated NOT'?", IMessageProvider.WARNING);
 		}
 
 		@Override
@@ -625,11 +635,14 @@ public class HandleChangedGeneratedCodeExecutor {
 
 			Button pushToEcoreButton = this.createButton(parent, IDialogConstants.OPEN_ID, "Push to Ecore", false);
 			pushToEcoreButton.addSelectionListener((SelectionListener2) e -> {
-				AddNotToGeneratedTagDialog.this.saveInput();
-				AddNotToGeneratedTagDialog.this.setReturnCode(IDialogConstants.OPEN_ID);
-				AddNotToGeneratedTagDialog.this.close();
+				HandleChangedGeneratedCodeDialog.this.saveInput();
+				HandleChangedGeneratedCodeDialog.this.setReturnCode(IDialogConstants.OPEN_ID);
+				HandleChangedGeneratedCodeDialog.this.close();
 
 			});
+			if (!new PushCodeToEcoreExecutor(this.helper, null).isPushable(this.sourceMethod)) {
+				pushToEcoreButton.setEnabled(false);
+			}
 			this.createButton(parent, IDialogConstants.OK_ID, "Add NOT tag", true);
 			this.createButton(parent, IDialogConstants.CANCEL_ID, "Ignore", false);
 		}
@@ -721,7 +734,7 @@ public class HandleChangedGeneratedCodeExecutor {
 		 * Whether the user selected the {@link #doNotAskAnyMore} checkbox.
 		 * <p />
 		 * Note: This will return <em>false</em> if {@link #pendingRequests} was set to null in the
-		 * {@link #AddNotToGeneratedTagDialog(String, int) constructor}.
+		 * {@link #HandleChangedGeneratedCodeDialog(SourceMethod, GeneratedEMFCodeHelper, int) constructor}.
 		 *
 		 * @return the {@link #doNotAskAnyMore}
 		 */
