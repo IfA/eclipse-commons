@@ -68,6 +68,28 @@ public abstract class AbstractGeneratedEMFCodeHandler extends AbstractHandler {
 		UIHelper.getCurrentEditor().getEditorSite().getActionBars().getStatusLineManager().setErrorMessage(null);
 	}
 
+	/**
+	 * This initializes the {@link #helper}, {@link #javaEditor}, and {@link #javaSelection} variables of this handler
+	 * for the current state of the given {@link CompilationUnitEditor}.
+	 */
+	protected void init(CompilationUnitEditor javaEditor) {
+
+		this.javaEditor = javaEditor;
+
+		this.javaSelection = this.javaEditor.getSelectionProvider().getSelection();
+
+		// In order to prevent manual parsing of the Java document, we make use of the CompilationUnit type that
+		// represents a structured Java document
+		//
+		CompilationUnit root = this.determineCompilationUnit((IEditorPart) this.javaEditor);
+
+		// Prevent unnecessary multiple initialization of the 'helper'
+		//
+		if (this.helper == null || !this.helper.getCompilationUnit().equals(root)) {
+			this.helper = new GeneratedEMFCodeHelper(root);
+		}
+	}
+
 	@Override
 	public boolean isEnabled() {
 
@@ -77,18 +99,22 @@ public abstract class AbstractGeneratedEMFCodeHandler extends AbstractHandler {
 		}
 
 		// test if the menu is shown in a Java editor
-		if (!(UIHelper.getCurrentEditor() instanceof CompilationUnitEditor)) {
+		IEditorPart currentEditor = UIHelper.getCurrentEditor();
+		if (!(currentEditor instanceof CompilationUnitEditor)) {
 			return false;
 		}
+
+		this.init((CompilationUnitEditor) currentEditor);
 
 		return super.isEnabled();
 	}
 
 	/**
-	 * This implementation initializes the {@link #helper}, {@link #javaEditor}, and {@link #javaSelection} variables of
-	 * this handler and then just calls {@link #doExecute()}.
+	 * This implementation checks if the handler {@link #isEnabled() is enabled} and (if it is) then just calls
+	 * {@link #doExecute()}.
 	 * <p />
-	 * Note: Clients should override {@link #doExecute()} instead of overwriting this.
+	 * Note: Clients should override {@link #doExecute()} instead of overwriting this in order to be able to rely on
+	 * properly initialized {@link #helper}, {@link #javaEditor}, and {@link #javaSelection} variables of this handler.
 	 * <p />
 	 * Note: Any exceptions thrown by {@link #doExecute()} are logged and {@link #showError(String) shown to the user}
 	 * via the status line.
@@ -100,17 +126,9 @@ public abstract class AbstractGeneratedEMFCodeHandler extends AbstractHandler {
 
 		this.clearError();
 
-		this.javaEditor = (CompilationUnitEditor) UIHelper.getCurrentEditor();
-
-		this.javaSelection = this.javaEditor.getSelectionProvider().getSelection();
-
-		// In order to prevent manual parsing of the Java document, we make use
-		// of the CompilationUnit type that
-		// represents a structured Java document
-		//
-		CompilationUnit root = this.determineCompilationUnit();
-
-		this.helper = new GeneratedEMFCodeHelper(root);
+		if (!this.isEnabled()) {
+			this.showError("Internal error while executing the handler. Handler is not enabled...");
+		}
 
 		try {
 

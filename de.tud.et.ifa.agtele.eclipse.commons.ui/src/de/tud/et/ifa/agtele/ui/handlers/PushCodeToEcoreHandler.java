@@ -8,10 +8,8 @@ import org.eclipse.emf.ecore.ETypedElement;
 import org.eclipse.emf.ecore.EcoreFactory;
 import org.eclipse.emf.ecore.resource.ResourceSet;
 import org.eclipse.emf.edit.domain.IEditingDomainProvider;
-import org.eclipse.jdt.internal.core.CompilationUnit;
 import org.eclipse.ui.IEditorPart;
 
-import de.tud.et.ifa.agtele.ui.emf.EMFGeneratedJavaFileType;
 import de.tud.et.ifa.agtele.ui.emf.PushCodeToEcoreExecutor;
 import de.tud.et.ifa.agtele.ui.emf.PushCodeToEcoreExecutor.PushCodeToEcoreResult;
 
@@ -32,9 +30,8 @@ import de.tud.et.ifa.agtele.ui.emf.PushCodeToEcoreExecutor.PushCodeToEcoreResult
  *
  * As implementation source, only implementation classes from the emf 'model' ore 'item provider' code are accepted.
  *
- * @author baron
+ * @author baron, mfreund
  */
-@SuppressWarnings("restriction")
 public class PushCodeToEcoreHandler extends OpenMetamodelHandler {
 
 	/**
@@ -93,15 +90,13 @@ public class PushCodeToEcoreHandler extends OpenMetamodelHandler {
 	@Override
 	public boolean isEnabled() {
 
-		if (super.isEnabled()) {
-			// check if the current compilation unit is a model code implementation
-			CompilationUnit cUnit = this.determineCompilationUnit();
-			String mainTypeName = String.valueOf(cUnit.getMainTypeName());
-			EMFGeneratedJavaFileType type = EMFGeneratedJavaFileType.getFileType(mainTypeName);
-
-			return type.isClassImplementationType() || type.isEditItemProviderType();
+		if (!super.isEnabled()) {
+			return false;
 		}
-		return false;
+
+		PushCodeToEcoreExecutor executor = new PushCodeToEcoreExecutor(this.helper, null);
+
+		return executor.isPushable(this.javaSelection);
 
 	}
 
