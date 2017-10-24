@@ -70,7 +70,7 @@ public class HandleChangedGeneratedCodeExecutor {
 	 * be used to separate the JavaDoc (group 1) of the actual source (group 2) of a Java element.
 	 */
 	protected static final String JAVADOC_WITH_GENERATED_TAG_REGEX = "(/\\*\\*[\\s\\S]*" + // JavaDoc beginning
-			"@generated(?![\\s]+NOT)" + // '@generated' Tag (not followed by 'NOT')
+			"\\*[\\s]*@generated(?![\\s]+NOT)" + // '@generated' tag (starting a new line; not followed by 'NOT')
 			"[\\s\\S]*\\*/)" // JavaDoc ending
 			+ "([\\s\\S]+)"; // Actual content of the method
 
