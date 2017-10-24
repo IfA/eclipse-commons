@@ -193,6 +193,9 @@
 			<!-- change group -->
 			<arg value="call chgrp -R ${group} ${remote-path}/*" />
 			
+			<!-- make folders executable for all users -->
+			<arg value="call find ${remote-path} -type d -exec chmod o+x {} \;" />
+			
 			<!-- close the connection -->
 			<arg value="close" />
 			<arg value="exit" />

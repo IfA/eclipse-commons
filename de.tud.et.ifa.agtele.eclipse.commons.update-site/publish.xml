@@ -63,6 +63,10 @@
 			<arg value="call chgrp ${group} ${remote-path}artifacts.jar" />
 			<arg value="call chgrp -R ${group} ${remote-path}features" />
 			<arg value="call chgrp -R ${group} ${remote-path}plugins" />
+			
+			<!-- make folders executable for all users -->
+			<arg value="call find ${remote-path}features -type d -exec chmod o+x {} \;" />
+			<arg value="call find ${remote-path}plugins -type d -exec chmod o+x {} \;" />
 
 			<!-- close the connection -->
 			<arg value="close" />
