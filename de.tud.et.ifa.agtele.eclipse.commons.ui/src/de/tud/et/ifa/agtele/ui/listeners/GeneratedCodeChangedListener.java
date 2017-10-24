@@ -220,7 +220,7 @@ public class GeneratedCodeChangedListener extends WorkspaceCommandListener {
 
 			List<Object> selection = selectionByEditor.containsKey(editor) ? selectionByEditor.get(editor)
 					: new ArrayList<>();
-			selection.addAll(result.getPushedMethods().entrySet().stream().filter(e -> e.getValue().isPresent())
+			selection.addAll(result.getPushedElements().entrySet().stream().filter(e -> e.getValue().isPresent())
 					.map(e -> e.getValue().get().getTarget()).collect(Collectors.toList()));
 
 			if (!selection.isEmpty()) {
