@@ -3,10 +3,15 @@ package de.tud.et.ifa.agtele.ui.util;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.emf.common.ui.viewer.IViewerProvider;
+import org.eclipse.emf.ecore.EObject;
+import org.eclipse.emf.ecore.resource.ResourceSet;
+import org.eclipse.emf.edit.domain.IEditingDomainProvider;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.swt.widgets.Shell;
@@ -22,6 +27,8 @@ import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.part.FileEditorInput;
 
+import de.tud.et.ifa.agtele.emf.AgteleEcoreUtil;
+import de.tud.et.ifa.agtele.resources.ResourceHelper;
 import de.tud.et.ifa.agtele.ui.AgteleUIPlugin;
 
 /**
@@ -172,6 +179,69 @@ public interface UIHelper {
 		} else {
 			return null;
 		}
+	}
+
+	/**
+	 * Selects the given {@link EObject} in an editor.
+	 * <p />
+	 * <b>Important:</b> This must be called from the UI thread. If called from a non-UI thread, it will throw an
+	 * 'InvalidThreadAccessException'.
+	 * <p />
+	 * Note: The given {@link EObject} does not need be part of the {@link ResourceSet} used by the editor as
+	 * {@link AgteleEcoreUtil#getEquivalentElementFrom(EObject, ResourceSet) an equivalent element} will determined
+	 * automatically.
+	 *
+	 * @param elementToSelect
+	 *            The {@link EObject} to select.
+	 * @param editorToUse
+	 *            An optional {@link IEditorPart} to use. If no editor is given, a new editor will be
+	 *            {@link #openEditor(IFile) opened}.
+	 * @return The {@link IEditorPart} in which the element was selected.
+	 * @throws PartInitException
+	 *             If the editor could not be created or initialized.
+	 * @throws ClassCastException
+	 *             If the opened editor does not implement {@link IEditingDomainProvider} or {@link IViewerProvider}.
+	 */
+	public static IEditorPart selectEObjectInEditor(EObject elementToSelect, Optional<IEditorPart> editorToUse)
+			throws PartInitException, ClassCastException {
+
+		IEditorPart editor = editorToUse
+				.orElse(UIHelper.openEditor(ResourceHelper.getFileForResource(elementToSelect.eResource())));
+
+		EObject equivalentElement = AgteleEcoreUtil.getEquivalentElementFrom(elementToSelect,
+				((IEditingDomainProvider) editor).getEditingDomain().getResourceSet());
+		((IViewerProvider) editor).getViewer().setSelection(new StructuredSelection(equivalentElement));
+
+		return editor;
+	}
+
+	/**
+	 * Selects the given {@link EObject} in an editor.
+	 * <p />
+	 * <b>Important:</b> This must be called from the UI thread. If called from a non-UI thread, it will throw an
+	 * 'InvalidThreadAccessException'.
+	 * <p />
+	 * Note: The given {@link EObject} does not need be part of the {@link ResourceSet} used by the editor as
+	 * {@link AgteleEcoreUtil#getEquivalentElementFrom(EObject, ResourceSet) an equivalent element} will determined
+	 * automatically.
+	 *
+	 * @param elementToSelect
+	 *            The {@link EObject} to select.
+	 * @param editorToUse
+	 *            The id of the editor to use.
+	 * @return The {@link IEditorPart} in which the element was selected.
+	 * @throws PartInitException
+	 *             If the editor could not be created or initialized.
+	 * @throws ClassCastException
+	 *             If the opened editor does not implement {@link IEditingDomainProvider} or {@link IViewerProvider}.
+	 */
+	public static IEditorPart selectEObjectInEditor(EObject elementToSelect, String editorToUse)
+			throws PartInitException, ClassCastException {
+
+		IEditorPart editor = UIHelper.openEditor(ResourceHelper.getFileForResource(elementToSelect.eResource()),
+				editorToUse);
+
+		return UIHelper.selectEObjectInEditor(elementToSelect, Optional.of(editor));
 	}
 
 	/**
