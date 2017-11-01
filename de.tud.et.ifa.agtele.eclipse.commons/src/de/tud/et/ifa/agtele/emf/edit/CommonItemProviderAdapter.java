@@ -42,7 +42,7 @@ public class CommonItemProviderAdapter extends ItemProviderAdapter {
 	 *
 	 * @author cmartin
 	 */
-	private final class AddCommandWithEnhancedGenericTypeSupport extends AddCommand {
+	public class AddCommandWithEnhancedGenericTypeSupport extends AddCommand {
 
 		/**
 		 * This creates an instance of an {@link AddCommand} with enhanced
@@ -54,7 +54,7 @@ public class CommonItemProviderAdapter extends ItemProviderAdapter {
 		 * @param collection
 		 * @param index
 		 */
-		private AddCommandWithEnhancedGenericTypeSupport(EditingDomain domain, EObject owner,
+		public AddCommandWithEnhancedGenericTypeSupport(EditingDomain domain, EObject owner,
 				EStructuralFeature feature, Collection<?> collection, int index) {
 			super(domain, owner, feature, collection, index);
 		}
@@ -69,7 +69,7 @@ public class CommonItemProviderAdapter extends ItemProviderAdapter {
 			//
 			if (this.ownerList == null || this.collection == null || this.collection.size() == 0
 					|| this.index != CommandParameter.NO_INDEX
-							&& (this.index < 0 || this.index > this.ownerList.size())) {
+					&& (this.index < 0 || this.index > this.ownerList.size())) {
 				return false;
 			}
 
