@@ -1,15 +1,21 @@
 package de.tud.et.ifa.agtele.emf.edit;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
 import org.eclipse.emf.common.command.Command;
 import org.eclipse.emf.common.command.CompoundCommand;
+import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.edit.command.AddCommand;
 import org.eclipse.emf.edit.command.CopyCommand;
+import org.eclipse.emf.edit.command.CreateChildCommand;
 import org.eclipse.emf.edit.command.MoveCommand;
 import org.eclipse.emf.edit.command.RemoveCommand;
 import org.eclipse.emf.edit.command.SetCommand;
+
+import de.tud.et.ifa.agtele.emf.AgteleEcoreUtil;
 
 /**
  * IRequireRelatedModelUpdateProvider provides an interfaces that can be
@@ -19,6 +25,10 @@ import org.eclipse.emf.edit.command.SetCommand;
  * when the initial model change is done and provides command parameters in
  * order to update any model in any way and restorable.
  *
+ * If implemented, the interface will be queried two times, on the model element
+ * that is updated in some of its features and the target element, that is
+ * referenced through the feature.
+ *
  * @author Nils Frederik Dickmann
  *
  */
@@ -27,10 +37,19 @@ public interface IRequireRelatedModelUpdateProvider {
 	/**
 	 * Checks if a model change is required depending on the original command.
 	 *
+	 * The element, this provider is responsible for, can always be the owner (some
+	 * of its features changes) and the target (a new instance of a model element,
+	 * for example) element. If a command affects multiple elements, e.g. of a
+	 * multi-valued reference, each provider for a certain element class is expected
+	 * to be called only once per command.
+	 *
 	 * @param originalCommand
 	 * @return
 	 */
 	default boolean isModelUpdateRequired(Command originalCommand) {
+		if (originalCommand instanceof CreateChildCommand) {
+			return this.isModelUpdateRequiredForCreateChild((CreateChildCommand) originalCommand);
+		}
 		if (originalCommand instanceof AddCommand) {
 			return this.isModelUpdateRequiredForAdd((AddCommand) originalCommand);
 		}
@@ -46,6 +65,17 @@ public interface IRequireRelatedModelUpdateProvider {
 		if (originalCommand instanceof SetCommand) {
 			return this.isModelUpdateRequiredForSet((SetCommand) originalCommand);
 		}
+		return false;
+	}
+
+	/**
+	 * Convenience method in order to check if a model change is required when an
+	 * element is created.
+	 *
+	 * @param originalCommand
+	 * @return
+	 */
+	default boolean isModelUpdateRequiredForCreateChild(CreateChildCommand originalCommand) {
 		return false;
 	}
 
@@ -115,6 +145,9 @@ public interface IRequireRelatedModelUpdateProvider {
 		if (originalCommand instanceof AddCommand) {
 			return this.getModelUpdateCommandsForAdd((AddCommand) originalCommand);
 		}
+		if (originalCommand instanceof CreateChildCommand) {
+			return this.getModelUpdateCommandsForCreateChild((CreateChildCommand) originalCommand);
+		}
 		if (originalCommand instanceof RemoveCommand) {
 			return this.getModelUpdateCommandsForRemove((RemoveCommand) originalCommand);
 		}
@@ -127,6 +160,17 @@ public interface IRequireRelatedModelUpdateProvider {
 		if (originalCommand instanceof CopyCommand) {
 			return this.getModelUpdateCommandsForCopy((CopyCommand) originalCommand);
 		}
+		return Collections.emptyList();
+	}
+
+	/**
+	 * Convenience method for returning the list of Commands that need to be
+	 * executed in conjunction with the original create child command.
+	 *
+	 * @param originalCommand
+	 * @return
+	 */
+	default List<Command> getModelUpdateCommandsForCreateChild(CreateChildCommand originalCommand) {
 		return Collections.emptyList();
 	}
 
@@ -188,25 +232,124 @@ public interface IRequireRelatedModelUpdateProvider {
 	/**
 	 * Wraps the original command in a {@link CompoundCommand}, if needed.
 	 *
+	 * @param originalProvider
+	 *            The Provider the gets involved first, when a subordinate feature
+	 *            changes.
 	 * @param originalCommand
+	 *            The original command, that has been created.
 	 * @return
 	 */
-	default Command wrapOriginalCommand(Command originalCommand) {
-		if (!this.isModelUpdateRequired(originalCommand)) {
-			return originalCommand;
-		}
-		List<Command> requiredUpdates = this.getModelUpdateCommands(originalCommand);
-		if (requiredUpdates.isEmpty()) {
-			return originalCommand;
-		}
-
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	static Command wrapOriginalCommand(Object originalProvider, Command originalCommand) {
 		CompoundCommand result = new CompoundCommand();
 
-		for (Command c : requiredUpdates) {
-			result.append(c);
+		//Query the hosting provider first
+		if (originalProvider instanceof IRequireRelatedModelUpdateProvider) {
+			if (((IRequireRelatedModelUpdateProvider) originalProvider).isModelUpdateRequired(originalCommand)) {
+				for (Command c : ((IRequireRelatedModelUpdateProvider) originalProvider)
+						.getModelUpdateCommands(originalCommand)) {
+					result.append(c);
+				}
+			}
 		}
-		result.append(originalCommand);
 
+		//query providers of the possible child/affected elements
+		Collection<?> elements = null;
+		if (originalCommand instanceof AddCommand) {
+			elements = ((AddCommand) originalCommand).getCollection();
+		}
+		if (originalCommand instanceof RemoveCommand) {
+			elements = ((RemoveCommand) originalCommand).getCollection();
+		}
+		if (originalCommand instanceof CreateChildCommand) {
+			elements = ((CreateChildCommand) originalCommand).getResult();
+		}
+		if (originalCommand instanceof MoveCommand) {
+			elements = ((MoveCommand) originalCommand).getAffectedObjects();
+		}
+		if (originalCommand instanceof SetCommand) {
+			elements = new ArrayList<>();
+			((ArrayList) elements).add(((SetCommand) originalCommand).getOldValue());
+			((ArrayList) elements).add(((SetCommand) originalCommand).getValue());
+		}
+
+		if (elements != null && !elements.isEmpty()) {
+			//perform the collection of related commands only once per provider instance (if singleton pattern is used, once per provider class)
+			Collection<IRequireRelatedModelUpdateProvider> providers = new ArrayList<>();
+
+			IRequireRelatedModelUpdateProvider elementProvider = AgteleEcoreUtil
+					.adapt((EObject) elements.iterator().next(), IRequireRelatedModelUpdateProvider.class);
+			if (elementProvider != null && !providers.contains(elementProvider)
+					&& elementProvider.isModelUpdateRequired(originalCommand)) {
+				providers.add(elementProvider);
+				for (Command c : elementProvider.getModelUpdateCommands(originalCommand)) {
+					result.append(c);
+				}
+			}
+		}
+
+		result.append(originalCommand);
+		if (result.getCommandList().size() == 1) {
+			return originalCommand;
+		}
+		return result;
+	}
+
+	/**
+	 * Fetches the created class instance from the command.
+	 *
+	 * @param cmd
+	 * @return
+	 */
+	default <T> T getCreatedElement(CreateChildCommand cmd, Class<T> cls) {
+		Collection<?> col = cmd.getResult();
+		if (col.isEmpty()) {
+			return null;
+		}
+		Object ele = col.iterator().next();
+		if (ele.getClass().isAssignableFrom(cls)) {
+			return (T) ele;
+		}
+		return null;
+	}
+
+	/**
+	 * Fetches the removed class instances from the command.
+	 *
+	 * @param cmd
+	 * @return
+	 */
+	default <T> List<T> getRemovedElements(RemoveCommand cmd, Class<T> cls) {
+		Collection<?> col = cmd.getCollection();
+		if (col.isEmpty()) {
+			return null;
+		}
+		List<T> result = new ArrayList<>();
+		for (Object o : col) {
+			if (o.getClass().isAssignableFrom(cls)) {
+				result.add((T) o);
+			}
+		}
+		return result;
+	}
+
+	/**
+	 * Fetches the added class instances from the command.
+	 *
+	 * @param cmd
+	 * @return
+	 */
+	default <T> List<T> getAddedElements(AddCommand cmd, Class<T> cls) {
+		Collection<?> col = cmd.getCollection();
+		if (col.isEmpty()) {
+			return null;
+		}
+		List<T> result = new ArrayList<>();
+		for (Object o : col) {
+			if (o.getClass().isAssignableFrom(cls)) {
+				result.add((T) o);
+			}
+		}
 		return result;
 	}
 }

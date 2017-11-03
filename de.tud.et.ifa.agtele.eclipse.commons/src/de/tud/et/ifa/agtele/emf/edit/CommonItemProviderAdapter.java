@@ -313,10 +313,7 @@ public class CommonItemProviderAdapter extends ItemProviderAdapter {
 	public Command createCommand(Object object, EditingDomain domain, Class<? extends Command> commandClass,
 			CommandParameter commandParameter) {
 		Command result = super.createCommand(object, domain, commandClass, commandParameter);
-		if (this instanceof IRequireRelatedModelUpdateProvider) {
-			result = ((IRequireRelatedModelUpdateProvider) this).wrapOriginalCommand(result);
-		}
-		return result;
+		return IRequireRelatedModelUpdateProvider.wrapOriginalCommand(this, result);
 	}
 
 }
