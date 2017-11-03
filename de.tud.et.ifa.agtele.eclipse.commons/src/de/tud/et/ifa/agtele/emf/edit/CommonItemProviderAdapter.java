@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Set;
 
 import org.eclipse.emf.common.command.Command;
+import org.eclipse.emf.common.command.CompoundCommand;
 import org.eclipse.emf.common.notify.AdapterFactory;
 import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.EGenericType;
@@ -300,6 +301,22 @@ public class CommonItemProviderAdapter extends ItemProviderAdapter {
 			Collection<?> collection, int index) {
 
 		return new AddCommandWithEnhancedGenericTypeSupport(domain, owner, feature, collection, index);
+	}
+
+	/**
+	 * Delegates to the super implementation but wraps the original command into a
+	 * {@link CompoundCommand} by use of the
+	 * {@link IRequireRelatedModelUpdateProvider}, if other model updates have to be
+	 * done.
+	 */
+	@Override
+	public Command createCommand(Object object, EditingDomain domain, Class<? extends Command> commandClass,
+			CommandParameter commandParameter) {
+		Command result = super.createCommand(object, domain, commandClass, commandParameter);
+		if (this instanceof IRequireRelatedModelUpdateProvider) {
+			result = ((IRequireRelatedModelUpdateProvider) this).wrapOriginalCommand(result);
+		}
+		return result;
 	}
 
 }
