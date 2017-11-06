@@ -16,6 +16,7 @@ import org.eclipse.emf.edit.command.RemoveCommand;
 import org.eclipse.emf.edit.command.SetCommand;
 
 import de.tud.et.ifa.agtele.emf.AgteleEcoreUtil;
+import de.tud.et.ifa.agtele.emf.edit.CommonItemProviderAdapter.CreateChildCommandWithExtendedAccess;
 
 /**
  * IRequireRelatedModelUpdateProvider provides an interfaces that can be
@@ -48,7 +49,7 @@ public interface IRequireRelatedModelUpdateProvider {
 	 */
 	default boolean isModelUpdateRequired(Command originalCommand) {
 		if (originalCommand instanceof CreateChildCommand) {
-			return this.isModelUpdateRequiredForCreateChild((CreateChildCommand) originalCommand);
+			return this.isModelUpdateRequiredForCreateChild((CreateChildCommandWithExtendedAccess) originalCommand);
 		}
 		if (originalCommand instanceof AddCommand) {
 			return this.isModelUpdateRequiredForAdd((AddCommand) originalCommand);
@@ -75,7 +76,7 @@ public interface IRequireRelatedModelUpdateProvider {
 	 * @param originalCommand
 	 * @return
 	 */
-	default boolean isModelUpdateRequiredForCreateChild(CreateChildCommand originalCommand) {
+	default boolean isModelUpdateRequiredForCreateChild(CreateChildCommandWithExtendedAccess originalCommand) {
 		return false;
 	}
 
@@ -146,7 +147,7 @@ public interface IRequireRelatedModelUpdateProvider {
 			return this.getModelUpdateCommandsForAdd((AddCommand) originalCommand);
 		}
 		if (originalCommand instanceof CreateChildCommand) {
-			return this.getModelUpdateCommandsForCreateChild((CreateChildCommand) originalCommand);
+			return this.getModelUpdateCommandsForCreateChild((CreateChildCommandWithExtendedAccess) originalCommand);
 		}
 		if (originalCommand instanceof RemoveCommand) {
 			return this.getModelUpdateCommandsForRemove((RemoveCommand) originalCommand);
@@ -170,8 +171,8 @@ public interface IRequireRelatedModelUpdateProvider {
 	 * @param originalCommand
 	 * @return
 	 */
-	default List<Command> getModelUpdateCommandsForCreateChild(CreateChildCommand originalCommand) {
-		return Collections.emptyList();
+	default List<Command> getModelUpdateCommandsForCreateChild(CreateChildCommandWithExtendedAccess originalCommand) {
+		return new ArrayList<>();
 	}
 
 	/**
@@ -182,7 +183,7 @@ public interface IRequireRelatedModelUpdateProvider {
 	 * @return
 	 */
 	default List<Command> getModelUpdateCommandsForAdd(AddCommand originalCommand) {
-		return Collections.emptyList();
+		return new ArrayList<>();
 	}
 
 	/**
@@ -193,7 +194,7 @@ public interface IRequireRelatedModelUpdateProvider {
 	 * @return
 	 */
 	default List<Command> getModelUpdateCommandsForRemove(RemoveCommand originalCommand) {
-		return Collections.emptyList();
+		return new ArrayList<>();
 	}
 
 	/**
@@ -204,7 +205,7 @@ public interface IRequireRelatedModelUpdateProvider {
 	 * @return
 	 */
 	default List<Command> getModelUpdateCommandsForMove(MoveCommand originalCommand) {
-		return Collections.emptyList();
+		return new ArrayList<>();
 	}
 
 	/**
@@ -215,7 +216,7 @@ public interface IRequireRelatedModelUpdateProvider {
 	 * @return
 	 */
 	default List<Command> getModelUpdateCommandsForCopy(CopyCommand originalCommand) {
-		return Collections.emptyList();
+		return new ArrayList<>();
 	}
 
 	/**
@@ -226,7 +227,7 @@ public interface IRequireRelatedModelUpdateProvider {
 	 * @return
 	 */
 	default List<Command> getModelUpdateCommandsForSet(SetCommand originalCommand) {
-		return Collections.emptyList();
+		return new ArrayList<>();
 	}
 
 	/**
@@ -261,7 +262,7 @@ public interface IRequireRelatedModelUpdateProvider {
 		if (originalCommand instanceof RemoveCommand) {
 			elements = ((RemoveCommand) originalCommand).getCollection();
 		}
-		if (originalCommand instanceof CreateChildCommand) {
+		if (originalCommand instanceof CreateChildCommandWithExtendedAccess) {
 			elements = ((CreateChildCommand) originalCommand).getResult();
 		}
 		if (originalCommand instanceof MoveCommand) {
@@ -301,7 +302,7 @@ public interface IRequireRelatedModelUpdateProvider {
 	 * @param cmd
 	 * @return
 	 */
-	default <T> T getCreatedElement(CreateChildCommand cmd, Class<T> cls) {
+	default <T> T getCreatedElement(CreateChildCommandWithExtendedAccess cmd, Class<T> cls) {
 		Collection<?> col = cmd.getResult();
 		if (col.isEmpty()) {
 			return null;
@@ -316,9 +317,13 @@ public interface IRequireRelatedModelUpdateProvider {
 	/**
 	 * Fetches the removed class instances from the command.
 	 *
+	 * @param <T>
+	 *
 	 * @param cmd
+	 * @param cls
 	 * @return
 	 */
+	@SuppressWarnings("unchecked")
 	default <T> List<T> getRemovedElements(RemoveCommand cmd, Class<T> cls) {
 		Collection<?> col = cmd.getCollection();
 		if (col.isEmpty()) {

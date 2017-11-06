@@ -19,6 +19,7 @@ import org.eclipse.emf.ecore.util.FeatureMap;
 import org.eclipse.emf.ecore.util.FeatureMapUtil;
 import org.eclipse.emf.edit.command.AddCommand;
 import org.eclipse.emf.edit.command.CommandParameter;
+import org.eclipse.emf.edit.command.CreateChildCommand;
 import org.eclipse.emf.edit.domain.EditingDomain;
 import org.eclipse.emf.edit.provider.ComposedImage;
 import org.eclipse.emf.edit.provider.ItemProviderAdapter;
@@ -35,6 +36,54 @@ import org.eclipse.emf.edit.provider.ItemProviderAdapter;
 public class CommonItemProviderAdapter extends ItemProviderAdapter {
 
 	/**
+	 * This create child command allows accessing the intended owner of the child by
+	 * adding a single Method to the super class.
+	 *
+	 * @author Baron
+	 *
+	 */
+	public static class CreateChildCommandWithExtendedAccess extends CreateChildCommand {
+		public CreateChildCommandWithExtendedAccess(EditingDomain domain, EObject owner, EStructuralFeature feature,
+				Object child, Collection<?> selection) {
+			super(domain, owner, feature, child, selection);
+		}
+
+		public CreateChildCommandWithExtendedAccess(EditingDomain domain, EObject owner, EStructuralFeature feature,
+				Object child, Collection<?> selection, Helper helper) {
+			super(domain, owner, feature, child, selection, helper);
+		}
+
+		public CreateChildCommandWithExtendedAccess(EditingDomain domain, EObject owner, EStructuralFeature feature,
+				Object child, int index, Collection<?> selection) {
+			super(domain, owner, feature, child, index, selection);
+		}
+
+		public CreateChildCommandWithExtendedAccess(EditingDomain domain, EObject owner, EStructuralFeature feature,
+				Object child, int index, Collection<?> selection, Helper helper) {
+			super(domain, owner, feature, child, index, selection, helper);
+		}
+
+		/**
+		 * Returns the owner.
+		 *
+		 * @return
+		 */
+		public EObject getOwner() {
+			return this.owner;
+		}
+
+		/**
+		 * Returns the editing domain for this command.
+		 *
+		 * @return
+		 */
+		public EditingDomain getDomain() {
+			return this.domain;
+		}
+
+	}
+
+	/**
 	 * This class realizes a fix for the creation of e.g. PropertySamples
 	 *
 	 * the preparation of their {@link AddCommand} fails the type check in line
@@ -43,7 +92,7 @@ public class CommonItemProviderAdapter extends ItemProviderAdapter {
 	 *
 	 * @author cmartin
 	 */
-	public class AddCommandWithEnhancedGenericTypeSupport extends AddCommand {
+	public static class AddCommandWithEnhancedGenericTypeSupport extends AddCommand {
 
 		/**
 		 * This creates an instance of an {@link AddCommand} with enhanced
@@ -314,6 +363,16 @@ public class CommonItemProviderAdapter extends ItemProviderAdapter {
 			CommandParameter commandParameter) {
 		Command result = super.createCommand(object, domain, commandClass, commandParameter);
 		return IRequireRelatedModelUpdateProvider.wrapOriginalCommand(this, result);
+	}
+
+	@Override
+	protected Command createCreateChildCommand(EditingDomain domain, EObject owner, EStructuralFeature feature,
+			Object value, int index, Collection<?> collection) {
+
+		if (feature instanceof EReference && value instanceof EObject) {
+			return new CreateChildCommandWithExtendedAccess(domain, owner, feature, value, index, collection, this);
+		}
+		return new CreateChildCommandWithExtendedAccess(domain, owner, feature, value, index, collection, this);
 	}
 
 }
