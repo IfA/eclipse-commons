@@ -543,6 +543,48 @@ public class ResourceHelper {
 	}
 
 	/**
+	 * For a given {@link URI}, returns an Eclipse {@link IContainer} that represents this URI.
+	 *
+	 * @param uri
+	 *            The {@link URI} for which the container shall be returned.
+	 * @return The {@link IContainer} representing the uri or '<em>null</em>' if no container could be determined.
+	 */
+	public static IContainer getContainerForURI(URI uri) {
+
+		URI fileBasedUri = ResourceHelper.convertPlatformToFileURI(uri);
+
+		if (fileBasedUri == null) {
+			return null;
+		}
+
+		try {
+
+			IContainer[] containers = ResourcesPlugin.getWorkspace().getRoot()
+					.findContainersForLocationURI(new java.net.URI(fileBasedUri.toString()));
+
+			return containers.length == 0 ? null : containers[0];
+
+		} catch (Exception e) {
+			e.printStackTrace();
+			return null;
+		}
+
+	}
+
+	/**
+	 * For a given {@link IPath}, returns an Eclipse {@link IContainer} that represents this path.
+	 *
+	 * @param path
+	 *            The {@link IPath} for which the container shall be returned.
+	 * @return The {@link IContainer} representing the path or '<em>null</em>' if no container could be determined.
+	 */
+	public static IContainer getContainerForPath(IPath path) {
+
+		return ResourcesPlugin.getWorkspace().getRoot().getContainerForLocation(path);
+
+	}
+
+	/**
 	 * For a given platform-scheme absolute {@link URI}, this returns a file-scheme absolute URI.
 	 * <p />
 	 * Note: If the given URI is already a file-scheme absolute URI, it is simply returned.
