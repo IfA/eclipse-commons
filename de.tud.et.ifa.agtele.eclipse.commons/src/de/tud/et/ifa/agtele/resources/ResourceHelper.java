@@ -585,6 +585,29 @@ public class ResourceHelper {
 	}
 
 	/**
+	 * Recursively collect all {@link IFile IFile} contained in the given {@link IContainer}.
+	 *
+	 * @param container
+	 *            The container to browse.
+	 * @return The list of {@link IFile IFiles}.
+	 * @throws CoreException
+	 */
+	public static List<IFile> getFilesInContainerRecursively(IContainer container) throws CoreException {
+
+		List<IFile> ret = new ArrayList<>();
+
+		for (IResource member : container.members()) {
+			if (member instanceof IFile) {
+				ret.add((IFile) member);
+			} else if (member instanceof IContainer) {
+				ret.addAll(ResourceHelper.getFilesInContainerRecursively((IContainer) member));
+			}
+		}
+
+		return ret;
+	}
+
+	/**
 	 * For a given platform-scheme absolute {@link URI}, this returns a file-scheme absolute URI.
 	 * <p />
 	 * Note: If the given URI is already a file-scheme absolute URI, it is simply returned.
