@@ -5,15 +5,17 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
+import org.eclipse.emf.common.command.AbstractCommand;
 import org.eclipse.emf.common.command.Command;
-import org.eclipse.emf.common.command.CompoundCommand;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.edit.command.AddCommand;
+import org.eclipse.emf.edit.command.CommandActionDelegate;
 import org.eclipse.emf.edit.command.CopyCommand;
 import org.eclipse.emf.edit.command.CreateChildCommand;
 import org.eclipse.emf.edit.command.MoveCommand;
 import org.eclipse.emf.edit.command.RemoveCommand;
 import org.eclipse.emf.edit.command.SetCommand;
+import org.eclipse.emf.edit.provider.ItemProvider;
 
 import de.tud.et.ifa.agtele.emf.AgteleEcoreUtil;
 import de.tud.et.ifa.agtele.emf.edit.CommonItemProviderAdapter.CreateChildCommandWithExtendedAccess;
@@ -73,6 +75,8 @@ public interface IRequireRelatedModelUpdateProvider {
 	 * Convenience method in order to check if a model change is required when an
 	 * element is created.
 	 *
+	 * When this method is invoked, the original command has already been executed.
+	 *
 	 * @param originalCommand
 	 * @return
 	 */
@@ -83,6 +87,8 @@ public interface IRequireRelatedModelUpdateProvider {
 	/**
 	 * Convenience method in order to check if a model change is required when an
 	 * element is added to the model.
+	 *
+	 * When this method is invoked, the original command has already been executed.
 	 *
 	 * @param originalCommand
 	 * @return
@@ -95,6 +101,8 @@ public interface IRequireRelatedModelUpdateProvider {
 	 * Convenience method in order to check if a model change is required when an
 	 * element is removed from the model.
 	 *
+	 * This method is invoked before the original command will be executed.
+	 *
 	 * @param originalCommand
 	 * @return
 	 */
@@ -105,6 +113,8 @@ public interface IRequireRelatedModelUpdateProvider {
 	/**
 	 * Convenience method in order to check if a model change is required when an
 	 * element is moved.
+	 *
+	 * When this method is invoked, the original command has already been executed.
 	 *
 	 * @param originalCommand
 	 * @return
@@ -117,6 +127,8 @@ public interface IRequireRelatedModelUpdateProvider {
 	 * Convenience method in order to check if a model change is required when an
 	 * element is copied.
 	 *
+	 * When this method is invoked, the original command has already been executed.
+	 *
 	 * @param originalCommand
 	 * @return
 	 */
@@ -127,6 +139,8 @@ public interface IRequireRelatedModelUpdateProvider {
 	/**
 	 * Convenience method in order to check if a model change is required when
 	 * something is set on this command.
+	 *
+	 * When this method is invoked, the original command has already been executed.
 	 *
 	 * @param originalCommand
 	 * @return
@@ -168,6 +182,8 @@ public interface IRequireRelatedModelUpdateProvider {
 	 * Convenience method for returning the list of Commands that need to be
 	 * executed in conjunction with the original create child command.
 	 *
+	 * When this method is invoked, the original command has already been executed.
+	 *
 	 * @param originalCommand
 	 * @return
 	 */
@@ -178,6 +194,8 @@ public interface IRequireRelatedModelUpdateProvider {
 	/**
 	 * Convenience method for returning the list of Commands that need to be
 	 * executed in conjunction with the original add command.
+	 *
+	 * When this method is invoked, the original command has already been executed.
 	 *
 	 * @param originalCommand
 	 * @return
@@ -190,6 +208,8 @@ public interface IRequireRelatedModelUpdateProvider {
 	 * Convenience method for returning the list of Commands that need to be
 	 * executed in conjunction with the original remove command.
 	 *
+	 * This method is invoked, before the original command will be executed.
+	 *
 	 * @param originalCommand
 	 * @return
 	 */
@@ -200,6 +220,8 @@ public interface IRequireRelatedModelUpdateProvider {
 	/**
 	 * Convenience method for returning the list of Commands that need to be
 	 * executed in conjunction with the original move command.
+	 *
+	 * When this method is invoked, the original command has already been executed.
 	 *
 	 * @param originalCommand
 	 * @return
@@ -212,6 +234,8 @@ public interface IRequireRelatedModelUpdateProvider {
 	 * Convenience method for returning the list of Commands that need to be
 	 * executed in conjunction with the original copy command.
 	 *
+	 * When this method is invoked, the original command has already been executed.
+	 *
 	 * @param originalCommand
 	 * @return
 	 */
@@ -223,6 +247,8 @@ public interface IRequireRelatedModelUpdateProvider {
 	 * Convenience method for returning the list of Commands that need to be
 	 * executed in conjunction with the original set command.
 	 *
+	 * When this method is invoked, the original command has already been executed.
+	 *
 	 * @param originalCommand
 	 * @return
 	 */
@@ -231,7 +257,9 @@ public interface IRequireRelatedModelUpdateProvider {
 	}
 
 	/**
-	 * Wraps the original command in a {@link CompoundCommand}, if needed.
+	 * Wraps the original command in a {@link DelayedWrappingCommand}, if needed. If
+	 * the original command is a {@link CommandActionDelegate}, the returned Command
+	 * is a {@link DelegatingDelayedWrappingCommand}.
 	 *
 	 * @param originalProvider
 	 *            The Provider the gets involved first, when a subordinate feature
@@ -242,58 +270,10 @@ public interface IRequireRelatedModelUpdateProvider {
 	 */
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	static Command wrapOriginalCommand(Object originalProvider, Command originalCommand) {
-		CompoundCommand result = new CompoundCommand();
-
-		//Query the hosting provider first
-		if (originalProvider instanceof IRequireRelatedModelUpdateProvider) {
-			if (((IRequireRelatedModelUpdateProvider) originalProvider).isModelUpdateRequired(originalCommand)) {
-				for (Command c : ((IRequireRelatedModelUpdateProvider) originalProvider)
-						.getModelUpdateCommands(originalCommand)) {
-					result.append(c);
-				}
-			}
+		if (originalCommand instanceof CommandActionDelegate) {
+			return new DelegatingDelayedWrappingCommand(originalCommand, originalProvider);
 		}
-
-		//query providers of the possible child/affected elements
-		Collection<?> elements = null;
-		if (originalCommand instanceof AddCommand) {
-			elements = ((AddCommand) originalCommand).getCollection();
-		}
-		if (originalCommand instanceof RemoveCommand) {
-			elements = ((RemoveCommand) originalCommand).getCollection();
-		}
-		if (originalCommand instanceof CreateChildCommandWithExtendedAccess) {
-			elements = ((CreateChildCommand) originalCommand).getResult();
-		}
-		if (originalCommand instanceof MoveCommand) {
-			elements = ((MoveCommand) originalCommand).getAffectedObjects();
-		}
-		if (originalCommand instanceof SetCommand) {
-			elements = new ArrayList<>();
-			((ArrayList) elements).add(((SetCommand) originalCommand).getOldValue());
-			((ArrayList) elements).add(((SetCommand) originalCommand).getValue());
-		}
-
-		if (elements != null && !elements.isEmpty()) {
-			//perform the collection of related commands only once per provider instance (if singleton pattern is used, once per provider class)
-			Collection<IRequireRelatedModelUpdateProvider> providers = new ArrayList<>();
-
-			IRequireRelatedModelUpdateProvider elementProvider = AgteleEcoreUtil
-					.adapt((EObject) elements.iterator().next(), IRequireRelatedModelUpdateProvider.class);
-			if (elementProvider != null && !providers.contains(elementProvider)
-					&& elementProvider.isModelUpdateRequired(originalCommand)) {
-				providers.add(elementProvider);
-				for (Command c : elementProvider.getModelUpdateCommands(originalCommand)) {
-					result.append(c);
-				}
-			}
-		}
-
-		result.append(originalCommand);
-		if (result.getCommandList().size() == 1) {
-			return originalCommand;
-		}
-		return result;
+		return new DelayedWrappingCommand(originalCommand, originalProvider);
 	}
 
 	/**
@@ -302,13 +282,13 @@ public interface IRequireRelatedModelUpdateProvider {
 	 * @param cmd
 	 * @return
 	 */
-	default <T> T getCreatedElement(CreateChildCommandWithExtendedAccess cmd, Class<T> cls) {
+	static <T> T getCreatedElement(CreateChildCommandWithExtendedAccess cmd, Class<T> cls) {
 		Collection<?> col = cmd.getResult();
 		if (col.isEmpty()) {
 			return null;
 		}
 		Object ele = col.iterator().next();
-		if (ele.getClass().isAssignableFrom(cls)) {
+		if (cls.isAssignableFrom(ele.getClass())) {
 			return (T) ele;
 		}
 		return null;
@@ -324,14 +304,14 @@ public interface IRequireRelatedModelUpdateProvider {
 	 * @return
 	 */
 	@SuppressWarnings("unchecked")
-	default <T> List<T> getRemovedElements(RemoveCommand cmd, Class<T> cls) {
+	static <T> List<T> getRemovedElements(RemoveCommand cmd, Class<T> cls) {
 		Collection<?> col = cmd.getCollection();
 		if (col.isEmpty()) {
 			return null;
 		}
 		List<T> result = new ArrayList<>();
 		for (Object o : col) {
-			if (o.getClass().isAssignableFrom(cls)) {
+			if (cls.isAssignableFrom(o.getClass())) {
 				result.add((T) o);
 			}
 		}
@@ -344,17 +324,324 @@ public interface IRequireRelatedModelUpdateProvider {
 	 * @param cmd
 	 * @return
 	 */
-	default <T> List<T> getAddedElements(AddCommand cmd, Class<T> cls) {
+	static <T> List<T> getAddedElements(AddCommand cmd, Class<T> cls) {
 		Collection<?> col = cmd.getCollection();
 		if (col.isEmpty()) {
 			return null;
 		}
 		List<T> result = new ArrayList<>();
 		for (Object o : col) {
-			if (o.getClass().isAssignableFrom(cls)) {
+			if (cls.isAssignableFrom(o.getClass())) {
 				result.add((T) o);
 			}
 		}
 		return result;
+	}
+
+	/**
+	 * This class emulates a special version of a compound command. It is
+	 * initialized with an {@link #originalCommand}.
+	 *
+	 * When this {@link #originalCommand} is being executed,
+	 * {@link #additionalCommands} are being determined by use of the
+	 * {@link IRequireRelatedModelUpdateProvider} interface that can optionally be
+	 * implemented by the {@link #originalProvider} provider that created the
+	 * {@link #originalCommand} in the first place or by the elements that are the
+	 * result of the {@link #originalCommand}.
+	 *
+	 * The type of the {@link #originalCommand} determines, whether it is executed
+	 * first.
+	 *
+	 * Redo, Undo are supported, if the {@link #originalCommand} and all
+	 * {@link #additionalCommands} support it.
+	 *
+	 * Supported original command classes are
+	 * {@link CreateChildCommandWithExtendedAccess}, {@link AddCommand},
+	 * {@link RemoveCommand}, {@link MoveCommand}, {@link SetCommand}, and
+	 * {@link SetCommand}
+	 *
+	 * If the command shall support Command Actions, use
+	 * {@link DelegatingDelayedWrappingCommand}
+	 *
+	 * @author Baron
+	 *
+	 */
+	public static class DelayedWrappingCommand extends AbstractCommand {
+		//TODO make it a Coumpound Command?
+		/**
+		 * Flag indicating, that the original command will be executed first
+		 */
+		protected boolean executeOriginalCommandFirst = false;
+		/**
+		 * The original command, this command wraps
+		 */
+		protected Command originalCommand;
+		/**
+		 * Additional commands determined by the
+		 * {@link IRequireRelatedModelUpdateProvider} interface.
+		 */
+		protected List<Command> additionalCommands = null;
+		/**
+		 * The {@link ItemProvider} that created the {@link #originalCommand}
+		 */
+		protected Object originalProvider;
+
+		/**
+		 *
+		 * @param originalCommand
+		 *            The command to wrap and to determine {@link #additionalCommands}
+		 *            for
+		 * @param originalProvider
+		 *            The {@link ItemProvider} that created the original command
+		 */
+		public DelayedWrappingCommand(Command originalCommand, Object originalProvider) {
+			super();
+			this.originalCommand = originalCommand;
+			this.originalProvider = originalProvider;
+			this.executeOriginalCommandFirst = this.getExecuteOriginalCommandFirst();
+		}
+
+		/**
+		 * Returns the {@link #executeOriginalCommandFirst} flag
+		 *
+		 * @return
+		 */
+		public boolean getExecuteOriginalCommandFirst() {
+			return this.originalCommand instanceof CreateChildCommand || this.originalCommand instanceof SetCommand
+					|| this.originalCommand instanceof AddCommand || this.originalCommand instanceof CopyCommand
+					|| this.originalCommand instanceof MoveCommand;
+		}
+
+		/**
+		 * Adapted in order to also execute the {@link #additionalCommands}.
+		 */
+		@Override
+		public void execute() {
+			if (this.executeOriginalCommandFirst && this.originalCommand.canExecute()) {
+				this.originalCommand.execute();
+			}
+			if (this.additionalCommands == null) {
+				this.additionalCommands = this.getAdditionalCommands();
+			}
+			for (Command cmd : this.additionalCommands) {
+				if (cmd.canExecute()) {
+					cmd.execute();
+				}
+			}
+			if (!this.executeOriginalCommandFirst && this.originalCommand.canExecute()) {
+				this.originalCommand.execute();
+			}
+		}
+
+		@Override
+		public boolean canExecute() {
+			if (this.additionalCommands != null) {
+				for (Command cmd : this.additionalCommands) {
+					if (!cmd.canExecute()) {
+						return false;
+					}
+				}
+			}
+			return this.originalCommand.canExecute();
+		}
+
+		@Override
+		public boolean canUndo() {
+			if (this.additionalCommands != null) {
+				for (Command cmd : this.additionalCommands) {
+					if (!cmd.canUndo()) {
+						return false;
+					}
+				}
+			}
+			return this.originalCommand.canUndo();
+		}
+
+		@Override
+		public void redo() {
+			if (this.executeOriginalCommandFirst) {
+				this.originalCommand.redo();
+			}
+			for (Command cmd : this.additionalCommands) {
+				cmd.redo();
+			}
+			if (!this.executeOriginalCommandFirst) {
+				this.originalCommand.redo();
+			}
+		}
+
+		@Override
+		public void undo() {
+			if (!this.executeOriginalCommandFirst && this.originalCommand.canUndo()) {
+				this.originalCommand.undo();
+			}
+			List<Command> reverse = new ArrayList<>();
+			reverse.addAll(this.additionalCommands);
+			Collections.reverse(reverse);
+
+			for (Command cmd : reverse) {
+				try {
+					if (cmd.canUndo()) {
+						cmd.undo();
+					}
+				} catch (UnsupportedOperationException e) {
+					for (int i = reverse.indexOf(cmd) - 1; i >= 0; i -= 1) {
+						Command cmd2 = reverse.get(i);
+						cmd2.redo();
+					}
+					throw e;
+				}
+			}
+			if (this.executeOriginalCommandFirst) {
+				try {
+					if (this.originalCommand.canUndo()) {
+						this.originalCommand.undo();
+					}
+				} catch (UnsupportedOperationException e) {
+					Collections.reverse(reverse);
+					for (Command cmd : reverse) {
+						cmd.redo();
+					}
+					throw e;
+				}
+			}
+		}
+
+		/**
+		 * Determines the {@link #additionalCommands} to be executed either before or
+		 * after the {@link #originalCommand}.
+		 *
+		 * @return
+		 */
+		protected List<Command> getAdditionalCommands() {
+			ArrayList<Command> result = new ArrayList<>();
+
+			//Query the hosting provider first
+			if (this.originalProvider instanceof IRequireRelatedModelUpdateProvider) {
+				if (((IRequireRelatedModelUpdateProvider) this.originalProvider)
+						.isModelUpdateRequired(this.originalCommand)) {
+					for (Command c : ((IRequireRelatedModelUpdateProvider) this.originalProvider)
+							.getModelUpdateCommands(this.originalCommand)) {
+						result.add(c);
+					}
+				}
+			}
+
+			//query providers of the possible child/affected elements
+			Collection<?> elements = null;
+			if (this.originalCommand instanceof AddCommand) {
+				elements = ((AddCommand) this.originalCommand).getCollection();
+			}
+			if (this.originalCommand instanceof RemoveCommand) {
+				elements = ((RemoveCommand) this.originalCommand).getCollection();
+			}
+			if (this.originalCommand instanceof CreateChildCommandWithExtendedAccess) {
+				elements = ((CreateChildCommand) this.originalCommand).getResult();
+			}
+			if (this.originalCommand instanceof MoveCommand) {
+				elements = ((MoveCommand) this.originalCommand).getAffectedObjects();
+			}
+			if (this.originalCommand instanceof SetCommand) {
+				elements = new ArrayList<>();
+				((ArrayList) elements).add(((SetCommand) this.originalCommand).getOldValue());
+				((ArrayList) elements).add(((SetCommand) this.originalCommand).getValue());
+			}
+
+			if (elements != null && !elements.isEmpty()) {
+				//perform the collection of related commands only once per provider instance (if singleton pattern is used, once per provider class)
+				Collection<IRequireRelatedModelUpdateProvider> providers = new ArrayList<>();
+				for (Object element : elements) {
+					if (element != null && element instanceof EObject) {
+						IRequireRelatedModelUpdateProvider elementProvider = AgteleEcoreUtil.adapt((EObject) element,
+								IRequireRelatedModelUpdateProvider.class);
+						if (elementProvider != null && !providers.contains(elementProvider)) {
+							providers.add(elementProvider);
+							if (elementProvider.isModelUpdateRequired(this.originalCommand)) {
+								result.addAll(elementProvider.getModelUpdateCommands(this.originalCommand));
+							}
+						}
+					}
+				}
+			}
+
+			result.remove(this.originalCommand);
+			return result;
+		}
+
+		@Override
+		public String getDescription() {
+			return this.originalCommand.getDescription();
+		}
+
+		@Override
+		public String getLabel() {
+			return this.originalCommand.getLabel();
+		}
+
+		@SuppressWarnings("unchecked")
+		@Override
+		public Collection<?> getAffectedObjects() {
+			@SuppressWarnings({ "rawtypes" })
+			ArrayList result = new ArrayList(this.originalCommand.getAffectedObjects());
+			if (this.additionalCommands != null) {
+				for (Command cmd : this.additionalCommands) {
+					result.addAll(cmd.getAffectedObjects());
+				}
+			}
+			return result;
+		}
+
+		@SuppressWarnings("unchecked")
+		@Override
+		public Collection<?> getResult() {
+			@SuppressWarnings("rawtypes")
+			ArrayList result = new ArrayList(this.originalCommand.getResult());
+			if (this.additionalCommands != null) {
+				for (Command cmd : this.additionalCommands) {
+					result.addAll(cmd.getResult());
+				}
+			}
+			return result;
+		}
+
+		public Command getOriginalCommand() {
+			return this.originalCommand;
+		}
+
+		public Object getOriginalItemProvider() {
+			return this.originalProvider;
+		}
+	}
+
+	/**
+	 * Adds support for Command Action Delegation.
+	 *
+	 * @author Baron
+	 */
+	public static class DelegatingDelayedWrappingCommand extends DelayedWrappingCommand implements CommandActionDelegate {
+
+		/**
+		 * @see DelayedWrappingCommand
+		 * @param originalCommand
+		 * @param originalProvider
+		 */
+		public DelegatingDelayedWrappingCommand(Command originalCommand, Object originalProvider) {
+			super(originalCommand, originalProvider);
+		}
+
+		@Override
+		public Object getImage() {
+			return ((CommandActionDelegate) this.originalCommand).getImage();
+		}
+
+		@Override
+		public String getText() {
+			return ((CommandActionDelegate) this.originalCommand).getText();
+		}
+
+		@Override
+		public String getToolTipText() {
+			return ((CommandActionDelegate) this.originalCommand).getToolTipText();
+		}
 	}
 }

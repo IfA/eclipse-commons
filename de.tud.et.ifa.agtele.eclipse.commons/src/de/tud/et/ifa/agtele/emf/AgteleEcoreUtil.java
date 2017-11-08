@@ -828,7 +828,7 @@ public interface AgteleEcoreUtil {
 		// equivalent elements
 		//
 		String uriFragment = element.eResource().getURIFragment(element);
-		
+
 		return otherEcoreResource.getEObject(uriFragment);
 
 	}
