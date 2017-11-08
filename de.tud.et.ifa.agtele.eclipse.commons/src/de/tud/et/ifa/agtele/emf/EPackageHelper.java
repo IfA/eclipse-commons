@@ -5,14 +5,17 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.eclipse.emf.common.util.BasicEList;
 import org.eclipse.emf.common.util.EList;
 import org.eclipse.emf.common.util.URI;
+import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.EPackage;
+import org.eclipse.emf.ecore.EReference;
 import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.ecore.resource.impl.ResourceSetImpl;
 import org.eclipse.emf.ecore.xmi.impl.EcoreResourceFactoryImpl;
@@ -20,32 +23,26 @@ import org.eclipse.xsd.ecore.XSDEcoreBuilder;
 import org.eclipse.xsd.impl.XSDSchemaImpl;
 
 /**
- * This provides convenience methods that are related to {@link EPackage
- * EPackages}.
+ * This provides convenience methods that are related to {@link EPackage EPackages}.
  *
  */
 public interface EPackageHelper {
 
 	/**
-	 * This tries to determine the ePackages defined in a meta-model (either
-	 * Ecore or XSD). Therefore, the resource is loaded and the ePackages are
-	 * extracted. If an XSD file is specified, corresponding EPackages are
-	 * automatically generated via the {@link XSDEcoreBuilder}.
+	 * This tries to determine the ePackages defined in a meta-model (either Ecore or XSD). Therefore, the resource is
+	 * loaded and the ePackages are extracted. If an XSD file is specified, corresponding EPackages are automatically
+	 * generated via the {@link XSDEcoreBuilder}.
 	 *
 	 * @param absolutePathToMetaModelFile
-	 *            the absolute path to the meta-model to be analyzed. This may
-	 *            point either to an Ecore or to an XSD file.
+	 *            the absolute path to the meta-model to be analyzed. This may point either to an Ecore or to an XSD
+	 *            file.
 	 * @param adaptResourceUri
-	 *            if true, the uri of the resource that contains the ePackage
-	 *            will be set to the namespace uri of the ePackage. That way,
-	 *            this namespace uri is used for references to the package
-	 *            during serialization of resources, otherwise there will be
-	 *            file-based references
+	 *            if true, the uri of the resource that contains the ePackage will be set to the namespace uri of the
+	 *            ePackage. That way, this namespace uri is used for references to the package during serialization of
+	 *            resources, otherwise there will be file-based references
 	 * @param register
-	 *            if the packages shall be registered to the global ePackage
-	 *            registry.
-	 * @return a map of nsUris and corresponding ePackages found in the
-	 *         Ecore/XSD meta-model, null if any error occurs.
+	 *            if the packages shall be registered to the global ePackage registry.
+	 * @return a map of nsUris and corresponding ePackages found in the Ecore/XSD meta-model, null if any error occurs.
 	 */
 	public static Map<String, EPackage> getEPackages(String absolutePathToMetaModelFile, boolean adaptResourceUri,
 			boolean register) {
@@ -122,14 +119,17 @@ public interface EPackageHelper {
 	}
 
 	/**
-	 * Recursively collects the sub-packages of an ePackage and returns them as
-	 * a set (including the root package itself).
+	 * Recursively collects the sub-packages of an ePackage and returns them as a set (including the root package
+	 * itself).
+	 *
+	 * @see #collectEPackages(EPackage, boolean, boolean, Optional)
 	 *
 	 * @param ePackage
 	 *            The root ePackage.
 	 * @return A set of sub-ePackages including the root ePackage itself.
 	 */
 	public static Set<EPackage> collectEPackages(EPackage ePackage) {
+
 		HashSet<EPackage> ePackages = new HashSet<>();
 		ePackages.add(ePackage);
 		for (EPackage child : ePackage.getESubpackages()) {
@@ -139,14 +139,15 @@ public interface EPackageHelper {
 	}
 
 	/**
-	 * Recursively collects the sub-packages of a list of ePackages and returns
-	 * them as a set (including the root packages themselves).
+	 * Recursively collects the sub-packages of a list of ePackages and returns them as a set (including the root
+	 * packages themselves).
 	 *
 	 * @param ePackages
 	 *            The list of root ePackages.
 	 * @return A set of sub-ePackages including the root ePackages themselves.
 	 */
 	public static HashSet<EPackage> collectEPackages(Collection<EPackage> ePackages) {
+
 		HashSet<EPackage> ret = new HashSet<>();
 
 		for (EPackage ePackage : ePackages) {
@@ -154,6 +155,123 @@ public interface EPackageHelper {
 		}
 
 		return ret;
+	}
+
+	/**
+	 * Recursively collect those {@link EPackage EPackages} that define the {@link EClass EClasses} that are
+	 * <em>referenced</em> (via {@link EReference EReferences}) and/or <em>extended</em> (via
+	 * {@link EClass#getEAllSuperTypes()}) by the {@link EClass EClasses} contained in the given {@link EPackage}.
+	 * <p />
+	 * Note: While {@link #collectEPackages(EPackage)} should be faster, this will also collect any referenced packages
+	 * that are not contained in the given {@link EPackage}.
+	 *
+	 * @see #collectEPackages(EPackage)
+	 *
+	 * @param ePackage
+	 *            The {@link EPackage} to scan.
+	 * @param includeSubPackages
+	 *            Whether sub-packages of the given {@link EPackage} shall also be collected.
+	 * @param includeReferenced
+	 *            Whether <em>referenced</em> (via {@link EReference EReferences}) classes resp. the containing packages
+	 *            shall be considered.
+	 * @param includeExtended
+	 *            Whether <em>extended</em> (via {@link EClass#getEAllSuperTypes()}) classes resp. the containing
+	 *            packages shall be considered.
+	 * @param packagesToIgnore
+	 *            An optional set of {@link EPackage EPackages} that shall be ignored.
+	 * @return A set of ePackages including the root ePackage itself.
+	 */
+	public static Set<EPackage> collectEPackages(EPackage ePackage, boolean includeSubPackages,
+			boolean includeReferenced, boolean includeExtended, Optional<Set<EPackage>> packagesToIgnore) {
+
+		Set<EPackage> ePackages = new HashSet<>();
+		ePackages.add(ePackage);
+
+		if (includeSubPackages) {
+			ePackages.addAll(EPackageHelper.collectEPackages(ePackage));
+		}
+
+		Set<EPackage> newPackagesToIngore = packagesToIgnore.orElse(new HashSet<>());
+		newPackagesToIngore.addAll(ePackages);
+
+		List<EClass> containedClasses = ePackages.stream().flatMap(e -> e.getEClassifiers().stream())
+				.filter(e -> e instanceof EClass).map(e -> (EClass) e).collect(Collectors.toList());
+
+		Set<EPackage> referencedPackages = containedClasses.stream()
+				.flatMap(c -> EPackageHelper
+						.collectEPackages(c, includeReferenced, includeExtended, Optional.of(newPackagesToIngore))
+						.stream())
+				.collect(Collectors.toSet());
+
+		ePackages.addAll(EPackageHelper.collectEPackages(referencedPackages, includeSubPackages, includeReferenced,
+				includeExtended, Optional.of(newPackagesToIngore)));
+
+		return ePackages;
+	}
+
+	/**
+	 * Recursively collect those {@link EPackage EPackages} that define the {@link EClass EClasses} that are
+	 * <em>referenced</em> (via {@link EReference EReferences}) and/or <em>extended</em> (via
+	 * {@link EClass#getEAllSuperTypes()}) by the {@link EClass EClasses} contained in the given {@link EPackage
+	 * EPackages}.
+	 *
+	 * @see #collectEPackages(EPackage, boolean, boolean, boolean, Optional)
+	 *
+	 * @param ePackages
+	 *            The {@link EPackage EPackages} to scan.
+	 * @param includeSubPackages
+	 *            Whether sub-packages of the given {@link EPackage} shall also be collected.
+	 * @param includeReferenced
+	 *            Whether <em>referenced</em> (via {@link EReference EReferences}) classes resp. the containing packages
+	 *            shall be considered.
+	 * @param includeExtended
+	 *            Whether <em>extended</em> (via {@link EClass#getEAllSuperTypes()}) classes resp. the containing
+	 *            packages shall be considered.
+	 * @param packagesToIgnore
+	 *            An optional set of {@link EPackage EPackages} that shall be ignored.
+	 * @return A set of ePackages including the root ePackage itself.
+	 */
+	public static Set<EPackage> collectEPackages(Set<EPackage> ePackages, boolean includeSubPackages,
+			boolean includeReferenced, boolean includeExtended, Optional<Set<EPackage>> packagesToIgnore) {
+
+		return ePackages.stream()
+				.flatMap(p -> EPackageHelper
+						.collectEPackages(p, includeSubPackages, includeReferenced, includeExtended, packagesToIgnore)
+						.stream())
+				.collect(Collectors.toSet());
+	}
+
+	/**
+	 * Collect those {@link EPackage EPackages} that define the {@link EClass EClasses} that are <em>referenced</em>
+	 * (via {@link EReference EReferences}) and/or <em>extended</em> (via {@link EClass#getEAllSuperTypes()}) by the
+	 * given {@link EClass}.
+	 *
+	 * @param eClass
+	 *            The {@link EClass} to scan.
+	 * @param includeReferenced
+	 *            Whether <em>referenced</em> (via {@link EReference EReferences}) classes resp. the containing packages
+	 *            shall be considered.
+	 * @param includeExtended
+	 *            Whether <em>extended</em> (via {@link EClass#getEAllSuperTypes()}) classes resp. the containing
+	 *            packages shall be considered.
+	 * @param packagesToIgnore
+	 *            An optional set of {@link EPackage EPackages} that shall be ignored.
+	 * @return The collected set of packages.
+	 */
+	public static Set<EPackage> collectEPackages(EClass eClass, boolean includeReferenced, boolean includeExtended,
+			Optional<Set<EPackage>> packagesToIgnore) {
+
+		Set<EPackage> packages = new HashSet<>();
+		if (includeReferenced) {
+			packages.addAll(eClass.getEAllReferences().stream().map(EReference::getEReferenceType)
+					.map(EClass::getEPackage).filter(p -> !packagesToIgnore.orElse(new HashSet<>()).contains(p))
+					.collect(Collectors.toSet()));
+		}
+		if (includeExtended) {
+			packages.addAll(eClass.getEAllSuperTypes().stream().map(EClass::getEPackage)
+					.filter(p -> !packagesToIgnore.orElse(new HashSet<>()).contains(p)).collect(Collectors.toSet()));
+		}
+		return packages;
 	}
 
 }
