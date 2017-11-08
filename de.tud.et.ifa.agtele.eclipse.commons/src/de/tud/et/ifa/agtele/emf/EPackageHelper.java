@@ -169,6 +169,8 @@ public interface EPackageHelper {
 	 *
 	 * @param ePackage
 	 *            The {@link EPackage} to scan.
+	 * @param includeSubPackages
+	 *            Whether sub-packages of the given {@link EPackage} shall also be collected.
 	 * @param includeReferenced
 	 *            Whether <em>referenced</em> (via {@link EReference EReferences}) classes resp. the containing packages
 	 *            shall be considered.
@@ -179,17 +181,21 @@ public interface EPackageHelper {
 	 *            An optional set of {@link EPackage EPackages} that shall be ignored.
 	 * @return A set of ePackages including the root ePackage itself.
 	 */
-	public static Set<EPackage> collectEPackages(EPackage ePackage, boolean includeReferenced, boolean includeExtended,
-			Optional<Set<EPackage>> packagesToIgnore) {
+	public static Set<EPackage> collectEPackages(EPackage ePackage, boolean includeSubPackages,
+			boolean includeReferenced, boolean includeExtended, Optional<Set<EPackage>> packagesToIgnore) {
 
 		Set<EPackage> ePackages = new HashSet<>();
 		ePackages.add(ePackage);
 
-		Set<EPackage> newPackagesToIngore = packagesToIgnore.orElse(new HashSet<>());
-		newPackagesToIngore.add(ePackage);
+		if (includeSubPackages) {
+			ePackages.addAll(EPackageHelper.collectEPackages(ePackage));
+		}
 
-		List<EClass> containedClasses = ePackage.getEClassifiers().stream().filter(e -> e instanceof EClass)
-				.map(e -> (EClass) e).collect(Collectors.toList());
+		Set<EPackage> newPackagesToIngore = packagesToIgnore.orElse(new HashSet<>());
+		newPackagesToIngore.addAll(ePackages);
+
+		List<EClass> containedClasses = ePackages.stream().flatMap(e -> e.getEClassifiers().stream())
+				.filter(e -> e instanceof EClass).map(e -> (EClass) e).collect(Collectors.toList());
 
 		Set<EPackage> referencedPackages = containedClasses.stream()
 				.flatMap(c -> EPackageHelper
@@ -197,8 +203,8 @@ public interface EPackageHelper {
 						.stream())
 				.collect(Collectors.toSet());
 
-		ePackages.addAll(EPackageHelper.collectEPackages(referencedPackages, includeReferenced, includeExtended,
-				Optional.of(newPackagesToIngore)));
+		ePackages.addAll(EPackageHelper.collectEPackages(referencedPackages, includeSubPackages, includeReferenced,
+				includeExtended, Optional.of(newPackagesToIngore)));
 
 		return ePackages;
 	}
@@ -209,10 +215,12 @@ public interface EPackageHelper {
 	 * {@link EClass#getEAllSuperTypes()}) by the {@link EClass EClasses} contained in the given {@link EPackage
 	 * EPackages}.
 	 *
-	 * @see #collectEPackages(EPackage, boolean, boolean, Optional)
+	 * @see #collectEPackages(EPackage, boolean, boolean, boolean, Optional)
 	 *
 	 * @param ePackages
 	 *            The {@link EPackage EPackages} to scan.
+	 * @param includeSubPackages
+	 *            Whether sub-packages of the given {@link EPackage} shall also be collected.
 	 * @param includeReferenced
 	 *            Whether <em>referenced</em> (via {@link EReference EReferences}) classes resp. the containing packages
 	 *            shall be considered.
@@ -223,11 +231,13 @@ public interface EPackageHelper {
 	 *            An optional set of {@link EPackage EPackages} that shall be ignored.
 	 * @return A set of ePackages including the root ePackage itself.
 	 */
-	public static Set<EPackage> collectEPackages(Set<EPackage> ePackages, boolean includeReferenced,
-			boolean includeExtended, Optional<Set<EPackage>> packagesToIgnore) {
+	public static Set<EPackage> collectEPackages(Set<EPackage> ePackages, boolean includeSubPackages,
+			boolean includeReferenced, boolean includeExtended, Optional<Set<EPackage>> packagesToIgnore) {
 
-		return ePackages.stream().flatMap(
-				p -> EPackageHelper.collectEPackages(p, includeReferenced, includeExtended, packagesToIgnore).stream())
+		return ePackages.stream()
+				.flatMap(p -> EPackageHelper
+						.collectEPackages(p, includeSubPackages, includeReferenced, includeExtended, packagesToIgnore)
+						.stream())
 				.collect(Collectors.toSet());
 	}
 
