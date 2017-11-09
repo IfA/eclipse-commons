@@ -3,6 +3,8 @@ package de.tud.et.ifa.agtele.emf;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -47,7 +49,7 @@ public interface EPackageHelper {
 	public static Map<String, EPackage> getEPackages(String absolutePathToMetaModelFile, boolean adaptResourceUri,
 			boolean register) {
 
-		HashMap<String, EPackage> ePackages = new HashMap<>();
+		HashMap<String, EPackage> ePackages = new LinkedHashMap<>();
 
 		// try to load the resource
 		Resource metamodel = null;
@@ -91,7 +93,7 @@ public interface EPackageHelper {
 		// the complete list of packages defined by the meta-model including all
 		// sub-packages
 		//
-		HashSet<EPackage> ePackageSet = EPackageHelper.collectEPackages(rootEPackages);
+		Set<EPackage> ePackageSet = EPackageHelper.collectEPackages(rootEPackages);
 
 		for (EPackage ePackage : ePackageSet) {
 
@@ -122,7 +124,7 @@ public interface EPackageHelper {
 	 * Recursively collects the sub-packages of an ePackage and returns them as a set (including the root package
 	 * itself).
 	 *
-	 * @see #collectEPackages(EPackage, boolean, boolean, Optional)
+	 * @see #collectEPackages(EPackage, boolean, boolean, boolean, Optional)
 	 *
 	 * @param ePackage
 	 *            The root ePackage.
@@ -130,7 +132,7 @@ public interface EPackageHelper {
 	 */
 	public static Set<EPackage> collectEPackages(EPackage ePackage) {
 
-		HashSet<EPackage> ePackages = new HashSet<>();
+		HashSet<EPackage> ePackages = new LinkedHashSet<>();
 		ePackages.add(ePackage);
 		for (EPackage child : ePackage.getESubpackages()) {
 			ePackages.addAll(EPackageHelper.collectEPackages(child));
@@ -148,7 +150,7 @@ public interface EPackageHelper {
 	 */
 	public static HashSet<EPackage> collectEPackages(Collection<EPackage> ePackages) {
 
-		HashSet<EPackage> ret = new HashSet<>();
+		HashSet<EPackage> ret = new LinkedHashSet<>();
 
 		for (EPackage ePackage : ePackages) {
 			ret.addAll(EPackageHelper.collectEPackages(ePackage));
@@ -184,14 +186,14 @@ public interface EPackageHelper {
 	public static Set<EPackage> collectEPackages(EPackage ePackage, boolean includeSubPackages,
 			boolean includeReferenced, boolean includeExtended, Optional<Set<EPackage>> packagesToIgnore) {
 
-		Set<EPackage> ePackages = new HashSet<>();
+		Set<EPackage> ePackages = new LinkedHashSet<>();
 		ePackages.add(ePackage);
 
 		if (includeSubPackages) {
 			ePackages.addAll(EPackageHelper.collectEPackages(ePackage));
 		}
 
-		Set<EPackage> newPackagesToIngore = packagesToIgnore.orElse(new HashSet<>());
+		Set<EPackage> newPackagesToIngore = packagesToIgnore.orElse(new LinkedHashSet<>());
 		newPackagesToIngore.addAll(ePackages);
 
 		List<EClass> containedClasses = ePackages.stream().flatMap(e -> e.getEClassifiers().stream())
@@ -201,7 +203,7 @@ public interface EPackageHelper {
 				.flatMap(c -> EPackageHelper
 						.collectEPackages(c, includeReferenced, includeExtended, Optional.of(newPackagesToIngore))
 						.stream())
-				.collect(Collectors.toSet());
+				.collect(Collectors.toCollection(LinkedHashSet::new));
 
 		ePackages.addAll(EPackageHelper.collectEPackages(referencedPackages, includeSubPackages, includeReferenced,
 				includeExtended, Optional.of(newPackagesToIngore)));
@@ -238,7 +240,7 @@ public interface EPackageHelper {
 				.flatMap(p -> EPackageHelper
 						.collectEPackages(p, includeSubPackages, includeReferenced, includeExtended, packagesToIgnore)
 						.stream())
-				.collect(Collectors.toSet());
+				.collect(Collectors.toCollection(LinkedHashSet::new));
 	}
 
 	/**
@@ -261,15 +263,16 @@ public interface EPackageHelper {
 	public static Set<EPackage> collectEPackages(EClass eClass, boolean includeReferenced, boolean includeExtended,
 			Optional<Set<EPackage>> packagesToIgnore) {
 
-		Set<EPackage> packages = new HashSet<>();
+		Set<EPackage> packages = new LinkedHashSet<>();
 		if (includeReferenced) {
 			packages.addAll(eClass.getEAllReferences().stream().map(EReference::getEReferenceType)
-					.map(EClass::getEPackage).filter(p -> !packagesToIgnore.orElse(new HashSet<>()).contains(p))
-					.collect(Collectors.toSet()));
+					.map(EClass::getEPackage).filter(p -> !packagesToIgnore.orElse(new LinkedHashSet<>()).contains(p))
+					.collect(Collectors.toCollection(LinkedHashSet::new)));
 		}
 		if (includeExtended) {
 			packages.addAll(eClass.getEAllSuperTypes().stream().map(EClass::getEPackage)
-					.filter(p -> !packagesToIgnore.orElse(new HashSet<>()).contains(p)).collect(Collectors.toSet()));
+					.filter(p -> !packagesToIgnore.orElse(new LinkedHashSet<>()).contains(p))
+					.collect(Collectors.toCollection(LinkedHashSet::new)));
 		}
 		return packages;
 	}
