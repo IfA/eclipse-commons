@@ -12,6 +12,7 @@ import org.eclipse.emf.edit.command.AddCommand;
 import org.eclipse.emf.edit.command.CommandActionDelegate;
 import org.eclipse.emf.edit.command.CopyCommand;
 import org.eclipse.emf.edit.command.CreateChildCommand;
+import org.eclipse.emf.edit.command.DragAndDropFeedback;
 import org.eclipse.emf.edit.command.MoveCommand;
 import org.eclipse.emf.edit.command.RemoveCommand;
 import org.eclipse.emf.edit.command.SetCommand;
@@ -259,7 +260,9 @@ public interface IRequireRelatedModelUpdateProvider {
 	/**
 	 * Wraps the original command in a {@link DelayedWrappingCommand}, if needed. If
 	 * the original command is a {@link CommandActionDelegate}, the returned Command
-	 * is a {@link DelegatingDelayedWrappingCommand}.
+	 * is a {@link DelegatingDelayedWrappingCommand}. If the original command is a
+	 * {@link DragAndDropFeedback}, the returned Command is a
+	 * {@link DragAndDropFeedbackDelayedWrappingCommand}.
 	 *
 	 * @param originalProvider
 	 *            The Provider the gets involved first, when a subordinate feature
@@ -272,6 +275,9 @@ public interface IRequireRelatedModelUpdateProvider {
 	static Command wrapOriginalCommand(Object originalProvider, Command originalCommand) {
 		if (originalCommand instanceof CommandActionDelegate) {
 			return new DelegatingDelayedWrappingCommand(originalCommand, originalProvider);
+		}
+		if (originalCommand instanceof DragAndDropFeedback) {
+			return new DragAndDropFeedbackDelayedWrappingCommand(originalCommand, originalProvider);
 		}
 		return new DelayedWrappingCommand(originalCommand, originalProvider);
 	}
@@ -643,5 +649,35 @@ public interface IRequireRelatedModelUpdateProvider {
 		public String getToolTipText() {
 			return ((CommandActionDelegate) this.originalCommand).getToolTipText();
 		}
+	}
+
+	/**
+	 * Adds support for DragAndDropFeedback.
+	 *
+	 * @author Baron
+	 */
+	public static class DragAndDropFeedbackDelayedWrappingCommand extends DelayedWrappingCommand
+			implements DragAndDropFeedback {
+
+		public DragAndDropFeedbackDelayedWrappingCommand(Command originalCommand, Object originalProvider) {
+			super(originalCommand, originalProvider);
+		}
+
+		@Override
+		public boolean validate(Object owner, float location, int operations, int operation, Collection<?> collection) {
+			return ((DragAndDropFeedback) this.originalCommand).validate(owner, location, operations, operation,
+					collection);
+		}
+
+		@Override
+		public int getFeedback() {
+			return ((DragAndDropFeedback) this.originalCommand).getFeedback();
+		}
+
+		@Override
+		public int getOperation() {
+			return ((DragAndDropFeedback) this.originalCommand).getOperation();
+		}
+
 	}
 }
