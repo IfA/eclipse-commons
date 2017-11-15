@@ -35,6 +35,7 @@ import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
+import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TreeViewer;
@@ -68,15 +69,14 @@ import de.tud.et.ifa.agtele.ui.views.EMFModelHelpView;
 import de.tud.et.ifa.agtele.ui.views.EMFModelHelpView.HelpListener;
 
 /**
- * A class that represents an SWT {@link Group} containing a {@link FilteredTree
- * filtered tree viewer} and optionally a {@link ToolBar}. It supports
- * {@link IPersistable persisting and restoring} the state of the tree viewer
- * (i.e. the expanded paths).
+ * A class that represents an SWT {@link Group} containing a {@link FilteredTree filtered tree viewer} and optionally a
+ * {@link ToolBar}. It supports {@link IPersistable persisting and restoring} the state of the tree viewer (i.e. the
+ * expanded paths).
  *
  * @author mfreund
  *
  */
-public class TreeViewerGroup extends FilteredTree implements IPersistable {
+public class TreeViewerGroup extends FilteredTree implements IPersistable, ISelectionProvider {
 
 	protected final String bundleID = AgteleUIPlugin.getPlugin().getSymbolicName();
 
@@ -101,23 +101,20 @@ public class TreeViewerGroup extends FilteredTree implements IPersistable {
 	protected String groupText;
 
 	/**
-	 * The {@link EditingDomain} for the model to be displayed in this tree
-	 * viewer. It is, e.g., used to extract labels for the elements to be
-	 * displayed in the tree.
+	 * The {@link EditingDomain} for the model to be displayed in this tree viewer. It is, e.g., used to extract labels
+	 * for the elements to be displayed in the tree.
 	 */
 	protected EditingDomain editingDomain;
 
 	/**
-	 * The {@link IDialogSettings} that are used to persist and restore the
-	 * state of this viewer.
+	 * The {@link IDialogSettings} that are used to persist and restore the state of this viewer.
 	 *
 	 * @see IPersistable
 	 */
 	private IDialogSettings dialogSettings;
 
 	/**
-	 * The {@link Composite} holding the {@link ToolBar} that displays the
-	 * various buttons.
+	 * The {@link Composite} holding the {@link ToolBar} that displays the various buttons.
 	 */
 	private Composite toolbarComposite;
 
@@ -139,8 +136,8 @@ public class TreeViewerGroup extends FilteredTree implements IPersistable {
 	protected DisposeListener disposeListener;
 
 	/**
-	 * Use this constructor if you want to add one or multiple
-	 * {@link TreeViewerGroupOption TreeViewerGroupOptions} to the viewer.
+	 * Use this constructor if you want to add one or multiple {@link TreeViewerGroupOption TreeViewerGroupOptions} to
+	 * the viewer.
 	 *
 	 * @param parent
 	 *            The parent composite.
@@ -149,17 +146,16 @@ public class TreeViewerGroup extends FilteredTree implements IPersistable {
 	 * @param editingDomain
 	 *            The editing domain that is used for the viewer.
 	 * @param dialogSettings
-	 *            The dialog settings belonging to the editor (e.g.
-	 *            XYZPlugin..getPlugin().getDialogSettings()).
+	 *            The dialog settings belonging to the editor (e.g. XYZPlugin..getPlugin().getDialogSettings()).
 	 * @param groupText
-	 *            The label of the group widget that hold all other widgets. If
-	 *            this is null no surrounding group will created.
+	 *            The label of the group widget that hold all other widgets. If this is null no surrounding group will
+	 *            created.
 	 * @param options
-	 *            A set of options that are used to alter the default
-	 *            composition of the TreeViewerGroup
+	 *            A set of options that are used to alter the default composition of the TreeViewerGroup
 	 */
 	public TreeViewerGroup(Composite parent, ComposedAdapterFactory adapterFactory, EditingDomain editingDomain,
 			IDialogSettings dialogSettings, String groupText, TreeViewerGroupOption... options) {
+
 		super(parent, true);
 		this.parent = parent;
 		this.groupText = groupText;
@@ -173,8 +169,7 @@ public class TreeViewerGroup extends FilteredTree implements IPersistable {
 	/**
 	 * The default option to add a collapse all button to the tool bar.
 	 *
-	 * @return a new instance of the
-	 *         TreeViewerGroupToolbarCollapseAllButtonOption
+	 * @return a new instance of the TreeViewerGroupToolbarCollapseAllButtonOption
 	 */
 	public static TreeViewerGroupToolbarCollapseAllButtonOption TOOLBAR_COLLAPSE_ALL_BUTTON() {
 
@@ -204,8 +199,7 @@ public class TreeViewerGroup extends FilteredTree implements IPersistable {
 	/**
 	 * The default option to add a toggle editor split vertically button.
 	 *
-	 * @return a new instance of
-	 *         TreeViewerGroupToolbarToggleSplitEditorVerticallyButtonOption
+	 * @return a new instance of TreeViewerGroupToolbarToggleSplitEditorVerticallyButtonOption
 	 */
 	public static TreeViewerGroupToolbarToggleSplitEditorVerticallyButtonOption TOOLBAR_TOGGLE_SPLIT_VERTICALLY_BUTTON() {
 
@@ -213,8 +207,8 @@ public class TreeViewerGroup extends FilteredTree implements IPersistable {
 	}
 
 	/**
-	 * The default option to add bind the {@link HelpListener} so that the user
-	 * can press F1 to open the {@link EMFModelHelpView}..
+	 * The default option to add bind the {@link HelpListener} so that the user can press F1 to open the
+	 * {@link EMFModelHelpView}..
 	 *
 	 * @return a new instance of TreeViewerGroupBindHelpListenerOption
 	 */
@@ -224,9 +218,8 @@ public class TreeViewerGroup extends FilteredTree implements IPersistable {
 	}
 
 	/**
-	 * Create the filtered tree's controls. This is copied from the standard
-	 * 'FilteredTree' - changes are only introduced in the layout of the filter
-	 * composite.
+	 * Create the filtered tree's controls. This is copied from the standard 'FilteredTree' - changes are only
+	 * introduced in the layout of the filter composite.
 	 *
 	 * @param parent
 	 * @param treeStyle
@@ -364,8 +357,7 @@ public class TreeViewerGroup extends FilteredTree implements IPersistable {
 	/**
 	 * The getter for the {@link #toolbarComposite}.
 	 *
-	 * @return The {@link Composite} holding the {@link ToolBar} that displays
-	 *         the various buttons.
+	 * @return The {@link Composite} holding the {@link ToolBar} that displays the various buttons.
 	 */
 	public Composite getToolbar() {
 
@@ -373,8 +365,8 @@ public class TreeViewerGroup extends FilteredTree implements IPersistable {
 	}
 
 	/**
-	 * Override the standard method so that default label and content providers
-	 * based on the adapter factory are created.
+	 * Override the standard method so that default label and content providers based on the adapter factory are
+	 * created.
 	 *
 	 * @param parent
 	 *            The parent composite.
@@ -523,9 +515,8 @@ public class TreeViewerGroup extends FilteredTree implements IPersistable {
 			for (String path : paths) {
 				Object expanded;
 				/*
-				 * as the URI of an eObject also reflects the containing
-				 * resource, we can use this to uniquely identify an eObject
-				 * inside a resource set
+				 * as the URI of an eObject also reflects the containing resource, we can use this to uniquely identify
+				 * an eObject inside a resource set
 				 */
 				try {
 					expanded = this.editingDomain.getResourceSet().getEObject(URI.createURI(path), true);
@@ -578,6 +569,30 @@ public class TreeViewerGroup extends FilteredTree implements IPersistable {
 		Arrays.asList(this.options).stream().forEach(TreeViewerGroupOption::dispose);
 	}
 
+	@Override
+	public void addSelectionChangedListener(ISelectionChangedListener listener) {
+	
+		this.treeViewer.addSelectionChangedListener(listener);
+	}
+
+	@Override
+	public ISelection getSelection() {
+	
+		return this.treeViewer.getSelection();
+	}
+
+	@Override
+	public void removeSelectionChangedListener(ISelectionChangedListener listener) {
+	
+		this.treeViewer.removeSelectionChangedListener(listener);
+	}
+
+	@Override
+	public void setSelection(ISelection selection) {
+	
+		this.treeViewer.setSelection(selection);
+	}
+
 	/**
 	 * Can be anything, that alters the TreeViewerGroup
 	 *
@@ -587,8 +602,7 @@ public class TreeViewerGroup extends FilteredTree implements IPersistable {
 	public static interface TreeViewerGroupOption {
 
 		/**
-		 * Disposes the created UI elements and removes created event listeners
-		 * from other elements.
+		 * Disposes the created UI elements and removes created event listeners from other elements.
 		 */
 		public void dispose();
 	}
@@ -785,17 +799,16 @@ public class TreeViewerGroup extends FilteredTree implements IPersistable {
 		}
 
 		/**
-		 * A {@link SelectionAdapter} that operates on a {@link ToolItem} and
-		 * allows the user to add items based on the element currently selected
-		 * in the tree.
+		 * A {@link SelectionAdapter} that operates on a {@link ToolItem} and allows the user to add items based on the
+		 * element currently selected in the tree.
 		 *
 		 * @author mfreund
 		 */
 		public class AddDropDownSelectionListener extends SelectionAdapter {
 
 			/**
-			 * The {@link MenuManager} that creates the menu with the various
-			 * options for adding an element that can be selected by the user.
+			 * The {@link MenuManager} that creates the menu with the various options for adding an element that can be
+			 * selected by the user.
 			 */
 			private MenuManager menuManager;
 
@@ -806,6 +819,7 @@ public class TreeViewerGroup extends FilteredTree implements IPersistable {
 			 *            The {@link ToolItem} on that this listener listens.
 			 */
 			public AddDropDownSelectionListener(ToolItem dropdown) {
+
 				this.menuManager = new MenuManager();
 				this.menuManager.createContextMenu(dropdown.getParent());
 			}
@@ -826,8 +840,7 @@ public class TreeViewerGroup extends FilteredTree implements IPersistable {
 			}
 
 			/**
-			 * This determines the currently selected element and adds an
-			 * element of the same type to its parent.
+			 * This determines the currently selected element and adds an element of the same type to its parent.
 			 */
 			private void addDefaultElement() {
 
@@ -861,8 +874,8 @@ public class TreeViewerGroup extends FilteredTree implements IPersistable {
 			}
 
 			/**
-			 * This creates a new menu based on the currently selected element
-			 * that allows to create children and siblings.
+			 * This creates a new menu based on the currently selected element that allows to create children and
+			 * siblings.
 			 */
 			private void createMenu() {
 
@@ -1011,8 +1024,7 @@ public class TreeViewerGroup extends FilteredTree implements IPersistable {
 		}
 
 		/**
-		 * Creates an instance of the ModelElementPalette. Override in order to
-		 * modify the class used.
+		 * Creates an instance of the ModelElementPalette. Override in order to modify the class used.
 		 *
 		 * @return
 		 */
@@ -1090,8 +1102,7 @@ public class TreeViewerGroup extends FilteredTree implements IPersistable {
 		}
 
 		/**
-		 * Returns the hidden property based on the actual size of the displayed
-		 * palette.
+		 * Returns the hidden property based on the actual size of the displayed palette.
 		 *
 		 * @return whether the palette is visible
 		 */
@@ -1190,8 +1201,7 @@ public class TreeViewerGroup extends FilteredTree implements IPersistable {
 	}
 
 	/**
-	 * Binds the {@link HelpListener} so that the user can press F1 to open the
-	 * {@link EMFModelHelpView}.
+	 * Binds the {@link HelpListener} so that the user can press F1 to open the {@link EMFModelHelpView}.
 	 *
 	 * @author mfreund
 	 */
@@ -1208,8 +1218,7 @@ public class TreeViewerGroup extends FilteredTree implements IPersistable {
 		protected EMFModelHelpView.HelpListener helpListener;
 
 		/**
-		 * Initializes the {@link HelpListener} for the given
-		 * {@link TreeViewer}.
+		 * Initializes the {@link HelpListener} for the given {@link TreeViewer}.
 		 *
 		 * @param viewer
 		 */
@@ -1223,6 +1232,7 @@ public class TreeViewerGroup extends FilteredTree implements IPersistable {
 
 		@Override
 		public void dispose() {
+
 			this.viewer.removeHelpListener(this.helpListener);
 
 		}
