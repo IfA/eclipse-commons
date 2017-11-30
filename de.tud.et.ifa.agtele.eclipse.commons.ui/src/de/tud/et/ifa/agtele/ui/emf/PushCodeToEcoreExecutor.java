@@ -124,7 +124,8 @@ public class PushCodeToEcoreExecutor {
 				// The eIsSet expression cannot be pushed to the ecore, without further work on identifying the
 				// ecore element from the selection within the java method
 				//
-				return name.startsWith("set") || name.startsWith("get") || name.startsWith("basicSet")
+				return name.startsWith("set") || name.startsWith("get") || name.startsWith("is")
+						|| name.startsWith("basicSet")
 						|| name.startsWith("basicGet");
 
 			} else if (specificEcoreElement instanceof EAttribute && javaElement instanceof SourceField) {
@@ -222,7 +223,7 @@ public class PushCodeToEcoreExecutor {
 
 		return new PushCodeToEcoreResult(target, annotationDescriptor[1] != null
 				? "Pushed the java code to the ecore model, to enable getters, setters, initializers or isSet evaluations, use custom emitter templates"
-				: "Cleared the java code from the ecore model. Run the generator in order to get the default implementation.");
+						: "Cleared the java code from the ecore model. Run the generator in order to get the default implementation.");
 	}
 
 	/**
@@ -273,7 +274,7 @@ public class PushCodeToEcoreExecutor {
 				if (name.startsWith("set")) {
 					detailsKey = "set";
 					code = this.compileImplementation(code, this.helper.getCompilationUnit(), true, false);
-				} else if (name.startsWith("get")) {
+				} else if (name.startsWith("get") || name.startsWith("is")) {
 					detailsKey = "get";
 					code = this.compileImplementation(code, this.helper.getCompilationUnit(), true, false);
 				} else if (name.startsWith("basicSet")) {

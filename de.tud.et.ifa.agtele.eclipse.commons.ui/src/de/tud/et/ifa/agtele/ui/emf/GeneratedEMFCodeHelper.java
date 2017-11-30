@@ -265,6 +265,7 @@ public class GeneratedEMFCodeHelper {
 			//
 			Optional<EStructuralFeature> eFeature = eClass.getEAllStructuralFeatures().stream()
 					.filter(o -> methodName.equalsIgnoreCase("get" + o.getName())
+							|| methodName.equalsIgnoreCase("is" + o.getName())
 							|| methodName.equalsIgnoreCase("set" + o.getName())
 							|| methodName.equalsIgnoreCase("add" + o.getName() + "propertydescriptor"))
 					.findAny();
@@ -303,7 +304,7 @@ public class GeneratedEMFCodeHelper {
 
 		IFile genModelFile = this.getGenModelFile();
 
-		return this.checkIsGenModelForJavaClass(genModelFile, root)
+		return this.getEcoreElementForJavaClass(genModelFile, root)
 				.orElseThrow(() -> new GeneratedEMFCodeHelperException(
 						"Unable to determine the metamodel element associated with CompilationUnit '"
 								+ root.getElementName() + "'!"));
@@ -336,7 +337,7 @@ public class GeneratedEMFCodeHelper {
 		// our Java class
 		//
 		for (IFile file : genModelFiles) {
-			Optional<EObject> element = this.checkIsGenModelForJavaClass(file, this.compilationUnit);
+			Optional<EObject> element = this.getEcoreElementForJavaClass(file, this.compilationUnit);
 			if (element.isPresent()) {
 				return file;
 			}
@@ -347,7 +348,7 @@ public class GeneratedEMFCodeHelper {
 		//
 		genModelFiles = new ArrayList<>(this.collectGenModels(ResourcesPlugin.getWorkspace().getRoot()));
 		for (IFile file : genModelFiles) {
-			Optional<EObject> element = this.checkIsGenModelForJavaClass(file, this.compilationUnit);
+			Optional<EObject> element = this.getEcoreElementForJavaClass(file, this.compilationUnit);
 			if (element.isPresent()) {
 				return file;
 			}
@@ -397,7 +398,7 @@ public class GeneratedEMFCodeHelper {
 	 * @return The {@link EObject metamodel element} associated with the given Java file or an empty optional if the
 	 *         metamodel was not responsible for the generation of the Java file.
 	 */
-	public Optional<EObject> checkIsGenModelForJavaClass(IFile genModelFile, CompilationUnit javaFile) {
+	public Optional<EObject> getEcoreElementForJavaClass(IFile genModelFile, CompilationUnit javaFile) {
 
 		ResourceSet resourceSet = new ResourceSetImpl();
 
