@@ -125,8 +125,7 @@ public class PushCodeToEcoreExecutor {
 				// ecore element from the selection within the java method
 				//
 				return name.startsWith("set") || name.startsWith("get") || name.startsWith("is")
-						|| name.startsWith("basicSet")
-						|| name.startsWith("basicGet");
+						|| name.startsWith("basicSet") || name.startsWith("basicGet");
 
 			} else if (specificEcoreElement instanceof EAttribute && javaElement instanceof SourceField) {
 				return true;
@@ -227,7 +226,7 @@ public class PushCodeToEcoreExecutor {
 
 		return new PushCodeToEcoreResult(target, annotationDescriptor[1] != null
 				? "Pushed the java code to the ecore model, to enable getters, setters, initializers or isSet evaluations, use custom emitter templates"
-						: "Cleared the java code from the ecore model. Run the generator in order to get the default implementation.");
+				: "Cleared the java code from the ecore model. Run the generator in order to get the default implementation.");
 	}
 
 	/**
@@ -377,7 +376,7 @@ public class PushCodeToEcoreExecutor {
 			String packageName = importDeclaration.substring(0, lastDotIndex);
 			String typeName = importDeclaration.substring(lastDotIndex + 1);
 
-			compiledCode = compiledCode.replaceAll("([\\(\\[\\{\\s<])" + typeName + "([\\s\\)<>\\.,])",
+			compiledCode = compiledCode.replaceAll("([\\(\\[\\{\\s<])" + typeName + "([\\s\\)<>:\\.,])",
 					"$1<%" + packageName + "." + typeName + "%>$2");
 		}
 
