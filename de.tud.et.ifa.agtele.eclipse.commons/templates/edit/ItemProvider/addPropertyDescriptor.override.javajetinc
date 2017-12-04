@@ -35,4 +35,4 @@
     <%}%>
 				 }));
   <%}%>
-<%} //closes the getSetterBody extension%>
+<%} //closes the addPropertyDescriptorBody extension%>
