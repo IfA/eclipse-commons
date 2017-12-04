@@ -159,6 +159,10 @@ public class PushCodeToEcoreExecutor {
 		IJavaElement javaElement = null;
 		try {
 			javaElement = this.helper.getCompilationUnit().getElementAt(((TextSelection) javaSelection).getOffset());
+			while (javaElement.getParent() != null
+					&& javaElement.getParent().getParent() != this.helper.getCompilationUnit()) {
+				javaElement = javaElement.getParent();
+			}
 		} catch (JavaModelException e) {
 			throw new PushCodeToEcoreExecutorException(e);
 		}
@@ -373,7 +377,7 @@ public class PushCodeToEcoreExecutor {
 			String packageName = importDeclaration.substring(0, lastDotIndex);
 			String typeName = importDeclaration.substring(lastDotIndex + 1);
 
-			compiledCode = compiledCode.replaceAll("([\\(\\[\\{\\s<])" + typeName + "([\\s\\)>\\.])",
+			compiledCode = compiledCode.replaceAll("([\\(\\[\\{\\s<])" + typeName + "([\\s\\)<>\\.,])",
 					"$1<%" + packageName + "." + typeName + "%>$2");
 		}
 
