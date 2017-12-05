@@ -10,8 +10,7 @@ import org.eclipse.emf.edit.ui.provider.DecoratingColumLabelProvider;
 import org.eclipse.emf.edit.ui.provider.DelegatingStyledCellLabelProvider;
 import org.eclipse.emf.edit.ui.provider.DiagnosticDecorator;
 import org.eclipse.jface.dialogs.IDialogSettings;
-import org.eclipse.jface.viewers.ISelectionChangedListener;
-import org.eclipse.jface.viewers.SelectionChangedEvent;
+import org.eclipse.jface.viewers.IDoubleClickListener;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.swt.events.ControlAdapter;
 import org.eclipse.swt.events.ControlEvent;
@@ -28,6 +27,7 @@ import de.tud.et.ifa.agtele.emf.edit.IDragAndDropProvider;
 import de.tud.et.ifa.agtele.ui.AgteleUIPlugin;
 import de.tud.et.ifa.agtele.ui.emf.edit.UserChoiceCommandSelectionStrategy;
 import de.tud.et.ifa.agtele.ui.interfaces.IPersistable;
+import de.tud.et.ifa.agtele.ui.listeners.AnnotationDetailsEntryDoubleClickListener;
 import de.tud.et.ifa.agtele.ui.listeners.BasicJumpOnClickListener;
 import de.tud.et.ifa.agtele.ui.providers.AgteleEcoreAdapterFactoryLabelProvider;
 import de.tud.et.ifa.agtele.ui.providers.AgteleEcoreContentProvider;
@@ -105,6 +105,12 @@ public class AgteleEcoreEditor extends ClonableEcoreEditor implements IPersistab
 	protected BasicJumpOnClickListener jumpOnCtrlClickListener;
 
 	/**
+	 * This listener enables the quick editing of details entries used in ecore
+	 * annotations.
+	 */
+	protected IDoubleClickListener doubleClickDetailsEntryListener;
+
+	/**
 	 * This is called during startup. <!-- begin-user-doc --> <!-- end-user-doc -->
 	 */
 	@Override
@@ -153,17 +159,12 @@ public class AgteleEcoreEditor extends ClonableEcoreEditor implements IPersistab
 					new TreeViewerGroup.TreeViewerGroupToolbarAddButtonOption(),
 					new TreeViewerGroup.TreeViewerGroupToolbarToggleSplitEditorVerticallyButtonOption(),
 					new TreeViewerGroup.TreeViewerGroupAddToolPaletteOption.TreeViewerGroupAddToolPaletteToolbarHideEMFPaletteOption());
-			
+
 			//listen to changed tree view selections in order to hook into the navigation location
-			this.tree.getViewer().addSelectionChangedListener(new ISelectionChangedListener() {
-				@Override
-				public void selectionChanged(SelectionChangedEvent event) {
-					AgteleEcoreEditor.this.updateNavigationHistory();
-				}				
-			});
-			
+			this.tree.getViewer().addSelectionChangedListener(event -> AgteleEcoreEditor.this.updateNavigationHistory());
+
 			this.selectionViewer = this.tree.getViewer();
-			
+
 			// Edited Section end
 			//
 			this.setCurrentViewer(this.selectionViewer);
@@ -184,6 +185,7 @@ public class AgteleEcoreEditor extends ClonableEcoreEditor implements IPersistab
 
 			this.jumpOnCtrlClickListener = new BasicJumpOnClickListener(this.selectionViewer);
 			this.selectionViewer.getTree().addSelectionListener(this.jumpOnCtrlClickListener);
+			this.doubleClickDetailsEntryListener = new AnnotationDetailsEntryDoubleClickListener(this.selectionViewer);
 
 			new AdapterFactoryTreeEditor(this.selectionViewer.getTree(), this.adapterFactory);
 			new ColumnViewerInformationControlToolTipSupport(this.selectionViewer,
