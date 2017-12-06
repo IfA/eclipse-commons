@@ -34,10 +34,4 @@ public class AgteleXMIResourceImpl extends XMIResourceImpl implements IAgteleRes
 	protected boolean useUUIDs() {
 		return this.useUUIDs;
 	}
-
-	@Override
-	protected boolean useIDAttributes() {
-		// TODO Auto-generated method stub
-		return super.useIDAttributes();
-	}
 }
