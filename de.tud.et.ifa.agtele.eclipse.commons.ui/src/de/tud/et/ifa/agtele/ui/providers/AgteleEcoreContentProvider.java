@@ -91,15 +91,13 @@ public class AgteleEcoreContentProvider extends StateRestoringViewerContentProvi
 
 	/**
 	 * Standard {@link StateRestoringViewerContentProvider#getChildren(Object)},
-	 * except in case the object is an {@link EClass}, for each inherited
-	 * (tree-) child, a {@link NonContainedChildWrapper} is created. This
-	 * wrapper is needed in order to keep track of the respective parent node in
-	 * the tree, which in case of inherited features is not the eContainer of
-	 * the feature.
+	 * except in case the object is an {@link EClass}, for each inherited (tree-)
+	 * child, a {@link NonContainedChildWrapper} is created. This wrapper is needed
+	 * in order to keep track of the respective parent node in the tree, which in
+	 * case of inherited features is not the eContainer of the feature.
 	 *
 	 * The order of inherited features (and {@link EStructuralFeature}s and
-	 * {@link EOperation}s within) cannot be set right now. TODO create Agtele
-	 * Settings for that.
+	 * {@link EOperation}s within) cannot be set right now.
 	 */
 	@Override
 	public Object[] getChildren(Object object) {
