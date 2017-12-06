@@ -773,6 +773,16 @@ public interface AgteleEcoreUtil {
 		return AgteleEcoreUtil.getAllContainers(obj, false);
 	}
 
+	public static EObject getClosestContainerOfType(EObject obj, EClass cls) {
+		Collection<EObject> containers = AgteleEcoreUtil.getAllContainers(obj);
+		for (EObject container : containers) {
+			if (cls.isInstance(container)) {
+				return container;
+			}
+		}
+		return null;
+	}
+
 	/**
 	 * Returns a collection of the chain of containers, an element is contained at its bottom
 	 *
