@@ -203,7 +203,7 @@ public class HandleChangedGeneratedCodeExecutor {
 		// A list of all Java elements that we will check for an '@generated' tag
 		//
 		List<SourceRefElement> elementsToCheck = new ArrayList<>();
-		elementsToCheck.add(sourceType.get());
+		//elementsToCheck.add(sourceType.get());
 		elementsToCheck.addAll(
 				Arrays.asList(sourceType.get().getChildren()).stream().filter(e -> e instanceof SourceRefElement)
 				.map(e -> (SourceRefElement) e).collect(Collectors.toList()));
