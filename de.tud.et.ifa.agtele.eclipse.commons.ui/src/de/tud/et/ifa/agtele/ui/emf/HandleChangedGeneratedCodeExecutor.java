@@ -71,16 +71,16 @@ public class HandleChangedGeneratedCodeExecutor {
 	 * A regex that can be used to check if the JavaDoc of a method is equipped with the '@generated' tag. Also, it can
 	 * be used to separate the JavaDoc (group 1) of the actual source (group 2) of a Java element.
 	 */
-	protected static final String JAVADOC_WITH_GENERATED_TAG_REGEX = "(/\\*(?:[^*]|(?:\\*+[^*/]))*" // JavaDoc beginning
+	protected static final String JAVADOC_WITH_GENERATED_TAG_REGEX = "^(/\\*(?:[^*]|(?:\\*+[^*/]))*" // JavaDoc beginning
 			+ "\\*[\\s]*@generated(?![\\s]+NOT)" // '@generated' tag (starting a new line; not followed by 'NOT')
 			+ "(?:[^*]|(?:\\*+[^*/]))*\\*+/)" // JavaDoc ending
-			+ "([\\s\\S]+)"; // Actual content of the method
+			+ "([.]+)$"; // Actual content of the method
 
 	/**
 	 * The {@link Pattern} for the {@link #JAVADOC_WITH_GENERATED_TAG_REGEX}.
 	 */
 	protected final Pattern javaDocPattern = Pattern
-			.compile(HandleChangedGeneratedCodeExecutor.JAVADOC_WITH_GENERATED_TAG_REGEX);
+			.compile(HandleChangedGeneratedCodeExecutor.JAVADOC_WITH_GENERATED_TAG_REGEX, Pattern.DOTALL);
 
 	/**
 	 * The {@link CompilationUnitEditor} displaying the Java file to be handled by this executor.
@@ -206,7 +206,7 @@ public class HandleChangedGeneratedCodeExecutor {
 		elementsToCheck.add(sourceType.get());
 		elementsToCheck.addAll(
 				Arrays.asList(sourceType.get().getChildren()).stream().filter(e -> e instanceof SourceRefElement)
-						.map(e -> (SourceRefElement) e).collect(Collectors.toList()));
+				.map(e -> (SourceRefElement) e).collect(Collectors.toList()));
 
 		// The list of Java elements that are tagged with '@generated' (but not with '@generate NOT')
 		//
@@ -304,10 +304,10 @@ public class HandleChangedGeneratedCodeExecutor {
 			//
 			return changedRegions.parallelStream()
 					.anyMatch(cr -> sourceRangeWithoutJavadoc.getOffset() <= cr.getOffset()
-							&& cr.getOffset() <= sourceRangeWithoutJavadoc.getOffset()
-									+ sourceRangeWithoutJavadoc.getLength()
-							|| cr.getOffset() <= sourceRangeWithoutJavadoc.getOffset()
-									&& sourceRangeWithoutJavadoc.getOffset() <= cr.getOffset() + cr.getLength());
+					&& cr.getOffset() <= sourceRangeWithoutJavadoc.getOffset()
+					+ sourceRangeWithoutJavadoc.getLength()
+					|| cr.getOffset() <= sourceRangeWithoutJavadoc.getOffset()
+					&& sourceRangeWithoutJavadoc.getOffset() <= cr.getOffset() + cr.getLength());
 
 		} catch (JavaModelException e) {
 			e.printStackTrace();
@@ -428,7 +428,7 @@ public class HandleChangedGeneratedCodeExecutor {
 	 */
 	protected Optional<PushCodeToEcoreResult> handleChangedGeneratedElement(SourceRefElement javaElement,
 			boolean pushToEcore, boolean addTodo, Optional<String> explanation)
-			throws JavaModelException, BadLocationException {
+					throws JavaModelException, BadLocationException {
 
 		if (pushToEcore) {
 
@@ -498,7 +498,7 @@ public class HandleChangedGeneratedCodeExecutor {
 
 		String todoString = addTodo
 				? "TODO Don't forget to incorporate your manual changes into the Ecore metamodel!\n\t * "
-				: "";
+						: "";
 
 		String newSource = oldSource.replaceFirst("@generated",
 				todoString + "@generated NOT" + (explanation.isPresent() ? " " + explanation.get() : ""));
@@ -649,7 +649,7 @@ public class HandleChangedGeneratedCodeExecutor {
 			if (this.javaElement instanceof SourceMethod) {
 				type = "method";
 				name.append("(").append(((IMethod) this.javaElement).getNumberOfParameters() > 0 ? "..." : "")
-						.append(")");
+				.append(")");
 			} else if (this.javaElement instanceof SourceField) {
 				type = "field";
 			} else if (this.javaElement instanceof SourceType) {
@@ -712,7 +712,7 @@ public class HandleChangedGeneratedCodeExecutor {
 				this.doNotAskAnyMoreButton = new Button(container, SWT.CHECK);
 				this.doNotAskAnyMoreButton.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1));
 				this.doNotAskAnyMoreButton
-						.setText("Remember my decision (" + this.pendingRequests + " additional changes)");
+				.setText("Remember my decision (" + this.pendingRequests + " additional changes)");
 			}
 
 			Label lblInfo = new Label(container, SWT.WRAP);
