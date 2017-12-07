@@ -9,8 +9,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import org.eclipse.core.filebuffers.FileBuffers;
@@ -66,21 +64,6 @@ import de.tud.et.ifa.agtele.ui.util.UIHelper;
  */
 @SuppressWarnings("restriction")
 public class HandleChangedGeneratedCodeExecutor {
-
-	/**
-	 * A regex that can be used to check if the JavaDoc of a method is equipped with the '@generated' tag. Also, it can
-	 * be used to separate the JavaDoc (group 1) of the actual source (group 2) of a Java element.
-	 */
-	protected static final String JAVADOC_WITH_GENERATED_TAG_REGEX = "(/\\*(?:[^*]|(?:\\*+[^*/]))*" // JavaDoc beginning
-			+ "\\*[\\s]*@generated(?![\\s]+NOT)" // '@generated' tag (starting a new line; not followed by 'NOT')
-			+ "(?:[^*]|(?:\\*+[^*/]))*\\*+/)" // JavaDoc ending
-			+ "([\\s\\S]+)"; // Actual content of the method
-
-	/**
-	 * The {@link Pattern} for the {@link #JAVADOC_WITH_GENERATED_TAG_REGEX}.
-	 */
-	protected final Pattern javaDocPattern = Pattern
-			.compile(HandleChangedGeneratedCodeExecutor.JAVADOC_WITH_GENERATED_TAG_REGEX);
 
 	/**
 	 * The {@link CompilationUnitEditor} displaying the Java file to be handled by this executor.
@@ -247,18 +230,56 @@ public class HandleChangedGeneratedCodeExecutor {
 	protected boolean isTaggedWithGenerated(SourceRefElement javaElement) {
 
 		try {
+
+			int javaDocEndIndex = this.getEndIndexOfJavaDoc(javaElement);
+
+			if (javaDocEndIndex == -1) {
+				return false;
+			}
+
 			// Theoretically, it should be better to only query '#getJavadocRange'. However, this seems to sometimes
 			// return 'null' although there is a JavaDoc for the elemet.
 			//
-			String source = javaElement.getSource();
+			String javaDoc = javaElement.getSource().substring(0, javaDocEndIndex);
 
-			return source != null && this.javaDocPattern.matcher(source).matches();
+			return javaDoc.contains("@generated") && !javaDoc.matches("@generated[\\s]+NOT");
 
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 
 		return false;
+	}
+
+	/**
+	 * If the given {@link SourceRefElement} is equipped with a {@link SourceRefElement#getSource() Java source}, this
+	 * returns the index that can be used to separate the JavaDoc from the actual source of the element.
+	 *
+	 * @param javaElement
+	 *            The {@link SourceRefElement} to check.
+	 * @return The index separating the JavaDoc from the actual source of the element or '-1' if there is no JavaDoc
+	 *         attached to the element or if the correct index could not be determined.
+	 */
+	protected int getEndIndexOfJavaDoc(SourceRefElement javaElement) {
+
+		// Theoretically, it should be better to simply query '#getJavadocRange'. However, this seems to sometimes
+		// return 'null' although there is a JavaDoc for the elemet.
+		//
+		try {
+			String source = javaElement.getSource();
+
+			if (source == null || !source.startsWith("/**")) {
+				return -1;
+			}
+
+			int javaDocEndIndex = source.indexOf("*/");
+
+			return javaDocEndIndex < 0 ? -1 : javaDocEndIndex + 2;
+
+		} catch (JavaModelException e) {
+			e.printStackTrace();
+			return -1;
+		}
 	}
 
 	/**
@@ -275,21 +296,19 @@ public class HandleChangedGeneratedCodeExecutor {
 
 		try {
 
-			ISourceRange sourceRange = javaElement.getSourceRange();
-
 			// We are not interested in changes to the JavaDoc of an element but only in changes to the actual source.
-			// In order to determine this, we use the 'javaDocPattern' from above.
 			//
-			Matcher matcher = this.javaDocPattern.matcher(javaElement.getSource());
+			int javaDocEndIndex = this.getEndIndexOfJavaDoc(javaElement);
 
-			if (!matcher.matches()) {
-				// This should not happen because we have checked this before as part of 'isTaggedWithGenerated'
-				//
-				throw new RuntimeException("Internal Error while determining change methods in the Java source file!");
+			if (javaDocEndIndex == -1) {
+				return false;
 			}
 
-			String javaDoc = matcher.group(1);
-			String source = matcher.group(2);
+			String javaElementSource = javaElement.getSource();
+			ISourceRange sourceRange = javaElement.getSourceRange();
+
+			String javaDoc = javaElementSource.substring(0, javaDocEndIndex);
+			String source = javaElementSource.substring(javaDocEndIndex, javaElementSource.length());
 
 			// For classes (SourceType), we do not consider all changes to the source but only changes affecting the
 			// class definition (i.e. changed extends and imports).
