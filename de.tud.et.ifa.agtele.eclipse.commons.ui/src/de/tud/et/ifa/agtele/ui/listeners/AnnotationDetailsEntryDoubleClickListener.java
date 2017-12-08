@@ -20,7 +20,7 @@ import de.tud.et.ifa.agtele.ui.util.UIHelper;
  * This is a simple double click listener, that opens an input dialog for string
  * to string map entries, mostly used in the details feature of ecore
  * annotations.
- * 
+ *
  * @author Baron
  *
  */
@@ -48,6 +48,9 @@ public class AnnotationDetailsEntryDoubleClickListener implements IDoubleClickLi
 			}
 		} else if (selection instanceof EStringToStringMapEntryImpl) {
 			entry = (EStringToStringMapEntryImpl) selection;
+		}
+		if (entry == null) {
+			return;
 		}
 
 		EditingDomain dom = AgteleEcoreUtil.getEditingDomainFor(entry);
