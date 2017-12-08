@@ -3,6 +3,10 @@
  */
 package de.tud.et.ifa.agtele.ui.emf;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
 import org.eclipse.emf.ecore.EAnnotation;
 import org.eclipse.emf.ecore.EAttribute;
 import org.eclipse.emf.ecore.EObject;
@@ -389,24 +393,40 @@ public class PushCodeToEcoreExecutor {
 
 		// determine the minimum count of whitespace characters at the beginnint of all lines
 		int minSpaceCount = 999999;
-		String[] lines;
+		String[] lineArray;
 		String nl;
-		if (compiledCode.contains("\n\r")) {
-			lines = compiledCode.split("\n\r");
-			nl = "\n\r";
-		} else if (compiledCode.contains("\r\n")) {
-			lines = compiledCode.split("\r\n");
+		if (compiledCode.contains("\r\n")) {
+			lineArray = compiledCode.split("\r\n");
 			nl = "\r\n";
 		} else if (compiledCode.contains("\r")) {
-			lines = compiledCode.split("\r");
+			lineArray = compiledCode.split("\r");
 			nl = "\r";
 		} else {
-			lines = compiledCode.split("\n");
+			lineArray = compiledCode.split("\n");
 			nl = "\n";
 		}
-		if (lines.length <= 1) {
+
+		List<String> lines = new ArrayList<>(Arrays.asList(lineArray));
+
+		if (lines.isEmpty()) {
 			result = compiledCode;
 		} else {
+
+			// remove the line belonging to the beginning { and closing } if it is empty or does only contain whitespace
+			// (these lines will be regenerated nonetheless)
+			//
+			if (lines.size() > 1) {
+				String firstLine = lines.get(0);
+				if (firstLine.isEmpty() || firstLine.matches("[\\s]+")) {
+					lines.remove(0);
+				}
+
+				String lastLine = lines.get(lines.size() - 1);
+				if (lastLine.isEmpty() || lastLine.matches("[\\s]+")) {
+					lines.remove(lines.size() - 1);
+				}
+			}
+
 			for (String line2 : lines) {
 				String s = line2;
 				int spaceCount = 0;
@@ -427,10 +447,13 @@ public class PushCodeToEcoreExecutor {
 			}
 		}
 
-		// remove a the minimal count of whitespace characters
+		// remove the minimal count of whitespace characters
 		if (minSpaceCount >= 999999) {
 			result = compiledCode;
 		} else {
+
+			List<String> resultLines = new ArrayList<>();
+
 			for (String line2 : lines) {
 				String s = line2;
 				int charCount = 0;
@@ -449,11 +472,13 @@ public class PushCodeToEcoreExecutor {
 						break;
 					}
 				}
-				result += (result.length() > 0 ? nl : "") + s.substring(charCount <= s.length() ? charCount : 0);
+
+				resultLines.add(s.substring(charCount <= s.length() ? charCount : 0));
+				result = String.join(nl, resultLines);
 			}
 		}
 
-		return result.trim();
+		return result;
 	}
 
 	/**
