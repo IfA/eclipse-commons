@@ -242,7 +242,7 @@ public class PushCodeToEcoreExecutor {
 
 		return new PushCodeToEcoreResult(target, annotationDescriptor[1] != null
 				? "Pushed the java code to the ecore model, to enable getters, setters, initializers or isSet evaluations, use custom emitter templates"
-				: "Cleared the java code from the ecore model. Run the generator in order to get the default implementation.");
+						: "Cleared the java code from the ecore model. Run the generator in order to get the default implementation.");
 	}
 
 	/**
@@ -418,10 +418,15 @@ public class PushCodeToEcoreExecutor {
 			return compiledCode;
 		}
 
+		//TODO extract the fetching of the implementation body into a util method
 		// remove leading comments
 		compiledCode = compiledCode.trim();
-		while (compiledCode.startsWith("/*")) {
-			compiledCode = compiledCode.substring(compiledCode.indexOf("*/") + 2).trim();
+		while (compiledCode.startsWith("/*") || compiledCode.startsWith("//") || compiledCode.startsWith("@")) {
+			if (compiledCode.startsWith("/*")) {
+				compiledCode = compiledCode.substring(compiledCode.indexOf("*/") + 2).trim();
+			} else {
+				compiledCode = compiledCode.substring(compiledCode.indexOf(System.lineSeparator()) + 1).trim();
+			}
 		}
 
 		// get implementation body
@@ -447,7 +452,7 @@ public class PushCodeToEcoreExecutor {
 			String packageName = importDeclaration.substring(0, lastDotIndex);
 			String typeName = importDeclaration.substring(lastDotIndex + 1);
 
-			compiledCode = compiledCode.replaceAll("([\\(\\[\\{\\s<])" + typeName + "([\\s\\)<>:\\.,])",
+			compiledCode = compiledCode.replaceFirst("([\\(\\[\\{\\s<])" + typeName + "([\\s\\)<>:\\.,])",
 					"$1<%" + packageName + "." + typeName + "%>$2");
 		}
 
