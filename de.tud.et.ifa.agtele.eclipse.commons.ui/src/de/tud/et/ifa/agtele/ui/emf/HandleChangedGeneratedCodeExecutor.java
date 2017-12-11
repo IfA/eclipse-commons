@@ -66,6 +66,11 @@ import de.tud.et.ifa.agtele.ui.util.UIHelper;
 public class HandleChangedGeneratedCodeExecutor {
 
 	/**
+	 * A constant representing the 'generated' annotation
+	 */
+	protected static final String GENERATED = "@generated";
+
+	/**
 	 * The {@link CompilationUnitEditor} displaying the Java file to be handled by this executor.
 	 */
 	protected final CompilationUnitEditor javaEditor;
@@ -242,7 +247,11 @@ public class HandleChangedGeneratedCodeExecutor {
 			//
 			String javaDoc = javaElement.getSource().substring(0, javaDocEndIndex);
 
-			return javaDoc.contains("@generated") && !javaDoc.matches("@generated[\\s]+NOT");
+			int atGeneratedIndex = javaDoc.indexOf(HandleChangedGeneratedCodeExecutor.GENERATED);
+
+			return atGeneratedIndex > 0
+					&& !javaDoc.substring(atGeneratedIndex + HandleChangedGeneratedCodeExecutor.GENERATED.length())
+							.trim().startsWith("NOT");
 
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -519,7 +528,7 @@ public class HandleChangedGeneratedCodeExecutor {
 				? "TODO Don't forget to incorporate your manual changes into the Ecore metamodel!\n\t * "
 				: "";
 
-		String newSource = oldSource.replaceFirst("@generated",
+		String newSource = oldSource.replaceFirst(HandleChangedGeneratedCodeExecutor.GENERATED,
 				todoString + "@generated NOT" + (explanation.isPresent() ? " " + explanation.get() : ""));
 
 		this.textFileBuffer.getDocument().replace(javaElement.getSourceRange().getOffset(),
