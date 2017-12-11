@@ -7,6 +7,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.emf.ecore.EAnnotation;
 import org.eclipse.emf.ecore.EAttribute;
 import org.eclipse.emf.ecore.EObject;
@@ -15,14 +17,19 @@ import org.eclipse.emf.ecore.EReference;
 import org.eclipse.emf.ecore.ETypedElement;
 import org.eclipse.emf.ecore.resource.ResourceSet;
 import org.eclipse.emf.edit.domain.EditingDomain;
+import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IImportDeclaration;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMethod;
+import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.ToolFactory;
+import org.eclipse.jdt.core.formatter.CodeFormatter;
 import org.eclipse.jdt.internal.core.CompilationUnit;
 import org.eclipse.jdt.internal.core.SourceField;
 import org.eclipse.jface.text.TextSelection;
 import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.text.edits.TextEdit;
 
 import de.tud.et.ifa.agtele.emf.AgteleEcoreUtil;
 import de.tud.et.ifa.agtele.ui.emf.GeneratedEMFCodeHelper.GeneratedEMFCodeHelperException;
@@ -163,7 +170,7 @@ public class PushCodeToEcoreExecutor {
 		try {
 			javaElement = this.helper.getCompilationUnit().getElementAt(((TextSelection) javaSelection).getOffset());
 			while (javaElement.getParent() != null
-					&& javaElement.getParent().getParent() != this.helper.getCompilationUnit()) {
+					&& !this.helper.getCompilationUnit().equals(javaElement.getParent().getParent())) {
 				javaElement = javaElement.getParent();
 			}
 		} catch (JavaModelException e) {
@@ -190,6 +197,11 @@ public class PushCodeToEcoreExecutor {
 			throw new PushCodeToEcoreExecutorException(
 					"The JavaElement '" + javaElement.getElementName() + "' cannot be pushed to Ecore!");
 		}
+
+		// Before pushing the java element, format (indent, etc.) its content correctly so that regenerating the code
+		// will result in the same format
+		//
+		this.formatCompilationUnit();
 
 		// The basis for the annotation to be created
 		//
@@ -231,6 +243,61 @@ public class PushCodeToEcoreExecutor {
 		return new PushCodeToEcoreResult(target, annotationDescriptor[1] != null
 				? "Pushed the java code to the ecore model, to enable getters, setters, initializers or isSet evaluations, use custom emitter templates"
 				: "Cleared the java code from the ecore model. Run the generator in order to get the default implementation.");
+	}
+
+	/**
+	 * Formats the Java file represented by the {@link #helper} (as selecting 'Source -> Format' in the Java editor
+	 * would do).
+	 * <p />
+	 * Note: This may result in a dirty editor!
+	 *
+	 * @throws PushCodeToEcoreExecutorException
+	 *             If formatting the compilation unit fails.
+	 *
+	 * @see <a href=
+	 *      "https://stackoverflow.com/questions/16015240/formatting-source-code-programmatically-with-jdt">https://stackoverflow.com/questions/16015240/formatting-source-code-programmatically-with-jdt</a>
+	 *
+	 */
+	protected void formatCompilationUnit() throws PushCodeToEcoreExecutorException {
+
+		try {
+
+			NullProgressMonitor monitor = new NullProgressMonitor();
+			ICompilationUnit unit = this.helper.getCompilationUnit();
+
+			unit.becomeWorkingCopy(monitor);
+
+			CodeFormatter formatter = ToolFactory.createCodeFormatter(null);
+			ISourceRange range = unit.getSourceRange();
+
+			TextEdit formatEdit = formatter.format(CodeFormatter.K_COMPILATION_UNIT, unit.getSource(),
+					range.getOffset(), range.getLength(), 0, null);
+
+			if (formatEdit != null && formatEdit.hasChildren()) {
+
+				unit.applyTextEdit(formatEdit, monitor);
+
+			} else {
+				monitor.done();
+			}
+
+		} catch (Exception e) {
+			throw new PushCodeToEcoreExecutorException(e);
+		}
+
+	}
+
+	protected void formatUnitSourceCode(ICompilationUnit unit, IProgressMonitor monitor) throws JavaModelException {
+
+		CodeFormatter formatter = ToolFactory.createCodeFormatter(null);
+		ISourceRange range = unit.getSourceRange();
+		TextEdit formatEdit = formatter.format(CodeFormatter.K_COMPILATION_UNIT, unit.getSource(), range.getOffset(),
+				range.getLength(), 0, null);
+		if (formatEdit != null && formatEdit.hasChildren()) {
+			unit.applyTextEdit(formatEdit, monitor);
+		} else {
+			monitor.done();
+		}
 	}
 
 	/**
