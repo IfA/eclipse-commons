@@ -33,6 +33,7 @@ import org.eclipse.jdt.internal.core.SourceType;
 import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jface.dialogs.Dialog;
+import org.eclipse.jface.dialogs.DialogSettings;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.IMessageProvider;
 import org.eclipse.jface.dialogs.TitleAreaDialog;
@@ -50,6 +51,7 @@ import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.PartInitException;
 
+import de.tud.et.ifa.agtele.ui.AgteleUIPlugin;
 import de.tud.et.ifa.agtele.ui.editors.AgteleEcoreEditor;
 import de.tud.et.ifa.agtele.ui.emf.PushCodeToEcoreExecutor.PushCodeToEcoreResult;
 import de.tud.et.ifa.agtele.ui.listeners.SelectionListener2;
@@ -582,6 +584,12 @@ public class HandleChangedGeneratedCodeExecutor {
 	public class HandleChangedGeneratedCodeDialog extends TitleAreaDialog {
 
 		/**
+		 * The key under which the last text entered by the user as explanation why a generated method is tagged with
+		 * '@generated NOT' is persisted in the {@link DialogSettings}.
+		 */
+		protected static final String HANDLE_CHANGED_GENERATED_CODE_DIALOG_LAST_EXPLANATION_TEXT = "HANDLE_CHANGED_GENERATED_CODE_DIALOG_LAST_EXPLANATION_TEXT";
+
+		/**
 		 * The {@link SourceRefElement} that is the subject of this dialog.
 		 */
 		protected final SourceRefElement javaElement;
@@ -729,6 +737,15 @@ public class HandleChangedGeneratedCodeExecutor {
 					"An explanation why this element was changed manually (will only be used if 'NOT' tag is used)");
 			this.addNotTagExplanationText.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
 
+			// Show last entered explanation text (if there is any)
+			//
+			String lastExplanationText = AgteleUIPlugin.getPlugin().getDialogSettings()
+					.get(HandleChangedGeneratedCodeDialog.HANDLE_CHANGED_GENERATED_CODE_DIALOG_LAST_EXPLANATION_TEXT);
+			if (lastExplanationText != null) {
+				this.addNotTagExplanationText.setText(lastExplanationText);
+				this.addNotTagExplanationText.selectAll();
+			}
+
 			this.addTodoButton = new Button(container, SWT.CHECK);
 			this.addTodoButton.setSelection(true);
 			this.addTodoButton.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1));
@@ -769,6 +786,8 @@ public class HandleChangedGeneratedCodeExecutor {
 		@Override
 		protected void cancelPressed() {
 
+			// The user chose the 'Ignore' option
+			//
 			this.saveInput();
 			super.cancelPressed();
 		}
@@ -776,7 +795,14 @@ public class HandleChangedGeneratedCodeExecutor {
 		@Override
 		protected void okPressed() {
 
+			// The user chose the 'Add NOT tag' option
+			//
 			this.saveInput();
+			if (this.addNotTagExplanation != null && !this.addNotTagExplanation.isEmpty()) {
+				AgteleUIPlugin.getPlugin().getDialogSettings().put(
+						HandleChangedGeneratedCodeDialog.HANDLE_CHANGED_GENERATED_CODE_DIALOG_LAST_EXPLANATION_TEXT,
+						this.addNotTagExplanation);
+			}
 			super.okPressed();
 		}
 
