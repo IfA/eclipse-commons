@@ -670,6 +670,10 @@ public class HandleChangedGeneratedCodeExecutor {
 
 			this.setTitle(this.compileTitle());
 			this.setMessage("Push to Ecore or change '@generated' tag to '@generated NOT'?", IMessageProvider.WARNING);
+
+			if (HandleChangedGeneratedCodeExecutor.this.javaEditor != null) {
+				HandleChangedGeneratedCodeExecutor.this.javaEditor.setSelection(this.javaElement);
+			}
 		}
 
 		/**
