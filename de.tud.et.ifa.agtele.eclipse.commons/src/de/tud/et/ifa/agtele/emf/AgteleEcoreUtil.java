@@ -656,11 +656,18 @@ public interface AgteleEcoreUtil {
 	 *            The {@link EObject} for that the values shall be returned.
 	 * @param eFeature
 	 *            The {@link EStructuralFeature} for that the values shall be returned.
-	 * @return The determined values (either an empty list, a list consisting of a single value, or mutliple values).
+	 * @return The determined values (either an empty list, a list consisting of a single value, or multiple values). If
+	 *         the given feature is not a valid feature of the given eObject, an empty list will be returned..
 	 */
 	public static List<Object> getStructuralFeatureValueAsList(EObject eObject, EStructuralFeature eFeature) {
 
-		final Object value = eObject.eGet(eFeature);
+		Object value = null;
+
+		try {
+			value = eObject.eGet(eFeature);
+		} catch (IllegalArgumentException e) {
+			// we will just return an empty list
+		}
 
 		if (value == null) {
 			return new ArrayList<>(Collections.emptyList());
@@ -774,6 +781,7 @@ public interface AgteleEcoreUtil {
 	}
 
 	public static EObject getClosestContainerOfType(EObject obj, EClass cls) {
+
 		Collection<EObject> containers = AgteleEcoreUtil.getAllContainers(obj);
 		for (EObject container : containers) {
 			if (cls.isInstance(container)) {
