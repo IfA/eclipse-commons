@@ -19,6 +19,7 @@ import org.eclipse.emf.codegen.ecore.genmodel.GenClassifier;
 import org.eclipse.emf.codegen.ecore.genmodel.GenPackage;
 import org.eclipse.emf.common.notify.Adapter;
 import org.eclipse.emf.common.notify.AdapterFactory;
+import org.eclipse.emf.common.util.TreeIterator;
 import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.EAnnotation;
 import org.eclipse.emf.ecore.EAttribute;
@@ -516,13 +517,36 @@ public interface AgteleEcoreUtil {
 	}
 
 	/**
+	 * Returns all instances of an eClass, that are contained in the list of roots.
+	 *
+	 * @param eClass
+	 * @param roots
+	 * @return All instances of the eClass
+	 */
+	public static Collection<EObject> getAllInstances(EClass eClass, Collection<EObject> roots) {
+		Collection<EObject> result = new ArrayList<>();
+
+		for (EObject root : roots) {
+			Iterator<EObject> it = new AgteleContainmentTreeIterator(root, true, true);
+			while (it.hasNext()) {
+				EObject obj = it.next();
+				if (eClass.isSuperTypeOf(obj.eClass())) {
+					result.add(obj);
+				}
+			}
+		}
+		return result;
+	}
+
+	/**
 	 * Returns all instances of an eClass, that are contained in an eObject.
 	 *
 	 * @param eClass
 	 * @param anObject
 	 * @param findRoot
-	 *            if true, the search begins at the local containment root of anObject, if false only instances of the
-	 *            given eClass are found, that are subsequent to the given eObject.
+	 *            if true, the search begins at the local containment root of
+	 *            anObject, if false only instances of the given eClass are found,
+	 *            that are subsequent to the given eObject.
 	 * @return All instances of the eClass
 	 */
 	public static Collection<EObject> getAllInstances(EClass eClass, EObject anObject, boolean findRoot) {
@@ -841,5 +865,26 @@ public interface AgteleEcoreUtil {
 
 		return otherEcoreResource.getEObject(uriFragment);
 
+	}
+
+	/**
+	 * Checks if the root element specified contains the element
+	 *
+	 * @param root
+	 * @param element
+	 * @return whether the element is contained in the root or its subordinate
+	 *         elements or not
+	 */
+	public static boolean subTreeContainsElement(EObject root, Object element) {
+		TreeIterator<EObject> it = root.eAllContents();
+		if (root == element) {
+			return true;
+		}
+		while (it.hasNext()) {
+			if (it.next() == element) {
+				return true;
+			}
+		}
+		return false;
 	}
 }
