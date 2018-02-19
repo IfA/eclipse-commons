@@ -19,7 +19,6 @@ import org.eclipse.emf.codegen.ecore.genmodel.GenClassifier;
 import org.eclipse.emf.codegen.ecore.genmodel.GenPackage;
 import org.eclipse.emf.common.notify.Adapter;
 import org.eclipse.emf.common.notify.AdapterFactory;
-import org.eclipse.emf.common.util.TreeIterator;
 import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.EAnnotation;
 import org.eclipse.emf.ecore.EAttribute;
@@ -884,16 +883,7 @@ public interface AgteleEcoreUtil {
 	 * @return whether the element is contained in the root or its subordinate
 	 *         elements or not
 	 */
-	public static boolean subTreeContainsElement(EObject root, Object element) {
-		TreeIterator<EObject> it = root.eAllContents();
-		if (root == element) {
-			return true;
-		}
-		while (it.hasNext()) {
-			if (it.next() == element) {
-				return true;
-			}
-		}
-		return false;
+	public static boolean subTreeContainsElement(EObject root, EObject element) {
+		return root != element && EcoreUtil.isAncestor(root, element);
 	}
 }
