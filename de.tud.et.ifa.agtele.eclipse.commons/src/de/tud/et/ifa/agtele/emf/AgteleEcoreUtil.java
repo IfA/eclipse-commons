@@ -835,6 +835,7 @@ public interface AgteleEcoreUtil {
 
 			while (current.eContainer() != null) {
 				result.add(current.eContainer());
+				current = current.eContainer();
 			}
 
 			return result;
