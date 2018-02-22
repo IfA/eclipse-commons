@@ -8,6 +8,7 @@ import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -212,16 +213,16 @@ public class GeneratedCodeChangedListener extends WorkspaceCommandListener {
 
 		for (HandleChangedGeneratedCodeExecutionResult result : results) {
 
-			if (!result.getEcoreEditor().isPresent() || !(result.getEcoreEditor().get() instanceof IViewerProvider)) {
+			if (!(result.getEcoreEditor().orElse(null) instanceof IViewerProvider)) {
 				continue;
 			}
 
 			IViewerProvider editor = (IViewerProvider) result.getEcoreEditor().get();
 
-			List<Object> selection = selectionByEditor.containsKey(editor) ? selectionByEditor.get(editor)
-					: new ArrayList<>();
+			List<Object> selection = selectionByEditor.getOrDefault(editor, new ArrayList<>());
+
 			selection.addAll(result.getPushedElements().entrySet().stream().filter(e -> e.getValue().isPresent())
-					.map(e -> e.getValue().get().getTarget()).collect(Collectors.toList()));
+					.map(e -> e.getValue().get().getTarget()).filter(Objects::nonNull).collect(Collectors.toList()));
 
 			if (!selection.isEmpty()) {
 				selectionByEditor.put(editor, selection);

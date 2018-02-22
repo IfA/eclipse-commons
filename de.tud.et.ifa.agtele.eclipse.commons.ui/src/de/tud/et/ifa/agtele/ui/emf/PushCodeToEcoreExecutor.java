@@ -6,6 +6,8 @@ package de.tud.et.ifa.agtele.ui.emf;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map.Entry;
+import java.util.Optional;
 
 import org.eclipse.emf.ecore.EAnnotation;
 import org.eclipse.emf.ecore.EAttribute;
@@ -224,16 +226,23 @@ public class PushCodeToEcoreExecutor {
 		EditingDomain dom = AgteleEcoreUtil.getEditingDomainFor(specificEcoreElement);
 		dom.getCommandStack().execute(cmd);
 
-		// Set the selection in the ecore editor either to the details key or the manipulated annotation
+		// Set the selection in the Ecore editor either to the details key, the manipulated annotation, or the EObject
 		//
-		Object target = null;
-		Object entrySet[] = cmd.getManipulatedAnnotation().getDetails().entrySet().toArray();
-		if (annotationDescriptor[1] != null) {
-			target = entrySet[cmd.getManipulatedAnnotation().getDetails().indexOfKey(annotationDescriptor[0])];
-		} else if (cmd.getManipulatedAnnotation() != null) {
-			target = cmd.getManipulatedAnnotation();
-		} else {
-			target = specificEcoreElement;
+		EAnnotation manipulatedAnnotation = cmd.getManipulatedAnnotation();
+
+		Object target = specificEcoreElement;
+
+		if (manipulatedAnnotation != null) {
+
+			Optional<Entry<String, String>> detailsEntryToSelect = manipulatedAnnotation.getDetails().entrySet()
+					.stream().filter(e -> annotationDescriptor[0] == e.getKey()).findAny();
+
+			if (detailsEntryToSelect.isPresent()) {
+				target = detailsEntryToSelect.get();
+			} else {
+				target = manipulatedAnnotation;
+			}
+
 		}
 
 		return new PushCodeToEcoreResult(target, annotationDescriptor[1] != null
@@ -383,6 +392,11 @@ public class PushCodeToEcoreExecutor {
 		//
 		String compiledImplementation = this.compileImplementation(formattedJavaCode, this.helper.getCompilationUnit(),
 				isMethod, isInitialization);
+
+		if (compiledImplementation == null) {
+			throw new PushCodeToEcoreExecutorException(
+					"Unable to compile implementation for JavaElement '" + javaElement.getElementName() + "'!");
+		}
 
 		return new String[] { detailsKey, compiledImplementation };
 	}
