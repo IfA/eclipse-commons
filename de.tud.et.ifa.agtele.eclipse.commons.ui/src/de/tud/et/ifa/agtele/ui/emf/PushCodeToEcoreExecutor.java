@@ -7,8 +7,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.emf.ecore.EAnnotation;
 import org.eclipse.emf.ecore.EAttribute;
 import org.eclipse.emf.ecore.EObject;
@@ -17,18 +15,21 @@ import org.eclipse.emf.ecore.EReference;
 import org.eclipse.emf.ecore.ETypedElement;
 import org.eclipse.emf.ecore.resource.ResourceSet;
 import org.eclipse.emf.edit.domain.EditingDomain;
-import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IImportDeclaration;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.ISourceRange;
+import org.eclipse.jdt.core.ISourceReference;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.SourceRange;
 import org.eclipse.jdt.core.ToolFactory;
 import org.eclipse.jdt.core.formatter.CodeFormatter;
 import org.eclipse.jdt.internal.core.CompilationUnit;
 import org.eclipse.jdt.internal.core.SourceField;
+import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.TextSelection;
 import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.text.edits.MultiTextEdit;
 import org.eclipse.text.edits.TextEdit;
 
 import de.tud.et.ifa.agtele.emf.AgteleEcoreUtil;
@@ -198,11 +199,6 @@ public class PushCodeToEcoreExecutor {
 					"The JavaElement '" + javaElement.getElementName() + "' cannot be pushed to Ecore!");
 		}
 
-		// Before pushing the java element, format (indent, etc.) its content correctly so that regenerating the code
-		// will result in the same format
-		//
-		this.formatCompilationUnit();
-
 		// The basis for the annotation to be created
 		//
 		String[] annotationDescriptor = this.getAnnotationDescriptor(javaElement);
@@ -242,15 +238,18 @@ public class PushCodeToEcoreExecutor {
 
 		return new PushCodeToEcoreResult(target, annotationDescriptor[1] != null
 				? "Pushed the java code to the ecore model, to enable getters, setters, initializers or isSet evaluations, use custom emitter templates"
-						: "Cleared the java code from the ecore model. Run the generator in order to get the default implementation.");
+				: "Cleared the java code from the ecore model. Run the generator in order to get the default implementation.");
 	}
 
 	/**
-	 * Formats the Java file represented by the {@link #helper} (as selecting 'Source -> Format' in the Java editor
-	 * would do).
+	 * {@link CodeFormatter Formats} the source code of the given {@link ISourceReference javaElement} (as selecting
+	 * 'Source -> Format Element' in the Java editor would do) and returns the formatted source code.
 	 * <p />
-	 * Note: This may result in a dirty editor!
+	 * Note: This does not affect the actual editor contents because formatting is performed on a temporary document!
 	 *
+	 * @param javaElement
+	 *            The {@link ISourceReference} whose source code shall be formatted.
+	 * @return The formatted source code.
 	 * @throws PushCodeToEcoreExecutorException
 	 *             If formatting the compilation unit fails.
 	 *
@@ -258,46 +257,40 @@ public class PushCodeToEcoreExecutor {
 	 *      "https://stackoverflow.com/questions/16015240/formatting-source-code-programmatically-with-jdt">https://stackoverflow.com/questions/16015240/formatting-source-code-programmatically-with-jdt</a>
 	 *
 	 */
-	protected void formatCompilationUnit() throws PushCodeToEcoreExecutorException {
+	protected String formatJavaElement(ISourceReference javaElement) throws PushCodeToEcoreExecutorException {
 
 		try {
 
-			NullProgressMonitor monitor = new NullProgressMonitor();
-			ICompilationUnit unit = this.helper.getCompilationUnit();
-
-			unit.becomeWorkingCopy(monitor);
+			String compilationUnitSource = this.helper.getCompilationUnit().getSource();
 
 			CodeFormatter formatter = ToolFactory.createCodeFormatter(null);
-			ISourceRange range = unit.getSourceRange();
 
-			TextEdit formatEdit = formatter.format(CodeFormatter.K_COMPILATION_UNIT, unit.getSource(),
-					range.getOffset(), range.getLength(), 0, null);
+			ISourceRange originalSourceRange = javaElement.getSourceRange();
 
-			if (formatEdit != null && formatEdit.hasChildren()) {
+			TextEdit formatEdit = formatter.format(CodeFormatter.K_COMPILATION_UNIT, compilationUnitSource,
+					originalSourceRange.getOffset(), originalSourceRange.getLength(), 0, null);
 
-				unit.applyTextEdit(formatEdit, monitor);
+			// Wrap the actual format TextEdit in a MultiTextEdit so that we are able to get the 'updatedSourceRange'
+			// later on
+			//
+			MultiTextEdit javaElementEdit = new MultiTextEdit(originalSourceRange.getOffset(),
+					originalSourceRange.getLength());
+			javaElementEdit.addChild(formatEdit);
 
-			} else {
-				monitor.done();
-			}
+			// Apply the edit in a temporary document so that we do not affect the actual editor contents
+			//
+			Document tempDocument = new Document(compilationUnitSource);
+			javaElementEdit.apply(tempDocument, TextEdit.UPDATE_REGIONS);
+
+			ISourceRange updatedSourceRange = new SourceRange(javaElementEdit.getRegion().getOffset(),
+					javaElementEdit.getRegion().getLength());
+
+			return tempDocument.get(updatedSourceRange.getOffset(), updatedSourceRange.getLength());
 
 		} catch (Exception e) {
 			throw new PushCodeToEcoreExecutorException(e);
 		}
 
-	}
-
-	protected void formatUnitSourceCode(ICompilationUnit unit, IProgressMonitor monitor) throws JavaModelException {
-
-		CodeFormatter formatter = ToolFactory.createCodeFormatter(null);
-		ISourceRange range = unit.getSourceRange();
-		TextEdit formatEdit = formatter.format(CodeFormatter.K_COMPILATION_UNIT, unit.getSource(), range.getOffset(),
-				range.getLength(), 0, null);
-		if (formatEdit != null && formatEdit.hasChildren()) {
-			unit.applyTextEdit(formatEdit, monitor);
-		} else {
-			monitor.done();
-		}
 	}
 
 	/**
@@ -314,6 +307,11 @@ public class PushCodeToEcoreExecutor {
 	 */
 	protected String[] getAnnotationDescriptor(IJavaElement javaElement) throws PushCodeToEcoreExecutorException {
 
+		if (!(javaElement instanceof ISourceReference)) {
+			throw new PushCodeToEcoreExecutorException(
+					"Could not retrieve source code for JavaElement '" + javaElement.getElementName() + "'!");
+		}
+
 		EMFGeneratedJavaFileType type = this.helper.getFileType();
 
 		EObject specificEcoreElement;
@@ -323,76 +321,70 @@ public class PushCodeToEcoreExecutor {
 			throw new PushCodeToEcoreExecutorException(e1);
 		}
 
+		// The 'key' to be used for the annotation to be created
+		//
 		String detailsKey = null;
-		String code = null;
+
+		boolean isMethod = false;
+		boolean isInitialization = false;
 
 		if (type.isClassImplementationType()) {
 			if (specificEcoreElement instanceof EOperation) {
+
 				detailsKey = "body";
-				IMethod method = (IMethod) javaElement;
-				try {
-					code = method.getSource();
-				} catch (JavaModelException e) {
-					throw new PushCodeToEcoreExecutorException("Could not retrieve method source code.", e);
-				}
-				code = this.compileImplementation(code, this.helper.getCompilationUnit(), true, false);
+				isMethod = true;
+
 			} else if ((specificEcoreElement instanceof EReference || specificEcoreElement instanceof EAttribute)
 					&& javaElement instanceof IMethod) {
+
 				IMethod method = (IMethod) javaElement;
-				try {
-					code = method.getSource();
-				} catch (JavaModelException e) {
-					throw new PushCodeToEcoreExecutorException("Could not retrieve method source code.", e);
-				}
 				String name = method.getElementName();
 				if (name.startsWith("set")) {
 					detailsKey = "set";
-					code = this.compileImplementation(code, this.helper.getCompilationUnit(), true, false);
 				} else if (name.startsWith("get") || name.startsWith("is")) {
 					detailsKey = "get";
-					code = this.compileImplementation(code, this.helper.getCompilationUnit(), true, false);
 				} else if (name.startsWith("basicSet")) {
 					detailsKey = "basicSet";
-					code = this.compileImplementation(code, this.helper.getCompilationUnit(), true, false);
 				} else if (name.startsWith("basicGet")) {
 					detailsKey = "basicGet";
-					code = this.compileImplementation(code, this.helper.getCompilationUnit(), true, false);
 				}
-				// //The eIsSet expression cannot be pushed to the ecore, without further work on identifying the ecore
-				// element from the selection within the java method
-				// else if (name.startsWith("eIsSet")) {
-				// detailsKey = "isSet";
-				// // determine the expression, it should follow: case --.CLASS_NAME__FEATURE_NAME:\n return
-				// }
-			} else if (specificEcoreElement instanceof EAttribute && javaElement instanceof SourceField) {
-				detailsKey = "init";
-				try {
-					code = ((SourceField) javaElement).getSource();
-				} catch (JavaModelException e) {
-					throw new PushCodeToEcoreExecutorException("Could not retrieve field initialization source code.",
-							e);
-				}
-				code = this.compileImplementation(code, this.helper.getCompilationUnit(), false, true);
+				isMethod = true;
 
-			} else {
-				throw new PushCodeToEcoreExecutorException(
-						"Could not handle selection or ecore target element, this is probably due to a section of the source code, that cannot be pushed to the ecore model.");
+			} else if (specificEcoreElement instanceof EAttribute && javaElement instanceof SourceField) {
+
+				detailsKey = "init";
+				isInitialization = true;
+
 			}
+
 		} else if (type.isEditItemProviderType()) {
 			if (javaElement instanceof IMethod
 					&& (specificEcoreElement instanceof EAttribute || specificEcoreElement instanceof EReference
 							&& !((EReference) specificEcoreElement).isContainment())) {
+
 				detailsKey = "propertyDescriptor";
-				try {
-					code = ((IMethod) javaElement).getSource();
-				} catch (JavaModelException e) {
-					throw new PushCodeToEcoreExecutorException(
-							"Could not retrieve add property descriptor source code.", e);
-				}
-				code = this.compileImplementation(code, this.helper.getCompilationUnit(), true, false);
+				isMethod = true;
+
 			}
 		}
-		return new String[] { detailsKey, code };
+
+		if (detailsKey == null) {
+			throw new PushCodeToEcoreExecutorException(
+					"Could not handle selection or ecore target element, this is probably due to a section of the source code, that cannot be pushed to the ecore model.");
+		}
+
+		// Before pushing the java element, format (indent, etc.) its content correctly so that regenerating the code
+		// will result in the same format
+		//
+		String formattedJavaCode = this.formatJavaElement((ISourceReference) javaElement);
+
+		// Additionally, extract the part of the source code to be pushed (e.g. only the method content), replace
+		// unqualified symbols with their qualified versions, etc.
+		//
+		String compiledImplementation = this.compileImplementation(formattedJavaCode, this.helper.getCompilationUnit(),
+				isMethod, isInitialization);
+
+		return new String[] { detailsKey, compiledImplementation };
 	}
 
 	/**
@@ -418,7 +410,7 @@ public class PushCodeToEcoreExecutor {
 			return compiledCode;
 		}
 
-		//TODO extract the fetching of the implementation body into a util method
+		// TODO extract the fetching of the implementation body into a util method
 		// remove leading comments
 		compiledCode = compiledCode.trim();
 		while (compiledCode.startsWith("/*") || compiledCode.startsWith("//") || compiledCode.startsWith("@")) {
