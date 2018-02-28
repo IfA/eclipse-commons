@@ -9,8 +9,10 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.eclipse.emf.codegen.ecore.genmodel.GenBase;
@@ -33,6 +35,7 @@ import org.eclipse.emf.ecore.EcorePackage;
 import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.ecore.resource.ResourceSet;
 import org.eclipse.emf.ecore.util.EcoreUtil;
+import org.eclipse.emf.ecore.util.ExtendedMetaData;
 import org.eclipse.emf.edit.domain.AdapterFactoryEditingDomain;
 import org.eclipse.emf.edit.domain.EditingDomain;
 import org.eclipse.emf.edit.domain.IEditingDomainProvider;
@@ -143,6 +146,85 @@ public interface AgteleEcoreUtil {
 		// required type
 		//
 		return adapterClass.isAssignableFrom(adapter.getClass()) ? (T) adapter : null;
+	}
+
+	/**
+	 * Returns the set of {@link EClass EClasses} defined by the given {@link EPackage EPackages} and all of the
+	 * {@link EPackageHelper#collectEPackages(Set, boolean, boolean, boolean, Optional) referenced} EPackages.
+	 *
+	 * @param ePackages
+	 * @return the set of classes
+	 */
+	public static Set<EClass> getAllClassesInEPackagesAndReferencedEPackages(Collection<EPackage> ePackages) {
+
+		Set<EPackage> packagesToScan = EPackageHelper.collectEPackages(new LinkedHashSet<>(ePackages), true, true, true,
+				Optional.empty());
+
+		return AgteleEcoreUtil.getAllClassesInEPackages(packagesToScan);
+	}
+
+	/**
+	 * Returns the set of {@link EClass EClasses} defined by the given {@link EPackage} and all of the
+	 * {@link EPackageHelper#collectEPackages(EPackage, boolean, boolean, boolean, Optional) referenced} EPackages.
+	 *
+	 * @param ePackage
+	 * @return the set of classes
+	 */
+	public static Set<EClass> getAllClassesInEPackageAndReferencedEPackages(EPackage ePackage) {
+
+		Set<EPackage> packagesToScan = EPackageHelper.collectEPackages(ePackage, true, true, true, Optional.empty());
+
+		return packagesToScan.stream().flatMap(p -> AgteleEcoreUtil.getAllClassesInEPackage(p).stream())
+				.collect(Collectors.toCollection(LinkedHashSet::new));
+	}
+
+	/**
+	 * Returns the set of {@link EClass EClasses} defined by the given {@link EPackage EPackages}.
+	 *
+	 * @param ePackages
+	 * @return the set of classes
+	 */
+	public static Set<EClass> getAllClassesInEPackages(Collection<EPackage> ePackages) {
+
+		List<EClass> classesInPackage = ePackages.stream()
+				.flatMap(e -> e.getEClassifiers().stream().filter(EClass.class::isInstance).map(EClass.class::cast))
+				.collect(Collectors.toList());
+
+		List<EClass> classesWithOutDocumentRoot = classesInPackage.stream()
+				.filter(c -> !AgteleEcoreUtil.isDocRootClass(c)).collect(Collectors.toList());
+
+		return new LinkedHashSet<>(classesWithOutDocumentRoot);
+	}
+
+	/**
+	 * Returns the set of {@link EClass EClasses} defined by the given {@link EPackage}.
+	 *
+	 * @param ePackage
+	 * @return the set of classes
+	 */
+	public static Set<EClass> getAllClassesInEPackage(EPackage ePackage) {
+
+		List<EClass> classesInPackage = ePackage.getEClassifiers().stream().filter(EClass.class::isInstance)
+				.map(EClass.class::cast).collect(Collectors.toList());
+
+		List<EClass> classesWithOutDocumentRoot = classesInPackage.stream()
+				.filter(c -> !AgteleEcoreUtil.isDocRootClass(c)).collect(Collectors.toList());
+
+		return new LinkedHashSet<>(classesWithOutDocumentRoot);
+	}
+
+	/**
+	 * Whether the given {@link EClassifier} is a <em>DocumentRoot</em> class created when converting XSD-based to
+	 * Ecore-based metamodels.
+	 *
+	 * @param eClassifier
+	 * @return '<em>true</em>' if the given eClass is a DocumentRoot
+	 */
+	public static boolean isDocRootClass(EClassifier eClassifier) {
+
+		EClass docroot = ExtendedMetaData.INSTANCE.getDocumentRoot(eClassifier.getEPackage());
+
+		return docroot != null && docroot.equals(eClassifier);
 	}
 
 	/**
@@ -523,6 +605,7 @@ public interface AgteleEcoreUtil {
 	 * @return All instances of the eClass
 	 */
 	public static Collection<EObject> getAllInstances(EClass eClass, Collection<EObject> roots) {
+
 		Collection<EObject> result = new ArrayList<>();
 
 		for (EObject root : roots) {
@@ -543,9 +626,8 @@ public interface AgteleEcoreUtil {
 	 * @param eClass
 	 * @param anObject
 	 * @param findRoot
-	 *            if true, the search begins at the local containment root of
-	 *            anObject, if false only instances of the given eClass are found,
-	 *            that are subsequent to the given eObject.
+	 *            if true, the search begins at the local containment root of anObject, if false only instances of the
+	 *            given eClass are found, that are subsequent to the given eObject.
 	 * @return All instances of the eClass
 	 */
 	public static Collection<EObject> getAllInstances(EClass eClass, EObject anObject, boolean findRoot) {
@@ -880,10 +962,10 @@ public interface AgteleEcoreUtil {
 	 *
 	 * @param root
 	 * @param element
-	 * @return whether the element is contained in the root or its subordinate
-	 *         elements or not
+	 * @return whether the element is contained in the root or its subordinate elements or not
 	 */
 	public static boolean subTreeContainsElement(EObject root, EObject element) {
+
 		return root != element && EcoreUtil.isAncestor(root, element);
 	}
 }
