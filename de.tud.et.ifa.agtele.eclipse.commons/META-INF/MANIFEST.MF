@@ -20,6 +20,7 @@ Bundle-ActivationPolicy: lazy
 Export-Package: de.tud.et.ifa.agtele,
  de.tud.et.ifa.agtele.emf,
  de.tud.et.ifa.agtele.emf.compare,
+ de.tud.et.ifa.agtele.emf.connecting,
  de.tud.et.ifa.agtele.emf.edit,
  de.tud.et.ifa.agtele.emf.edit.commands,
  de.tud.et.ifa.agtele.help,
