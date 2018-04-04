@@ -8,10 +8,12 @@ import java.util.List;
 import java.util.logging.Logger;
 
 import org.eclipse.emf.ecore.EPackage;
+import org.eclipse.emf.ecore.EReference;
 
 import de.tud.et.ifa.agtele.emf.connecting.EClassConnectionPath;
 import de.tud.et.ifa.agtele.emf.connecting.EClassConnectionPathProvider;
 import de.tud.et.ifa.agtele.emf.connecting.EClassConnectionPathRequirement;
+import de.tud.et.ifa.agtele.emf.connecting.Length;
 
 /**
  * A concrete implementation of {@link EClassConnectionPathProvider} that is able to create {@link EClassConnectionPath
@@ -54,11 +56,45 @@ public class EClassConnectionPathFactory implements EClassConnectionPathProvider
 	@Override
 	public List<EClassConnectionPath> getConnections(EClassConnectionPathRequirement connectionRequirement) {
 
-		EClassConnectionPathBuilder pathBuilder = new EClassConnectionPathBuilder(connectionRequirement,
-				eClassConnectionInformationRegistry);
+		IEClassConnectionPathBuilder pathBuilder = createPathBuilder(connectionRequirement);
 
 		return pathBuilder.buildConnectionPaths();
+	}
 
+	private IEClassConnectionPathBuilder createPathBuilder(EClassConnectionPathRequirement connectionRequirement) {
+
+		IEClassConnectionPathBuilder pathBuilder;
+
+		if (isSimpleRequirement(connectionRequirement)) {
+			pathBuilder = new SimpleEClassConnectionPathBuilder(connectionRequirement,
+					eClassConnectionInformationRegistry);
+		} else {
+			pathBuilder = new EClassConnectionPathBuilder(connectionRequirement, eClassConnectionInformationRegistry);
+		}
+
+		return pathBuilder;
+	}
+
+	private boolean isSimpleRequirement(EClassConnectionPathRequirement connectionRequirement) {
+
+		return isDirectConnection(connectionRequirement) && specifiesStartingClass(connectionRequirement)
+				&& specifiesRequiredReference(connectionRequirement);
+	}
+
+	private boolean isDirectConnection(EClassConnectionPathRequirement connectionRequirement) {
+
+		return connectionRequirement.getRequiredMaximumPathLength().equals(Length.DIRECT_CONNECTION);
+	}
+
+	private boolean specifiesStartingClass(EClassConnectionPathRequirement connectionRequirement) {
+
+		return connectionRequirement.getRequiredStartingClass() != null;
+	}
+
+	private boolean specifiesRequiredReference(EClassConnectionPathRequirement connectionRequirement) {
+
+		Collection<EReference> requiredReferences = connectionRequirement.getRequiredReferences();
+		return requiredReferences != null && requiredReferences.size() == 1;
 	}
 
 }

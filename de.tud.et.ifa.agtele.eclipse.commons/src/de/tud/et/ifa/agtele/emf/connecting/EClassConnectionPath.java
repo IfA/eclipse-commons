@@ -5,7 +5,9 @@ package de.tud.et.ifa.agtele.emf.connecting;
 
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.NoSuchElementException;
 
 import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.EObject;
@@ -85,6 +87,23 @@ public interface EClassConnectionPath {
 	public default boolean containsLoop() {
 
 		return new HashSet<>(getAllClasses()).size() < getAllClasses().size();
+	}
+
+	/**
+	 * @return '<em>true</em>' if any of the {@link #getAllClasses()} except the {@link #getStartingClass()} or the
+	 *         {@link #getTargetClass()} is {@link EClass#isAbstract() abstract}.
+	 */
+	public default boolean containsIntermediateAbstractClass() {
+
+		LinkedList<EClass> classList = new LinkedList<>(getAllClasses());
+		try {
+			classList.removeFirst();
+			classList.removeLast();
+		} catch (NoSuchElementException e) {
+			return false;
+		}
+		return classList.stream().anyMatch(EClass::isAbstract);
+
 	}
 
 	/**

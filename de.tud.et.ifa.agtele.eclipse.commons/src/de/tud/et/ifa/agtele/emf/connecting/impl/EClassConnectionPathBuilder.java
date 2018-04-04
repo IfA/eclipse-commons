@@ -4,22 +4,17 @@
 package de.tud.et.ifa.agtele.emf.connecting.impl;
 
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
+import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.eclipse.emf.ecore.EClass;
-import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.EReference;
 import org.eclipse.emf.ecore.EcorePackage;
 
-import de.tud.et.ifa.agtele.emf.XSDAnyContentUtil;
-import de.tud.et.ifa.agtele.emf.connecting.AllowedReferenceType;
-import de.tud.et.ifa.agtele.emf.connecting.Capacity;
 import de.tud.et.ifa.agtele.emf.connecting.EClassConnectionPath;
 import de.tud.et.ifa.agtele.emf.connecting.EClassConnectionPathRequirement;
 import de.tud.et.ifa.agtele.emf.connecting.Length;
@@ -33,77 +28,31 @@ import de.tud.et.ifa.agtele.emf.connecting.Length;
  *
  * @author mfreund
  */
-public class EClassConnectionPathBuilder {
+@SuppressWarnings("javadoc")
 
-	private EClass startingClass;
-
-	private EClass targetClass;
-
-	private EObject startingElement;
-
-	private Length maxPathLength;
-
-	private Capacity requiredCapacity;
-
-	private AllowedReferenceType allowedReferenceType;
-
-	private Collection<EReference> requiredReferences;
-
-	private EClassConnectionInformationRegistry eClassConnectionInformationRegistry;
-
-	private List<EClassConnectionPath> foundPaths;
+public class EClassConnectionPathBuilder extends AbstractEClassConnectionPathBuilder {
 
 	private Queue<EClassConnectionPath> potentialPathQueue;
 
 	private EClassConnectionPath currentPotentialPath;
 
-	/**
-	 * Create an instance.
-	 *
-	 * @param requirement
-	 *            The {@link EClassConnectionPathRequirement} that this builder operates on.
-	 * @param eClassConnectionInformationRegistry
-	 *            The {@link EClassConnectionInformationRegistry} that is consulted by the builder to retrieve potential
-	 *            connections between various {@link EClass EClasses}.
-	 */
 	public EClassConnectionPathBuilder(EClassConnectionPathRequirement requirement,
 			EClassConnectionInformationRegistry eClassConnectionInformationRegistry) {
 
-		startingClass = requirement.getRequiredStartingClass();
-		targetClass = requirement.getRequiredTargetClass();
-		maxPathLength = requirement.getRequiredMaximumPathLength();
-		allowedReferenceType = requirement.getAllowedReferenceType();
-		requiredCapacity = requirement.getRequiredMinimumCapacity();
-		startingElement = requirement.getRequiredStartingElement();
-		requiredReferences = requirement.getRequiredReferences();
-		this.eClassConnectionInformationRegistry = eClassConnectionInformationRegistry;
+		super(requirement, eClassConnectionInformationRegistry);
 	}
 
-	/**
-	 * Determine all {@link EClassConnectionPath EClassConnectionPaths} that satisfy the
-	 * {@link EClassConnectionPathRequirement} that was passed to the constructor.
-	 *
-	 * @return The list of paths.
-	 */
-	public List<EClassConnectionPath> buildConnectionPaths() {
-
-		initBuilder();
+	@Override
+	protected void doBuildConnectionPaths() {
 
 		buildConnectionPathsIncrementally();
-
-		filterPathsWithRequiredCapacity();
-
-		filterPathsWithRequiredReferences();
-
-		sortPaths();
-
-		return foundPaths;
-
 	}
 
-	private void initBuilder() {
+	@Override
+	protected void initBuilder() {
 
-		foundPaths = new ArrayList<>();
+		super.initBuilder();
+
 		potentialPathQueue = new LinkedList<>();
 		currentPotentialPath = null;
 	}
@@ -120,7 +69,7 @@ public class EClassConnectionPathBuilder {
 			if (currentPotentialPathLeadsToTargetClass()) {
 				foundPaths.add(currentPotentialPath);
 
-			} else {
+			} else if (!isCurrentPotentialPathOfMaxPathLength()) {
 				buildNextPotentialPaths();
 			}
 
@@ -129,35 +78,41 @@ public class EClassConnectionPathBuilder {
 
 	private boolean currentPotentialPathLeadsToTargetClass() {
 
-		if (currentPotentialPath == null || currentPotentialPath.getTargetClass() == null) {
-			return false;
-		} else {
-			EClass potentialPathTargetClass = currentPotentialPath.getTargetClass();
-			return potentialPathTargetClass.isSuperTypeOf(targetClass)
-					|| potentialPathTargetClass.equals(EcorePackage.Literals.EOBJECT);
-		}
+		return currentPotentialPath != null && pathLeadsToRequiredTargetClass(currentPotentialPath);
+	}
 
+	private boolean pathLeadsToRequiredTargetClass(EClassConnectionPath path) {
+
+		EClass pathPathTargetClass = path.getTargetClass();
+
+		return pathPathTargetClass.isSuperTypeOf(targetClass)
+				|| pathPathTargetClass.equals(EcorePackage.Literals.EOBJECT);
+	}
+
+	private boolean isCurrentPotentialPathOfMaxPathLength() {
+
+		Length currentPotentialPathLength = getLengthOfCurrentPotentialPath();
+
+		return isMaximumLength(currentPotentialPathLength);
+	}
+
+	private Length getLengthOfCurrentPotentialPath() {
+
+		return currentPotentialPath != null ? currentPotentialPath.getLength() : Length.NO_CONNECTION;
+	}
+
+	private boolean isMaximumLength(Length length) {
+
+		return maxPathLength.compareTo(length) <= 0;
 	}
 
 	private void buildNextPotentialPaths() {
-
-		if (isCurrentPotentialPathOfMaxPathLength()) {
-			return;
-		}
 
 		List<EClassConnectionPath> nextPossiblePathSegments = getNextPotentialPathSegments();
 
 		for (EClassConnectionPath nextPossiblePathSegment : nextPossiblePathSegments) {
 			buildNextPotentialPath(nextPossiblePathSegment);
 		}
-	}
-
-	private boolean isCurrentPotentialPathOfMaxPathLength() {
-
-		Length currentPotentialPathLength = currentPotentialPath != null ? currentPotentialPath.getLength()
-				: Length.NO_CONNECTION;
-
-		return maxPathLength.compareTo(currentPotentialPathLength) <= 0;
 	}
 
 	private List<EClassConnectionPath> getNextPotentialPathSegments() {
@@ -194,13 +149,8 @@ public class EClassConnectionPathBuilder {
 
 	private List<EReference> getAllAllowedOutgoingReferences(EClass startingClass) {
 
-		List<EReference> allOutgoingReferences = new ArrayList<>(startingClass.getEAllReferences());
-
-		// for classes based on an xsd element with content of type 'xs:any'
-		if (XSDAnyContentUtil.allowsAnyContent(startingClass)) {
-			EReference xsAnyReference = XSDAnyContentUtil.getOrCreateVirtualAnyContentReference(startingClass);
-			allOutgoingReferences.add(xsAnyReference);
-		}
+		Set<EReference> allOutgoingReferences = eClassConnectionInformationRegistry
+				.getAllReferencesFromClass(startingClass);
 
 		return allOutgoingReferences.stream().filter(allowedReferenceType::allows).collect(Collectors.toList());
 	}
@@ -218,11 +168,10 @@ public class EClassConnectionPathBuilder {
 
 		List<EClass> potentialTargetClasses = getAllPotentialTargetClasses(outgoingReference);
 
-		List<EClass> nonAbstractPotentialTargetClasses = potentialTargetClasses.stream().filter(c -> !c.isAbstract())
+		List<EClass> validTargetClasses = potentialTargetClasses.stream().filter(this::isValidClassForPath)
 				.collect(Collectors.toList());
 
-		return nonAbstractPotentialTargetClasses.stream()
-				.map(c -> new DirectEClassConnectionPath(startingClass, outgoingReference, c))
+		return validTargetClasses.stream().map(c -> new DirectEClassConnectionPath(startingClass, outgoingReference, c))
 				.collect(Collectors.toList());
 	}
 
@@ -235,6 +184,11 @@ public class EClassConnectionPathBuilder {
 		potentialTargetClasses.addAll(eClassConnectionInformationRegistry.getAllSubClasses(referenceType));
 
 		return potentialTargetClasses;
+	}
+
+	private boolean isValidClassForPath(EClass eClass) {
+
+		return !eClass.isAbstract() || eClass.equals(targetClass);
 	}
 
 	private void buildNextPotentialPath(EClassConnectionPath nextPossiblePathSegment) {
@@ -252,58 +206,6 @@ public class EClassConnectionPathBuilder {
 
 		return !path.containsLoop();
 
-	}
-
-	private void filterPathsWithRequiredCapacity() {
-
-		foundPaths = foundPaths.stream().filter(this::providesRequiredCapacity).collect(Collectors.toList());
-	}
-
-	private boolean providesRequiredCapacity(EClassConnectionPath path) {
-
-		Capacity pathCapacity = startingElement != null ? path.getActualCapacity(startingElement)
-				: path.getTheoreticalCapacity();
-
-		return pathCapacity.isSufficientFor(requiredCapacity);
-	}
-
-	private void filterPathsWithRequiredReferences() {
-
-		foundPaths = foundPaths.stream().filter(this::containsRequiredReferences).collect(Collectors.toList());
-	}
-
-	private boolean containsRequiredReferences(EClassConnectionPath path) {
-
-		if (requiredReferences instanceof List<?>) {
-			return containsRequiredReferencesInCorrectOrder(path);
-		} else {
-			return containsRequiredReferencesInAnyOrder(path);
-		}
-	}
-
-	private boolean containsRequiredReferencesInCorrectOrder(EClassConnectionPath path) {
-
-		if (!containsRequiredReferencesInAnyOrder(path)) {
-			return false;
-		}
-
-		List<Integer> referenceIndices = requiredReferences.stream().map(r -> path.getAllReferences().indexOf(r))
-				.collect(Collectors.toList());
-
-		List<Integer> sortedReferenceIndices = new ArrayList<>(referenceIndices);
-		Collections.sort(sortedReferenceIndices);
-
-		return referenceIndices.equals(sortedReferenceIndices);
-	}
-
-	private boolean containsRequiredReferencesInAnyOrder(EClassConnectionPath path) {
-
-		return requiredReferences != null ? path.getAllReferences().containsAll(requiredReferences) : true;
-	}
-
-	private void sortPaths() {
-
-		foundPaths = EClassConnectionPathUtil.sortConnectionPathsFromShortestToLongest(foundPaths);
 	}
 
 }

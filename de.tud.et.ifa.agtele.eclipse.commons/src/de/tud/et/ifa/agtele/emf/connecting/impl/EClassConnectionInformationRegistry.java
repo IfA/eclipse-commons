@@ -18,9 +18,11 @@ import java.util.stream.Collectors;
 import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.EPackage;
 import org.eclipse.emf.ecore.EReference;
+import org.eclipse.emf.ecore.EcorePackage;
 
 import de.tud.et.ifa.agtele.emf.AgteleEcoreUtil;
 import de.tud.et.ifa.agtele.emf.EPackageHelper;
+import de.tud.et.ifa.agtele.emf.XSDAnyContentUtil;
 
 /**
  * For a set of {@link EClass EClasses}, this registry keeps track of all sub-{@link EClass EClasses} and of all
@@ -113,7 +115,8 @@ public class EClassConnectionInformationRegistry {
 
 		this.registerInClassToSubClassesRegistry(eClassesToRegister);
 
-		Set<EReference> eReferencesToRegister = eClassesToRegister.stream().flatMap(c -> c.getEAllReferences().stream())
+		Set<EReference> eReferencesToRegister = eClassesToRegister.stream()
+				.flatMap(c -> getAllReferencesFromClass(c).stream())
 				.collect(Collectors.toCollection(LinkedHashSet::new));
 
 		this.registerInClassToIncomingReferencesRegistry(eReferencesToRegister);
@@ -149,6 +152,10 @@ public class EClassConnectionInformationRegistry {
 		Set<EClass> referenceTargetIncludingSubClasses = new LinkedHashSet<>();
 		referenceTargetIncludingSubClasses.add(referenceTarget);
 		referenceTargetIncludingSubClasses.addAll(getAllSubClasses(referenceTarget));
+
+		if (EcorePackage.Literals.EOBJECT.equals(referenceTarget)) {
+			referenceTargetIncludingSubClasses.addAll(registeredClasses);
+		}
 
 		referenceTargetIncludingSubClasses.stream()
 				.forEach(target -> this.registerInClassToIncomingReferencesRegistry(target, incomingReference));
@@ -213,6 +220,29 @@ public class EClassConnectionInformationRegistry {
 
 		return Collections
 				.unmodifiableSet(classToIncomingReferencesRegistry.getOrDefault(targetClass, new LinkedHashSet<>()));
+	}
+
+	/**
+	 * Returns all {@link EReference references} defined by the given {@link EClass} (or one of its super-types).
+	 * <p />
+	 * Note: This will also include a {@link XSDAnyContentUtil#getOrCreateVirtualAnyContentReference(EClass) (virtual)
+	 * 'xs:any'-content} reference if applicable.
+	 *
+	 * @param sourceClass
+	 *            The class to search outgoing references for
+	 * @return the references
+	 */
+	public Set<EReference> getAllReferencesFromClass(EClass sourceClass) {
+
+		Set<EReference> allOutgoingReferences = new LinkedHashSet<>(sourceClass.getEAllReferences());
+
+		// for classes based on an xsd element with content of type 'xs:any'
+		if (XSDAnyContentUtil.allowsAnyContent(sourceClass)) {
+			EReference xsAnyReference = XSDAnyContentUtil.getOrCreateVirtualAnyContentReference(sourceClass);
+			allOutgoingReferences.add(xsAnyReference);
+		}
+
+		return allOutgoingReferences;
 	}
 
 	/**
