@@ -13,18 +13,14 @@ package de.tud.et.ifa.agtele.emf;
 
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import org.eclipse.emf.ecore.EAttribute;
 import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.EObject;
-import org.eclipse.emf.ecore.EPackage.Registry;
 import org.eclipse.emf.ecore.EReference;
 import org.eclipse.emf.ecore.EStructuralFeature;
 import org.eclipse.emf.ecore.EcorePackage;
-import org.eclipse.emf.ecore.util.BasicExtendedMetaData;
 import org.eclipse.emf.ecore.util.ExtendedMetaData;
 import org.eclipse.emf.ecore.util.FeatureMap;
 import org.eclipse.emf.ecore.util.FeatureMap.Entry.Internal;
@@ -38,52 +34,33 @@ import org.eclipse.emf.ecore.util.FeatureMapUtil;
  */
 public class ExtendedMetaDataUtil {
 
-	/**
-	 * The single instance of {@link ExtendedMetaData} that we use to create/read/set metadata.
-	 */
-	private static ExtendedMetaData extendedMetaData;
+	private static final String NAME_OF_ANY_CONTENT_FEATURE = "any";
 
 	private ExtendedMetaDataUtil() {
 
 	}
 
-	/**
-	 * This initializes the {@link #extendedMetaData}.
-	 */
-	private static synchronized void initMetaData() {
-
-		ExtendedMetaDataUtil.extendedMetaData = new BasicExtendedMetaData(Registry.INSTANCE);
-
-	}
-
-	/**
-	 * Returns the {@link #extendedMetaData}.
-	 *
-	 * @return the {@link #extendedMetaData}}
-	 */
 	private static ExtendedMetaData getMetaData() {
 
-		if (ExtendedMetaDataUtil.extendedMetaData == null) {
-			ExtendedMetaDataUtil.initMetaData();
-		}
-
-		return ExtendedMetaDataUtil.extendedMetaData;
+		return ExtendedMetaData.INSTANCE;
 	}
 
 	/**
-	 * Returns whether the given {@link EStructuralFeature} represents a {@link FeatureMap} created based on an 'xs:any'
-	 * element.
+	 * Returns whether the given {@link EStructuralFeature} can be used to add 'xs:any'-content to an instance of the
+	 * given {@link EClass}.
 	 *
+	 * @param eClass
+	 *            The {@link EClass} that allows 'xs:any'-content.
 	 * @param feature
 	 *            The {@link EStructuralFeature} to check.
 	 * @return '<em>true</em>' if equipped with 'xs:any'-content.
 	 */
-	public static boolean isAnyContentFeature(EStructuralFeature feature) {
+	public static boolean isAnyContentFeature(EClass eClass, EStructuralFeature feature) {
 
 		if (feature instanceof EAttribute) {
 			return isAnyContentAttribute((EAttribute) feature);
 		} else if (feature instanceof EReference) {
-			return isAnyContentReference((EReference) feature);
+			return isAnyContentReference(eClass, (EReference) feature);
 		} else {
 			return false;
 		}
@@ -91,27 +68,13 @@ public class ExtendedMetaDataUtil {
 
 	private static boolean isAnyContentAttribute(EAttribute eAttribute) {
 
-		return "any".equals(eAttribute.getName())
-				&& eAttribute.getEAttributeType().equals(EcorePackage.Literals.EFEATURE_MAP_ENTRY);
+		return eAttribute != null && NAME_OF_ANY_CONTENT_FEATURE.equals(eAttribute.getName())
+				&& EcorePackage.Literals.EFEATURE_MAP_ENTRY.equals(eAttribute.getEAttributeType());
 	}
 
-	/**
-	 * Returns whether the given {@link EReference} was {@link #createVirtualAnyContentReference(EClass) created} based
-	 * on an {@link #isAnyContentAttribute(EAttribute)}.
-	 *
-	 * @param eReference
-	 *            The {@link EReference} to check.
-	 * @return '<em>true</em>' if created based on an attribute with 'xs:any'-content.
-	 */
-	private static boolean isAnyContentReference(EReference eReference) {
+	private static boolean isAnyContentReference(EClass eClass, EReference eReference) {
 
-		if (eReference == null) {
-			return false;
-		}
-
-		EReference anyContentReference = getOrCreateVirtualAnyContentReference(
-				eReference.getEContainingClass().getEPackage().getNsURI(), eReference.getName());
-		return eReference.equals(anyContentReference);
+		return getAnyContentAttributeFor(eClass, eReference).isPresent();
 	}
 
 	/**
@@ -126,32 +89,23 @@ public class ExtendedMetaDataUtil {
 		return getAnyContentAttribute(parentClass).isPresent();
 	}
 
-	/**
-	 * Returns an {@link #isAnyContentAttribute(EAttribute) 'any-content attribute'} for the given {@link EClass}.
-	 *
-	 * @param parentEClass
-	 *            The {@link EClass}.
-	 * @return A suitable {@link EAttribute} or an empty optional if no such attribute exists.
-	 */
-	public static Optional<EAttribute> getAnyContentAttribute(EClass parentEClass) {
+	private static Optional<EAttribute> getAnyContentAttribute(EClass parentEClass) {
 
 		return parentEClass.getEAllAttributes().stream().filter(ExtendedMetaDataUtil::isAnyContentAttribute).findAny();
 	}
 
 	/**
 	 * This allows to add the given <em>childElement</em> as child of the given <em>parentElement</em> that represents
-	 * an 'xs:any' element.
-	 * <p />
-	 * Therefore, a new (virtual) reference is created on the fly.
-	 * <p />
-	 * Note: A suitable {@link #isAnyContentAttribute(EAttribute) 'any-content attribute'} is determined automatically
-	 * before redirecting to {@link #addAnyConent(EObject, EStructuralFeature, EObject)}.
+	 * an 'xs:any'-content element.
+	 *
+	 * @see #getOrCreateVirtualAnyContentReference(EClass)
 	 *
 	 * @param parentElement
 	 *            The parent {@link EObject}.
 	 * @param childElement
 	 *            The child {@link EObject} to add.
-	 * @return '<em>true</em>' if the element was successfully added; '<em>false</em>' otherwise.
+	 * @return '<em>true</em>' if the element was successfully added; '<em>false</em>' otherwise (e.g. if the given
+	 *         parentElement does not allow 'xs:any'-content).
 	 */
 	public static boolean addAnyConent(EObject parentElement, EObject childElement) {
 
@@ -160,69 +114,20 @@ public class ExtendedMetaDataUtil {
 
 	/**
 	 * This allows to add the given <em>childElements</em> as children of the given <em>parentElement</em> that
-	 * represents an 'xs:any' element.
-	 * <p />
-	 * Therefore, a new (virtual) reference is created on the fly.
-	 * <p />
-	 * Note: A suitable {@link #isAnyContentAttribute(EAttribute) 'any-content attribute'} is determined automatically
-	 * before redirecting to {@link #addAnyConent(EObject, EStructuralFeature, EObject)}.
+	 * represents an 'xs:any'-content element.
+	 *
+	 * @see #getOrCreateVirtualAnyContentReference(EClass)
 	 *
 	 * @param parentElement
 	 *            The parent {@link EObject}.
 	 * @param childElements
 	 *            The child {@link EObject EObjects} to add.
-	 * @return '<em>true</em>' if the elements were successfully added; '<em>false</em>' otherwise.
+	 * @return '<em>true</em>' if the elements were successfully added; '<em>false</em>' otherwise (e.g. if the given
+	 *         parentElement does not allow 'xs:any'-content).
 	 */
 	public static boolean addAnyConent(EObject parentElement, Collection<EObject> childElements) {
 
 		Optional<EAttribute> anyContentAttribute = getAnyContentAttribute(parentElement.eClass());
-
-		if (!anyContentAttribute.isPresent()) {
-			return false;
-		} else {
-			return ExtendedMetaDataUtil.addAnyConent(parentElement, anyContentAttribute.get(), childElements);
-		}
-
-	}
-
-	/**
-	 * This allows to add the given <em>childElement</em> as child of the given <em>parentElement</em> via the given
-	 * {@link EStructuralFeature} that represents a {@link FeatureMap} created based on an 'xs:any' element.
-	 * <p />
-	 * Therefore, a new (virtual) reference is created on the fly
-	 *
-	 * @param parentElement
-	 *            The parent {@link EObject}.
-	 * @param anyContentFeature
-	 *            The {@link EStructuralFeature} representing the 'xs:any' element.
-	 * @param childElement
-	 *            The child {@link EObject} to add.
-	 * @return '<em>true</em>' if the element was successfully added; '<em>false</em>' otherwise.
-	 */
-	public static boolean addAnyConent(EObject parentElement, EStructuralFeature anyContentFeature,
-			EObject childElement) {
-
-		return ExtendedMetaDataUtil.addAnyConent(parentElement, anyContentFeature, Arrays.asList(childElement));
-	}
-
-	/**
-	 * This allows to add the given <em>childElements</em> as children of the given <em>parentElement</em> via the given
-	 * {@link EStructuralFeature} that represents a {@link FeatureMap} created based on an 'xs:any' element.
-	 * <p />
-	 * Therefore, a new (virtual) reference is created on the fly
-	 *
-	 * @param parentElement
-	 *            The parent {@link EObject}.
-	 * @param anyContentFeature
-	 *            The {@link EAttribute} representing the 'xs:any' element.
-	 * @param childElements
-	 *            The child {@link EObject EObjects} to add.
-	 * @return '<em>true</em>' if the elements were successfully added; '<em>false</em>' otherwise.
-	 */
-	public static boolean addAnyConent(EObject parentElement, EStructuralFeature anyContentFeature,
-			Collection<EObject> childElements) {
-
-		Optional<EAttribute> anyContentAttribute = getAnyContentAttributeFor(anyContentFeature);
 
 		if (anyContentAttribute.isPresent()) {
 			return addAnyContent(parentElement, anyContentAttribute.get(), childElements);
@@ -231,18 +136,13 @@ public class ExtendedMetaDataUtil {
 		}
 	}
 
-	private static Optional<EAttribute> getAnyContentAttributeFor(EStructuralFeature anyContentFeature) {
+	private static Optional<EAttribute> getAnyContentAttributeFor(EClass eClass, EStructuralFeature anyContentFeature) {
 
-		if (!isAnyContentFeature(anyContentFeature)) {
-			return Optional.empty();
-		}
+		// if the 'anyContentFeature' is a reference, we try to retrieve the affiliated attribute
+		EStructuralFeature affiliation = ExtendedMetaDataUtil.getMetaData().getAffiliation(eClass, anyContentFeature);
 
-		if (anyContentFeature instanceof EAttribute) {
-			return Optional.of((EAttribute) anyContentFeature);
-
-		} else if (anyContentFeature instanceof EReference) {
-			return getAnyContentAttribute(anyContentFeature.getEContainingClass());
-
+		if (affiliation instanceof EAttribute && isAnyContentAttribute((EAttribute) affiliation)) {
+			return Optional.of((EAttribute) affiliation);
 		} else {
 			return Optional.empty();
 		}
@@ -251,31 +151,43 @@ public class ExtendedMetaDataUtil {
 	private static boolean addAnyContent(EObject parentElement, EAttribute anyContentAttribute,
 			Collection<EObject> childElements) {
 
+		if (!isAnyContentAttribute(anyContentAttribute)) {
+			return false;
+		}
+
 		try {
 			FeatureMap rootMixed = (FeatureMap) parentElement.eGet(anyContentAttribute);
 
-			EReference virtualReference = ExtendedMetaDataUtil
-					.getOrCreateVirtualAnyContentReference(anyContentAttribute);
+			for (EObject childElement : childElements) {
 
-			List<Internal> featureMapEntries = childElements.stream()
-					.map(c -> FeatureMapUtil.createRawEntry(virtualReference, c)).collect(Collectors.toList());
+				EReference virtualReference = ExtendedMetaDataUtil
+						.getOrCreateVirtualAnyContentReference(parentElement.eClass(), childElement.eClass());
 
-			// using 'addAll' throws an exception for any weird reason
-			for (Internal featureMapEntry : featureMapEntries) {
+				Internal featureMapEntry = FeatureMapUtil.createRawEntry(virtualReference, childElement);
+
 				rootMixed.add(anyContentAttribute, featureMapEntry);
 			}
-
 		} catch (Exception e) {
 			e.printStackTrace();
 			return false;
 		}
 
 		return true;
+
 	}
 
 	/**
-	 * Create a new (virtual) reference that can be used to add content to the given {@link EClass} via an attribute
-	 * that represents a {@link FeatureMap} created based on an 'xs:any' element.
+	 * If the given {@link EClass} is based on an XSD-element that allows 'xs:any'-content, returns a (virtual)
+	 * {@link EReference} that can be used to add such 'xs:any'-content.
+	 * <p />
+	 * Note: The returned reference can be used as a convenient way to add 'any'-content via the usual
+	 * {@link EObject#eSet(EStructuralFeature, Object)} functionality instead of heaving to rely on special
+	 * functionality that directly operates on the required {@link FeatureMap}
+	 * <p />
+	 * Note: The returned reference will have the name 'any' and the {@link EReference#getEReferenceType()
+	 * referenceType} {@link EObject}.
+	 *
+	 * @see #getOrCreateVirtualAnyContentReference(EClass, EClass)
 	 *
 	 * @param eClass
 	 *            The {@link EClass} based on which the reference shall be created.
@@ -283,44 +195,64 @@ public class ExtendedMetaDataUtil {
 	 */
 	public static EReference getOrCreateVirtualAnyContentReference(EClass eClass) {
 
-		Optional<EAttribute> anyContentAttribute = getAnyContentAttribute(eClass);
-		if (anyContentAttribute.isPresent()) {
-			return getOrCreateVirtualAnyContentReference(anyContentAttribute.get());
-		} else {
-			return null;
-		}
+		return getOrCreateVirtualAnyContentReference(eClass, NAME_OF_ANY_CONTENT_FEATURE,
+				EcorePackage.Literals.EOBJECT);
 	}
 
 	/**
-	 * Create a new (virtual) reference that can be used to add content to the given {@link EAttribute} that represents
-	 * a {@link FeatureMap} created based on an 'xs:any' element.
+	 * If the given {@link EClass} is based on an XSD-element that allows 'xs:any'-content, returns a (virtual)
+	 * {@link EReference} that can be used to add such 'xs:any'-content.
+	 * <p />
+	 * Note: The returned reference can be used as a convenient way to add 'any'-content via the usual
+	 * {@link EObject#eSet(EStructuralFeature, Object)} functionality instead of heaving to rely on special
+	 * functionality that directly operates on the required {@link FeatureMap}
+	 * <p />
+	 * Note: The returned reference will have the name and type of the given <em>eReferenceType</em>.
 	 *
-	 * @param anyContentAttribute
-	 *            The {@link EAttribute} based on which the reference shall be created.
+	 * @see #getOrCreateVirtualAnyContentReference(EClass)
+	 *
+	 * @param eClass
+	 *            The {@link EClass} based on which the reference shall be created.
+	 * @param eReferenceType
+	 *            The {@link EClass} used as {@link EReference#getEReferenceType() referenceType}.
 	 * @return The created {@link EReference}.
 	 */
-	public static EReference getOrCreateVirtualAnyContentReference(EAttribute anyContentAttribute) {
+	public static EReference getOrCreateVirtualAnyContentReference(EClass eClass, EClass eReferenceType) {
 
-		if (!isAnyContentAttribute(anyContentAttribute)) {
+		String referenceName = eReferenceType.getName();
+
+		return getOrCreateVirtualAnyContentReference(eClass, referenceName, eReferenceType);
+
+	}
+
+	private static EReference getOrCreateVirtualAnyContentReference(EClass eClass, String referenceName,
+			EClass eReferenceType) {
+
+		Optional<EAttribute> anyContentAttribute = getAnyContentAttribute(eClass);
+
+		if (!anyContentAttribute.isPresent()) {
 			return null;
 		}
 
-		String referenceNsURI = anyContentAttribute.getEContainingClass().getEPackage().getNsURI();
-		String referenceName = anyContentAttribute.getName();
+		return getOrCreateVirtualAnyContentReference(referenceName, eReferenceType);
 
-		return getOrCreateVirtualAnyContentReference(referenceNsURI, referenceName);
 	}
 
-	private static EReference getOrCreateVirtualAnyContentReference(String referenceNsURI, String referenceName) {
+	private static EReference getOrCreateVirtualAnyContentReference(String referenceName, EClass referenceType) {
+
+		String referenceNsURI = referenceType.getEPackage().getNsURI();
 
 		EReference virtualReference = (EReference) ExtendedMetaDataUtil.getMetaData().demandFeature(referenceNsURI,
 				referenceName, true);
 
-		// use 'EObject' as common super type for all EClasses
-		EClass referenceType = EcorePackage.Literals.EOBJECT;
-		virtualReference.setEType(referenceType);
+		if (virtualReference != null) {
 
-		virtualReference.setContainment(true);
+			// explicitly setting the reference type instead of leaving the generic 'EObject' helps with serialization:
+			// instead of unnecessarily serializing to <MyType xsi:type="MyType" .../>, this will serialize to <MyType
+			// .../>
+			virtualReference.setEType(referenceType);
+		}
+
 		return virtualReference;
 	}
 
