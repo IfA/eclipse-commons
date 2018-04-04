@@ -12,7 +12,7 @@ import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.EReference;
 
-import de.tud.et.ifa.agtele.emf.ExtendedMetaDataUtil;
+import de.tud.et.ifa.agtele.emf.XSDAnyContentUtil;
 
 /**
  * Instances of this class represent a requirement/request for a {@link EClassConnectionPath connection path}. It can be
@@ -120,7 +120,7 @@ public class EClassConnectionPathRequirement {
 	/**
 	 * Add a list of {@link EReference EReferences} that need to be present in a path in the given order.
 	 * <p />
-	 * Note: This could also contain a {@link ExtendedMetaDataUtil#createVirtualAnyContentReference(EClass)
+	 * Note: This could also contain a {@link XSDAnyContentUtil#createVirtualAnyContentReference(EClass)
 	 * virtualReference} representing an <em>xs:any</em>-based element.
 	 */
 	public EClassConnectionPathRequirement withRequiredReferences(List<EReference> references) {
@@ -132,7 +132,7 @@ public class EClassConnectionPathRequirement {
 	/**
 	 * Add a set of {@link EReference EReferences} that need to be present in a path in any order.
 	 * <p />
-	 * Note: This could also contain a {@link ExtendedMetaDataUtil#createVirtualAnyContentReference(EClass)
+	 * Note: This could also contain a {@link XSDAnyContentUtil#createVirtualAnyContentReference(EClass)
 	 * virtualReference} representing an <em>xs:any</em>-based element.
 	 */
 	public EClassConnectionPathRequirement withRequiredReferences(Set<EReference> references) {

@@ -17,7 +17,7 @@ import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.EReference;
 import org.eclipse.emf.ecore.EcorePackage;
 
-import de.tud.et.ifa.agtele.emf.ExtendedMetaDataUtil;
+import de.tud.et.ifa.agtele.emf.XSDAnyContentUtil;
 import de.tud.et.ifa.agtele.emf.connecting.AllowedReferenceType;
 import de.tud.et.ifa.agtele.emf.connecting.Capacity;
 import de.tud.et.ifa.agtele.emf.connecting.EClassConnectionPath;
@@ -197,8 +197,8 @@ public class EClassConnectionPathBuilder {
 		List<EReference> allOutgoingReferences = new ArrayList<>(startingClass.getEAllReferences());
 
 		// for classes based on an xsd element with content of type 'xs:any'
-		if (ExtendedMetaDataUtil.allowsAnyContent(startingClass)) {
-			EReference xsAnyReference = ExtendedMetaDataUtil.getOrCreateVirtualAnyContentReference(startingClass);
+		if (XSDAnyContentUtil.allowsAnyContent(startingClass)) {
+			EReference xsAnyReference = XSDAnyContentUtil.getOrCreateVirtualAnyContentReference(startingClass);
 			allOutgoingReferences.add(xsAnyReference);
 		}
 

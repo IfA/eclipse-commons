@@ -27,16 +27,16 @@ import org.eclipse.emf.ecore.util.FeatureMap.Entry.Internal;
 import org.eclipse.emf.ecore.util.FeatureMapUtil;
 
 /**
- * A utility class to simplify handling of {@link ExtendedMetaData} elements that result from converting an XSD-based to
- * an EMF-based metamodel.
+ * A utility class to simplify handling of EClasses that have been generated based on XSD types that allow content of
+ * type 'xs:any'.
  *
  * @author mfreund
  */
-public class ExtendedMetaDataUtil {
+public class XSDAnyContentUtil {
 
 	private static final String NAME_OF_ANY_CONTENT_FEATURE = "any";
 
-	private ExtendedMetaDataUtil() {
+	private XSDAnyContentUtil() {
 
 	}
 
@@ -91,7 +91,7 @@ public class ExtendedMetaDataUtil {
 
 	private static Optional<EAttribute> getAnyContentAttribute(EClass parentEClass) {
 
-		return parentEClass.getEAllAttributes().stream().filter(ExtendedMetaDataUtil::isAnyContentAttribute).findAny();
+		return parentEClass.getEAllAttributes().stream().filter(XSDAnyContentUtil::isAnyContentAttribute).findAny();
 	}
 
 	/**
@@ -109,7 +109,7 @@ public class ExtendedMetaDataUtil {
 	 */
 	public static boolean addAnyConent(EObject parentElement, EObject childElement) {
 
-		return ExtendedMetaDataUtil.addAnyConent(parentElement, Arrays.asList(childElement));
+		return XSDAnyContentUtil.addAnyConent(parentElement, Arrays.asList(childElement));
 	}
 
 	/**
@@ -139,7 +139,7 @@ public class ExtendedMetaDataUtil {
 	private static Optional<EAttribute> getAnyContentAttributeFor(EClass eClass, EStructuralFeature anyContentFeature) {
 
 		// if the 'anyContentFeature' is a reference, we try to retrieve the affiliated attribute
-		EStructuralFeature affiliation = ExtendedMetaDataUtil.getMetaData().getAffiliation(eClass, anyContentFeature);
+		EStructuralFeature affiliation = XSDAnyContentUtil.getMetaData().getAffiliation(eClass, anyContentFeature);
 
 		if (affiliation instanceof EAttribute && isAnyContentAttribute((EAttribute) affiliation)) {
 			return Optional.of((EAttribute) affiliation);
@@ -160,7 +160,7 @@ public class ExtendedMetaDataUtil {
 
 			for (EObject childElement : childElements) {
 
-				EReference virtualReference = ExtendedMetaDataUtil
+				EReference virtualReference = XSDAnyContentUtil
 						.getOrCreateVirtualAnyContentReference(parentElement.eClass(), childElement.eClass());
 
 				Internal featureMapEntry = FeatureMapUtil.createRawEntry(virtualReference, childElement);
@@ -242,7 +242,7 @@ public class ExtendedMetaDataUtil {
 
 		String referenceNsURI = referenceType.getEPackage().getNsURI();
 
-		EReference virtualReference = (EReference) ExtendedMetaDataUtil.getMetaData().demandFeature(referenceNsURI,
+		EReference virtualReference = (EReference) XSDAnyContentUtil.getMetaData().demandFeature(referenceNsURI,
 				referenceName, true);
 
 		if (virtualReference != null) {

@@ -11,7 +11,7 @@ import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.EReference;
 
 import de.tud.et.ifa.agtele.emf.AgteleEcoreUtil;
-import de.tud.et.ifa.agtele.emf.ExtendedMetaDataUtil;
+import de.tud.et.ifa.agtele.emf.XSDAnyContentUtil;
 import de.tud.et.ifa.agtele.emf.connecting.EClassConnectionPathInstantiator;
 
 /**
@@ -34,7 +34,7 @@ public class DirectEClassConnectionPathInstantiator extends EClassConnectionPath
 
 		EReference reference = ((DirectEClassConnectionPath) pathToInstantiate).getReference();
 
-		if (ExtendedMetaDataUtil.isAnyContentFeature(pathToInstantiate.getStartingClass(), reference)) {
+		if (XSDAnyContentUtil.isAnyContentFeature(pathToInstantiate.getStartingClass(), reference)) {
 			instantiateViaAnyContentReference();
 		} else {
 			instantiateViaNormalReference(reference);
@@ -43,7 +43,7 @@ public class DirectEClassConnectionPathInstantiator extends EClassConnectionPath
 
 	private void instantiateViaAnyContentReference() {
 
-		ExtendedMetaDataUtil.addAnyConent(startingElement, targetElements);
+		XSDAnyContentUtil.addAnyConent(startingElement, targetElements);
 	}
 
 	private void instantiateViaNormalReference(EReference reference) {
