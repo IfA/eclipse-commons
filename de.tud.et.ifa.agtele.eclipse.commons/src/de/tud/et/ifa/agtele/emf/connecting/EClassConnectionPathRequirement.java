@@ -3,10 +3,16 @@
  */
 package de.tud.et.ifa.agtele.emf.connecting;
 
+import java.util.Collection;
+import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 
 import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.EObject;
+import org.eclipse.emf.ecore.EReference;
+
+import de.tud.et.ifa.agtele.emf.ExtendedMetaDataUtil;
 
 /**
  * Instances of this class represent a requirement/request for a {@link EClassConnectionPath connection path}. It can be
@@ -37,6 +43,8 @@ public class EClassConnectionPathRequirement {
 
 	private AllowedReferenceType allowedReferenceType;
 
+	private Collection<EReference> requiredReferences;
+
 	public EClassConnectionPathRequirement(EClass requiredTargetClass) {
 
 		this.requiredTargetClass = requiredTargetClass;
@@ -45,6 +53,7 @@ public class EClassConnectionPathRequirement {
 		requiredMaximumPathLength = Length.UNBOUNDED;
 		requiredMinimumCapacity = Capacity.ZERO;
 		allowedReferenceType = AllowedReferenceType.BOTH;
+		requiredReferences = null;
 	}
 
 	/**
@@ -100,12 +109,35 @@ public class EClassConnectionPathRequirement {
 	/**
 	 * Specify the {@link AllowedReferenceType}.
 	 * <p />
-	 * If not set, {@link AllowedReferenceType#BOTH both} types (containment and non-containment references) are
-	 * allowed.
+	 * If not set, {@link AllowedReferenceType#ALL} types are allowed.
 	 */
 	public EClassConnectionPathRequirement withAllowedReferenceType(AllowedReferenceType allowedReferenceType) {
 
 		this.allowedReferenceType = allowedReferenceType;
+		return this;
+	}
+
+	/**
+	 * Add a list of {@link EReference EReferences} that need to be present in a path in the given order.
+	 * <p />
+	 * Note: This could also contain a {@link ExtendedMetaDataUtil#createVirtualAnyContentReference(EClass)
+	 * virtualReference} representing an <em>xs:any</em>-based element.
+	 */
+	public EClassConnectionPathRequirement withRequiredReferences(List<EReference> references) {
+
+		requiredReferences = references;
+		return this;
+	}
+
+	/**
+	 * Add a set of {@link EReference EReferences} that need to be present in a path in any order.
+	 * <p />
+	 * Note: This could also contain a {@link ExtendedMetaDataUtil#createVirtualAnyContentReference(EClass)
+	 * virtualReference} representing an <em>xs:any</em>-based element.
+	 */
+	public EClassConnectionPathRequirement withRequiredReferences(Set<EReference> references) {
+
+		requiredReferences = references;
 		return this;
 	}
 
@@ -139,6 +171,11 @@ public class EClassConnectionPathRequirement {
 		return allowedReferenceType;
 	}
 
+	public Collection<EReference> getRequiredReferences() {
+
+		return requiredReferences;
+	}
+
 	@Override
 	public boolean equals(Object obj) {
 
@@ -155,22 +192,31 @@ public class EClassConnectionPathRequirement {
 				&& Objects.equals(requiredStartingElement, requirement.requiredStartingElement)
 				&& Objects.equals(requiredMaximumPathLength, requirement.requiredMaximumPathLength)
 				&& Objects.equals(requiredMinimumCapacity, requirement.requiredMinimumCapacity)
-				&& Objects.equals(allowedReferenceType, requirement.allowedReferenceType);
+				&& Objects.equals(allowedReferenceType, requirement.allowedReferenceType)
+				&& Objects.equals(requiredReferences, requirement.requiredReferences);
 	}
 
 	@Override
 	public int hashCode() {
 
 		return Objects.hash(requiredStartingClass, requiredTargetClass, requiredStartingElement,
-				requiredMaximumPathLength, requiredMinimumCapacity, allowedReferenceType);
+				requiredMaximumPathLength, requiredMinimumCapacity, allowedReferenceType, requiredReferences);
 	}
 
 	public EClassConnectionPathRequirement copy() {
 
-		return new EClassConnectionPathRequirement(requiredTargetClass).withRequiredStartingClass(requiredStartingClass)
-				.withRequiredStartingElement(requiredStartingElement)
+		EClassConnectionPathRequirement copy = new EClassConnectionPathRequirement(requiredTargetClass)
+				.withRequiredStartingClass(requiredStartingClass).withRequiredStartingElement(requiredStartingElement)
 				.withRequiredMaximumPathLength(requiredMaximumPathLength)
 				.withRequiredMinimumCapacity(requiredMinimumCapacity).withAllowedReferenceType(allowedReferenceType);
+
+		if (requiredReferences instanceof List<?>) {
+			copy.withRequiredReferences((List<EReference>) requiredReferences);
+		} else if (requiredReferences instanceof Set<?>) {
+			copy.withRequiredReferences((Set<EReference>) requiredReferences);
+		}
+
+		return copy;
 	}
 
 }

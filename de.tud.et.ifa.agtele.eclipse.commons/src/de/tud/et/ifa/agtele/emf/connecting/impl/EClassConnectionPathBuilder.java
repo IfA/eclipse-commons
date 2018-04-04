@@ -4,6 +4,8 @@
 package de.tud.et.ifa.agtele.emf.connecting.impl;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
@@ -13,7 +15,9 @@ import java.util.stream.Stream;
 import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.EReference;
+import org.eclipse.emf.ecore.EcorePackage;
 
+import de.tud.et.ifa.agtele.emf.ExtendedMetaDataUtil;
 import de.tud.et.ifa.agtele.emf.connecting.AllowedReferenceType;
 import de.tud.et.ifa.agtele.emf.connecting.Capacity;
 import de.tud.et.ifa.agtele.emf.connecting.EClassConnectionPath;
@@ -43,6 +47,8 @@ public class EClassConnectionPathBuilder {
 
 	private AllowedReferenceType allowedReferenceType;
 
+	private Collection<EReference> requiredReferences;
+
 	private EClassConnectionInformationRegistry eClassConnectionInformationRegistry;
 
 	private List<EClassConnectionPath> foundPaths;
@@ -69,6 +75,7 @@ public class EClassConnectionPathBuilder {
 		allowedReferenceType = requirement.getAllowedReferenceType();
 		requiredCapacity = requirement.getRequiredMinimumCapacity();
 		startingElement = requirement.getRequiredStartingElement();
+		requiredReferences = requirement.getRequiredReferences();
 		this.eClassConnectionInformationRegistry = eClassConnectionInformationRegistry;
 	}
 
@@ -85,6 +92,8 @@ public class EClassConnectionPathBuilder {
 		buildConnectionPathsIncrementally();
 
 		filterPathsWithRequiredCapacity();
+
+		filterPathsWithRequiredReferences();
 
 		sortPaths();
 
@@ -120,7 +129,14 @@ public class EClassConnectionPathBuilder {
 
 	private boolean currentPotentialPathLeadsToTargetClass() {
 
-		return currentPotentialPath != null && targetClass.equals(currentPotentialPath.getTargetClass());
+		if (currentPotentialPath == null || currentPotentialPath.getTargetClass() == null) {
+			return false;
+		} else {
+			EClass potentialPathTargetClass = currentPotentialPath.getTargetClass();
+			return potentialPathTargetClass.isSuperTypeOf(targetClass)
+					|| potentialPathTargetClass.equals(EcorePackage.Literals.EOBJECT);
+		}
+
 	}
 
 	private void buildNextPotentialPaths() {
@@ -178,7 +194,13 @@ public class EClassConnectionPathBuilder {
 
 	private List<EReference> getAllAllowedOutgoingReferences(EClass startingClass) {
 
-		List<EReference> allOutgoingReferences = startingClass.getEAllReferences();
+		List<EReference> allOutgoingReferences = new ArrayList<>(startingClass.getEAllReferences());
+
+		// for classes based on an xsd element with content of type 'xs:any'
+		if (ExtendedMetaDataUtil.allowsAnyContent(startingClass)) {
+			EReference xsAnyReference = ExtendedMetaDataUtil.getOrCreateVirtualAnyContentReference(startingClass);
+			allOutgoingReferences.add(xsAnyReference);
+		}
 
 		return allOutgoingReferences.stream().filter(allowedReferenceType::allows).collect(Collectors.toList());
 	}
@@ -243,6 +265,40 @@ public class EClassConnectionPathBuilder {
 				: path.getTheoreticalCapacity();
 
 		return pathCapacity.isSufficientFor(requiredCapacity);
+	}
+
+	private void filterPathsWithRequiredReferences() {
+
+		foundPaths = foundPaths.stream().filter(this::containsRequiredReferences).collect(Collectors.toList());
+	}
+
+	private boolean containsRequiredReferences(EClassConnectionPath path) {
+
+		if (requiredReferences instanceof List<?>) {
+			return containsRequiredReferencesInCorrectOrder(path);
+		} else {
+			return containsRequiredReferencesInAnyOrder(path);
+		}
+	}
+
+	private boolean containsRequiredReferencesInCorrectOrder(EClassConnectionPath path) {
+
+		if (!containsRequiredReferencesInAnyOrder(path)) {
+			return false;
+		}
+
+		List<Integer> referenceIndices = requiredReferences.stream().map(r -> path.getAllReferences().indexOf(r))
+				.collect(Collectors.toList());
+
+		List<Integer> sortedReferenceIndices = new ArrayList<>(referenceIndices);
+		Collections.sort(sortedReferenceIndices);
+
+		return referenceIndices.equals(sortedReferenceIndices);
+	}
+
+	private boolean containsRequiredReferencesInAnyOrder(EClassConnectionPath path) {
+
+		return requiredReferences != null ? path.getAllReferences().containsAll(requiredReferences) : true;
 	}
 
 	private void sortPaths() {

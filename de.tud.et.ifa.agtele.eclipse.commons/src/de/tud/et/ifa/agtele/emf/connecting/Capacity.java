@@ -6,6 +6,7 @@ package de.tud.et.ifa.agtele.emf.connecting;
 import java.util.Collection;
 
 import org.eclipse.emf.ecore.EReference;
+import org.eclipse.emf.ecore.ETypedElement;
 
 /**
  * Instances of this class describe the 'capacity' of an {@link EClassConnectionPath} (i.e. how many elements can be
@@ -33,7 +34,7 @@ public class Capacity extends UnsignedIntegerWithUnbounded {
 	 */
 	public static Capacity valueOf(int value) {
 
-		if (Capacity.UNBOUNDED.getValue() == value) {
+		if (Capacity.UNBOUNDED.getValue() == value || ETypedElement.UNSPECIFIED_MULTIPLICITY == value) {
 			return Capacity.UNBOUNDED;
 		} else if (Capacity.ZERO.getValue() == value) {
 			return Capacity.ZERO;
@@ -65,7 +66,7 @@ public class Capacity extends UnsignedIntegerWithUnbounded {
 
 	public boolean isSufficientFor(Capacity requiredCapacity) {
 
-		return this.compareTo(requiredCapacity) >= 0;
+		return compareTo(requiredCapacity) >= 0;
 	}
 
 }
