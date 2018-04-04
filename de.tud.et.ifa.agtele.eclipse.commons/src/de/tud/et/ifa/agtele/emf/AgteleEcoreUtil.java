@@ -775,13 +775,13 @@ public interface AgteleEcoreUtil {
 		}
 
 		if (value == null) {
-			return new ArrayList<>(Collections.emptyList());
-		}
-
-		if (eFeature.isMany()) {
-			return new ArrayList<>((Collection<?>) value);
+			return Collections.emptyList();
+		} else if (value instanceof EObject) {
+			return Arrays.asList(value);
+		} else if (value instanceof Collection<?>) {
+			return Collections.unmodifiableList(new ArrayList<>((Collection<?>) value));
 		} else {
-			return new ArrayList<>(Arrays.asList(value));
+			return Arrays.asList(value);
 		}
 
 	}
