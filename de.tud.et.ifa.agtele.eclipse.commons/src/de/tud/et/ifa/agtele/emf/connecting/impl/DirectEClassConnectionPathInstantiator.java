@@ -43,7 +43,7 @@ public class DirectEClassConnectionPathInstantiator extends EClassConnectionPath
 
 	private void instantiateViaAnyContentReference() {
 
-		XSDAnyContentUtil.addAnyConent(startingElement, targetElements);
+		XSDAnyContentUtil.addAnyContent(startingElement, targetElements);
 	}
 
 	private void instantiateViaNormalReference(EReference reference) {

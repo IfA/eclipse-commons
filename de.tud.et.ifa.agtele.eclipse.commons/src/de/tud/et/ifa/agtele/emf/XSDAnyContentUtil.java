@@ -11,9 +11,13 @@
  */
 package de.tud.et.ifa.agtele.emf;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.eclipse.emf.ecore.EAttribute;
 import org.eclipse.emf.ecore.EClass;
@@ -95,6 +99,50 @@ public class XSDAnyContentUtil {
 	}
 
 	/**
+	 * This allows to get the 'xs:any'-content of the given <em>parentElement</em>.
+	 *
+	 * @param parentElement
+	 *            The parent {@link EObject}.
+	 * @return The 'xs:any'-content or an empty list if there is no such content or if the given parentElement does not
+	 *         allow 'xs:any'-content.
+	 */
+	public static List<EObject> getAnyContent(EObject parentElement) {
+
+		Optional<EAttribute> anyContentAttribute = getAnyContentAttribute(parentElement.eClass());
+
+		if (anyContentAttribute.isPresent()) {
+			return getAnyContent(parentElement, anyContentAttribute.get());
+		} else {
+			return Collections.emptyList();
+		}
+	}
+
+	private static List<EObject> getAnyContent(EObject parentElement, EAttribute anyContentAttribute) {
+
+		try {
+			FeatureMap rootMixed = (FeatureMap) parentElement.eGet(anyContentAttribute);
+
+			List<EObject> children = new ArrayList<>();
+
+			for (FeatureMap.Entry childElement : rootMixed) {
+
+				Object value = childElement.getValue();
+				@SuppressWarnings("unchecked")
+				Collection<Object> valueCollection = value instanceof Collection<?> ? (Collection<Object>) value
+						: Arrays.asList(value);
+				children.addAll(valueCollection.stream().filter(EObject.class::isInstance).map(EObject.class::cast)
+						.collect(Collectors.toList()));
+			}
+
+			return children;
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+		return Collections.emptyList();
+	}
+
+	/**
 	 * This allows to add the given <em>childElement</em> as child of the given <em>parentElement</em> that represents
 	 * an 'xs:any'-content element.
 	 *
@@ -107,9 +155,9 @@ public class XSDAnyContentUtil {
 	 * @return '<em>true</em>' if the element was successfully added; '<em>false</em>' otherwise (e.g. if the given
 	 *         parentElement does not allow 'xs:any'-content).
 	 */
-	public static boolean addAnyConent(EObject parentElement, EObject childElement) {
+	public static boolean addAnyContent(EObject parentElement, EObject childElement) {
 
-		return XSDAnyContentUtil.addAnyConent(parentElement, Arrays.asList(childElement));
+		return XSDAnyContentUtil.addAnyContent(parentElement, Arrays.asList(childElement));
 	}
 
 	/**
@@ -125,7 +173,7 @@ public class XSDAnyContentUtil {
 	 * @return '<em>true</em>' if the elements were successfully added; '<em>false</em>' otherwise (e.g. if the given
 	 *         parentElement does not allow 'xs:any'-content).
 	 */
-	public static boolean addAnyConent(EObject parentElement, Collection<EObject> childElements) {
+	public static boolean addAnyContent(EObject parentElement, Collection<EObject> childElements) {
 
 		Optional<EAttribute> anyContentAttribute = getAnyContentAttribute(parentElement.eClass());
 
@@ -139,9 +187,10 @@ public class XSDAnyContentUtil {
 	private static Optional<EAttribute> getAnyContentAttributeFor(EClass eClass, EStructuralFeature anyContentFeature) {
 
 		// if the 'anyContentFeature' is a reference, we try to retrieve the affiliated attribute
-		EStructuralFeature affiliation = XSDAnyContentUtil.getMetaData().getAffiliation(eClass, anyContentFeature);
+		EStructuralFeature affiliation = XSDAnyContentUtil.getMetaData().getAffiliation(anyContentFeature);
 
-		if (affiliation instanceof EAttribute && isAnyContentAttribute((EAttribute) affiliation)) {
+		if (affiliation instanceof EAttribute && eClass.equals(affiliation.getEContainingClass())
+				&& isAnyContentAttribute((EAttribute) affiliation)) {
 			return Optional.of((EAttribute) affiliation);
 		} else {
 			return Optional.empty();
@@ -234,11 +283,31 @@ public class XSDAnyContentUtil {
 			return null;
 		}
 
-		return getOrCreateVirtualAnyContentReference(referenceName, eReferenceType);
+		EReference virtualAnyContentReference = getExistingLocalAnyContentReference(eClass, referenceName,
+				eReferenceType);
+
+		if (virtualAnyContentReference == null) {
+			virtualAnyContentReference = getOrCreateGlobalVirtualAnyContentReference(referenceName, eReferenceType);
+		}
+
+		if (virtualAnyContentReference != null) {
+			getMetaData().setAffiliation(virtualAnyContentReference, anyContentAttribute.get());
+		}
+
+		return virtualAnyContentReference;
 
 	}
 
-	private static EReference getOrCreateVirtualAnyContentReference(String referenceName, EClass referenceType) {
+	private static EReference getExistingLocalAnyContentReference(EClass eClass, String referenceName,
+			EClass eReferenceType) {
+
+		return eClass.getEStructuralFeatures().stream().filter(EReference.class::isInstance).map(EReference.class::cast)
+				.filter(r -> referenceName.equals(r.getName()))
+				.filter(r -> eReferenceType.equals(r.getEReferenceType())).filter(r -> isAnyContentFeature(eClass, r))
+				.findAny().orElse(null);
+	}
+
+	private static EReference getOrCreateGlobalVirtualAnyContentReference(String referenceName, EClass referenceType) {
 
 		String referenceNsURI = referenceType.getEPackage().getNsURI();
 
