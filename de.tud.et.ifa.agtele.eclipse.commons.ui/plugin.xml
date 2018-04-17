@@ -15,25 +15,15 @@
             name="%_UI_EMFModelHelpView_Name">
       </view>
    </extension>   
-   <extension
-         point="org.eclipse.ui.perspectiveExtensions">
-      <perspectiveExtension
-            targetID="org.eclipse.jdt.ui.JavaPerspective">
-         <view
-               id="de.tud.et.ifa.agtele.ui.views.EMFModelHelpView"
-               ratio="0.5"
-               relationship="right"
-               relative="org.eclipse.ui.views.ProblemView">
-         </view>
-      </perspectiveExtension>
-   </extension>
       <extension point="org.eclipse.ui.editors">
       <editor
-            id="de.tud.et.ifa.agtele.ui.editors.EcoreEditorID"
-            name="AGTele Ecore Model Editor"
-            icon="icons/EcoreModelFile.gif"
             class="de.tud.et.ifa.agtele.ui.editors.AgteleEcoreEditor"
-            contributorClass="org.eclipse.emf.ecore.presentation.EcoreActionBarContributor">
+            contributorClass="org.eclipse.emf.ecore.presentation.EcoreActionBarContributor"
+            default="true"
+            extensions="ecore"
+            icon="icons/EcoreModelFile.gif"
+            id="de.tud.et.ifa.agtele.ui.editors.EcoreEditorID"
+            name="AGTele Ecore Model Editor">
          <contentTypeBinding contentTypeId="org.eclipse.emf.ecore"/>
          <contentTypeBinding contentTypeId="org.eclipse.emf.emof"/>
       </editor>
@@ -41,11 +31,13 @@
    
    <extension point="org.eclipse.ui.editors">
       <editor
-            id="de.tud.et.ifa.agtele.ui.editors.ReflectiveEcoreEditorID"
-            name="AGTele Reflective Ecore Model Editor"
-            icon="platform:/plugin/org.eclipse.emf.edit/icons/full/obj16/ModelFile.gif"
             class="de.tud.et.ifa.agtele.ui.editors.AgteleEcoreEditor"
-            contributorClass="org.eclipse.emf.ecore.presentation.EcoreActionBarContributor$Reflective">
+            contributorClass="org.eclipse.emf.ecore.presentation.EcoreActionBarContributor$Reflective"
+            default="true"
+            extensions="xmi"
+            icon="platform:/plugin/org.eclipse.emf.edit/icons/full/obj16/ModelFile.gif"
+            id="de.tud.et.ifa.agtele.ui.editors.ReflectiveEcoreEditorID"
+            name="AGTele Reflective Ecore Model Editor">
          <contentTypeBinding contentTypeId="org.eclipse.emf.ecore.xmi"/>
       </editor>
    </extension>
@@ -65,6 +57,70 @@
             allPopups="false"
             class="de.tud.et.ifa.agtele.ui.contributions.OpenCodeMenuContribution"
             locationURI="popup:org.eclipse.emf.codegen.ecore.genmodel.presentation.GenModelEditorID?after=open-actions">
+      </menuContribution>
+      <menuContribution
+            allPopups="true"
+            class="de.tud.et.ifa.agtele.ui.contributions.CompilationUnitEditorMenuContribution"
+            locationURI="popup:org.eclipse.jdt.ui.CompilationUnitEditor.EditorContext">
+      </menuContribution>
+      <menuContribution
+            allPopups="false"
+            locationURI="menu:org.eclipse.ui.main.menu">
+         <menu
+               id="de.tud.et.ifa.agtele.eclipse.commons.ui.ecoreEditorMenuId"
+               label="Agtele Settings">
+            <command
+                  commandId="de.tud.et.ifa.agtele.eclipse.commons.ui.showInheritedEcoreClassFeaturesCommand"
+                  label="Show inherited Class Features"
+                  style="toggle">
+            </command>
+            <menu
+                  id="de.tud.et.ifa.agtele.eclipse.commons.ui.changeGeneratedCodeChangedListenerBehaviorMenu"
+                  label="React to changed &apos;@generated&apos; methods"
+                  tooltip="Customize the behavior of the listener that reacts to manual changes to &apos;@generated&apos; methods.">
+            <command
+                  commandId="de.tud.et.ifa.agtele.eclipse.commons.ui.changeGeneratedCodeChangedListenerBehaviorCommand"
+                  label="User"
+                  style="radio"
+                  tooltip="On a per-change basis, let the user decide (via a dialog) whether to react to.">
+                   <parameter
+                     name="org.eclipse.ui.commands.radioStateParameter"
+                     value="0">
+               </parameter>
+            </command>
+            <command
+                  commandId="de.tud.et.ifa.agtele.eclipse.commons.ui.changeGeneratedCodeChangedListenerBehaviorCommand"
+                  label="Automatic (Add NOT tag)"
+                  style="radio"
+                  tooltip="Automatically react to changes by adding a &apos;NOT&apos; to the &apos;@generated&apos; tag as well as a TODO for the user.">
+                   <parameter
+                     name="org.eclipse.ui.commands.radioStateParameter"
+                     value="1">
+               </parameter>
+            </command>
+            <command
+                  commandId="de.tud.et.ifa.agtele.eclipse.commons.ui.changeGeneratedCodeChangedListenerBehaviorCommand"
+                  label="Off"
+                  style="radio"
+                  tooltip="Turn off the listener.">
+               <parameter
+                     name="org.eclipse.ui.commands.radioStateParameter"
+                     value="2">
+               </parameter>
+            </command>
+         </menu>
+         </menu>
+      </menuContribution>
+      <menuContribution
+            allPopups="true"
+            locationURI="menu:org.eclipse.emf.ecoreMenuID?after=additions">
+         <command
+               commandId="de.tud.et.ifa.agtele.eclipse.commons.ui.showInheritedEcoreClassFeaturesCommand"
+               label="Show inherited Class Features"
+               style="toggle">
+         </command>
+         
+         
       </menuContribution>
    </extension>
    <extension
@@ -99,5 +155,50 @@
             id="de.tud.et.ifa.agtele.ui.commands.OpenFactoryCode"
             name="OpenFactoryCode">
       </command>
+      <command
+            defaultHandler="de.tud.et.ifa.agtele.ui.handlers.OpenMetamodelHandler"
+            id="de.tud.et.ifa.agtele.ui.commands.OpenMetamodel"
+            name="OpenMetamodel">
+      </command>
+      <command
+            defaultHandler="de.tud.et.ifa.agtele.ui.handlers.ShowInheritedEcoreClassFeaturesCommandHandler"
+            id="de.tud.et.ifa.agtele.eclipse.commons.ui.showInheritedEcoreClassFeaturesCommand"
+            name="ShowInheritedEcoreClassFeaturesCommand">
+      </command>
+      <command
+            defaultHandler="de.tud.et.ifa.agtele.ui.handlers.AddValidationEOperationHandler"
+            id="de.tud.et.ifa.agtele.ui.commands.AddValidationEOperation"
+            name="AddValidationEOperation">
+      </command>
+      <command
+            defaultHandler="de.tud.et.ifa.agtele.ui.handlers.PushCodeToEcoreHandler"
+            id="de.tud.et.ifa.agtele.ui.commands.PushCodeToEcoreHandler"
+            name="PushCodeToEcoreHandler">
+      </command>
+      <command
+            defaultHandler="de.tud.et.ifa.agtele.ui.handlers.AddDocumentationAnnotationHandler"
+            id="de.tud.et.ifa.agtele.ui.commands.AddDocumentationAnnotation"
+            name="AddDocumentationAnnotation">
+      </command>
+      <command
+            defaultHandler="de.tud.et.ifa.agtele.ui.handlers.ChangeGeneratedCodeChangedListenerBehaviorHandler"
+            id="de.tud.et.ifa.agtele.eclipse.commons.ui.changeGeneratedCodeChangedListenerBehaviorCommand"
+            name="ChangeGeneratedCodeChangedListenerBehaviorCommand">
+         <commandParameter
+               id="org.eclipse.ui.commands.radioStateParameter"
+               name="State"
+               optional="false">
+         </commandParameter>
+         <state
+               class="org.eclipse.ui.handlers.RadioState:0"
+               id="org.eclipse.ui.commands.radioState">
+         </state>
+      </command>
+   </extension>
+   <extension
+         point="org.eclipse.ui.startup">
+      <startup
+            class="de.tud.et.ifa.agtele.ui.StartupClass">
+      </startup>
    </extension>
 </plugin>

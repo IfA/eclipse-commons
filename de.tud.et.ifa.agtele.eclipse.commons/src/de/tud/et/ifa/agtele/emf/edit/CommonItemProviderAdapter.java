@@ -1,11 +1,24 @@
+/*******************************************************************************
+ * Copyright (C) 2016-2018 Institute of Automation, TU Dresden.
+ * 
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ * 
+ * Contributors:
+ *     Institute of Automation, TU Dresden - initial API and implementation
+ ******************************************************************************/
 package de.tud.et.ifa.agtele.emf.edit;
 
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import org.eclipse.emf.common.command.Command;
+import org.eclipse.emf.common.command.CompoundCommand;
 import org.eclipse.emf.common.notify.AdapterFactory;
 import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.EGenericType;
@@ -17,18 +30,69 @@ import org.eclipse.emf.ecore.util.FeatureMap;
 import org.eclipse.emf.ecore.util.FeatureMapUtil;
 import org.eclipse.emf.edit.command.AddCommand;
 import org.eclipse.emf.edit.command.CommandParameter;
+import org.eclipse.emf.edit.command.CreateChildCommand;
 import org.eclipse.emf.edit.domain.EditingDomain;
+import org.eclipse.emf.edit.provider.ComposedImage;
 import org.eclipse.emf.edit.provider.ItemProviderAdapter;
 
 /**
- * A special {@link ItemProviderAdapter} that encapsulates common functionalities.
+ * A special {@link ItemProviderAdapter} that encapsulates common
+ * functionalities.
  * <p />
- * In order to make use of it, the root item provider of your generated model must extend this instead
- * of the default '<em>ItemProviderAdapter</em>'.
+ * In order to make use of it, the root item provider of your generated model
+ * must extend this instead of the default '<em>ItemProviderAdapter</em>'.
  *
  * @author mfreund
  */
 public class CommonItemProviderAdapter extends ItemProviderAdapter {
+
+	/**
+	 * This create child command allows accessing the intended owner of the child by
+	 * adding a single Method to the super class.
+	 *
+	 * @author Baron
+	 *
+	 */
+	public static class CreateChildCommandWithExtendedAccess extends CreateChildCommand {
+		public CreateChildCommandWithExtendedAccess(EditingDomain domain, EObject owner, EStructuralFeature feature,
+				Object child, Collection<?> selection) {
+			super(domain, owner, feature, child, selection);
+		}
+
+		public CreateChildCommandWithExtendedAccess(EditingDomain domain, EObject owner, EStructuralFeature feature,
+				Object child, Collection<?> selection, Helper helper) {
+			super(domain, owner, feature, child, selection, helper);
+		}
+
+		public CreateChildCommandWithExtendedAccess(EditingDomain domain, EObject owner, EStructuralFeature feature,
+				Object child, int index, Collection<?> selection) {
+			super(domain, owner, feature, child, index, selection);
+		}
+
+		public CreateChildCommandWithExtendedAccess(EditingDomain domain, EObject owner, EStructuralFeature feature,
+				Object child, int index, Collection<?> selection, Helper helper) {
+			super(domain, owner, feature, child, index, selection, helper);
+		}
+
+		/**
+		 * Returns the owner.
+		 *
+		 * @return
+		 */
+		public EObject getOwner() {
+			return this.owner;
+		}
+
+		/**
+		 * Returns the editing domain for this command.
+		 *
+		 * @return
+		 */
+		public EditingDomain getDomain() {
+			return this.domain;
+		}
+
+	}
 
 	/**
 	 * This class realizes a fix for the creation of e.g. PropertySamples
@@ -39,7 +103,7 @@ public class CommonItemProviderAdapter extends ItemProviderAdapter {
 	 *
 	 * @author cmartin
 	 */
-	private final class AddCommandWithEnhancedGenericTypeSupport extends AddCommand {
+	public static class AddCommandWithEnhancedGenericTypeSupport extends AddCommand {
 
 		/**
 		 * This creates an instance of an {@link AddCommand} with enhanced
@@ -51,7 +115,7 @@ public class CommonItemProviderAdapter extends ItemProviderAdapter {
 		 * @param collection
 		 * @param index
 		 */
-		private AddCommandWithEnhancedGenericTypeSupport(EditingDomain domain, EObject owner,
+		public AddCommandWithEnhancedGenericTypeSupport(EditingDomain domain, EObject owner,
 				EStructuralFeature feature, Collection<?> collection, int index) {
 			super(domain, owner, feature, collection, index);
 		}
@@ -171,11 +235,104 @@ public class CommonItemProviderAdapter extends ItemProviderAdapter {
 	}
 
 	/**
+	 * A special {@link ComposedImage} where the last of the given images is be
+	 * shifted by a given x- and yOffset.
+	 * <p />
+	 * It can e.g. be used in {@link ItemProviderAdapter#getImage(Object)} to
+	 * return a decorated image. Usage examples:
+	 * <p />
+	 * <code>
+	 * <pre>
+	 * {@code
+	 * return new DecoratedComposedImage(Arrays.asList(
+	 * 		this.overlayImage(object, this.getResourceLocator().getImage("full/obj16/NameOfModelElement")),
+	 * 		this.getResourceLocator().getImage("full/obj16/NameOfDecorationImage")),
+	 * 		5, 0);
+	 *
+	 * return new DecoratedComposedImage(Arrays.asList(
+	 * 		this.overlayImage(object, this.getResourceLocator().getImage("full/obj16/NameOfModelElement")),
+	 * 		BundleContentHelper.getBundleImage("my.fancy.plugin", "icons/NameOfDecorationImage.gif"))),
+	 * 		5, 0);
+	 * }
+	 * </pre>
+	 * </code>
+	 *
+	 * @author mfreund
+	 */
+	public static final class DecoratedComposedImage extends ComposedImage {
+
+		/**
+		 * The horizontal offset by which the last of the images shall be
+		 * shifted.
+		 */
+		private final int xOffset;
+
+		/**
+		 * The vertical offset by which the last of the images shall be shifted.
+		 */
+		private final int yOffset;
+
+		/**
+		 * This creates an instance.
+		 *
+		 * @param images
+		 *            The list of images that this image shall be composed of.
+		 * @param xOffset
+		 *            The horizontal offset by which the last of the images
+		 *            shall be shifted.
+		 * @param yOffSet
+		 *            The vertical offset by which the last of the images shall
+		 *            be shifted.
+		 */
+		public DecoratedComposedImage(Collection<?> images, int xOffset, int yOffSet) {
+			super(images);
+			this.xOffset = xOffset;
+			this.yOffset = yOffSet;
+		}
+
+		/**
+		 * @return the {@link #xOffset}
+		 */
+		public int getXOffset() {
+			return this.xOffset;
+		}
+
+		/**
+		 * @return the {@link #yOffset}
+		 */
+		public int getYOffset() {
+			return this.yOffset;
+		}
+
+		@Override
+		public List<ComposedImage.Point> getDrawPoints(Size size) {
+			List<ComposedImage.Point> result = super.getDrawPoints(size);
+			result.get(result.size() - 1).y = this.yOffset;
+			result.get(result.size() - 1).x = this.xOffset;
+			return result;
+		}
+
+		@Override
+		public boolean equals(Object that) {
+			return that instanceof DecoratedComposedImage
+					&& ((DecoratedComposedImage) that).getImages().equals(this.images)
+					&& ((DecoratedComposedImage) that).getXOffset() == this.getXOffset()
+					&& ((DecoratedComposedImage) that).getYOffset() == this.getYOffset();
+		}
+
+		@Override
+		public int hashCode() {
+			return this.images.hashCode() + this.xOffset + this.yOffset;
+		}
+	}
+
+	/**
 	 * This creates an instance.
 	 *
 	 * @param adapterFactory
-	 *            An instance is created from an adapter factory. The factory is used as a key so that we always know
-	 *            which factory created this adapter.
+	 *            An instance is created from an adapter factory. The factory is
+	 *            used as a key so that we always know which factory created
+	 *            this adapter.
 	 */
 	public CommonItemProviderAdapter(AdapterFactory adapterFactory) {
 		super(adapterFactory);
@@ -185,10 +342,11 @@ public class CommonItemProviderAdapter extends ItemProviderAdapter {
 	protected Command createDragAndDropCommand(EditingDomain domain, Object owner, float location, int operations,
 			int operation, Collection<?> collection) {
 
-		// If possible use the special functionality provided by the 'IDragAndDropProvider' interface...
-		if(this instanceof IDragAndDropProvider) {
-			return ((IDragAndDropProvider) this).createCustomDragAndDropCommand(domain, owner, location, operations, operation, collection,
-					((IDragAndDropProvider) this).getCommandSelectionStrategy());
+		// If possible use the special functionality provided by the
+		// 'IDragAndDropProvider' interface...
+		if (this instanceof IDragAndDropProvider) {
+			return ((IDragAndDropProvider) this).createCustomDragAndDropCommand(domain, owner, location, operations,
+					operation, collection, ((IDragAndDropProvider) this).getCommandSelectionStrategy());
 		} else {
 			return super.createDragAndDropCommand(domain, owner, location, operations, operation, collection);
 		}
@@ -203,6 +361,29 @@ public class CommonItemProviderAdapter extends ItemProviderAdapter {
 			Collection<?> collection, int index) {
 
 		return new AddCommandWithEnhancedGenericTypeSupport(domain, owner, feature, collection, index);
+	}
+
+	/**
+	 * Delegates to the super implementation but wraps the original command into a
+	 * {@link CompoundCommand} by use of the
+	 * {@link IRequireRelatedModelUpdateProvider}, if other model updates have to be
+	 * done.
+	 */
+	@Override
+	public Command createCommand(Object object, EditingDomain domain, Class<? extends Command> commandClass,
+			CommandParameter commandParameter) {
+		Command result = super.createCommand(object, domain, commandClass, commandParameter);
+		return IRequireRelatedModelUpdateProvider.wrapOriginalCommand(this, result);
+	}
+
+	@Override
+	protected Command createCreateChildCommand(EditingDomain domain, EObject owner, EStructuralFeature feature,
+			Object value, int index, Collection<?> collection) {
+
+		if (feature instanceof EReference && value instanceof EObject) {
+			return new CreateChildCommandWithExtendedAccess(domain, owner, feature, value, index, collection, this);
+		}
+		return new CreateChildCommandWithExtendedAccess(domain, owner, feature, value, index, collection, this);
 	}
 
 }

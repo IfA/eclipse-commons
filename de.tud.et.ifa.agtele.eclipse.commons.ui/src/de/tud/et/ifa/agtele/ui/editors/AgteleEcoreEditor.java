@@ -1,34 +1,45 @@
-/**
- *
- */
+/*******************************************************************************
+ * Copyright (C) 2016-2018 Institute of Automation, TU Dresden.
+ * 
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ * 
+ * Contributors:
+ *     Institute of Automation, TU Dresden - initial API and implementation
+ ******************************************************************************/
 package de.tud.et.ifa.agtele.ui.editors;
 
 import org.eclipse.emf.common.ui.viewer.ColumnViewerInformationControlToolTipSupport;
-import org.eclipse.emf.ecore.EReference;
 import org.eclipse.emf.ecore.presentation.EcoreEditorPlugin;
-import org.eclipse.emf.ecore.provider.EReferenceItemProvider;
-import org.eclipse.emf.edit.provider.ComposedImage;
-import org.eclipse.emf.edit.provider.IItemLabelProvider;
 import org.eclipse.emf.edit.ui.celleditor.AdapterFactoryTreeEditor;
-import org.eclipse.emf.edit.ui.provider.AdapterFactoryContentProvider;
-import org.eclipse.emf.edit.ui.provider.AdapterFactoryLabelProvider;
 import org.eclipse.emf.edit.ui.provider.DecoratingColumLabelProvider;
+import org.eclipse.emf.edit.ui.provider.DelegatingStyledCellLabelProvider;
 import org.eclipse.emf.edit.ui.provider.DiagnosticDecorator;
 import org.eclipse.jface.dialogs.IDialogSettings;
+import org.eclipse.jface.viewers.IDoubleClickListener;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.swt.events.ControlAdapter;
 import org.eclipse.swt.events.ControlEvent;
-import org.eclipse.swt.graphics.Image;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorSite;
+import org.eclipse.ui.INavigationLocation;
+import org.eclipse.ui.INavigationLocationProvider;
 import org.eclipse.ui.IPartListener;
 import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.part.FileEditorInput;
 
-import de.tud.et.ifa.agtele.resources.BundleContentHelper;
+import de.tud.et.ifa.agtele.emf.edit.ICommandSelectionStrategy;
+import de.tud.et.ifa.agtele.emf.edit.IDragAndDropProvider;
 import de.tud.et.ifa.agtele.ui.AgteleUIPlugin;
+import de.tud.et.ifa.agtele.ui.emf.edit.UserChoiceCommandSelectionStrategy;
 import de.tud.et.ifa.agtele.ui.interfaces.IPersistable;
+import de.tud.et.ifa.agtele.ui.listeners.AnnotationDetailsEntryDoubleClickListener;
 import de.tud.et.ifa.agtele.ui.listeners.BasicJumpOnClickListener;
+import de.tud.et.ifa.agtele.ui.providers.AgteleEcoreAdapterFactoryLabelProvider;
+import de.tud.et.ifa.agtele.ui.providers.AgteleEcoreContentProvider;
+import de.tud.et.ifa.agtele.ui.util.TreeViewNavigationLocation;
 import de.tud.et.ifa.agtele.ui.widgets.TreeViewerGroup;
 
 /**
@@ -36,7 +47,7 @@ import de.tud.et.ifa.agtele.ui.widgets.TreeViewerGroup;
  *
  * @author cmartin
  */
-public class AgteleEcoreEditor extends ClonableEcoreEditor implements IPersistable {
+public class AgteleEcoreEditor extends ClonableEcoreEditor implements IPersistable, IDragAndDropProvider, INavigationLocationProvider {
 
 	private TreeViewerGroup tree;
 
@@ -48,11 +59,13 @@ public class AgteleEcoreEditor extends ClonableEcoreEditor implements IPersistab
 
 		@Override
 		public void partActivated(IWorkbenchPart p) {
+
 			// Ignore.
 		}
 
 		@Override
 		public void partBroughtToTop(IWorkbenchPart p) {
+
 			// Ignore.
 		}
 
@@ -65,11 +78,13 @@ public class AgteleEcoreEditor extends ClonableEcoreEditor implements IPersistab
 
 		@Override
 		public void partDeactivated(IWorkbenchPart p) {
+
 			// Ignore.
 		}
 
 		@Override
 		public void partOpened(IWorkbenchPart p) {
+
 			if (p == AgteleEcoreEditor.this && AgteleEcoreEditor.this.getEditorInput() instanceof FileEditorInput) {
 
 				// Restore the UI state
@@ -77,9 +92,11 @@ public class AgteleEcoreEditor extends ClonableEcoreEditor implements IPersistab
 				IDialogSettings settings = AgteleUIPlugin.getPlugin().getDialogSettings();
 				IDialogSettings section = settings.getSection("UI_STATE");
 				if (section != null) {
-					String pamtramFile = ((FileEditorInput) AgteleEcoreEditor.this.getEditorInput()).getFile()
-							.toString();
-					IDialogSettings project = section.getSection(pamtramFile);
+
+					// Use the file opened in the editor as identifier
+					//
+					String file = ((FileEditorInput) AgteleEcoreEditor.this.getEditorInput()).getFile().toString();
+					IDialogSettings project = section.getSection(file);
 
 					if (project != null) {
 						AgteleEcoreEditor.this.restore(project);
@@ -96,10 +113,17 @@ public class AgteleEcoreEditor extends ClonableEcoreEditor implements IPersistab
 	protected BasicJumpOnClickListener jumpOnCtrlClickListener;
 
 	/**
+	 * This listener enables the quick editing of details entries used in ecore
+	 * annotations.
+	 */
+	protected IDoubleClickListener doubleClickDetailsEntryListener;
+
+	/**
 	 * This is called during startup. <!-- begin-user-doc --> <!-- end-user-doc -->
 	 */
 	@Override
 	public void init(IEditorSite site, IEditorInput editorInput) {
+
 		super.init(site, editorInput);
 
 		site.getPage().addPartListener(this.persistPartListener);
@@ -111,6 +135,7 @@ public class AgteleEcoreEditor extends ClonableEcoreEditor implements IPersistab
 	 */
 	@Override
 	public void dispose() {
+
 		this.getSite().getPage().removePartListener(this.persistPartListener);
 		if (!this.selectionViewer.getTree().isDisposed()) {
 			this.selectionViewer.getTree().removeSelectionListener(this.jumpOnCtrlClickListener);
@@ -124,6 +149,7 @@ public class AgteleEcoreEditor extends ClonableEcoreEditor implements IPersistab
 	 */
 	@Override
 	public void createPages() {
+
 		// Creates the model from the editor input
 		//
 		this.createModel();
@@ -141,58 +167,33 @@ public class AgteleEcoreEditor extends ClonableEcoreEditor implements IPersistab
 					new TreeViewerGroup.TreeViewerGroupToolbarAddButtonOption(),
 					new TreeViewerGroup.TreeViewerGroupToolbarToggleSplitEditorVerticallyButtonOption(),
 					new TreeViewerGroup.TreeViewerGroupAddToolPaletteOption.TreeViewerGroupAddToolPaletteToolbarHideEMFPaletteOption());
+
+			//listen to changed tree view selections in order to hook into the navigation location
+			this.tree.getViewer().addSelectionChangedListener(event -> AgteleEcoreEditor.this.updateNavigationHistory());
+
 			this.selectionViewer = this.tree.getViewer();
+
 			// Edited Section end
 			//
 			this.setCurrentViewer(this.selectionViewer);
 
-			this.selectionViewer.setContentProvider(new AdapterFactoryContentProvider(this.adapterFactory));
-			this.selectionViewer.setLabelProvider(new DecoratingColumLabelProvider(
-					// Display containment references with a special icon to make them more distinguishable from
-					// non-containment references
-					// Edited Section begin
-					//
-					new AdapterFactoryLabelProvider(this.adapterFactory) {
+			this.selectionViewer
+			.setContentProvider(new AgteleEcoreContentProvider(this.adapterFactory, this.selectionViewer));
 
-						@Override
-						public Image getImage(Object object) {
-
-							if (object instanceof EReference && ((EReference) object).isContainment()) {
-
-								EReferenceItemProvider labelProvider = (EReferenceItemProvider) this.adapterFactory
-										.adapt(object, IItemLabelProvider.class);
-
-								Object image = labelProvider.getImage(object);
-
-								if (image instanceof ComposedImage) {
-
-									// The first sub-image of the composed image always represent the 'base' image (i.e.
-									// the icon for the 'Reference'). Thus we can simply replace this with our special
-									// icon.
-									//
-									((ComposedImage) image).getImages().set(0,
-											BundleContentHelper.getBundleImage(
-													"de.tud.et.ifa.agtele.eclipse.commons.ui",
-													"icons/ContainmentReference.gif"));
-
-									return this.getImageFromObject(image);
-								}
-
-							}
-
-							return super.getImage(object);
-						}
-					},
-					// Edited Section end
-					//
-					new DiagnosticDecorator(this.editingDomain,
-							this.selectionViewer, EcoreEditorPlugin.getPlugin().getDialogSettings())));
+			this.selectionViewer.setLabelProvider(
+					new DelegatingStyledCellLabelProvider(new DecoratingColumLabelProvider.StyledLabelProvider(
+							// Display containment references with a special icon to make them more distinguishable from
+							// non-containment references
+							new AgteleEcoreAdapterFactoryLabelProvider(this.adapterFactory, this.selectionViewer),
+							new DiagnosticDecorator.Styled(this.editingDomain, this.selectionViewer,
+									EcoreEditorPlugin.getPlugin().getDialogSettings()))));
 			this.selectionViewer.setInput(this.editingDomain.getResourceSet());
 			this.selectionViewer.setSelection(
 					new StructuredSelection(this.editingDomain.getResourceSet().getResources().get(0)), true);
 
 			this.jumpOnCtrlClickListener = new BasicJumpOnClickListener(this.selectionViewer);
 			this.selectionViewer.getTree().addSelectionListener(this.jumpOnCtrlClickListener);
+			this.doubleClickDetailsEntryListener = new AnnotationDetailsEntryDoubleClickListener(this.selectionViewer);
 
 			new AdapterFactoryTreeEditor(this.selectionViewer.getTree(), this.adapterFactory);
 			new ColumnViewerInformationControlToolTipSupport(this.selectionViewer,
@@ -214,6 +215,7 @@ public class AgteleEcoreEditor extends ClonableEcoreEditor implements IPersistab
 
 			@Override
 			public void controlResized(ControlEvent event) {
+
 				if (!this.guard) {
 					this.guard = true;
 					AgteleEcoreEditor.this.hideTabs();
@@ -238,6 +240,7 @@ public class AgteleEcoreEditor extends ClonableEcoreEditor implements IPersistab
 
 	@Override
 	public void restore(final IDialogSettings settings) {
+
 		// perform the restore operations in an asynchronous way
 		try {
 			this.getSite().getShell().getDisplay().asyncExec(() -> {
@@ -260,6 +263,7 @@ public class AgteleEcoreEditor extends ClonableEcoreEditor implements IPersistab
 	 *
 	 */
 	protected void doPersist() {
+
 		// Save the UI state
 		//
 		IDialogSettings settings = AgteleUIPlugin.getPlugin().getDialogSettings();
@@ -275,4 +279,29 @@ public class AgteleEcoreEditor extends ClonableEcoreEditor implements IPersistab
 		AgteleEcoreEditor.this.persist(project);
 	}
 
+	//provide the command selection strategy for the drag and drop feature
+	//edited section start
+	@Override
+	public ICommandSelectionStrategy getCommandSelectionStrategy() {
+
+		return new UserChoiceCommandSelectionStrategy();
+	}
+	//hook into the back and forward navigation buttons of the ide
+	//
+	protected void updateNavigationHistory() {
+		this.getSite().getPage().getNavigationHistory().markLocation(this);
+	}
+
+	@Override
+	public INavigationLocation createEmptyNavigationLocation() {
+		return new TreeViewNavigationLocation(this, this.tree.getViewer());
+	}
+
+	@Override
+	public INavigationLocation createNavigationLocation() {
+		TreeViewNavigationLocation location =  new TreeViewNavigationLocation(this, this.tree.getViewer());
+		location.update();
+		return location;
+	}
+	//edited section end
 }

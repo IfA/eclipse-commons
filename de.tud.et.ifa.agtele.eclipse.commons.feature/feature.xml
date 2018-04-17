@@ -2,48 +2,35 @@
 <feature
       id="de.tud.et.ifa.agtele.eclipse.commons.feature"
       label="Eclipse Commons"
-      version="1.0.0.qualifier"
+      version="1.1.0.qualifier"
       provider-name="AG Tele">
 
-   <description url="http://www.example.com/description">
+   <description>
       This feature includes the AG Tele Eclipse Commons.
    </description>
 
-   <copyright url="http://www.example.com/copyright">
-      [Enter Copyright Description here.]
+   <copyright url="https://www.eclipse.org/org/documents/epl-v10.php">
+      Copyright (C) 2016-2018 Institute of Automation, TU Dresden.
+All rights reserved. This program and the accompanying materials
+are made available under the terms of the Eclipse Public License
+v1.0
+which accompanies this distribution, and is available at
+http://www.eclipse.org/legal/epl-v10.html
+Contributors:
+Institute of Automation, TU Dresden - initial API and implementation
    </copyright>
 
-   <license url="https://eats3.et.tu-dresden.de/eclipse/LICENSE.txt">
-      All Rights reserved 2015 TU-Dresden Institute of Automation!
-It has not been decided yet, which (open-source) license this project and the related projects will be published with.
-For now, the use is granted in projects that are related to education and science at the Institute of Automation at TU-Dresden, under the following terms: &lt;br/&gt;
- - You are not allowed to re-distribute any content of this project or feature or the software that is based on it. &lt;br/&gt;
- - No commercial use. &lt;br/&gt;
- - Changes on this project or feature itself are allowed only if the `Nutzungsvereinbarung` (`usage agreement`) of the Institute of Automation has been signed. &lt;br/&gt;
- - For feature requests and questions please contact (Matthias Freund)[mailto://matthias.freund@tu-dresden.de]. &lt;br/&gt;
- - This copyright notice must be preserved in this project, even if changes where made for adopting this project for your own project. &lt;br/&gt;
-These terms will be replaced, once it has been decided, which public license to issue.
+   <license url="%licenseURL">
+      %license
    </license>
 
    <url>
-      <update label="AG Tele Eclipse Commons Update Site" url="https://eats3.et.tu-dresden.de/projects/eclipse-commons/udpates"/>
+      <update label="AG Tele Eclipse Commons Update Site" url="https://agtele.eats.et.tu-dresden.de/projects/eclipse-commons/updates"/>
+      <discovery label="Eclipse Neon Release" url="http://download.eclipse.org/eclipse/updates/4.6"/>
+      <discovery label="Eclipse Neon Release" url="http://download.eclipse.org/eclipse/updates/4.6/"/>
+      <discovery label="Eclipse Oxygen Release" url="http://download.eclipse.org/eclipse/updates/4.7"/>
+      <discovery label="Eclipse Oxygen Release" url="http://download.eclipse.org/eclipse/updates/4.7/"/>
    </url>
-
-   <includes
-         id="org.eclipse.emf.common"
-         version="0.0.0"/>
-
-   <includes
-         id="org.eclipse.emf.ecore"
-         version="0.0.0"/>
-
-   <includes
-         id="org.eclipse.emf.edit"
-         version="0.0.0"/>
-
-   <includes
-         id="org.eclipse.xsd"
-         version="0.0.0"/>
 
    <requires>
       <import plugin="org.eclipse.core.runtime"/>

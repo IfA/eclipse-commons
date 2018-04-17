@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Eclipse Commons
 Bundle-SymbolicName: de.tud.et.ifa.agtele.eclipse.commons
-Bundle-Version: 1.0.0.qualifier
+Bundle-Version: 1.1.0.qualifier
 Bundle-Activator: de.tud.et.ifa.agtele.Activator
 Bundle-Vendor: AG Tele
 Require-Bundle: org.eclipse.core.runtime,
@@ -13,13 +13,18 @@ Require-Bundle: org.eclipse.core.runtime,
  org.eclipse.xsd;bundle-version="2.11.0",
  org.eclipse.emf.edit,
  org.eclipse.emf.common,
- org.eclipse.emf.compare
+ org.eclipse.emf.compare,
+ org.eclipse.emf.codegen.ecore
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ActivationPolicy: lazy
 Export-Package: de.tud.et.ifa.agtele,
  de.tud.et.ifa.agtele.emf,
  de.tud.et.ifa.agtele.emf.compare,
+ de.tud.et.ifa.agtele.emf.connecting,
  de.tud.et.ifa.agtele.emf.edit,
  de.tud.et.ifa.agtele.emf.edit.commands,
  de.tud.et.ifa.agtele.help,
  de.tud.et.ifa.agtele.resources
+Import-Package: org.eclipse.emf.ecore.xmi,
+ org.eclipse.emf.ecore.xmi.impl
+Automatic-Module-Name: de.tud.et.ifa.agtele.eclipse.commons

@@ -1,8 +1,18 @@
-/**
- *
- */
+/*******************************************************************************
+ * Copyright (C) 2016-2018 Institute of Automation, TU Dresden.
+ * 
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ * 
+ * Contributors:
+ *     Institute of Automation, TU Dresden - initial API and implementation
+ ******************************************************************************/
 package de.tud.et.ifa.agtele.ui.listeners;
 
+import org.eclipse.emf.ecore.EAttribute;
+import org.eclipse.emf.ecore.EEnum;
 import org.eclipse.emf.ecore.EGenericType;
 import org.eclipse.emf.ecore.EReference;
 import org.eclipse.jface.viewers.ITreeSelection;
@@ -12,6 +22,8 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.widgets.TreeItem;
+
+import de.tud.et.ifa.agtele.ui.providers.AgteleEcoreContentProvider.NonContainedChildWrapper;
 
 /**
  * A {@link SelectionListener} that operates on a {@link TreeViewer} and jumps to a suitable target if the user clicks
@@ -28,8 +40,8 @@ import org.eclipse.swt.widgets.TreeItem;
 public class BasicJumpOnClickListener implements SelectionListener2 {
 
 	/**
-	 * The {@link TreeViewer} that this listener shall operate on, i.e. that is used to detect selections and to
-	 * jump to suitable targets.
+	 * The {@link TreeViewer} that this listener shall operate on, i.e. that is used to detect selections and to jump to
+	 * suitable targets.
 	 */
 	private TreeViewer treeViewer;
 
@@ -121,8 +133,8 @@ public class BasicJumpOnClickListener implements SelectionListener2 {
 	 * <p />
 	 * This base implementation realizes the following deductions:
 	 * <ul>
-	 * <li>In case an {@link EReference} is selected, the {@link EReference#getEReferenceType() reference type} will
-	 * be returned.</li>
+	 * <li>In case an {@link EReference} is selected, the {@link EReference#getEReferenceType() reference type} will be
+	 * returned.</li>
 	 * <li>In case an {@link EGenericType} is selected, the {@link EGenericType#getEClassifier() classifier that it
 	 * represents} will be returned.</li>
 	 * </ul>
@@ -131,8 +143,8 @@ public class BasicJumpOnClickListener implements SelectionListener2 {
 	 *
 	 * @param selected
 	 *            The element selected by the user.
-	 * @return The determined target or '<em><b>null</b></em>' if no suitable target could be determined/no jump
-	 *         shall be performed.
+	 * @return The determined target or '<em><b>null</b></em>' if no suitable target could be determined/no jump shall
+	 *         be performed.
 	 */
 	protected Object determineJumpTarget(Object selected) {
 
@@ -142,6 +154,10 @@ public class BasicJumpOnClickListener implements SelectionListener2 {
 			target = ((EReference) selected).getEReferenceType();
 		} else if (selected instanceof EGenericType) {
 			target = ((EGenericType) selected).getEClassifier();
+		} else if (selected instanceof EAttribute && ((EAttribute) selected).getEAttributeType() instanceof EEnum) {
+			target = ((EAttribute) selected).getEAttributeType();
+		} else if (selected instanceof NonContainedChildWrapper) {
+			target = ((NonContainedChildWrapper) selected).getNoncontainedChild();
 		}
 
 		return target;

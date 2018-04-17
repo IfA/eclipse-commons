@@ -1,3 +1,14 @@
+/*******************************************************************************
+ * Copyright (C) 2016-2018 Institute of Automation, TU Dresden.
+ * 
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ * 
+ * Contributors:
+ *     Institute of Automation, TU Dresden - initial API and implementation
+ ******************************************************************************/
 package de.tud.et.ifa.agtele.ui.widgets;
 
 import java.util.ArrayList;
@@ -14,8 +25,8 @@ import org.eclipse.swt.widgets.Sash;
 import de.tud.et.ifa.agtele.ui.interfaces.IPersistable;
 
 /**
- * A {@link SashForm} that supports minimizing of controls. Currently, this only supports a single
- * minimized child control.
+ * A {@link SashForm} that supports minimizing of controls. Currently, this only
+ * supports a single minimized child control.
  *
  * @author mfreund
  */
@@ -27,7 +38,8 @@ public class MinimizableSashForm extends SashForm implements IPersistable {
 	private int defaultMinHeight = 18;
 
 	/**
-	 * The currently minimized {@link Control} in this sash form or '<em>null</em>' if no control is minimized.
+	 * The currently minimized {@link Control} in this sash form or
+	 * '<em>null</em>' if no control is minimized.
 	 */
 	private Control minimizedControl;
 
@@ -37,7 +49,8 @@ public class MinimizableSashForm extends SashForm implements IPersistable {
 	private Listener resizeListener;
 
 	/**
-	 * A listener that restores default behavior (no child is minimized) by removing the {@link #resizeListener}.
+	 * A listener that restores default behavior (no child is minimized) by
+	 * removing the {@link #resizeListener}.
 	 */
 	private Listener removeResizeListenerListener;
 
@@ -45,7 +58,8 @@ public class MinimizableSashForm extends SashForm implements IPersistable {
 	 * This creates an instance.
 	 *
 	 * @param parent
-	 *            A widget which will be the parent of the new instance (cannot be null).
+	 *            A widget which will be the parent of the new instance (cannot
+	 *            be null).
 	 * @param style
 	 *            The style of widget to construct.
 	 */
@@ -56,11 +70,11 @@ public class MinimizableSashForm extends SashForm implements IPersistable {
 
 		// this listener will be attached to every sash inside the sash form
 		this.removeResizeListenerListener = event -> {
-			if(MinimizableSashForm.this.minimizedControl != null) {
-				if(MinimizableSashForm.this.resizeListener != null) {
+			if (MinimizableSashForm.this.minimizedControl != null) {
+				if (MinimizableSashForm.this.resizeListener != null) {
 					MinimizableSashForm.this.removeListener(SWT.Resize, MinimizableSashForm.this.resizeListener);
 				}
-				if(MinimizableSashForm.this.minimizedControl instanceof IMinimizable) {
+				if (MinimizableSashForm.this.minimizedControl instanceof IMinimizable) {
 					((IMinimizable) MinimizableSashForm.this.minimizedControl).restore();
 				}
 				MinimizableSashForm.this.minimizedControl = null;
@@ -71,7 +85,9 @@ public class MinimizableSashForm extends SashForm implements IPersistable {
 
 	/**
 	 * This is the getter for the {@link #minimizedControl}.
-	 * @return The currently minimized control in this sash form or '<em>null</em>' if no control is minimized.
+	 *
+	 * @return The currently minimized control in this sash form or
+	 *         '<em>null</em>' if no control is minimized.
 	 */
 	public Control getMinimizedControl() {
 		return this.minimizedControl;
@@ -80,12 +96,14 @@ public class MinimizableSashForm extends SashForm implements IPersistable {
 	/**
 	 * Minimizes the given '<em>control</em>'.
 	 *
-	 * @param control The {@link Control} to be minimized. If this is '<em>null</em>', the method will return
-	 * without doing anything.
+	 * @param control
+	 *            The {@link Control} to be minimized. If this is
+	 *            '<em>null</em>', the method will return without doing
+	 *            anything.
 	 */
 	public void minimizeControl(final Control control) {
 
-		if(control == null || this.minimizedControl != null && this.minimizedControl.equals(control)) {
+		if (control == null || this.minimizedControl != null && this.minimizedControl.equals(control)) {
 			return;
 		}
 
@@ -93,8 +111,8 @@ public class MinimizableSashForm extends SashForm implements IPersistable {
 		this.minimizedControl = control;
 		this.setWeights(this.calculateWeights(control));
 		for (Control child : this.getChildren()) {
-			if(child instanceof IMinimizable) {
-				if(control.equals(child)) {
+			if (child instanceof IMinimizable) {
+				if (control.equals(child)) {
 					((IMinimizable) child).minimize();
 				} else {
 					((IMinimizable) child).restore();
@@ -102,19 +120,23 @@ public class MinimizableSashForm extends SashForm implements IPersistable {
 			}
 		}
 
-		// ensure that the control stays minimized even when the sash form is resized
-		if(this.resizeListener != null) {
+		// ensure that the control stays minimized even when the sash form is
+		// resized
+		if (this.resizeListener != null) {
 			// remove the listener from the previously minimized control
 			this.removeListener(SWT.Resize, this.resizeListener);
 		}
-		this.resizeListener = e -> MinimizableSashForm.this.setWeights(MinimizableSashForm.this.calculateWeights(control));
+		this.resizeListener = e -> MinimizableSashForm.this
+				.setWeights(MinimizableSashForm.this.calculateWeights(control));
 		this.addListener(SWT.Resize, this.resizeListener);
 
-		// add a listener to each contained sash that ensures that above 'resizeListener' is removed when the user
+		// add a listener to each contained sash that ensures that above
+		// 'resizeListener' is removed when the user
 		// manually moves the sash
 		for (int i = 0; i < this.getChildren().length; i++) {
 			Control child = this.getChildren()[i];
-			if (child instanceof Sash && !Arrays.asList(child.getListeners(SWT.DragDetect)).contains(this.removeResizeListenerListener)) {
+			if (child instanceof Sash
+					&& !Arrays.asList(child.getListeners(SWT.DragDetect)).contains(this.removeResizeListenerListener)) {
 				child.addListener(SWT.DragDetect, this.removeResizeListenerListener);
 			}
 		}
@@ -125,11 +147,11 @@ public class MinimizableSashForm extends SashForm implements IPersistable {
 	 */
 	public void restoreLayout() {
 
-		if(this.resizeListener != null) {
+		if (this.resizeListener != null) {
 			this.removeListener(SWT.Resize, this.resizeListener);
 		}
 		for (Control child : this.getChildren()) {
-			if(child instanceof IMinimizable) {
+			if (child instanceof IMinimizable) {
 				((IMinimizable) child).restore();
 			}
 		}
@@ -140,23 +162,24 @@ public class MinimizableSashForm extends SashForm implements IPersistable {
 	}
 
 	/**
-	 * Calculate the weights so that the given '<em>controlToBeMinimized</em>' is minimized.
-	 * If 'controlToBeMinimized' is '<em>null</em>', default weights will be returned to generate
-	 * a non-minimized layout.
+	 * Calculate the weights so that the given '<em>controlToBeMinimized</em>'
+	 * is minimized. If 'controlToBeMinimized' is '<em>null</em>', default
+	 * weights will be returned to generate a non-minimized layout.
 	 *
-	 * @param controlToBeMinimized The control to be minimized or '<em>null</em>' if no control
-	 * shall be minimized so that the default layout is restored.
+	 * @param controlToBeMinimized
+	 *            The control to be minimized or '<em>null</em>' if no control
+	 *            shall be minimized so that the default layout is restored.
 	 * @return The calculated weights.
 	 */
 	private int[] calculateWeights(Control controlToBeMinimized) {
 
 		/*
-		 * determine the 'real' children (excluding sashes) that have to be considered when
-		 * the weights are calculated
+		 * determine the 'real' children (excluding sashes) that have to be
+		 * considered when the weights are calculated
 		 */
 		ArrayList<Control> realChildren = new ArrayList<>();
 		for (Control child : this.getChildren()) {
-			if(!(child instanceof Sash)) {
+			if (!(child instanceof Sash)) {
 				realChildren.add(child);
 			}
 		}
@@ -166,26 +189,27 @@ public class MinimizableSashForm extends SashForm implements IPersistable {
 		}
 
 		int[] weights = new int[realChildren.size()];
-		if(controlToBeMinimized == null || !realChildren.contains(controlToBeMinimized)) {
+		if (controlToBeMinimized == null || !realChildren.contains(controlToBeMinimized)) {
 			// use a default layout
 			for (int i = 0; i < realChildren.size(); i++) {
 				weights[i] = 1;
 			}
 
 		} else {
-			// determine the weights so that height of the 'minimizedControl' will be 'minimized'
-			int minHeight = controlToBeMinimized instanceof IMinimizedHeightProvider ?
-					((IMinimizedHeightProvider) controlToBeMinimized).getMinimizedHeight() : this.defaultMinHeight;
-					for (int i = 0; i < realChildren.size(); i++) {
-						Control child = realChildren.get(i);
+			// determine the weights so that height of the 'minimizedControl'
+			// will be 'minimized'
+			int minHeight = controlToBeMinimized instanceof IMinimizedHeightProvider
+					? ((IMinimizedHeightProvider) controlToBeMinimized).getMinimizedHeight() : this.defaultMinHeight;
+			for (int i = 0; i < realChildren.size(); i++) {
+				Control child = realChildren.get(i);
 
-						if(controlToBeMinimized.equals(child)) {
-							weights[i] = minHeight;
-						} else {
-							weights[i] = (this.getClientArea().height - minHeight)/(realChildren.size() - 1);
-						}
+				if (controlToBeMinimized.equals(child)) {
+					weights[i] = minHeight;
+				} else {
+					weights[i] = (this.getClientArea().height - minHeight) / (realChildren.size() - 1);
+				}
 
-					}
+			}
 		}
 
 		return weights;
@@ -199,7 +223,7 @@ public class MinimizableSashForm extends SashForm implements IPersistable {
 
 			if (this.getChildren()[i] instanceof Sash
 					&& Arrays.asList(this.getChildren()[i].getListeners(SWT.DragDetect))
-					.contains(this.removeResizeListenerListener)) {
+							.contains(this.removeResizeListenerListener)) {
 
 				this.getChildren()[i].removeListener(SWT.DragDetect, this.removeResizeListenerListener);
 			}
@@ -215,13 +239,13 @@ public class MinimizableSashForm extends SashForm implements IPersistable {
 		//
 		String minimized = "";
 
-		if(this.minimizedControl != null) {
+		if (this.minimizedControl != null) {
 			minimized = Integer.toString(Arrays.asList(this.getChildren()).indexOf(this.minimizedControl));
 		}
 
-		if(minimized.isEmpty()) {
+		if (minimized.isEmpty()) {
 			settings.put("MINIMIZED_CONTROL", "");
-			settings.put("WEIGHTS", Arrays.toString(this.getWeights()).split(", "));
+			settings.put("WEIGHTS", Arrays.stream(this.getWeights()).mapToObj(String::valueOf).toArray(String[]::new));
 		} else {
 			settings.put("MINIMIZED_CONTROL", minimized);
 			settings.put("WEIGHTS", "");
@@ -234,17 +258,18 @@ public class MinimizableSashForm extends SashForm implements IPersistable {
 		// Restore the minimized control and/or the weights
 		//
 		String minimizedControl = settings.get("MINIMIZED_CONTROL");
-		if(minimizedControl != null && !minimizedControl.isEmpty()) {
+		if (minimizedControl != null && !minimizedControl.isEmpty()) {
 			try {
 				int index = Integer.parseInt(minimizedControl);
 				Control control = Arrays.asList(this.getChildren()).get(index);
 				this.minimizeControl(control);
-			} catch (NumberFormatException|IndexOutOfBoundsException e) {
+			} catch (NumberFormatException | IndexOutOfBoundsException e) {
 				// do nothing
 			}
 		} else {
+			this.restoreLayout();
 			String[] weights = settings.getArray("WEIGHTS");
-			if(weights != null) {
+			if (weights != null) {
 				try {
 					int[] parsedWeights = new int[weights.length];
 					for (int i = 0; i < weights.length; i++) {

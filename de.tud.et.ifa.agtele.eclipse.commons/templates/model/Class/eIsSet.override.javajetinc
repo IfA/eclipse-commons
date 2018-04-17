@@ -1,0 +1,144 @@
+<%
+/**
+ * Copyright (c) 2002-2007 IBM Corporation and others.
+ * All rights reserved.   This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ * 
+ * Contributors: 
+ *   IBM - Initial API and implementation
+ *   Institute of Automation, TU Dresden - Extracted into this file from the original 'Class.javajet' template (modifications marked below)
+ */
+%>
+ 	/**
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 */
+  <%if (genModel.useGenerics()) {%>
+    <%for (GenFeature genFeature : genClass.getEIsSetGenFeatures()) {%>
+      <%if (genFeature.isListType() && !genFeature.isUnsettable() && !genFeature.isWrappedFeatureMapType() && !genClass.isField(genFeature) && genFeature.isField() && genClass.getImplementingGenModel(genFeature).isVirtualDelegation()) {%>
+	@SuppressWarnings("unchecked")
+      <%break; }%>
+    <%}%>
+  <%}%>
+  <%if (genModel.useClassOverrideAnnotation()) {%>
+	@Override
+  <%}%>
+	public boolean eIsSet(int featureID)
+	{
+		switch (featureID<%=negativeOffsetCorrection%>)
+		{
+<%// Start of modifications by Institute of Automation, TU Dresden (modify isSet extension)%>
+<%for (GenFeature genFeature : genClass.getEIsSetGenFeatures()) {String isSetOverride = ""; String safeNameAccessor = genFeature.getSafeName(); if ("featureID".equals(safeNameAccessor)) { safeNameAccessor = "this." + safeNameAccessor; }%><%/*modify isSet extension*/%><%if (genFeature.getEcoreModelElement().getEAnnotation(GenModelPackage.eNS_URI) != null && genFeature.getEcoreModelElement().getEAnnotation(GenModelPackage.eNS_URI).getDetails().get("isSet") != null) {%><%String getTemp5 = genFeature.getEcoreModelElement().getEAnnotation(GenModelPackage.eNS_URI).getDetails().get("get");String isSetTemp = genFeature.getEcoreModelElement().getEAnnotation(GenModelPackage.eNS_URI).getDetails().get("isSet");genFeature.getEcoreModelElement().getEAnnotation(GenModelPackage.eNS_URI).getDetails().put("get", isSetTemp);%><% isSetOverride=genFeature.getGetterBody("");%><%genFeature.getEcoreModelElement().getEAnnotation(GenModelPackage.eNS_URI).getDetails().put("get", getTemp5);}/*modify local end*/%>
+<%// End of modifications by Institute of Automation, TU Dresden%>
+			case <%=genClass.getQualifiedFeatureID(genFeature)%>:
+  <%if (genFeature.hasSettingDelegate()) {%>
+    <%if (genFeature.isUnsettable()) {%><%if (isSetOverride.isEmpty()) {%>
+				return isSet<%=genFeature.getAccessorName()%>();<%} else {%>
+				return <%=isSetOverride%><%}%>
+    <%} else {%><%if (isSetOverride.isEmpty()) {%>
+				return <%=genFeature.getUpperName()%>__ESETTING_DELEGATE.dynamicIsSet(this, null, 0);<%} else {%>
+				return <%=isSetOverride%><%}%>
+    <%}%>
+  <%} else if (genFeature.isListType() && !genFeature.isUnsettable()) {%>
+    <%if (genFeature.isWrappedFeatureMapType()) {%>
+      <%if (genFeature.isVolatile()) {%><%if (isSetOverride.isEmpty()) {%>
+				return !((<%=genModel.getImportedName("org.eclipse.emf.ecore.util.FeatureMap")%>.Internal.Wrapper)<%=genFeature.getGetAccessor()%>()).featureMap().isEmpty();<%} else {%>
+				return <%=isSetOverride%><%}%>
+      <%} else {%><%if (isSetOverride.isEmpty()) {%>
+				return <%=safeNameAccessor%> != null && !<%=safeNameAccessor%>.featureMap().isEmpty();<%} else {%>
+				return <%=isSetOverride%><%}%>
+      <%}%>
+    <%} else {%>
+      <%if (genClass.isField(genFeature)) {%><%if (isSetOverride.isEmpty()) {%>
+				return <%=safeNameAccessor%> != null && !<%=safeNameAccessor%>.isEmpty();<%} else {%>
+				return <%=isSetOverride%><%}%>
+      <%} else {%>
+        <%if (genFeature.isField() && genClass.getImplementingGenModel(genFeature).isVirtualDelegation()) {%>
+				<%=genFeature.getImportedType(genClass)%> <%=safeNameAccessor%> = (<%=genFeature.getImportedType(genClass)%>)eVirtualGet(<%=genClass.getQualifiedFeatureID(genFeature)%><%=positiveOffsetCorrection%>);<%if (isSetOverride.isEmpty()) {%>
+				return <%=safeNameAccessor%> != null && !<%=safeNameAccessor%>.isEmpty();<%} else {%>
+				return <%=isSetOverride%><%}%>
+        <%} else {%><%if (isSetOverride.isEmpty()) {%>
+				return !<%=genFeature.getGetAccessor()%>().isEmpty();<%} else {%>
+				return <%=isSetOverride%><%}%>
+        <%}%>
+      <%}%>
+    <%}%>
+  <%} else if (genFeature.isUnsettable()) {%><%if (isSetOverride.isEmpty()) {%>
+				return isSet<%=genFeature.getAccessorName()%>();<%} else {%>
+				return <%=isSetOverride%><%}%>
+  <%} else if (genFeature.isResolveProxies()) {%>
+    <%if (genClass.isField(genFeature)) {%><%if (isSetOverride.isEmpty()) {%>
+				return <%=safeNameAccessor%> != null;<%} else {%>
+				return <%=isSetOverride%><%}%>
+    <%} else {%>
+      <%if (genFeature.isField() && genClass.getImplementingGenModel(genFeature).isVirtualDelegation()) {%><%if (isSetOverride.isEmpty()) {%>
+				return eVirtualGet(<%=genClass.getQualifiedFeatureID(genFeature)%><%=positiveOffsetCorrection%>) != null;<%} else {%>
+				return <%=isSetOverride%><%}%>
+      <%} else {%><%if (isSetOverride.isEmpty()) {%>
+				return basicGet<%=genFeature.getAccessorName()%>() != null;<%} else {%>
+				return <%=isSetOverride%><%}%>
+      <%}%>
+    <%}%>
+  <%} else if (!genFeature.hasEDefault()) {%>
+    <%if (genClass.isField(genFeature)) {%><%if (isSetOverride.isEmpty()) {%>
+				return <%=safeNameAccessor%> != null;<%} else {%>
+				return <%=isSetOverride%><%}%>
+    <%} else {%>
+      <%if (genFeature.isField() && genClass.getImplementingGenModel(genFeature).isVirtualDelegation()) {%><%if (isSetOverride.isEmpty()) {%>
+				return eVirtualGet(<%=genClass.getQualifiedFeatureID(genFeature)%><%=positiveOffsetCorrection%>) != null;<%} else {%>
+				return <%=isSetOverride%><%}%>
+      <%} else {%><%if (isSetOverride.isEmpty()) {%>
+				return <%=genFeature.getGetAccessor()%>() != null;<%} else {%>
+				return <%=isSetOverride%><%}%>
+      <%}%>
+    <%}%>
+  <%} else if (genFeature.isPrimitiveType() || genFeature.isEnumType()) {%>
+    <%if (genClass.isField(genFeature)) {%>
+      <%if (genClass.isFlag(genFeature)) {%>
+        <%if (genFeature.isBooleanType()) {%><%if (isSetOverride.isEmpty()) {%>
+				return ((<%=genClass.getFlagsField(genFeature)%> & <%=genFeature.getUpperName()%>_EFLAG) != 0) != <%=genFeature.getEDefault()%>;<%} else {%>
+				return <%=isSetOverride%><%}%>
+        <%} else {%><%if (isSetOverride.isEmpty()) {%>
+				return (<%=genClass.getFlagsField(genFeature)%> & <%=genFeature.getUpperName()%>_EFLAG) != <%=genFeature.getUpperName()%>_EFLAG_DEFAULT;<%} else {%>
+				return <%=isSetOverride%><%}%>
+        <%}%>
+      <%} else {%><%if (isSetOverride.isEmpty()) {%>
+				return <%=safeNameAccessor%> != <%=genFeature.getEDefault()%>;<%} else {%>
+				return <%=isSetOverride%><%}%>
+      <%}%>
+    <%} else {%>
+      <%if (genFeature.isEnumType() && genFeature.isField() && genClass.getImplementingGenModel(genFeature).isVirtualDelegation()) {%><%if (isSetOverride.isEmpty()) {%>
+				return eVirtualGet(<%=genClass.getQualifiedFeatureID(genFeature)%><%=positiveOffsetCorrection%>, <%=genFeature.getEDefault()%>) != <%=genFeature.getEDefault()%>;<%} else {%>
+				return <%=isSetOverride%><%}%>
+      <%} else {%><%if (isSetOverride.isEmpty()) {%>
+				return <%=genFeature.getGetAccessor()%>() != <%=genFeature.getEDefault()%>;<%} else {%>
+				return <%=isSetOverride%><%}%>
+      <%}%>
+    <%}%>
+  <%} else {//datatype%>
+    <%if (genClass.isField(genFeature)) {%><%if (isSetOverride.isEmpty()) {%>
+				return <%=genFeature.getEDefault()%> == null ? <%=safeNameAccessor%> != null : !<%=genFeature.getEDefault()%>.equals(<%=safeNameAccessor%>);<%} else {%>
+				return <%=isSetOverride%><%}%>
+    <%} else {%>
+      <%if (genFeature.isField() && genClass.getImplementingGenModel(genFeature).isVirtualDelegation()) {%>
+				<%=genFeature.getImportedType(genClass)%> <%=safeNameAccessor%> = (<%=genFeature.getImportedType(genClass)%>)eVirtualGet(<%=genClass.getQualifiedFeatureID(genFeature)%><%=positiveOffsetCorrection%>, <%=genFeature.getEDefault()%>);
+		<%if (isSetOverride.isEmpty()) {%>
+    			return <%=genFeature.getEDefault()%> == null ? <%=safeNameAccessor%> != null : !<%=genFeature.getEDefault()%>.equals(<%=safeNameAccessor%>);<%} else {%>
+				return <%=isSetOverride%><%}%>
+      <%} else {%><%if (isSetOverride.isEmpty()) {%>
+				return <%=genFeature.getEDefault()%> == null ? <%=genFeature.getGetAccessor()%>() != null : !<%=genFeature.getEDefault()%>.equals(<%=genFeature.getGetAccessor()%>());<%} else {%>
+				return <%=isSetOverride%><%}%>
+      <%}%>
+    <%}%>
+  <%}%>
+<%}%>
+		}
+<%if (genModel.isMinimalReflectiveMethods()) {%>
+		return super.eIsSet(featureID);
+<%} else {%>
+		return eDynamicIsSet(featureID);
+<%}%>
+	}

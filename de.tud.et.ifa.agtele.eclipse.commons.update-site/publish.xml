@@ -1,14 +1,35 @@
+<!--
+Copyright (C) 2016-2018 Institute of Automation, TU Dresden.
+
+All rights reserved. This program and the accompanying materials
+are made available under the terms of the Eclipse Public License v1.0
+which accompanies this distribution, and is available at
+http://www.eclipse.org/legal/epl-v10.html
+
+Contributors:
+    Institute of Automation, TU Dresden - initial API and implementation
+-->
 <project name="MyProject" default="cleanup" basedir=".">
-    <description>
+	<description>
 		This updates the contents of the update site on the web server.
     </description>
-	
+
+	<!-- the login to be used to connect to the server
+		(this should be configured in a global ANT property	named 'agtele.login' via 
+		Window -> Preferences -> Ant -> Runtime -> Properties -> Add Property...) -->
+	<property name="login" value="${agtele.login}" />
+
+	<!-- the 'group' to set to the contents of the update site via 'chgrp' 
+		(this should be configured in a global ANT property	named 'agtele.group' via 
+		Window -> Preferences -> Ant -> Runtime -> Properties -> Add Property...) -->
+	<property name="group" value="${agtele.group}" />
+
 	<!-- the URl of the server -->
-	<property name="server-url" value="sftp://root@eats3.et.tu-dresden.de/"/>
-	
+	<property name="server-url" value="sftp://${login}@agtele.eats.et.tu-dresden.de/" />
+
 	<!-- the folder (on the server) that shall contain the update site -->
-	<property name="remote-path" value="/srv/projects/eclipse-commons/updates/"/>
-	
+	<property name="remote-path" value="/data/projects/eclipse-commons/updates/" />
+
 	<!-- whether to delete the local update site files at the end -->
 	<property name="delete-local" value="true" />
 
@@ -18,39 +39,61 @@
 	<target name="publish">
 
 		<echo>Publishing to update site...</echo>
-		
+
 		<!-- copy the 'features' and 'plugins' folder as well as 'artifacts.jar' and 'content.jar'
 			to the specified directory representing the update site -->
-		
-		<exec executable="WinSCP.com"> <!-- WinSCP.com is expected to be on the Windows path! -->
+
+		<exec executable="WinSCP.com">
+			<!-- WinSCP.com is expected to be on the Windows path! -->
 			<arg value="/command" />
 			<!-- open a connection to the server -->
 			<arg value="open ${server-url}" />
-			
+
 			<!-- force overwrite -->
 			<arg value="option confirm off" />
 			
+			<!-- skip any problems (e.g. during changing the owner if we do not have permission) -->
+			<arg value="option batch continue" />
+
 			<!-- copy the files -->
 			<arg value="put ${basedir}\content.jar ${remote-path}" />
 			<arg value="put ${basedir}\artifacts.jar ${remote-path}" />
-			<arg value="put ${basedir}\features/ ${remote-path}" />
-			<arg value="put ${basedir}\plugins/ ${remote-path}" />
+			<arg value="put ${basedir}\features\ ${remote-path}" />
+			<arg value="put ${basedir}\plugins\ ${remote-path}" />
+
+			<!-- change modifiers -->
+			<arg value="call chmod 0774 ${remote-path}content.jar" />
+			<arg value="call chmod 0774 ${remote-path}artifacts.jar" />
+			<arg value="chmod 0775 ${remote-path}features" />
+			<arg value="chmod 0775 ${remote-path}plugins" />
+			<arg value="chmod 0774 ${remote-path}features/*" />
+			<arg value="chmod 0774 ${remote-path}plugins/*" />
+
+			<!-- change group -->
+			<arg value="call chgrp ${group} ${remote-path}content.jar" />
+			<arg value="call chgrp ${group} ${remote-path}artifacts.jar" />
+			<arg value="call chgrp -R ${group} ${remote-path}features" />
+			<arg value="call chgrp -R ${group} ${remote-path}plugins" />
 			
+			<!-- make folders executable for all users -->
+			<arg value="call find ${remote-path}features -type d -exec chmod o+x {} \;" />
+			<arg value="call find ${remote-path}plugins -type d -exec chmod o+x {} \;" />
+
 			<!-- close the connection -->
 			<arg value="close" />
 			<arg value="exit" />
 		</exec>
 	</target>
-	
+
 	<!-- ================================= 
           target: cleanup              
          ================================= -->
-    <target name="cleanup" depends="publish" if="${delete-local}">
-    	<delete>
-    		<fileset refid="update-site" />
+	<target name="cleanup" depends="publish" if="${delete-local}">
+		<delete>
+			<fileset refid="update-site" />
 		</delete>
-    </target>
-	
+	</target>
+
 	<!-- this fileset represents all the file making up the update site -->
 	<fileset dir="${basedir}" id="update-site">
 		<include name="features/*" />

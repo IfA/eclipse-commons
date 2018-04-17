@@ -1,3 +1,14 @@
+/*******************************************************************************
+ * Copyright (C) 2016-2018 Institute of Automation, TU Dresden.
+ * 
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ * 
+ * Contributors:
+ *     Institute of Automation, TU Dresden - initial API and implementation
+ ******************************************************************************/
 package de.tud.et.ifa.agtele.ui.contributions;
 
 import org.eclipse.jface.action.Separator;
@@ -20,6 +31,8 @@ public class EcoreEditorMenuContribution extends ExtensionContributionFactory {
 		additions.addContributionItem(new Separator("begin-agtele-ecore-additions"), null);
 		new OpenGenModelMenuContribution().createContributionItems(serviceLocator, additions);
 		new OpenCodeMenuContribution().createContributionItems(serviceLocator, additions);
+		new AddValidationEOperationMenuContribution().createContributionItems(serviceLocator, additions);
+		new AddDocumentationAnnotationMenuContribution().createContributionItems(serviceLocator, additions);
 		additions.addContributionItem(new Separator("end-agtele-ecore-additions"), null);
 	}
 

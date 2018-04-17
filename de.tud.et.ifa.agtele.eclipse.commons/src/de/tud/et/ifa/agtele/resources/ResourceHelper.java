@@ -1,3 +1,14 @@
+/*******************************************************************************
+ * Copyright (C) 2016-2018 Institute of Automation, TU Dresden.
+ * 
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ * 
+ * Contributors:
+ *     Institute of Automation, TU Dresden - initial API and implementation
+ ******************************************************************************/
 package de.tud.et.ifa.agtele.resources;
 
 import java.io.BufferedInputStream;
@@ -7,6 +18,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.jar.Attributes;
@@ -22,8 +34,13 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.FileLocator;
+import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
+import org.eclipse.emf.common.util.URI;
+import org.eclipse.emf.ecore.resource.Resource;
 
 /**
  * This provides a set of helper functions that allow to deal with files and resources.
@@ -480,4 +497,186 @@ public class ResourceHelper {
 
 		return file.substring(sourceFolder.length() + 1, file.length());
 	}
+
+	/**
+	 * For a given {@link URI}, returns an Eclipse {@link IFile} that represents this URI.
+	 *
+	 * @param uri
+	 *            The {@link URI} for which the file shall be returned.
+	 * @return The {@link IFile} representing the uri or '<em>null</em>' if no file could be determined.
+	 */
+	public static IFile getFileForURI(URI uri) {
+
+		URI fileBasedUri = ResourceHelper.convertPlatformToFileURI(uri);
+
+		if (fileBasedUri == null) {
+			return null;
+		}
+
+		try {
+
+			IFile[] files = ResourcesPlugin.getWorkspace().getRoot()
+					.findFilesForLocationURI(new java.net.URI(fileBasedUri.toString()));
+
+			return files.length == 0 ? null : files[0];
+
+		} catch (Exception e) {
+			e.printStackTrace();
+			return null;
+		}
+
+	}
+
+	/**
+	 * For a given {@link IPath}, returns an Eclipse {@link IFile} that represents this path.
+	 *
+	 * @param path
+	 *            The {@link IPath} for which the file shall be returned.
+	 * @return The {@link IFile} representing the path or '<em>null</em>' if no file could be determined.
+	 */
+	public static IFile getFileForPath(IPath path) {
+
+		return ResourcesPlugin.getWorkspace().getRoot().getFileForLocation(path);
+
+	}
+
+	/**
+	 * For a given EMF {@link Resource}, returns an Eclipse {@link IFile} that represents this resource.
+	 *
+	 * @param resource
+	 *            The {@link Resource} for which the file shall be returned.
+	 * @return The {@link IFile} representing the resource or '<em>null</em>' if no file could be determined.
+	 */
+	public static IFile getFileForResource(Resource resource) {
+
+		return ResourceHelper.getFileForURI(resource.getURI());
+
+	}
+
+	/**
+	 * For a given {@link URI}, returns an Eclipse {@link IContainer} that represents this URI.
+	 *
+	 * @param uri
+	 *            The {@link URI} for which the container shall be returned.
+	 * @return The {@link IContainer} representing the uri or '<em>null</em>' if no container could be determined.
+	 */
+	public static IContainer getContainerForURI(URI uri) {
+
+		URI fileBasedUri = ResourceHelper.convertPlatformToFileURI(uri);
+
+		if (fileBasedUri == null) {
+			return null;
+		}
+
+		try {
+
+			IContainer[] containers = ResourcesPlugin.getWorkspace().getRoot()
+					.findContainersForLocationURI(new java.net.URI(fileBasedUri.toString()));
+
+			return containers.length == 0 ? null : containers[0];
+
+		} catch (Exception e) {
+			e.printStackTrace();
+			return null;
+		}
+
+	}
+
+	/**
+	 * For a given {@link IPath}, returns an Eclipse {@link IContainer} that represents this path.
+	 *
+	 * @param path
+	 *            The {@link IPath} for which the container shall be returned.
+	 * @return The {@link IContainer} representing the path or '<em>null</em>' if no container could be determined.
+	 */
+	public static IContainer getContainerForPath(IPath path) {
+
+		return ResourcesPlugin.getWorkspace().getRoot().getContainerForLocation(path);
+
+	}
+
+	/**
+	 * Recursively collect all {@link IFile IFile} contained in the given {@link IContainer}.
+	 *
+	 * @param container
+	 *            The container to browse.
+	 * @return The list of {@link IFile IFiles}.
+	 * @throws CoreException
+	 */
+	public static List<IFile> getFilesInContainerRecursively(IContainer container) throws CoreException {
+
+		List<IFile> ret = new ArrayList<>();
+
+		for (IResource member : container.members()) {
+			if (member instanceof IFile) {
+				ret.add((IFile) member);
+			} else if (member instanceof IContainer) {
+				ret.addAll(ResourceHelper.getFilesInContainerRecursively((IContainer) member));
+			}
+		}
+
+		return ret;
+	}
+
+	/**
+	 * For a given platform-scheme absolute {@link URI}, this returns a file-scheme absolute URI.
+	 * <p />
+	 * Note: If the given URI is already a file-scheme absolute URI, it is simply returned.
+	 * <p />
+	 * Note: This class can only be used if the OSGi plugin is available because it makes use of {@link FileLocator}.
+	 *
+	 * @param uri
+	 *            The URI to be converted.
+	 * @return A file-scheme absolute URI representing the location of the file identified by the given URI or
+	 *         '<em>null</em>' if the given URI is no absolute file- or platform-scheme URI or if no file-scheme URI
+	 *         could be determined.
+	 */
+	public static URI convertPlatformToFileURI(URI uri) {
+
+		if (uri == null) {
+			return null;
+		}
+
+		if (uri.isFile() && uri.hasAbsolutePath()) {
+
+			// If the URI is already in the 'file:/' form, we may return it directly.
+			//
+			return uri;
+
+		} else if (uri.isPlatform()) {
+
+			// If the URI is a 'platform:/resource' URI, we need to convert it to a 'file:/' URI making use of the
+			// 'FileLocator'.
+			//
+			try {
+				return URI.createFileURI(FileLocator.toFileURL(new URL(uri.toString())).getFile());
+			} catch (Exception e) {
+				return null;
+			}
+
+		} else {
+
+			// Relative URIs or other forms (e.g. plugin-based URIs) are currently not supported.
+			//
+			return null;
+		}
+	}
+
+	/**
+	 * This returns a {@link URI} representing the given '<em>path</em>'.
+	 * <p />
+	 * Note: The path must either be absolute or relative to the workspace root (of the form
+	 * '<em>/project-name/path</em>').
+	 *
+	 * @param path
+	 *            The path for that the URI shall be returned.
+	 * @return The {@link URI} representing the given '<em>path</em>'.
+	 */
+	public static URI getURIForPathString(String path) {
+
+		return new File(path).isAbsolute() ? URI.createFileURI(new File(path).getAbsolutePath())
+				: URI.createPlatformResourceURI(path, true);
+
+	}
+
 }
