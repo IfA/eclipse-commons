@@ -2,11 +2,11 @@
 <feature
       id="de.tud.et.ifa.agtele.eclipse.commons.feature"
       label="Eclipse Commons"
-      version="1.0.1.qualifier"
+      version="1.1.0.qualifier"
       provider-name="AG Tele">
 
    <description>
-      This feature includes the AGTele Eclipse Commons.
+      This feature includes the AG Tele Eclipse Commons.
    </description>
 
    <copyright url="https://www.eclipse.org/org/documents/epl-v10.php">
