@@ -9,6 +9,7 @@
  *
  * Contributors:
  *   IBM - Initial API and implementation
+ *   Institute of Automation, TU Dresden - Fork of the original 'Editor.javajet' template (modifications marked below)
  */
 %>
 <%GenPackage genPackage = (GenPackage)argument; GenModel genModel=genPackage.getGenModel(); /* Trick to import java.util.* without warnings */Iterator.class.getName(); %>
@@ -235,6 +236,7 @@ import org.eclipse.emf.edit.ui.util.EditUIUtil;
 import org.eclipse.emf.edit.ui.view.ExtendedPropertySheetPage;
 
 import <%=genPackage.getQualifiedItemProviderAdapterFactoryClassName()%>;
+<%// Start of modifications by Institute of Automation, TU Dresden (import pakages requied for the extension of the 'ClonableEditor')%>
 import de.tud.et.ifa.agtele.ui.editors.ClonableEditor;
 import de.tud.et.ifa.agtele.ui.interfaces.IPersistable;
 import de.tud.et.ifa.agtele.ui.util.TreeViewNavigationLocation;
@@ -249,6 +251,7 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.ui.INavigationLocation;
 import org.eclipse.ui.INavigationLocationProvider;
 import org.eclipse.emf.common.EMFPlugin;
+<%// End of modifications by Institute of Automation, TU Dresden%>
 <%genModel.markImportLocation(stringBuffer);%>
 
 
@@ -258,9 +261,11 @@ import org.eclipse.emf.common.EMFPlugin;
  * <!-- end-user-doc -->
  * @generated
  */
+<%// Start of modifications by Institute of Automation, TU Dresden (extend the 'ClonableEditor')%>
 public class <%=genPackage.getEditorClassName()%>
 	extends ClonableEditor
 	implements IEditingDomainProvider, ISelectionProvider, IMenuListener, IViewerProvider, IPersistable, INavigationLocationProvider<%if (!genModel.isRichClientPlatform()) {%>, IGotoMarker<%}%>
+<%// End of modifications by Institute of Automation, TU Dresden %>
 {
 <%if (genModel.hasCopyrightField()) {%>
 	/**
@@ -456,6 +461,7 @@ public class <%=genPackage.getEditorClassName()%>
 	 */
 	protected MarkerHelper markerHelper = new EditUIMarkerHelper();
 
+<%// Start of modifications by Institute of Automation, TU Dresden (changed in order to handle the changed focus after the outline view has been in focus)%>
 <%}%>
 	/**
 	 * This listens for when the outline becomes active
@@ -531,6 +537,7 @@ public class <%=genPackage.getEditorClassName()%>
 				}
 			}
 		};
+<%// End of modifications by Institute of Automation, TU Dresden%>
 
 	/**
 	 * Resources that have been removed since last activation.
@@ -572,6 +579,7 @@ public class <%=genPackage.getEditorClassName()%>
 	 */
 	protected boolean updateProblemIndication = true;
 
+<%// Start of modifications by Institute of Automation, TU Dresden (integrate the 'HelpListener')%>
 	/**
 	 * This listens to the HelpEvent (F1)
 	 * <!-- begin-user-doc -->
@@ -579,6 +587,7 @@ public class <%=genPackage.getEditorClassName()%>
 	 * @generated
 	 */
 	protected EMFModelHelpView.HelpListener helpListener;
+<%// End of modifications by Institute of Automation, TU Dresden%>
 	
 	/**
 	 * Adapter used to update the problem indication when resources are demanded loaded.
@@ -781,7 +790,7 @@ public class <%=genPackage.getEditorClassName()%>
 		};
 <%}%>
 
-
+<%// Start of modifications by Institute of Automation, TU Dresden (integrate TreeViewerGroup and ModelElementPalette into the editor)%>
 	/**
 	 * <!-- begin-user-doc -->
 	 * <!-- end-user-doc -->
@@ -802,6 +811,7 @@ public class <%=genPackage.getEditorClassName()%>
 	 * @generated
 	 */
 	private ModelElementPalette elementPalette;
+<%// End of modifications by Institute of Automation, TU Dresden%>
 	
 	/**
 	 * Handles activation of the editor or it's associated views.
@@ -1004,7 +1014,9 @@ public class <%=genPackage.getEditorClassName()%>
 	public <%=genPackage.getEditorClassName()%>()
 	{
 		super();
+<%// Start of modifications by Institute of Automation, TU Dresden (redirect to implementation in the 'ClonableEditor')%>		
 		//initializeEditingDomain(); //adapted due to ClonableEditor
+<%// End of modifications by Institute of Automation, TU Dresden%>
 	}
 
 	/**
@@ -1544,6 +1556,7 @@ public class <%=genPackage.getEditorClassName()%>
 <%if (genModel.useClassOverrideAnnotation()) {%>
 						@Override
 <%}%>
+<%// Start of modifications by Institute of Automation, TU Dresden (use a 'TreeViewerGroup' instead of a simple 'TreeViewer')%>
 						public Viewer createViewer(Composite composite)
 						{
 							TreeViewerGroupViewer viewer = new TreeViewerGroupViewer();
@@ -1589,8 +1602,9 @@ public class <%=genPackage.getEditorClassName()%>
 				}
 	
 				this.selectionViewer.getControl().addHelpListener(this.helpListener);
+<%// End of modifications by Institute of Automation, TU Dresden%>
 
-				new AdapterFactoryTreeEditor(treeViewer.getTree(), adapterFactory);
+new AdapterFactoryTreeEditor(treeViewer.getTree(), adapterFactory);
 <%if (genModel.getDecoration() != GenDecoration.NONE) {%>
 				new <%=genModel.getImportedName("org.eclipse.emf.common.ui.viewer.ColumnViewerInformationControlToolTipSupport")%>(treeViewer, new <%=_DiagnosticDecorator%>.EditingDomainLocationListener(editingDomain, treeViewer));
 <%}%>
@@ -1708,6 +1722,7 @@ public class <%=genPackage.getEditorClassName()%>
 				setPageText(pageIndex, getString("_UI_TreeWithColumnsPage_label"));<%=genModel.getNonNLS()%>
 			}
 <%} else {%>
+<%// Start of modifications by Institute of Automation, TU Dresden (use a 'TreeViewerGroup' instead of a simple 'TreeViewer')%>
 			//adapted for the TreeViewerGroup
 			this.tree = new TreeViewerGroup(this.getContainer(), this.adapterFactory, this.editingDomain,
 					<%=genPackage.getEditorPluginClassName()%>.getPlugin().getDialogSettings(), null,
@@ -1734,7 +1749,7 @@ public class <%=genPackage.getEditorClassName()%>
 			}
 
 			this.selectionViewer.getControl().addHelpListener(this.helpListener);
-
+<%// End of modifications by Institute of Automation, TU Dresden%>
 			new AdapterFactoryTreeEditor(selectionViewer.getTree(), adapterFactory);
 <%if (genModel.getDecoration() != GenDecoration.NONE) {%>
 			new <%=genModel.getImportedName("org.eclipse.emf.common.ui.viewer.ColumnViewerInformationControlToolTipSupport")%>(selectionViewer, new <%=_DiagnosticDecorator%>.EditingDomainLocationListener(editingDomain, selectionViewer));
@@ -1793,6 +1808,7 @@ public class <%=genPackage.getEditorClassName()%>
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+<%// Start of modifications by Institute of Automation, TU Dresden (layout changes)%>
 	protected void hideTabs()
 	{
 		if (getPageCount() <= 1)
@@ -1827,6 +1843,7 @@ public class <%=genPackage.getEditorClassName()%>
 			}
 		}
 	}
+<%// End of modifications by Institute of Automation, TU Dresden%>
 
 	/**
 	 * This is used to track the active viewer.
@@ -2075,7 +2092,7 @@ public class <%=genPackage.getEditorClassName()%>
 	{
 		return ((BasicCommandStack)editingDomain.getCommandStack()).isSaveNeeded();
 	}
-
+<%// Start of modifications by Institute of Automation, TU Dresden (delegated to ClonableEditor)%>
 	/**
 	 * This is for implementing {@link IEditorPart} and simply saves the model file.
 	 * <!-- begin-user-doc -->
@@ -2096,7 +2113,7 @@ public class <%=genPackage.getEditorClassName()%>
 		
 		super.doSave(progressMonitor, saveOptions);
 	}
-
+<%// End of modifications by Institute of Automation, TU Dresden %>
 	/**
 	 * This returns whether something has been persisted to the URI of the specified resource.
 	 * The implementation uses the URI converter from the editor's resource set to try to open an input stream.
@@ -2132,11 +2149,13 @@ public class <%=genPackage.getEditorClassName()%>
 <%if (genModel.useClassOverrideAnnotation()) {%>
 	@Override
 <%}%>
+<%// Start of modifications by Institute of Automation, TU Dresden (delegated to ClonableEditor)%>
 	public boolean isSaveAsAllowed()
 	{
 		return super.isSaveAsAllowed(); //delegation to ClonableEditor
 		//return true; 
 	}
+<%// End of modifications by Institute of Automation, TU Dresden %>
 
 	/**
 	 * This also changes the editor's input.
@@ -2525,6 +2544,7 @@ public class <%=genPackage.getEditorClassName()%>
 		return <%=genPackage.isMultipleEditorPages()%>;
 	}
 
+<%// Start of modifications by Institute of Automation, TU Dresden (methods inherited from 'de.tud.et.ifa.agtele.ui.editors.ClonableEditor' other new implemented interfaces)%>
 	/*
 	 * INavigationLocationProvider methods
 	 */
@@ -2804,4 +2824,5 @@ public class <%=genPackage.getEditorClassName()%>
 		this.resourceChangeListener = resourceChangeListener;
 	}
 }
+<%// End of modifications by Institute of Automation, TU Dresden %>
 <%genModel.emitSortedImports();%>

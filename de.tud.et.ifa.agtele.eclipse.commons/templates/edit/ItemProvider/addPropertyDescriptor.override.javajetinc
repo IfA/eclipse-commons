@@ -1,4 +1,19 @@
+<%
+/**
+ * Copyright (c) 2002-2007 IBM Corporation and others.
+ * All rights reserved.   This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ * 
+ * Contributors: 
+ *   IBM - Initial API and implementation
+ *   Institute of Automation, TU Dresden - Extracted into this file from the original 'ItemProvider.javajet' template (modifications marked below)
+ */
+%>
+<%// Start of modifications by Institute of Automation, TU Dresden (modify addPropertyDescriptorBody extension)%>
 <%/*modify addPropertyDescriptorBody extension*/if (genFeature.getEcoreModelElement().getEAnnotation(GenModelPackage.eNS_URI) != null && genFeature.getEcoreModelElement().getEAnnotation(GenModelPackage.eNS_URI).getDetails().get("propertyDescriptor") != null) {%><%String getTemp = genFeature.getEcoreModelElement().getEAnnotation(GenModelPackage.eNS_URI).getDetails().get("get");String propTemp = genFeature.getEcoreModelElement().getEAnnotation(GenModelPackage.eNS_URI).getDetails().get("propertyDescriptor");genFeature.getEcoreModelElement().getEAnnotation(GenModelPackage.eNS_URI).getDetails().put("get", propTemp);%>
+<%// End of modifications by Institute of Automation, TU Dresden%>
 		<%=genFeature.getGetterBody(genModel.getIndentation(stringBuffer))%><%genFeature.getEcoreModelElement().getEAnnotation(GenModelPackage.eNS_URI).getDetails().put("get", propTemp);%><%} else {/*modify local end*/%>
 		itemPropertyDescriptors.add
 			(createItemPropertyDescriptor

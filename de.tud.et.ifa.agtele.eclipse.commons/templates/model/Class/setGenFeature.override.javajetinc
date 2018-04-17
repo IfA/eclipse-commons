@@ -1,3 +1,16 @@
+<%
+/**
+ * Copyright (c) 2002-2007 IBM Corporation and others.
+ * All rights reserved.   This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ * 
+ * Contributors: 
+ *   IBM - Initial API and implementation
+ *   Institute of Automation, TU Dresden - Extracted into this file from the original 'Class.javajet' template (modifications marked below)
+ */
+%>
 <%if (isInterface) { %>
 <%@ include file="Class/setGenFeature.javadoc.override.javajetinc" fail="alternative" %>
 <%@ start %>
@@ -37,8 +50,10 @@
 
 <%} else { GenOperation setAccessorOperation = genClass.getSetAccessorOperation(genFeature);%>
 	public void set<%=genFeature.getAccessorName()%><%if (genClass.hasCollidingSetAccessorOperation(genFeature)) {%>_<%}%>(<%=genFeature.getImportedType(genClass)%> <%=setAccessorOperation == null ? "new" + genFeature.getCapName() : setAccessorOperation.getGenParameters().get(0).getName()%>)
+<%// Start of modifications by Institute of Automation, TU Dresden (modify getSetterBody extension)%>
 	{<%/*modify getSetterBody extension*/if (genFeature.getEcoreModelElement().getEAnnotation(GenModelPackage.eNS_URI) != null && genFeature.getEcoreModelElement().getEAnnotation(GenModelPackage.eNS_URI).getDetails().get("set") != null) {%><%String getTemp = genFeature.getEcoreModelElement().getEAnnotation(GenModelPackage.eNS_URI).getDetails().get("get");String setTemp = genFeature.getEcoreModelElement().getEAnnotation(GenModelPackage.eNS_URI).getDetails().get("set");genFeature.getEcoreModelElement().getEAnnotation(GenModelPackage.eNS_URI).getDetails().put("get", setTemp);%>
 		<%=genFeature.getGetterBody(genModel.getIndentation(stringBuffer))%><%genFeature.getEcoreModelElement().getEAnnotation(GenModelPackage.eNS_URI).getDetails().put("get", getTemp);%><%} else {/*modify local end*/%>
+<%// End of modifications by Institute of Automation, TU Dresden%>
 	<%@ include file="Class/setGenFeature.pre.insert.javajetinc" fail="silent" %>
     <%if (genModel.isDynamicDelegation() && !genFeature.isVolatile()) {%>
 		eDynamicSet(<%=genClass.getQualifiedFeatureID(genFeature)%><%if (genClass.hasStaticFeatures()){%> - ESTATIC_FEATURE_COUNT<%}%>, <%=genFeature.getQualifiedFeatureAccessor()%>, <%if (!isJDK50 && genFeature.isPrimitiveType()) {%>new <%=genFeature.getObjectType(genClass)%>(<%}%>new<%=genFeature.getCapName()%><%if (!isJDK50 && genFeature.isPrimitiveType()) {%>)<%}%>);
