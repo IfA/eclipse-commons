@@ -74,6 +74,11 @@
                   label="Show inherited Class Features"
                   style="toggle">
             </command>
+            <command
+                  commandId="de.tud.et.ifa.agtele.eclipse.commons.ui.showGenericEcoreFeaturesCommand"
+                  label="Show Generics"
+                  style="toggle">
+            </command>
             <menu
                   id="de.tud.et.ifa.agtele.eclipse.commons.ui.changeGeneratedCodeChangedListenerBehaviorMenu"
                   label="React to changed &apos;@generated&apos; methods"
@@ -110,17 +115,6 @@
             </command>
          </menu>
          </menu>
-      </menuContribution>
-      <menuContribution
-            allPopups="true"
-            locationURI="menu:org.eclipse.emf.ecoreMenuID?after=additions">
-         <command
-               commandId="de.tud.et.ifa.agtele.eclipse.commons.ui.showInheritedEcoreClassFeaturesCommand"
-               label="Show inherited Class Features"
-               style="toggle">
-         </command>
-         
-         
       </menuContribution>
    </extension>
    <extension
@@ -164,6 +158,11 @@
             defaultHandler="de.tud.et.ifa.agtele.ui.handlers.ShowInheritedEcoreClassFeaturesCommandHandler"
             id="de.tud.et.ifa.agtele.eclipse.commons.ui.showInheritedEcoreClassFeaturesCommand"
             name="ShowInheritedEcoreClassFeaturesCommand">
+      </command>
+      <command
+            defaultHandler="de.tud.et.ifa.agtele.ui.handlers.ShowGenericEcoreFeaturesCommandHandler"
+            id="de.tud.et.ifa.agtele.eclipse.commons.ui.showGenericEcoreFeaturesCommand"
+            name="ShowGenericEcoreFeaturesCommand">
       </command>
       <command
             defaultHandler="de.tud.et.ifa.agtele.ui.handlers.AddValidationEOperationHandler"

@@ -13,13 +13,26 @@ package de.tud.et.ifa.agtele.ui.providers;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.emf.common.notify.AdapterFactory;
 import org.eclipse.emf.common.notify.Notification;
 import org.eclipse.emf.ecore.EClass;
+import org.eclipse.emf.ecore.EGenericType;
 import org.eclipse.emf.ecore.EOperation;
 import org.eclipse.emf.ecore.EStructuralFeature;
+import org.eclipse.emf.ecore.ETypeParameter;
+import org.eclipse.emf.ecore.EcorePackage;
+import org.eclipse.emf.ecore.impl.EcorePackageImpl;
+import org.eclipse.emf.ecore.provider.EModelElementItemProvider;
+import org.eclipse.emf.ecore.provider.EcoreItemProviderAdapterFactory;
+import org.eclipse.emf.ecore.util.EcoreAdapterFactory;
+import org.eclipse.emf.edit.provider.ComposedAdapterFactory;
+import org.eclipse.emf.edit.provider.ITreeItemContentProvider;
+import org.eclipse.emf.edit.provider.ItemProviderAdapter;
 import org.eclipse.emf.edit.provider.ViewerNotification;
 import org.eclipse.jface.viewers.StructuredViewer;
 import org.eclipse.ui.views.properties.IPropertySource;
@@ -49,11 +62,16 @@ public class AgteleEcoreContentProvider extends StateRestoringViewerContentProvi
 	 * The list of content provider instances.
 	 */
 	static protected List<AgteleEcoreContentProvider> instances = new ArrayList<>();
-
+	
 	/**
 	 * Flag indicating whether the inherited content is to be displayed.
 	 */
 	static protected boolean inheritedContentVisible = true;
+
+	/**
+	 * Flag indicating whether the generic content is to be displayed.
+	 */
+	static protected boolean genericContentVisible = true;
 
 	/**
 	 * @param adapterFactory
@@ -134,7 +152,38 @@ public class AgteleEcoreContentProvider extends StateRestoringViewerContentProvi
 				}
 			}
 		}
-		result.addAll(Arrays.asList(super.getChildren(object)));
+		
+		//Hijacking the EcoreItemProviderAdapterFactory#showGenerics setting in order to manipulate the 
+		//EModelElementItemProvider#getChildren method in order to show/hide generic model content
+		//This hack only works safely since the item providers are queried synchronously within the UI thread 
+	    ITreeItemContentProvider treeItemContentProvider = 
+	      (ITreeItemContentProvider)adapterFactory.adapt(object, ITreeItemContentProvider.class);
+	    EcoreItemProviderAdapterFactory ecoreFactory = null;
+	    boolean resetEcoreFactoryVisibility = false;
+	    
+	    if (treeItemContentProvider != null) {
+	    	AdapterFactory factory = ((ComposedAdapterFactory)this.adapterFactory).getFactoryForType(EcorePackage.eINSTANCE);
+	    	if (factory instanceof EcoreItemProviderAdapterFactory) {
+	    		ecoreFactory = (EcoreItemProviderAdapterFactory) factory;
+	    		
+	    		//set the property in the EcoreItemProviderAdapterFactory, if settings differ
+	    		if (ecoreFactory.isShowGenerics() != genericContentVisible) {
+	    			ecoreFactory.setShowGenerics(genericContentVisible);
+	    			resetEcoreFactoryVisibility = true;
+	    		}	    		
+	    	}
+	    }
+
+	    //former implementation in super.getChildren
+	   	result.addAll(treeItemContentProvider != null ?
+		        treeItemContentProvider.getChildren(object) :
+			        Collections.EMPTY_LIST);	
+	   	
+	   	//reset the property in EcoreItemProviderAdapterFactory to its previous value
+	   	if (resetEcoreFactoryVisibility) {
+	   		ecoreFactory.setShowGenerics(!genericContentVisible);
+	   	}
+	   	
 		return result.toArray();
 	}
 
@@ -150,7 +199,7 @@ public class AgteleEcoreContentProvider extends StateRestoringViewerContentProvi
 		}
 		return super.hasChildren(object);
 	}
-
+	
 	/**
 	 * Sets the visibility of inherited {@link EClass} content and
 	 * {@link #refreshViewers()} afterwards.
@@ -159,6 +208,17 @@ public class AgteleEcoreContentProvider extends StateRestoringViewerContentProvi
 	 */
 	static public void setInheritedContentVisibility(boolean visible) {
 		AgteleEcoreContentProvider.inheritedContentVisible = visible;
+		AgteleEcoreContentProvider.refreshViewers();
+	}
+
+	/**
+	 * Sets the visibility of inherited {@link EClass} content and
+	 * {@link #refreshViewers()} afterwards.
+	 *
+	 * @param visible
+	 */
+	static public void setGenericContentVisibility(boolean visible) {
+		AgteleEcoreContentProvider.genericContentVisible = visible;
 		AgteleEcoreContentProvider.refreshViewers();
 	}
 
