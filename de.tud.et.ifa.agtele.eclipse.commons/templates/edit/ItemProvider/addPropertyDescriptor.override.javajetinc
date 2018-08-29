@@ -11,10 +11,8 @@
  *   Institute of Automation, TU Dresden - Extracted into this file from the original 'ItemProvider.javajet' template (modifications marked below)
  */
 %>
-<%// Start of modifications by Institute of Automation, TU Dresden (modify addPropertyDescriptorBody extension)%>
-<%/*modify addPropertyDescriptorBody extension*/if (genFeature.getEcoreModelElement().getEAnnotation(GenModelPackage.eNS_URI) != null && genFeature.getEcoreModelElement().getEAnnotation(GenModelPackage.eNS_URI).getDetails().get("propertyDescriptor") != null) {%><%String getTemp = genFeature.getEcoreModelElement().getEAnnotation(GenModelPackage.eNS_URI).getDetails().get("get");String propTemp = genFeature.getEcoreModelElement().getEAnnotation(GenModelPackage.eNS_URI).getDetails().get("propertyDescriptor");genFeature.getEcoreModelElement().getEAnnotation(GenModelPackage.eNS_URI).getDetails().put("get", propTemp);%>
-<%// End of modifications by Institute of Automation, TU Dresden%>
-		<%=genFeature.getGetterBody(genModel.getIndentation(stringBuffer))%><%genFeature.getEcoreModelElement().getEAnnotation(GenModelPackage.eNS_URI).getDetails().put("get", propTemp);%><%} else {/*modify local end*/%>
+<%/*Start of modifications by Institute of Automation, TU Dresden (modify addPropertyDescriptorBody extension)*/if (de.tud.et.ifa.agtele.emf.AgtleEcoreGeneratorHelper.hasPropertyDescriptorOverride(genFeature)) {%>
+		<%=de.tud.et.ifa.agtele.emf.AgtleEcoreGeneratorHelper.getPropertyDescriptorBody(genFeature,genModel.getIndentation(stringBuffer))%><%} else {/*End of modifications by Institute of Automation, TU Dresden*/%>
 		itemPropertyDescriptors.add
 			(createItemPropertyDescriptor
 				(((<%=genModel.getImportedName("org.eclipse.emf.edit.provider.ComposeableAdapterFactory")%>)adapterFactory).getRootAdapterFactory(),

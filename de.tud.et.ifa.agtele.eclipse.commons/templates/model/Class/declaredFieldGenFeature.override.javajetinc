@@ -138,9 +138,9 @@
 	 */
       <%if (isGWT) {%>
 	@<%=genModel.getImportedName("com.google.gwt.user.client.rpc.GwtTransient")%>
-      <%}%><%/*init-field extension*/%>
-      <%if (genFeature.getEcoreModelElement().getEAnnotation(GenModelPackage.eNS_URI) != null && genFeature.getEcoreModelElement().getEAnnotation(GenModelPackage.eNS_URI).getDetails().get("init") != null) {%> <%String getTemp1 = genFeature.getEcoreModelElement().getEAnnotation(GenModelPackage.eNS_URI).getDetails().get("get"); String initTemp1 = genFeature.getEcoreModelElement().getEAnnotation(GenModelPackage.eNS_URI).getDetails().get("init"); genFeature.getEcoreModelElement().getEAnnotation(GenModelPackage.eNS_URI).getDetails().put("get", initTemp1);%>
-    protected <%=genFeature.getImportedType(genClass)%> <%=genFeature.getSafeName()%> <%=initTemp1%><%genFeature.getEcoreModelElement().getEAnnotation(GenModelPackage.eNS_URI).getDetails().put("get", getTemp1);%><%} else {%>
+      <%}%><%/*Start of modifications by Institute of Automation, TU Dresden (init field extension)*/%>
+      <%if (de.tud.et.ifa.agtele.emf.AgtleEcoreGeneratorHelper.hasFieldInitOverride(genFeature)) {%><%String initTemp1 = de.tud.et.ifa.agtele.emf.AgtleEcoreGeneratorHelper.getFieldInitBody(genFeature, "");%>
+    protected <%=genFeature.getImportedType(genClass)%> <%=genFeature.getSafeName()%> <%=initTemp1%><%} else {/*End of modifications by Institute of Automation, TU Dresden*/%>
     protected <%=genFeature.getImportedType(genClass)%> <%=genFeature.getSafeName()%><%if (genFeature.hasEDefault()) {%> = <%=genFeature.getEDefault()%><%}%>;
         <%}%><%}%>
       <%}%>

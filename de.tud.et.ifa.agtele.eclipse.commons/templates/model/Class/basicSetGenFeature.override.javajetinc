@@ -20,10 +20,8 @@
 <%@ include file="Class/basicSetGenFeature.annotations.insert.javajetinc" fail="silent" %>
 <%}%>
 	public <%=genModel.getImportedName("org.eclipse.emf.common.notify.NotificationChain")%> basicSet<%=genFeature.getAccessorName()%>(<%=genFeature.getImportedInternalType(genClass)%> new<%=genFeature.getCapName()%>, <%=genModel.getImportedName("org.eclipse.emf.common.notify.NotificationChain")%> msgs)
-<%// Start of modifications by Institute of Automation, TU Dresden (modify basicSetBody extension)%>
-	{<%/*modify basicSetBody extension*/if (genFeature.getEcoreModelElement().getEAnnotation(GenModelPackage.eNS_URI) != null && genFeature.getEcoreModelElement().getEAnnotation(GenModelPackage.eNS_URI).getDetails().get("basicSet") != null) {%><%String getTempT = genFeature.getEcoreModelElement().getEAnnotation(GenModelPackage.eNS_URI).getDetails().get("get");String basicSetTemp = genFeature.getEcoreModelElement().getEAnnotation(GenModelPackage.eNS_URI).getDetails().get("basicSet");genFeature.getEcoreModelElement().getEAnnotation(GenModelPackage.eNS_URI).getDetails().put("get", basicSetTemp);%>
-<%// End of modifications by Institute of Automation, TU Dresden%>
-		<%=genFeature.getGetterBody(genModel.getIndentation(stringBuffer))%><%genFeature.getEcoreModelElement().getEAnnotation(GenModelPackage.eNS_URI).getDetails().put("get", getTempT);%><%} else {/*modify local end*/%>
+	{<%/*Start of modifications by Institute of Automation, TU Dresden (modify basicSetBody extension)*/if (de.tud.et.ifa.agtele.emf.AgtleEcoreGeneratorHelper.hasBasicSetterOverride(genFeature)) {%>
+		<%=de.tud.et.ifa.agtele.emf.AgtleEcoreGeneratorHelper.getBasicSetterBody(genFeature,genModel.getIndentation(stringBuffer))%><%} else {/*End of modifications by Institute of Automation, TU Dresden*/%>
     <%if (genFeature.isContainer()) {%>
 <%@ include file="Class/basicSetGenFeature.pre.insert.javajetinc" fail="silent" %>
 		msgs = eBasicSetContainer((<%=genModel.getImportedName("org.eclipse.emf.ecore.InternalEObject")%>)new<%=genFeature.getCapName()%>, <%=genClass.getQualifiedFeatureID(genFeature)%><%=positiveOffsetCorrection%>, msgs);

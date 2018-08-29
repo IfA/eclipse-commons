@@ -37,9 +37,7 @@ if (index != -1) { head = typeName.substring(0, index); tail = typeName.substrin
 	 * It is bidirectional and its opposite is '{@link <%=reverseGenFeature.getGenClass().getQualifiedInterfaceName()%>#<%=reverseGenFeature.getGetAccessor()%> <em><%=reverseGenFeature.getFormattedName()%></em>}'.
       <%}%>
     <%}%>
-<%// Start of modifications by Institute of Automation, TU Dresden (include 'getGenFeature.javadoc.insert' template)%>
 <%@ include file="Class/getGenFeature.javadoc.insert.javajetinc" fail="silent" %>
-<%// End of modifications by Institute of Automation, TU Dresden%>
 	 * <!-- begin-user-doc -->
     <%if (!genFeature.hasDocumentation()) {%>
 	 * <p>
@@ -105,10 +103,10 @@ if (index != -1) { head = typeName.substring(0, index); tail = typeName.substrin
   <%}%>
 	public <%=genFeature.getImportedType(genClass)%> <%=genFeature.getGetAccessor()%><%if (genClass.hasCollidingGetAccessorOperation(genFeature)) {%>_<%}%>()
 	{
-<%@ include file="Class/getGenFeature.pre.insert.javajetinc" fail="silent" %>
-	<%if (genFeature.hasGetterBody()) {%>
+<%@ include file="Class/getGenFeature.pre.insert.javajetinc" fail="silent" %>	
+	<%/*Start of modifications by Institute of Automation, TU Dresden (include 'getGenFeature.javadoc.insert' template)*/if (genFeature.hasGetterBody()) {%>
 		<%=genFeature.getGetterBody(genModel.getIndentation(stringBuffer))%>
-    <%} else {%>
+    <%} else {/*End of modifications by Institute of Automation, TU Dresden*/%>
     <%if (genModel.isDynamicDelegation() && !genFeature.isVolatile()) {%>
 		return <%if (!isJDK50 && genFeature.isPrimitiveType()) {%>(<%}%>(<%=genFeature.getObjectType(genClass)%>)eDynamicGet(<%=genClass.getQualifiedFeatureID(genFeature)%><%if (genClass.hasStaticFeatures()){%> - ESTATIC_FEATURE_COUNT<%}%>, <%=genFeature.getQualifiedFeatureAccessor()%>, true, <%=!genFeature.isEffectiveSuppressEMFTypes()%>)<%if (!isJDK50 && genFeature.isPrimitiveType()) {%>).<%=genFeature.getPrimitiveValueFunction()%>()<%}%>;
     <%} else if (genModel.isReflectiveDelegation()) {%>
@@ -188,11 +186,9 @@ if (index != -1) { head = typeName.substring(0, index); tail = typeName.substrin
           <%} else {%>
 		return <%=genFeature.getUpperName()%>_EFLAG_VALUES[(<%=genClass.getFlagsField(genFeature)%> & <%=genFeature.getUpperName()%>_EFLAG) >>> <%=genFeature.getUpperName()%>_EFLAG_OFFSET];
           <%}%>
-<%// Start of modifications by Institute of Automation, TU Dresden (modified in order to insert the annotation getter body)%>
-        <%} else {%><% /*modified in order to insert the annotation getter body start*/ if (genFeature.hasGetterBody()) {%>
+        <%} else {%><%/*Start of modifications by Institute of Automation, TU Dresden (modified in order to insert the annotation getter body)*/ if (genFeature.hasGetterBody()) {%>
 		<%=genFeature.getGetterBody(genModel.getIndentation(stringBuffer))%><%} else {%>
-		return <%=genFeature.getSafeName()%>;<%} /*modification end*/%>
-<%// End of modifications by Institute of Automation, TU Dresden%>
+		return <%=genFeature.getSafeName()%>;<%} /*End of modifications by Institute of Automation, TU Dresden*/%>
         <%}%>
       <%}%>
     <%} else {//volatile%>

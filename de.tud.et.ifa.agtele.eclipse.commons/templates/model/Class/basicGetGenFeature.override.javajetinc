@@ -20,10 +20,8 @@
 <%@ include file="Class/basicGetGenFeature.annotations.insert.javajetinc" fail="silent" %>
 <%}%>
 	public <%=genFeature.getImportedType(genClass)%> basicGet<%=genFeature.getAccessorName()%>()
-<%// Start of modifications by Institute of Automation, TU Dresden (modify basicGetBody extension)%>
-	{<%/*modify basicGetBody extension*/if (genFeature.getEcoreModelElement().getEAnnotation(GenModelPackage.eNS_URI) != null && genFeature.getEcoreModelElement().getEAnnotation(GenModelPackage.eNS_URI).getDetails().get("basicGet") != null) {%><%String getTempU = genFeature.getEcoreModelElement().getEAnnotation(GenModelPackage.eNS_URI).getDetails().get("get");String basicGetTemp = genFeature.getEcoreModelElement().getEAnnotation(GenModelPackage.eNS_URI).getDetails().get("basicGet");genFeature.getEcoreModelElement().getEAnnotation(GenModelPackage.eNS_URI).getDetails().put("get", basicGetTemp);%>
-	<%// End of modifications by Institute of Automation, TU Dresden%>
-		<%=genFeature.getGetterBody(genModel.getIndentation(stringBuffer))%><%genFeature.getEcoreModelElement().getEAnnotation(GenModelPackage.eNS_URI).getDetails().put("get", getTempU);%><%} else {/*modify local end*/%>
+	{<%/*Start of modifications by Institute of Automation, TU Dresden (modify basicGetBody extension)*/if (de.tud.et.ifa.agtele.emf.AgtleEcoreGeneratorHelper.hasBasicGetterOverride(genFeature)) {%>
+		<%=de.tud.et.ifa.agtele.emf.AgtleEcoreGeneratorHelper.getBasicGetterBody(genFeature,genModel.getIndentation(stringBuffer))%><%} else {/*End of modifications by Institute of Automation, TU Dresden*/%>
 <%@ include file="Class/basicGetGenFeature.pre.insert.javajetinc" fail="silent" %>
     <%if (genModel.isDynamicDelegation()) {%>
 		return (<%=genFeature.getImportedType(genClass)%>)eDynamicGet(<%=genClass.getQualifiedFeatureID(genFeature)%><%if (genClass.hasStaticFeatures()){%> - ESTATIC_FEATURE_COUNT<%}%>, <%=genFeature.getQualifiedFeatureAccessor()%>, false, <%=!genFeature.isEffectiveSuppressEMFTypes()%>);
