@@ -139,7 +139,7 @@
       <%if (isGWT) {%>
 	@<%=genModel.getImportedName("com.google.gwt.user.client.rpc.GwtTransient")%>
       <%}%><%/*Start of modifications by Institute of Automation, TU Dresden (init field extension)*/%>
-      <%if (de.tud.et.ifa.agtele.emf.AgtleEcoreGeneratorHelper.hasFieldInitOverride(genFeature)) {%><%String initTemp1 = de.tud.et.ifa.agtele.emf.AgtleEcoreGeneratorHelper.getFieldInitBody(genFeature, "");%>
+      <%if (de.tud.et.ifa.agtele.emf.generator.AgtleEcoreGeneratorHelper.hasFieldInitOverride(genFeature)) {%><%String initTemp1 = de.tud.et.ifa.agtele.emf.generator.AgtleEcoreGeneratorHelper.getFieldInitBody(genFeature, "");%>
     protected <%=genFeature.getImportedType(genClass)%> <%=genFeature.getSafeName()%> <%=initTemp1%><%} else {/*End of modifications by Institute of Automation, TU Dresden*/%>
     protected <%=genFeature.getImportedType(genClass)%> <%=genFeature.getSafeName()%><%if (genFeature.hasEDefault()) {%> = <%=genFeature.getEDefault()%><%}%>;
         <%}%><%}%>

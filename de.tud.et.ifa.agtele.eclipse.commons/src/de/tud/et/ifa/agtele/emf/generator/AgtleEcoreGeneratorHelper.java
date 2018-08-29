@@ -1,4 +1,4 @@
-package de.tud.et.ifa.agtele.emf;
+package de.tud.et.ifa.agtele.emf.generator;
 
 import org.eclipse.emf.codegen.ecore.genmodel.GenFeature;
 import org.eclipse.emf.codegen.ecore.genmodel.GenModelPackage;
