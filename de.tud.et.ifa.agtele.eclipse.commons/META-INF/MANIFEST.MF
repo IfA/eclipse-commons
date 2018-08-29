@@ -1,7 +1,7 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Eclipse Commons
-Bundle-SymbolicName: de.tud.et.ifa.agtele.eclipse.commons
+Bundle-SymbolicName: de.tud.et.ifa.agtele.eclipse.commons;singleton:=true
 Bundle-Version: 1.1.0.qualifier
 Bundle-Activator: de.tud.et.ifa.agtele.Activator
 Bundle-Vendor: AG Tele

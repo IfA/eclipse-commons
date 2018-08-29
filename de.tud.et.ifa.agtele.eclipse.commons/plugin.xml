@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+   <extension
+         point="org.eclipse.emf.codegen.ecore.generatorAdapters">
+      <adapterFactory
+            class="de.tud.et.ifa.agtele.emf.generator.AddTemplateBuilderVariableGeneratorAdapterFactory">
+      </adapterFactory>
+   </extension>
+
+</plugin>
