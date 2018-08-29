@@ -2,7 +2,7 @@
 <feature
       id="de.tud.et.ifa.agtele.eclipse.commons.feature"
       label="Eclipse Commons"
-      version="1.1.0.qualifier"
+      version="1.2.0.qualifier"
       provider-name="AG Tele">
 
    <description>
