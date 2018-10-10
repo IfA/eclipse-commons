@@ -380,6 +380,7 @@ public class GeneratedEMFCodeHelper {
 		try {
 			List<IResource> members = Arrays.asList(container.members());
 
+			//TODO fist, check if the containing project is open in order to prevent log bloating
 			for (IResource member : members) {
 				if (member instanceof IFile && ((IFile) member).getName().endsWith(".genmodel")) {
 					ret.add((IFile) member);
