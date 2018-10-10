@@ -466,7 +466,7 @@ public class PushCodeToEcoreExecutor {
 			String packageName = importDeclaration.substring(0, lastDotIndex);
 			String typeName = importDeclaration.substring(lastDotIndex + 1);
 
-			compiledCode = compiledCode.replaceFirst("([\\(\\[\\{\\s<])" + typeName + "([\\s\\)<>:\\.,])",
+			compiledCode = compiledCode.replaceFirst("([\\(\\[\\{\\s<\\u0020\\p{javaSpaceChar}])" + typeName + "([\\s\\)\\(<>:\\.,])",
 					"$1<%" + packageName + "." + typeName + "%>$2");
 		}
 
