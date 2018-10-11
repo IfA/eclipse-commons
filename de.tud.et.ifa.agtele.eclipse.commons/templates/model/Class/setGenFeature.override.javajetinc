@@ -50,8 +50,8 @@
 
 <%} else { GenOperation setAccessorOperation = genClass.getSetAccessorOperation(genFeature);%>
 	public void set<%=genFeature.getAccessorName()%><%if (genClass.hasCollidingSetAccessorOperation(genFeature)) {%>_<%}%>(<%=genFeature.getImportedType(genClass)%> <%=setAccessorOperation == null ? "new" + genFeature.getCapName() : setAccessorOperation.getGenParameters().get(0).getName()%>)
-	{<%/*Start of modifications by Institute of Automation, TU Dresden (modify getSetterBody extension)*/if (de.tud.et.ifa.agtele.emf.generator.AgtleEcoreGeneratorHelper.hasSetterOverride(genFeature)) {%>
-		<%=de.tud.et.ifa.agtele.emf.generator.AgtleEcoreGeneratorHelper.getSetterBody(genFeature,genModel.getIndentation(stringBuffer))%><%} else {/*End of modifications by Institute of Automation, TU Dresden*/%>
+	{<%/*Start of modifications by Institute of Automation, TU Dresden (modify getSetterBody extension)*/if (de.tud.et.ifa.agtele.emf.generator.AgteleEcoreGeneratorHelper.hasSetterOverride(genFeature)) {%>
+		<%=de.tud.et.ifa.agtele.emf.generator.AgteleEcoreGeneratorHelper.getSetterBody(genFeature,genModel.getIndentation(stringBuffer))%><%} else {/*End of modifications by Institute of Automation, TU Dresden*/%>
 	<%@ include file="Class/setGenFeature.pre.insert.javajetinc" fail="silent" %>
     <%if (genModel.isDynamicDelegation() && !genFeature.isVolatile()) {%>
 		eDynamicSet(<%=genClass.getQualifiedFeatureID(genFeature)%><%if (genClass.hasStaticFeatures()){%> - ESTATIC_FEATURE_COUNT<%}%>, <%=genFeature.getQualifiedFeatureAccessor()%>, <%if (!isJDK50 && genFeature.isPrimitiveType()) {%>new <%=genFeature.getObjectType(genClass)%>(<%}%>new<%=genFeature.getCapName()%><%if (!isJDK50 && genFeature.isPrimitiveType()) {%>)<%}%>);

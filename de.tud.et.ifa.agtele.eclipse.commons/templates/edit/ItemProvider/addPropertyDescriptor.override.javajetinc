@@ -11,8 +11,8 @@
  *   Institute of Automation, TU Dresden - Extracted into this file from the original 'ItemProvider.javajet' template (modifications marked below)
  */
 %>
-<%/*Start of modifications by Institute of Automation, TU Dresden (modify addPropertyDescriptorBody extension)*/if (de.tud.et.ifa.agtele.emf.generator.AgtleEcoreGeneratorHelper.hasPropertyDescriptorOverride(genFeature)) {%>
-		<%=de.tud.et.ifa.agtele.emf.generator.AgtleEcoreGeneratorHelper.getPropertyDescriptorBody(genFeature,genModel.getIndentation(stringBuffer))%><%} else {/*End of modifications by Institute of Automation, TU Dresden*/%>
+<%/*Start of modifications by Institute of Automation, TU Dresden (modify addPropertyDescriptorBody extension)*/if (de.tud.et.ifa.agtele.emf.generator.AgteleEcoreGeneratorHelper.hasPropertyDescriptorOverride(genFeature)) {%>
+		<%=de.tud.et.ifa.agtele.emf.generator.AgteleEcoreGeneratorHelper.getPropertyDescriptorBody(genFeature,genModel.getIndentation(stringBuffer))%><%} else {/*End of modifications by Institute of Automation, TU Dresden*/%>
 		itemPropertyDescriptors.add
 			(createItemPropertyDescriptor
 				(((<%=genModel.getImportedName("org.eclipse.emf.edit.provider.ComposeableAdapterFactory")%>)adapterFactory).getRootAdapterFactory(),

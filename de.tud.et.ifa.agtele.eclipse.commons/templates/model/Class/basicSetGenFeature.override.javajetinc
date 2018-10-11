@@ -20,8 +20,8 @@
 <%@ include file="Class/basicSetGenFeature.annotations.insert.javajetinc" fail="silent" %>
 <%}%>
 	public <%=genModel.getImportedName("org.eclipse.emf.common.notify.NotificationChain")%> basicSet<%=genFeature.getAccessorName()%>(<%=genFeature.getImportedInternalType(genClass)%> new<%=genFeature.getCapName()%>, <%=genModel.getImportedName("org.eclipse.emf.common.notify.NotificationChain")%> msgs)
-	{<%/*Start of modifications by Institute of Automation, TU Dresden (modify basicSetBody extension)*/if (de.tud.et.ifa.agtele.emf.generator.AgtleEcoreGeneratorHelper.hasBasicSetterOverride(genFeature)) {%>
-		<%=de.tud.et.ifa.agtele.emf.generator.AgtleEcoreGeneratorHelper.getBasicSetterBody(genFeature,genModel.getIndentation(stringBuffer))%><%} else {/*End of modifications by Institute of Automation, TU Dresden*/%>
+	{<%/*Start of modifications by Institute of Automation, TU Dresden (modify basicSetBody extension)*/if (de.tud.et.ifa.agtele.emf.generator.AgteleEcoreGeneratorHelper.hasBasicSetterOverride(genFeature)) {%>
+		<%=de.tud.et.ifa.agtele.emf.generator.AgteleEcoreGeneratorHelper.getBasicSetterBody(genFeature,genModel.getIndentation(stringBuffer))%><%} else {/*End of modifications by Institute of Automation, TU Dresden*/%>
     <%if (genFeature.isContainer()) {%>
 <%@ include file="Class/basicSetGenFeature.pre.insert.javajetinc" fail="silent" %>
 		msgs = eBasicSetContainer((<%=genModel.getImportedName("org.eclipse.emf.ecore.InternalEObject")%>)new<%=genFeature.getCapName()%>, <%=genClass.getQualifiedFeatureID(genFeature)%><%=positiveOffsetCorrection%>, msgs);

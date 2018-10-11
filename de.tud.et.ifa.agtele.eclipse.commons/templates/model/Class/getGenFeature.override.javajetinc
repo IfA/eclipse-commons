@@ -104,9 +104,8 @@ if (index != -1) { head = typeName.substring(0, index); tail = typeName.substrin
 	public <%=genFeature.getImportedType(genClass)%> <%=genFeature.getGetAccessor()%><%if (genClass.hasCollidingGetAccessorOperation(genFeature)) {%>_<%}%>()
 	{
 <%@ include file="Class/getGenFeature.pre.insert.javajetinc" fail="silent" %>	
-	<%/*Start of modifications by Institute of Automation, TU Dresden (include 'getGenFeature.javadoc.insert' template)*/if (genFeature.hasGetterBody()) {%>
-		<%=genFeature.getGetterBody(genModel.getIndentation(stringBuffer))%>
-    <%} else {/*End of modifications by Institute of Automation, TU Dresden*/%>
+	<%/*Start of modifications by Institute of Automation, TU Dresden (modify getGetterBody extension)*/if (de.tud.et.ifa.agtele.emf.generator.AgteleEcoreGeneratorHelper.hasGetterOverride(genFeature)) {%>
+		<%=de.tud.et.ifa.agtele.emf.generator.AgteleEcoreGeneratorHelper.getGetterBody(genFeature,genModel.getIndentation(stringBuffer))%><%} else {/*End of modifications by Institute of Automation, TU Dresden*/%>
     <%if (genModel.isDynamicDelegation() && !genFeature.isVolatile()) {%>
 		return <%if (!isJDK50 && genFeature.isPrimitiveType()) {%>(<%}%>(<%=genFeature.getObjectType(genClass)%>)eDynamicGet(<%=genClass.getQualifiedFeatureID(genFeature)%><%if (genClass.hasStaticFeatures()){%> - ESTATIC_FEATURE_COUNT<%}%>, <%=genFeature.getQualifiedFeatureAccessor()%>, true, <%=!genFeature.isEffectiveSuppressEMFTypes()%>)<%if (!isJDK50 && genFeature.isPrimitiveType()) {%>).<%=genFeature.getPrimitiveValueFunction()%>()<%}%>;
     <%} else if (genModel.isReflectiveDelegation()) {%>
@@ -232,6 +231,6 @@ if (index != -1) { head = typeName.substring(0, index); tail = typeName.substrin
 <%@ end %><%//Class/getGenFeature.todo.override.javajetinc%>
       <%}%>
     <%}%>
-    <%}%>
+    <%} //closes the getGetterBody extension%>
 	}
 <%}%>

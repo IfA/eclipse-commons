@@ -30,7 +30,7 @@
 	{
 		switch (featureID<%=negativeOffsetCorrection%>)
 		{
-<%for (GenFeature genFeature : genClass.getEIsSetGenFeatures()) {/*Start of modifications by Institute of Automation, TU Dresden (modify isSet extension)*/String isSetOverride = ""; String safeNameAccessor = genFeature.getSafeName(); if ("featureID".equals(safeNameAccessor)) { safeNameAccessor = "this." + safeNameAccessor; }%><%if (de.tud.et.ifa.agtele.emf.generator.AgtleEcoreGeneratorHelper.hasIsSetOverride(genFeature)){isSetOverride=de.tud.et.ifa.agtele.emf.generator.AgtleEcoreGeneratorHelper.getIsSetBody(genFeature,"");}/*End of modifications by Institute of Automation, TU Dresden*/%>
+<%for (GenFeature genFeature : genClass.getEIsSetGenFeatures()) {/*Start of modifications by Institute of Automation, TU Dresden (modify isSet extension)*/String isSetOverride = ""; String safeNameAccessor = genFeature.getSafeName(); if ("featureID".equals(safeNameAccessor)) { safeNameAccessor = "this." + safeNameAccessor; }%><%if (de.tud.et.ifa.agtele.emf.generator.AgteleEcoreGeneratorHelper.hasIsSetOverride(genFeature)){isSetOverride=de.tud.et.ifa.agtele.emf.generator.AgteleEcoreGeneratorHelper.getIsSetBody(genFeature,"");}/*End of modifications by Institute of Automation, TU Dresden*/%>
 			case <%=genClass.getQualifiedFeatureID(genFeature)%>:
   <%if (genFeature.hasSettingDelegate()) {%>
     <%if (genFeature.isUnsettable()) {%><%/*Start of modifications by Institute of Automation, TU Dresden (modify isSet extension)*/if (isSetOverride.isEmpty()) {%>
