@@ -11,10 +11,20 @@ import org.eclipse.emf.ecore.EAnnotation;
  * 
  * @author Baron
  */
-public interface AgtleEcoreGeneratorHelper {
+public interface AgteleEcoreGeneratorHelper {
+	
+	public static final String AGTELE_ECORE_GENERATOR_NS_URI = "http://et.tu-dresden.de/ifa/emf/commons/20/GenModel",
+			SET_KEY = "set",
+			GET_KEY = "get",
+			BASIC_GET_KEY = "basicGet",
+			BASIC_SET_KEY = "basicSet",
+			BODY_KEY = "body",
+			INIT_KEY = "init",
+			PROPERTY_DESCRIPTOR_KEY = "propertyDescriptor",
+			IS_SET_KEY = "isSet";
 	
 	/**
-	 * Uses a hack in order to deliver the content of the genmodel annotation in the correct 
+	 * Uses a hack in order to deliver the content of the agtele or emf genmodel annotation in the correct 
 	 * indentation level and providing the appropriate imports within the generated code
 	 * @param genFeature the genFeature that is currently generated
 	 * @param indentation the indentation string that shall be prepended in every line
@@ -26,108 +36,160 @@ public interface AgtleEcoreGeneratorHelper {
 			if (genFeature == null) {
 				return null;
 			}
-			EAnnotation annotation = genFeature.getEcoreModelElement().getEAnnotation(GenModelPackage.eNS_URI);
-			if (annotation == null || !annotation.getDetails().containsKey(keyName)) {
+			EAnnotation generatorAnnotation = genFeature.getEcoreModelElement().getEAnnotation(GenModelPackage.eNS_URI),
+					agteleGeneratorAnnotation = genFeature.getEcoreModelElement().getEAnnotation(AGTELE_ECORE_GENERATOR_NS_URI);
+			if (agteleGeneratorAnnotation == null) {
+				
+			}
+			if (generatorAnnotation == null || !generatorAnnotation.getDetails().containsKey(keyName)) {
 				return null;
 			}
-			boolean isSetGet = AgtleEcoreGeneratorHelper.isSetGetSwitch(genFeature);
-			String oldGetValue = AgtleEcoreGeneratorHelper.getGetSwitch(genFeature);
-			String annotationValue = annotation.getDetails().get(keyName);
+			boolean isSetGet = AgteleEcoreGeneratorHelper.isSetGetSwitch(genFeature);
+			String oldGetValue = AgteleEcoreGeneratorHelper.getGetSwitch(genFeature);
 			if (isSetGet) {
-				AgtleEcoreGeneratorHelper.unsetGetSwitch(genFeature);	
+				AgteleEcoreGeneratorHelper.unsetGetSwitch(genFeature);	
 			}
-			annotation.getDetails().put("get", annotationValue);
+			String annotationValue = generatorAnnotation.getDetails().get(keyName);
+			
+			AgteleEcoreGeneratorHelper.setGetSwitch(genFeature, annotationValue);
 			
 			String result = genFeature.getGetterBody(indentation);
-			AgtleEcoreGeneratorHelper.unsetGetSwitch(genFeature);	
-			annotation.getDetails().put("get", oldGetValue);
 			
+			if (isSetGet) {
+				AgteleEcoreGeneratorHelper.setGetSwitch(genFeature, oldGetValue);				
+			} else {
+				AgteleEcoreGeneratorHelper.unsetGetSwitch(genFeature);				
+			}
+				
 			return result;
 		} catch (Exception e) {
-			return "/* an exception occurred during the evaluation of the annotation that overrides this implementation: '" + e.getMessage() + "'";
+			return "/* an exception occurred during the evaluation of the annotation that overrides this implementation: '" + e.getMessage() + "'*/";
 		}
+	}
+	
+	/**
+	 * Returns if the details key is an extended agtele generator annotation key.
+	 * @param key
+	 * @return
+	 */
+	public static boolean isExtendedAnnotationKey (String key) {
+		if (key.equals(BASIC_GET_KEY) || 
+				key.equals(BASIC_SET_KEY) || 
+				key.equals(SET_KEY) || 
+				key.equals(IS_SET_KEY) || 
+				key.equals(INIT_KEY) || 
+				key.equals(PROPERTY_DESCRIPTOR_KEY)) {
+			return true;
+		}
+		return false;
 	}
 	
 	/**
 	 * Returns the setter body override, use the following line in order to make use of this function within the generator template:
 	 * 
-	 * 'de.tud.et.ifa.agtele.emf.AgtleEcoreGeneratorHelper.getSetterBody(genFeature,genModel.getIndentation(stringBuffer))'
+	 * 'de.tud.et.ifa.agtele.emf.AgteleEcoreGeneratorHelper.getSetterBody(genFeature,genModel.getIndentation(stringBuffer))'
 	 * 
 	 * @param feature
 	 * @param indentation
 	 * @return
 	 */
 	public static String getSetterBody (GenFeature feature, String indentation) {
-		return getImplementationBody(feature, indentation, "set");
+		return getImplementationBody(feature, indentation, SET_KEY);
+	}
+	
+	/**
+	 * Returns the getter body override, use the following line in order to make use of this function within the generator template:
+	 * 
+	 * 'de.tud.et.ifa.agtele.emf.AgteleEcoreGeneratorHelper.getGetterBody(genFeature,genModel.getIndentation(stringBuffer))'
+	 * 
+	 * @param feature
+	 * @param indentation
+	 * @return
+	 */
+	public static String getGetterBody (GenFeature feature, String indentation) {
+		return getImplementationBody(feature, indentation, GET_KEY);
+	}
+	
+	/**
+	 * Returns the method body override, use the following line in order to make use of this function within the generator template:
+	 * 
+	 * 'de.tud.et.ifa.agtele.emf.AgteleEcoreGeneratorHelper.getMethodBody(genFeature,genModel.getIndentation(stringBuffer))'
+	 * 
+	 * @param feature
+	 * @param indentation
+	 * @return
+	 */
+	public static String getMethodBody (GenFeature feature, String indentation) {
+		return getImplementationBody(feature, indentation, BODY_KEY);
 	}
 	
 	/**
 	 * Returns the basic setter body override, use the following line in order to make use of this function within the generator template:
 	 * 
-	 * 'de.tud.et.ifa.agtele.emf.AgtleEcoreGeneratorHelper.getBasicSetterBody(genFeature,genModel.getIndentation(stringBuffer))'
+	 * 'de.tud.et.ifa.agtele.emf.AgteleEcoreGeneratorHelper.getBasicSetterBody(genFeature,genModel.getIndentation(stringBuffer))'
 	 * 
 	 * @param feature
 	 * @param indentation
 	 * @return
 	 */
 	public static String getBasicSetterBody (GenFeature feature, String indentation) {
-		return getImplementationBody(feature, indentation, "basicSet");
+		return getImplementationBody(feature, indentation, BASIC_SET_KEY);
 	}
 
 	/**
 	 * Returns the basic getter body override, use the following line in order to make use of this function within the generator template:
 	 * 
-	 * 'de.tud.et.ifa.agtele.emf.AgtleEcoreGeneratorHelper.getBasicGetterBody(genFeature,genModel.getIndentation(stringBuffer))'
+	 * 'de.tud.et.ifa.agtele.emf.AgteleEcoreGeneratorHelper.getBasicGetterBody(genFeature,genModel.getIndentation(stringBuffer))'
 	 * 
 	 * @param feature
 	 * @param indentation
 	 * @return
 	 */
 	public static String getBasicGetterBody (GenFeature feature, String indentation) {
-		return getImplementationBody(feature, indentation, "basicGet");
+		return getImplementationBody(feature, indentation, BASIC_GET_KEY);
 	}
 
 	/**
 	 * Returns the is set override, use the following line in order to make use of this function within the generator template:
 	 * 
-	 * 'de.tud.et.ifa.agtele.emf.AgtleEcoreGeneratorHelper.getIsSetBody(genFeature,genModel.getIndentation(stringBuffer))'
+	 * 'de.tud.et.ifa.agtele.emf.AgteleEcoreGeneratorHelper.getIsSetBody(genFeature,genModel.getIndentation(stringBuffer))'
 	 * 
 	 * @param feature
 	 * @param indentation
 	 * @return
 	 */
 	public static String getIsSetBody (GenFeature feature, String indentation) {
-		return getImplementationBody(feature, indentation, "isSet");
+		return getImplementationBody(feature, indentation, IS_SET_KEY);
 	}
 
 	/**
 	 * Returns the property descriptor override, use the following line in order to make use of this function within the generator template:
 	 * 
-	 * 'de.tud.et.ifa.agtele.emf.AgtleEcoreGeneratorHelper.getPropertyDescriptorBody(genFeature,genModel.getIndentation(stringBuffer))'
+	 * 'de.tud.et.ifa.agtele.emf.AgteleEcoreGeneratorHelper.getPropertyDescriptorBody(genFeature,genModel.getIndentation(stringBuffer))'
 	 * 
 	 * @param feature
 	 * @param indentation
 	 * @return
 	 */
 	public static String getPropertyDescriptorBody (GenFeature feature, String indentation) {
-		return getImplementationBody(feature, indentation, "propertyDescriptor");
+		return getImplementationBody(feature, indentation, PROPERTY_DESCRIPTOR_KEY);
 	}
 
 	/**
 	 * Returns the field init override, use the following line in order to make use of this function within the generator template:
 	 * 
-	 * 'de.tud.et.ifa.agtele.emf.AgtleEcoreGeneratorHelper.getFieldInitBody(genFeature,genModel.getIndentation(stringBuffer))'
+	 * 'de.tud.et.ifa.agtele.emf.AgteleEcoreGeneratorHelper.getFieldInitBody(genFeature,genModel.getIndentation(stringBuffer))'
 	 * 
 	 * @param feature
 	 * @param indentation
 	 * @return
 	 */
 	public static String getFieldInitBody (GenFeature feature, String indentation) {
-		return getImplementationBody(feature, indentation, "init");
+		return getImplementationBody(feature, indentation, INIT_KEY);
 	}
 	
 	/**
-	 * Checks if the feature specified provides a details entry within the genmodel annotation with the key name specified 
+	 * Checks if the feature specified provides a details entry within the agtele genmodel annotation or the emf genmodel annotation with the key name specified 
 	 * @param genFeature
 	 * @param keyName
 	 * @return
@@ -135,6 +197,10 @@ public interface AgtleEcoreGeneratorHelper {
 	public static boolean hasGenAnnotationDetailsEntry (GenFeature genFeature, String keyName) {	
 		if (genFeature == null) {
 			return false;
+		}
+		EAnnotation agteleAnnotation = genFeature.getEcoreModelElement().getEAnnotation(AGTELE_ECORE_GENERATOR_NS_URI);
+		if (agteleAnnotation != null && agteleAnnotation.getDetails().containsKey(keyName)) {
+			return true;
 		}
 		EAnnotation annotation = genFeature.getEcoreModelElement().getEAnnotation(GenModelPackage.eNS_URI);
 		return annotation != null && annotation.getDetails().containsKey(keyName);		
@@ -145,16 +211,25 @@ public interface AgtleEcoreGeneratorHelper {
 	 * @return
 	 */
 	public static boolean hasSetterOverride(GenFeature feature) {
-		return AgtleEcoreGeneratorHelper.hasGenAnnotationDetailsEntry(feature, "set");
+		return AgteleEcoreGeneratorHelper.hasGenAnnotationDetailsEntry(feature, SET_KEY);
 	}
-
+	
 	/**
 	 * checks if the getter body override has been modeled
 	 * @param feature
 	 * @return
 	 */
 	public static boolean hasGetterOverride(GenFeature feature) {
-		return AgtleEcoreGeneratorHelper.hasGenAnnotationDetailsEntry(feature, "get");
+		return AgteleEcoreGeneratorHelper.hasGenAnnotationDetailsEntry(feature, GET_KEY);
+	}
+
+	/**
+	 * checks if the method body override has been modeled
+	 * @param feature
+	 * @return
+	 */
+	public static boolean hasMethodBodyOverride(GenFeature feature) {
+		return AgteleEcoreGeneratorHelper.hasGenAnnotationDetailsEntry(feature, BODY_KEY);
 	}
 
 	/**
@@ -163,7 +238,7 @@ public interface AgtleEcoreGeneratorHelper {
 	 * @return
 	 */
 	public static boolean hasBasicGetterOverride(GenFeature feature) {
-		return AgtleEcoreGeneratorHelper.hasGenAnnotationDetailsEntry(feature, "basicGet");
+		return AgteleEcoreGeneratorHelper.hasGenAnnotationDetailsEntry(feature, BASIC_GET_KEY);
 	}
 
 	/**
@@ -172,7 +247,7 @@ public interface AgtleEcoreGeneratorHelper {
 	 * @return
 	 */
 	public static boolean hasBasicSetterOverride(GenFeature feature) {
-		return AgtleEcoreGeneratorHelper.hasGenAnnotationDetailsEntry(feature, "basicSet");
+		return AgteleEcoreGeneratorHelper.hasGenAnnotationDetailsEntry(feature, BASIC_SET_KEY);
 	}
 
 	/**
@@ -181,7 +256,7 @@ public interface AgtleEcoreGeneratorHelper {
 	 * @return
 	 */
 	public static boolean hasIsSetOverride(GenFeature feature) {
-		return AgtleEcoreGeneratorHelper.hasGenAnnotationDetailsEntry(feature, "isSet");
+		return AgteleEcoreGeneratorHelper.hasGenAnnotationDetailsEntry(feature, IS_SET_KEY);
 	}
 
 	/**
@@ -190,7 +265,7 @@ public interface AgtleEcoreGeneratorHelper {
 	 * @return
 	 */
 	public static boolean hasPropertyDescriptorOverride(GenFeature feature) {
-		return AgtleEcoreGeneratorHelper.hasGenAnnotationDetailsEntry(feature, "propertyDescriptor");
+		return AgteleEcoreGeneratorHelper.hasGenAnnotationDetailsEntry(feature, PROPERTY_DESCRIPTOR_KEY);
 	}
 
 	/**
@@ -199,7 +274,7 @@ public interface AgtleEcoreGeneratorHelper {
 	 * @return
 	 */
 	public static boolean hasFieldInitOverride(GenFeature feature) {
-		return AgtleEcoreGeneratorHelper.hasGenAnnotationDetailsEntry(feature, "init");
+		return AgteleEcoreGeneratorHelper.hasGenAnnotationDetailsEntry(feature, INIT_KEY);
 	}
 	
 	/**
