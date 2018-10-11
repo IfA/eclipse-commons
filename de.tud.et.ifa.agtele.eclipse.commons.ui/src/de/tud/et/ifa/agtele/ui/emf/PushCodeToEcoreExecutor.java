@@ -43,6 +43,7 @@ import org.eclipse.text.edits.MultiTextEdit;
 import org.eclipse.text.edits.TextEdit;
 
 import de.tud.et.ifa.agtele.emf.AgteleEcoreUtil;
+import de.tud.et.ifa.agtele.emf.generator.AgteleEcoreGeneratorHelper;
 import de.tud.et.ifa.agtele.ui.emf.GeneratedEMFCodeHelper.GeneratedEMFCodeHelperException;
 import de.tud.et.ifa.agtele.ui.handlers.PushCodeToEcoreHandler.AddImplementationEcoreAnnotationCommand;
 import de.tud.et.ifa.agtele.ui.util.UIHelper;
@@ -348,7 +349,7 @@ public class PushCodeToEcoreExecutor {
 		if (type.isClassImplementationType()) {
 			if (specificEcoreElement instanceof EOperation) {
 
-				detailsKey = "body";
+				detailsKey = AgteleEcoreGeneratorHelper.BODY_KEY;
 				isMethod = true;
 
 			} else if ((specificEcoreElement instanceof EReference || specificEcoreElement instanceof EAttribute)
@@ -357,19 +358,19 @@ public class PushCodeToEcoreExecutor {
 				IMethod method = (IMethod) javaElement;
 				String name = method.getElementName();
 				if (name.startsWith("set")) {
-					detailsKey = "set";
+					detailsKey = AgteleEcoreGeneratorHelper.SET_KEY;
 				} else if (name.startsWith("get") || name.startsWith("is")) {
-					detailsKey = "get";
+					detailsKey = AgteleEcoreGeneratorHelper.GET_KEY;
 				} else if (name.startsWith("basicSet")) {
-					detailsKey = "basicSet";
+					detailsKey = AgteleEcoreGeneratorHelper.BASIC_SET_KEY;
 				} else if (name.startsWith("basicGet")) {
-					detailsKey = "basicGet";
+					detailsKey = AgteleEcoreGeneratorHelper.BASIC_GET_KEY;
 				}
 				isMethod = true;
 
 			} else if (specificEcoreElement instanceof EAttribute && javaElement instanceof SourceField) {
 
-				detailsKey = "init";
+				detailsKey = AgteleEcoreGeneratorHelper.INIT_KEY;
 				isInitialization = true;
 
 			}
@@ -379,7 +380,7 @@ public class PushCodeToEcoreExecutor {
 					&& (specificEcoreElement instanceof EAttribute || specificEcoreElement instanceof EReference
 							&& !((EReference) specificEcoreElement).isContainment())) {
 
-				detailsKey = "propertyDescriptor";
+				detailsKey = AgteleEcoreGeneratorHelper.PROPERTY_DESCRIPTOR_KEY;
 				isMethod = true;
 
 			}

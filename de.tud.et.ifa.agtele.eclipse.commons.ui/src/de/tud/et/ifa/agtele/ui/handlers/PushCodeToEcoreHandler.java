@@ -21,6 +21,7 @@ import org.eclipse.emf.ecore.resource.ResourceSet;
 import org.eclipse.emf.edit.domain.IEditingDomainProvider;
 import org.eclipse.ui.IEditorPart;
 
+import de.tud.et.ifa.agtele.emf.generator.AgteleEcoreGeneratorHelper;
 import de.tud.et.ifa.agtele.ui.emf.PushCodeToEcoreExecutor;
 import de.tud.et.ifa.agtele.ui.emf.PushCodeToEcoreExecutor.PushCodeToEcoreResult;
 
@@ -149,12 +150,11 @@ public class PushCodeToEcoreHandler extends OpenMetamodelHandler {
 		}
 
 		@Override
-		protected boolean prepare() {
-
-			this.annotation = this.feature.getEAnnotation(GenModelPackage.eNS_URI);
+		protected boolean prepare() {			
+			this.annotation = this.feature.getEAnnotation(AgteleEcoreGeneratorHelper.getAnnotationNSUriForKeyType(this.keyName));
 			if (this.annotation == null && this.code != null) {
 				this.annotation = EcoreFactory.eINSTANCE.createEAnnotation();
-				this.annotation.setSource(GenModelPackage.eNS_URI);
+				this.annotation.setSource(AgteleEcoreGeneratorHelper.getAnnotationNSUriForKeyType(this.keyName));
 				this.feature.getEAnnotations().add(this.annotation);
 				this.createdAnnotation = true;
 				this.annotation.getDetails().put(this.keyName, this.code);
