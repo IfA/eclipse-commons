@@ -13,7 +13,7 @@ import org.eclipse.emf.ecore.EAnnotation;
  */
 public interface AgteleEcoreGeneratorHelper {
 	
-	public static final String AGTELE_ECORE_GENERATOR_NS_URI = "http://et.tu-dresden.de/ifa/emf/commons/20/GenModel",
+	public static final String AGTELE_ECORE_GENERATOR_NS_URI = "http://et.tu-dresden.de/ifa/emf/commons/2018/AgTeleGenModel",
 			SET_KEY = "set",
 			GET_KEY = "get",
 			BASIC_GET_KEY = "basicGet",
@@ -38,18 +38,21 @@ public interface AgteleEcoreGeneratorHelper {
 			}
 			EAnnotation generatorAnnotation = genFeature.getEcoreModelElement().getEAnnotation(GenModelPackage.eNS_URI),
 					agteleGeneratorAnnotation = genFeature.getEcoreModelElement().getEAnnotation(AGTELE_ECORE_GENERATOR_NS_URI);
-			if (agteleGeneratorAnnotation == null) {
-				
-			}
-			if (generatorAnnotation == null || !generatorAnnotation.getDetails().containsKey(keyName)) {
-				return null;
+			String annotationValue = null;
+			if (agteleGeneratorAnnotation == null || !agteleGeneratorAnnotation.getDetails().containsKey(keyName)) {				
+				if (generatorAnnotation == null || !generatorAnnotation.getDetails().containsKey(keyName)) {
+					return null;
+				} else {
+					annotationValue = generatorAnnotation.getDetails().get(keyName);
+				}
+			} else {
+				annotationValue = agteleGeneratorAnnotation.getDetails().get(keyName);
 			}
 			boolean isSetGet = AgteleEcoreGeneratorHelper.isSetGetSwitch(genFeature);
 			String oldGetValue = AgteleEcoreGeneratorHelper.getGetSwitch(genFeature);
 			if (isSetGet) {
 				AgteleEcoreGeneratorHelper.unsetGetSwitch(genFeature);	
 			}
-			String annotationValue = generatorAnnotation.getDetails().get(keyName);
 			
 			AgteleEcoreGeneratorHelper.setGetSwitch(genFeature, annotationValue);
 			
@@ -82,6 +85,27 @@ public interface AgteleEcoreGeneratorHelper {
 			return true;
 		}
 		return false;
+	}
+	
+	/**
+	 * Returns if the generator annotation details key specified is a method body key
+	 * @param key
+	 * @return
+	 */
+	public static boolean isMethodBodyKey(String key) {
+		return AgteleEcoreGeneratorHelper.BODY_KEY.equals(key);
+	}
+	
+	/**
+	 * returns the annotation source namespace identifier for the type of details key specified
+	 * @param key
+	 * @return
+	 */
+	public static String getAnnotationNSUriForKeyType (String key) {
+		if (AgteleEcoreGeneratorHelper.isMethodBodyKey(key)) {
+			return GenModelPackage.eNS_URI;
+		}
+		return AGTELE_ECORE_GENERATOR_NS_URI;
 	}
 	
 	/**
