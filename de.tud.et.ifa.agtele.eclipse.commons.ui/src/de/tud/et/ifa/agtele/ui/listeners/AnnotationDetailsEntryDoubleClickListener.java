@@ -24,7 +24,7 @@ import org.eclipse.jface.window.Window;
 
 import de.tud.et.ifa.agtele.emf.AgteleEcoreUtil;
 import de.tud.et.ifa.agtele.ui.dialogs.InputDialog;
-import de.tud.et.ifa.agtele.ui.handlers.AddDocumentationAnnotationHandler.MultiLineInputDialog;
+import de.tud.et.ifa.agtele.ui.dialogs.MultiLineInputDialog;
 import de.tud.et.ifa.agtele.ui.util.UIHelper;
 
 /**
