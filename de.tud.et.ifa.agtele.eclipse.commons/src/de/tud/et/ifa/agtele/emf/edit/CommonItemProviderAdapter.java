@@ -21,10 +21,12 @@ import org.eclipse.emf.common.command.Command;
 import org.eclipse.emf.common.command.CompoundCommand;
 import org.eclipse.emf.common.notify.AdapterFactory;
 import org.eclipse.emf.ecore.EClass;
+import org.eclipse.emf.ecore.EClassifier;
 import org.eclipse.emf.ecore.EGenericType;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.EReference;
 import org.eclipse.emf.ecore.EStructuralFeature;
+import org.eclipse.emf.ecore.EcorePackage;
 import org.eclipse.emf.ecore.util.ExtendedMetaData;
 import org.eclipse.emf.ecore.util.FeatureMap;
 import org.eclipse.emf.ecore.util.FeatureMapUtil;
@@ -174,7 +176,14 @@ public class CommonItemProviderAdapter extends ItemProviderAdapter {
 					//
 					if (!eType.isInstance(object)
 							&& !(eType.getEClassifier() != null && eType.getEClassifier().isInstance(object))) {
-						return false;
+						
+						EClassifier classifier = eType.getEClassifier();
+    	            	if (classifier == null ||
+    	            			!classifier.getName().equals("EObject") || 
+    	            			!classifier.getEPackage().getNsURI().equals(EcorePackage.eNS_URI) || 
+    	            			!(object instanceof EObject)) {   
+    	            		return false;
+    	            	}
 					}
 
 					// Check that the object isn't already in a unique list.

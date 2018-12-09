@@ -223,6 +223,14 @@ public class AgteleEcoreContentProvider extends StateRestoringViewerContentProvi
 	}
 
 	/**
+	 * Whether generic model content shall currently be visible in agtele ecore editors.
+	 * @return
+	 */
+	static public boolean isGenericContentVisible() {
+		return genericContentVisible;
+	}
+	
+	/**
 	 * Iterates the {@link #instances} and {@link StructuredViewer#refresh()}es
 	 * the views, if a view is available.
 	 */

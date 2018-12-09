@@ -49,6 +49,7 @@ import org.eclipse.emf.common.util.Diagnostic;
 import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.common.util.UniqueEList;
 import org.eclipse.emf.ecore.EClass;
+import org.eclipse.emf.ecore.EClassifier;
 import org.eclipse.emf.ecore.EGenericType;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.EPackage;
@@ -63,12 +64,16 @@ import org.eclipse.emf.ecore.util.EContentAdapter;
 import org.eclipse.emf.ecore.util.EcoreUtil;
 import org.eclipse.emf.ecore.xmi.XMLResource;
 import org.eclipse.emf.ecore.xmi.impl.GenericXMLResourceFactoryImpl;
+import org.eclipse.emf.edit.command.AddCommand;
 import org.eclipse.emf.edit.command.CommandParameter;
 import org.eclipse.emf.edit.command.DragAndDropCommand;
 import org.eclipse.emf.edit.domain.AdapterFactoryEditingDomain;
+import org.eclipse.emf.edit.domain.EditingDomain;
 import org.eclipse.emf.edit.domain.IEditingDomainProvider;
 import org.eclipse.emf.edit.provider.AdapterFactoryItemDelegator;
 import org.eclipse.emf.edit.provider.ComposedAdapterFactory;
+import org.eclipse.emf.edit.provider.IChildCreationExtender;
+import org.eclipse.emf.edit.provider.ReflectiveItemProvider;
 import org.eclipse.emf.edit.provider.ReflectiveItemProviderAdapterFactory;
 import org.eclipse.emf.edit.provider.resource.ResourceItemProviderAdapterFactory;
 import org.eclipse.emf.edit.ui.action.EditingDomainActionBarContributor;
@@ -132,9 +137,11 @@ import org.eclipse.ui.views.properties.PropertySheet;
 import org.eclipse.ui.views.properties.PropertySheetPage;
 
 import de.tud.et.ifa.agtele.emf.edit.IDragAndDropProvider;
+import de.tud.et.ifa.agtele.emf.edit.CommonItemProviderAdapter.AddCommandWithEnhancedGenericTypeSupport;
 import de.tud.et.ifa.agtele.ui.AgteleUIPlugin;
 import de.tud.et.ifa.agtele.ui.emf.editor.TooltipDisplayingDropAdapter;
 import de.tud.et.ifa.agtele.ui.providers.AgteleEcoreContentProvider;
+import de.tud.et.ifa.agtele.ui.providers.AgteleReflectiveItemProviderAdapterFactory;
 import de.tud.et.ifa.agtele.ui.util.UIHelper;
 
 // Start of modifications by Institute of Automation, TU Dresden (change class name and extended class)
@@ -687,6 +694,8 @@ public class ClonableEcoreEditor extends ClonableEditor implements IEditingDomai
 		super();
 		initializeEditingDomain();
 	}
+	
+	
 
 	// Start of modifications by Institute of Automation, TU Dresden (store the command stack listener in a field in order to reuse it on a shared editing domain)
 	/**
@@ -703,9 +712,22 @@ public class ClonableEcoreEditor extends ClonableEditor implements IEditingDomai
 		adapterFactory = new ComposedAdapterFactory(ComposedAdapterFactory.Descriptor.Registry.INSTANCE);
 
 		adapterFactory.addAdapterFactory(new ResourceItemProviderAdapterFactory());
-		ecoreItemProviderAdapterFactory = new EcoreItemProviderAdapterFactory();
+		ecoreItemProviderAdapterFactory = new EcoreItemProviderAdapterFactory() {
+			/*
+			 * (non-Javadoc)
+			 * @see org.eclipse.emf.ecore.provider.EcoreItemProviderAdapterFactory#isShowGenerics()
+			 * 
+			 * Override this method in order to use the agtele settings.
+			 */
+			@Override
+			public boolean isShowGenerics() {
+				return AgteleEcoreContentProvider.isGenericContentVisible();
+			}			
+			
+			
+		};
 		adapterFactory.addAdapterFactory(ecoreItemProviderAdapterFactory);
-		adapterFactory.addAdapterFactory(new ReflectiveItemProviderAdapterFactory());
+		adapterFactory.addAdapterFactory(new AgteleReflectiveItemProviderAdapterFactory());
 
 		// Create the command stack that will notify this editor as commands are executed.
 		//
@@ -798,9 +820,23 @@ public class ClonableEcoreEditor extends ClonableEditor implements IEditingDomai
 							detail.operation, commandParameter.getCollection(),
 							((IDragAndDropProvider) ClonableEcoreEditor.this).getCommandSelectionStrategy());
 				}
+				
+				if (commandClass.equals(AddCommand.class)) {
+					Command superCommand = super.createCommand(commandClass, commandParameter);
+					if (superCommand instanceof AddCommand) {
+						return new AddCommandWithEnhancedGenericTypeSupport(
+								((AddCommand) superCommand).getDomain(), 
+								((AddCommand) superCommand).getOwner(),
+								((AddCommand) superCommand).getFeature(), 
+								((AddCommand) superCommand).getCollection(), 
+								((AddCommand) superCommand).getIndex());
+					}
+					return superCommand;
+				}
 
 				return super.createCommand(commandClass, commandParameter);
 			}
+			
 			// Edited Section end
 			//
 		};
@@ -1745,12 +1781,13 @@ public class ClonableEcoreEditor extends ClonableEditor implements IEditingDomai
 	 * This implements {@link org.eclipse.jface.action.IMenuListener} to help fill the context menus with contributions
 	 * from the Edit menu. <!-- begin-user-doc --> <!-- end-user-doc -->
 	 *
-	 * @generated
+	 * @generated NOT
 	 */
 	@Override
 	public void menuAboutToShow(IMenuManager menuManager) {
 
-		((IMenuListener) getEditorSite().getActionBarContributor()).menuAboutToShow(menuManager);
+		((IMenuListener) getEditorSite().getActionBarContributor())
+			.menuAboutToShow(menuManager);
 	}
 
 	/**
