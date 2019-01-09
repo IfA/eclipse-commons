@@ -44,6 +44,7 @@ Require-Bundle: <%=pluginID%><%if (!pluginID.startsWith("org.eclipse.core.runtim
 <%}%>,
 <%// Start of modifications by Institute of Automation, TU Dresden (add import declarations)%>
  de.tud.et.ifa.agtele.eclipse.commons.ui,
+ de.tud.et.ifa.agtele.eclipse.commons,
  org.eclipse.ui.workbench
 <%// End of modifications by Institute of Automation, TU Dresden%> 
 <%if (genModel.isRichAjaxPlatform()) {%>
