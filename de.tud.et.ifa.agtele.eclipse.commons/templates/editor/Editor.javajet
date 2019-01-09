@@ -251,6 +251,10 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.ui.INavigationLocation;
 import org.eclipse.ui.INavigationLocationProvider;
 import org.eclipse.emf.common.EMFPlugin;
+
+import de.tud.et.ifa.agtele.emf.sanitizer.ModelSanitizer;
+import de.tud.et.ifa.agtele.emf.sanitizer.ModelSanitizer.ModelSanitizerImpl;
+
 <%// End of modifications by Institute of Automation, TU Dresden%>
 <%genModel.markImportLocation(stringBuffer);%>
 
@@ -587,6 +591,14 @@ public class <%=genPackage.getEditorClassName()%>
 	 * @generated
 	 */
 	protected EMFModelHelpView.HelpListener helpListener;
+
+	/**
+	 * Stores the last executed model sanitizer
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 **/
+	protected ModelSanitizerImpl sanitizer;
 <%// End of modifications by Institute of Automation, TU Dresden%>
 	
 	/**
@@ -2110,6 +2122,23 @@ new AdapterFactoryTreeEditor(treeViewer.getTree(), adapterFactory);
 		Map<Object, Object> saveOptions = new HashMap<>();
 		
 		//put custom save options here
+		
+
+		//integrate with the model sanitizer
+		if (this.sanitizer != null) {
+			//Do not sanitize, if last sanitizer action has been reverted
+			if (this.sanitizer.isExecutable() && this.editingDomain.getCommandStack().getMostRecentCommand() == this.sanitizer.getResult()) {
+				super.doSave(progressMonitor, saveOptions);
+				return;
+			};			
+		}	
+
+		this.sanitizer = new ModelSanitizer.ModelSanitizerImpl(this.editingDomain);
+
+		this.sanitizer.process(true);
+		if (this.sanitizer.isExecutable()){
+			this.editingDomain.getCommandStack().execute(this.sanitizer.getResult());
+		}
 		
 		super.doSave(progressMonitor, saveOptions);
 	}
