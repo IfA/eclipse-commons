@@ -9,6 +9,7 @@
  *
  * Contributors:
  *   IBM - Initial API and implementation
+ *   Institute of Automation, TU Dresden - Extracted into this file from the original 'Class.javajet' template (modifications marked below)
  */
 %>
 <%GenPackage genPackage = (GenPackage)argument; GenModel genModel=genPackage.getGenModel();%>
@@ -43,9 +44,11 @@ import org.eclipse.emf.common.util.URI;
 
 import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.EClassifier;
+
+<%/*Start of modifications by Institute of Automation, TU Dresden*/%>
 import org.eclipse.emf.ecore.EStructuralFeature;
 import java.util.Comparator;
-
+<%/*end of modifications by Institute of Automation, TU Dresden*/%>
 import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.ecore.resource.ResourceSet;
 
@@ -212,6 +215,7 @@ public class <%=genPackage.getModelWizardClassName()%> extends Wizard implements
 	 */
 	protected <%=_ListOfString%> initialObjectNames;
 
+<%/*Start of modifications by Institute of Automation, TU Dresden*/%>
 	/**
 	 * Stores Concepts of which model roots can be created from.
 	 * <!-- begin-user-doc -->
@@ -220,6 +224,7 @@ public class <%=genPackage.getModelWizardClassName()%> extends Wizard implements
 	 */	
 	protected ArrayList<EObject> modelRootConcepts = null;
 
+<%/*End of modifications by Institute of Automation, TU Dresden*/%>
 	/**
 	 * This just records the information.
 	 * <!-- begin-user-doc -->
@@ -237,6 +242,7 @@ public class <%=genPackage.getModelWizardClassName()%> extends Wizard implements
 		setDefaultPageImageDescriptor(ExtendedImageRegistry.INSTANCE.getImageDescriptor(<%=genPackage.getImportedEditorPluginClassName()%>.INSTANCE.getImage("full/wizban/New<%=genPackage.getPrefix()%>")));<%=genModel.getNonNLS()%>
 	}
 
+<%/*Start of modifications by Institute of Automation, TU Dresden*/%>
 	/**
 <%if (!genPackage.hasDocumentRoot()) {%>
 	 * Returns the eClass objects of the types that can be created as the root object.
@@ -376,6 +382,7 @@ public class <%=genPackage.getModelWizardClassName()%> extends Wizard implements
 			return rootObject;
 		}
 	}
+<%/*End of modifications by Institute of Automation, TU Dresden*/%>
 
 	/**
 	 * Do the work after everything is specified.
