@@ -30,8 +30,12 @@ Institute of Automation, TU Dresden - initial API and implementation
       <discovery label="Eclipse Neon Release" url="http://download.eclipse.org/eclipse/updates/4.6/"/>
       <discovery label="Eclipse Oxygen Release" url="http://download.eclipse.org/eclipse/updates/4.7"/>
       <discovery label="Eclipse Oxygen Release" url="http://download.eclipse.org/eclipse/updates/4.7/"/>
-      <discovery label="Eclipse Updates 4.8" url="http://download.eclipse.org/eclipse/updates/4.8/"/>
       <discovery label="Eclipse Updates 4.8" url="http://download.eclipse.org/eclipse/updates/4.8"/>
+      <discovery label="Eclipse Updates 4.8" url="http://download.eclipse.org/eclipse/updates/4.8/"/>
+      <discovery label="Eclipse Updates 4.9" url="http://download.eclipse.org/eclipse/updates/4.9"/>
+      <discovery label="Eclipse Updates 4.9" url="http://download.eclipse.org/eclipse/updates/4.9/"/>
+      <discovery label="Eclipse Updates 4.10" url="http://download.eclipse.org/eclipse/updates/4.10"/>
+      <discovery label="Eclipse Updates 4.10" url="http://download.eclipse.org/eclipse/updates/4.10/"/>
    </url>
 
    <requires>
