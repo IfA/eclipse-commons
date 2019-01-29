@@ -216,7 +216,6 @@ import org.eclipse.emf.edit.ui.action.EditingDomainActionBarContributor;
 
 import org.eclipse.emf.edit.ui.celleditor.AdapterFactoryTreeEditor;
 
-import org.eclipse.emf.edit.ui.dnd.EditingDomainViewerDropAdapter;
 import org.eclipse.emf.edit.ui.dnd.LocalTransfer;
 import org.eclipse.emf.edit.ui.dnd.ViewerDragAdapter;
 
@@ -237,6 +236,7 @@ import org.eclipse.emf.edit.ui.view.ExtendedPropertySheetPage;
 
 import <%=genPackage.getQualifiedItemProviderAdapterFactoryClassName()%>;
 <%// Start of modifications by Institute of Automation, TU Dresden (import pakages requied for the extension of the 'ClonableEditor')%>
+import de.tud.et.ifa.agtele.ui.util.CommonEditingDomainViewerDropAdapter;
 import de.tud.et.ifa.agtele.ui.editors.ClonableEditor;
 import de.tud.et.ifa.agtele.ui.interfaces.IPersistable;
 import de.tud.et.ifa.agtele.ui.util.TreeViewNavigationLocation;
@@ -1344,7 +1344,9 @@ public class <%=genPackage.getEditorClassName()%>
 		int dndOperations = DND.DROP_COPY | DND.DROP_MOVE | DND.DROP_LINK;
 		Transfer[] transfers = new Transfer[] { LocalTransfer.getInstance()<%if (genModel.getRuntimeVersion().getValue() >= GenRuntimeVersion.EMF29_VALUE) {%>, LocalSelectionTransfer.getTransfer(), FileTransfer.getInstance()<%}%> };
 		viewer.addDragSupport(dndOperations, transfers, new ViewerDragAdapter(viewer));
-		viewer.addDropSupport(dndOperations, transfers, new EditingDomainViewerDropAdapter(editingDomain, viewer));
+		<%// Start of modifications by Institute of Automation, TU Dresden (support custom transports)%>
+		viewer.addDropSupport(dndOperations, transfers, new CommonEditingDomainViewerDropAdapter(editingDomain, viewer));
+		<%// Start of modifications by Institute of Automation, TU Dresden%>
 	}
 
 	/**
