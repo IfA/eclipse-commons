@@ -118,6 +118,14 @@ public class AmbiguousDragAndDropCommandWrapper extends AbstractCommand implemen
 
 		return !this.validCommands.isEmpty();
 	}
+	
+	/**
+	 * Adds an additional command to the list of ambiguous commands.
+	 * @param cmd
+	 */
+	public void addAmbiguousCommand (AbstractCommand cmd) {
+		this.commands.add(cmd);
+	}
 
 	@Override
 	public boolean canExecute() {
