@@ -2,6 +2,7 @@ package de.tud.et.ifa.agtele.ui.util;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 
 import org.eclipse.swt.dnd.ByteArrayTransfer;
 import org.eclipse.swt.dnd.TextTransfer;
@@ -18,7 +19,7 @@ public class ReferencingIdentifierTransfer extends ByteArrayTransfer {
 		return instance;
 	}
 	
-	static final String MIME_TYPE= "custom/ReferencingIdentifier";
+	static final String MIME_TYPE= "text/referencing-identifier-list";
 	final int MIME_TYPE_ID = registerType(MIME_TYPE);
 	
 	@Override
@@ -45,12 +46,10 @@ public class ReferencingIdentifierTransfer extends ByteArrayTransfer {
 	
 	public String convertToText (Collection c) {
 		if (this.validate(c)) {
-			boolean first = true;
 			String text = "[";
 			
 			for (Object element : c) {
-				text += (first ? "" : ",\n") + "'" + ((String)element) + "'";
-				first = false;
+				text += "" + ((String)element).length() + "_" + ((String)element);
 			}
 			
 			text += "]";
@@ -62,31 +61,56 @@ public class ReferencingIdentifierTransfer extends ByteArrayTransfer {
 	@Override
 	protected void javaToNative (Object object, TransferData transferData) {
 		if (this.validate(object)) {
-			TextTransfer tt = TextTransfer.getInstance();
 			String text = convertToText((Collection) object);
-			
 			if (text != null) {
-				tt.javaToNative(text, transferData);
+				byte[] bytes = text.getBytes(); 
+				super.javaToNative(bytes, transferData);
 			}
 			
 		}
 	}
 	
-	public Collection<String> convertFromText (String text) {
-		ArrayList<String> result = new ArrayList<>();
+	public Collection<?> convertFromText (String text) {
+		ReferencingIdentifierList result = new ReferencingIdentifierList();
+
+		if (!text.startsWith("[") || !text.endsWith("]")) {
+			return null;
+		}
 		
-		//TODO
+		text = text.substring(1, text.length()-1);
 		
-		return result;
+		if (text.isEmpty()) {
+			return result;
+		}
+		while (!text.isEmpty()) {
+			int delim = text.indexOf("_"),
+				length = Integer.parseInt(text.substring(0, delim)); 
+			result.add(text.substring(delim+1, delim+1+length));
+			text = text.substring(delim+1+length);			
+		}
+		
+		return Collections.singleton(result);
 	}
 	
 	@Override
-	protected Object nativeToJava(TransferData transferData) {		
-		TextTransfer tt = TextTransfer.getInstance();
-		String text = (String) tt.nativeToJava(transferData);
+	public Object nativeToJava(TransferData transferData) {		
+		byte[] bytes = (byte[])super.nativeToJava(transferData);
+		String text = new String(bytes);
 		if (text != null) {
-			return this.convertFromText(text);
+			try {
+				return this.convertFromText(text);
+			} catch (Exception e) {
+				System.err.println("Could not convert dnd-string: '" + text + "'");
+			}
 		}
 		return null;
+	}
+	
+	public static class ReferencingIdentifierList extends ArrayList<String> {
+		private static final long serialVersionUID = -977424907021486244L;
+		
+		public ReferencingIdentifierList() {
+			super();
+		}
 	}
 }
