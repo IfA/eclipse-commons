@@ -14,6 +14,7 @@ package de.tud.et.ifa.agtele.emf.edit;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -273,5 +274,62 @@ public interface IDragAndDropProvider {
 		return new ICommandSelectionStrategy() {
 		};
 	}
+	/**
+	 * Enables the joining of the result of {@link IDragAndDropProvider#createCustomDragAndDropCommand(EditingDomain, Object, float, int, int, Collection, ICommandSelectionStrategy)}
+	 * with an additional custom command created in a subclass.
+	 *  
+	 * @param originalCustomCommand
+	 * @param additionalCustomCommand
+	 * @param domain
+	 * @param owner
+	 * @param location
+	 * @param operations
+	 * @param operation
+	 * @param collection
+	 * @param strategy
+	 * @return
+	 */
+	public default Command joinCustomCommands (Command originalCustomCommand, AbstractCommand additionalCustomCommand, EditingDomain domain, Object owner, float location, int operations,
+			int operation, Collection<?> collection, ICommandSelectionStrategy strategy) {
+		return joinCustomCommands(originalCustomCommand, additionalCustomCommand != null ? Collections.singleton(additionalCustomCommand) : null, domain, owner, location, operation, operation, collection, strategy);
+	}
 
+	/**
+	 * Enables the joining of the result of {@link IDragAndDropProvider#createCustomDragAndDropCommand(EditingDomain, Object, float, int, int, Collection, ICommandSelectionStrategy)}
+	 * with additional custom commands created in a subclass.
+	 * 
+	 * @param originalCustomCommand
+	 * @param additionalCustomCommands
+	 * @param domain
+	 * @param owner
+	 * @param location
+	 * @param operations
+	 * @param operation
+	 * @param collection
+	 * @param strategy
+	 * @return
+	 */
+	public default Command joinCustomCommands (Command originalCustomCommand, Collection<AbstractCommand> additionalCustomCommands, EditingDomain domain, Object owner, float location, int operations,
+			int operation, Collection<?> collection, ICommandSelectionStrategy strategy) {
+		if (additionalCustomCommands == null || additionalCustomCommands.isEmpty()) {
+			return originalCustomCommand;
+		}
+		if (originalCustomCommand instanceof AmbiguousDragAndDropCommandWrapper) {
+			for (AbstractCommand a : additionalCustomCommands) {
+				((AmbiguousDragAndDropCommandWrapper)originalCustomCommand).addAmbiguousCommand(a);
+			}
+			return originalCustomCommand;
+		} else if (originalCustomCommand == null && additionalCustomCommands.size() == 1) {
+			return additionalCustomCommands.iterator().next();
+		} else {
+			ArrayList<AbstractCommand> cmdList = new ArrayList<>();
+			if (originalCustomCommand != null && originalCustomCommand instanceof AbstractCommand) {
+				cmdList.add((AbstractCommand)originalCustomCommand);					
+			}
+			cmdList.addAll(additionalCustomCommands);
+			return new AmbiguousDragAndDropCommandWrapper(owner, location, operations, operation, collection, cmdList,
+					strategy == null ? new ICommandSelectionStrategy() {
+					} : strategy);
+		}			
+	}
 }
