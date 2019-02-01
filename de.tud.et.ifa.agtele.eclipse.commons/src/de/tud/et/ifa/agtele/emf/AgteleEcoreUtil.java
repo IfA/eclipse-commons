@@ -23,6 +23,10 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IConfigurationElement;
+import org.eclipse.core.runtime.IExtensionRegistry;
+import org.eclipse.core.runtime.Platform;
 import org.eclipse.emf.codegen.ecore.genmodel.GenBase;
 import org.eclipse.emf.codegen.ecore.genmodel.GenClass;
 import org.eclipse.emf.codegen.ecore.genmodel.GenClassifier;
@@ -975,5 +979,62 @@ public interface AgteleEcoreUtil {
 	public static boolean subTreeContainsElement(EObject root, EObject element) {
 
 		return root != element && EcoreUtil.isAncestor(root, element);
+	}
+	
+	/**
+	 * Returns an adapter of the specified type for the specified object. If none is registered in the resource set, 
+	 * the ecore adapter factory extension point is being queried for registered adapters.
+	 * @param eObject
+	 * @param type
+	 * @return
+	 */
+	static public Adapter getAdapter (EObject eObject, Object type) {
+		if (eObject == null) {
+			return null;
+		}
+		
+		Adapter adapter = EcoreUtil.getRegisteredAdapter(eObject, type);
+		
+		if (adapter == null && eObject.eResource() != null) {
+			AdapterFactory factory = EcoreUtil.getAdapterFactory(eObject.eResource().getResourceSet().getAdapterFactories(), type);
+			
+			if (factory == null) {
+				factory = AgteleEcoreUtil.createRegisteredAdapterFactory(eObject.eClass().getEPackage().getNsURI());
+				if (factory != null) {
+					eObject.eResource().getResourceSet().getAdapterFactories().add(factory);
+					adapter = factory.adapt(eObject, type);
+				}				
+			}			
+		}
+		return adapter;
+	}
+	
+	public static final String ITEM_PROVIDER_ADAPTER_FACTORIES_EXTENSION_POINT_ID = "org.eclipse.emf.edit.itemProviderAdapterFactories";
+	
+	/**
+	 * Fetches the Ecore Adapter Factory extension point and creates the registered adapter factory.
+	 * @param nameSpaceUri
+	 * @return
+	 */
+	static public AdapterFactory createRegisteredAdapterFactory (String nameSpaceUri) {
+		IExtensionRegistry registry = Platform.getExtensionRegistry();
+		
+		IConfigurationElement[] elements
+	      = registry.getConfigurationElementsFor(ITEM_PROVIDER_ADAPTER_FACTORIES_EXTENSION_POINT_ID);
+		
+		for(IConfigurationElement element : elements) {
+			if (element.getAttribute("uri").equals(nameSpaceUri)) {
+	            try {
+					final Object o =
+							element.createExecutableExtension("class");
+					if (o instanceof AdapterFactory) {
+						return (AdapterFactory)o;					
+					}
+				} catch (CoreException e) {
+					e.printStackTrace();
+				}
+			}
+		}
+		return null;
 	}
 }
