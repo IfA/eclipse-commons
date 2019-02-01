@@ -6,9 +6,13 @@ import java.util.Collections;
 import org.eclipse.emf.ecore.EObject;
 
 public interface IReferencingIdentificationStringProvider {
-	String getReferencingIdentificationString (Object element);
+	default String getReferencingIdentificationString (Object element) {
+		Collection<String> ids = this.getReferencingIdentificationStrings(element);
+		if (!ids.isEmpty()) {
+			return ids.iterator().next();
+		}
+		return null;
+	};
 
-	default Collection<String> getReferencingIdentificationStrings(EObject eObject) {
-		return Collections.singleton(this.getReferencingIdentificationString(eObject));
-	}
+	Collection<String> getReferencingIdentificationStrings(Object element);
 }
