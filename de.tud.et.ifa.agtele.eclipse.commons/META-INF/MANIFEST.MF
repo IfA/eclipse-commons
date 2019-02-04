@@ -24,6 +24,7 @@ Export-Package: de.tud.et.ifa.agtele,
  de.tud.et.ifa.agtele.emf.edit,
  de.tud.et.ifa.agtele.emf.edit.commands,
  de.tud.et.ifa.agtele.emf.generator,
+ de.tud.et.ifa.agtele.emf.importing,
  de.tud.et.ifa.agtele.emf.sanitizer,
  de.tud.et.ifa.agtele.help,
  de.tud.et.ifa.agtele.resources
