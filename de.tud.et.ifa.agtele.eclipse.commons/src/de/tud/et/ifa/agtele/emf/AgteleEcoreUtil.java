@@ -1001,8 +1001,11 @@ public interface AgteleEcoreUtil {
 			if (factory == null) {
 				factory = AgteleEcoreUtil.createRegisteredAdapterFactory(eObject.eClass().getEPackage().getNsURI());
 				if (factory != null) {
-					eObject.eResource().getResourceSet().getAdapterFactories().add(factory);
 					adapter = factory.adapt(eObject, type);
+					if (adapter != null) {
+						eObject.eResource().getResourceSet().getAdapterFactories().add(factory);
+						//TODO store factory in a local static map in order not to query the extension point all the time
+					}
 				}				
 			}			
 		}
