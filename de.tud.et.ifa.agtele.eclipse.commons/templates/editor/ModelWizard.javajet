@@ -224,6 +224,27 @@ public class <%=genPackage.getModelWizardClassName()%> extends Wizard implements
 	 */	
 	protected ArrayList<EObject> modelRootConcepts = null;
 
+<%{ String type = genPackage.hasDocumentRoot() ? "feature" : "type"; String prefix = genPackage.hasDocumentRoot() ? "_UI_DocumentRoot_" : "_UI_";%>
+
+		/**
+		 * Returns the label for the specified <%=type%> name.
+		 * <!-- begin-user-doc -->
+		 * <!-- end-user-doc -->
+		 * @generated
+		 */
+		protected String getLabel(String <%=type%>Name)
+		{
+			try
+			{
+				return <%=genPackage.getEditPluginClassName()%>.INSTANCE.getString("<%=prefix%>" + <%=type%>Name + "_<%=type%>");<%=genModel.getNonNLS()%><%=genModel.getNonNLS(2)%>
+			}
+			catch(MissingResourceException mre)
+			{
+				<%=genModel.getImportedName(genModel.getQualifiedEditorPluginClassName())%>.INSTANCE.log(mre);
+			}
+			return <%=type%>Name;
+		}
+<%}%>
 <%/*End of modifications by Institute of Automation, TU Dresden*/%>
 	/**
 	 * This just records the information.
@@ -325,11 +346,11 @@ public class <%=genPackage.getModelWizardClassName()%> extends Wizard implements
 		EClass cls = null;
 		if (concept instanceof EClass) {
 			cls = (EClass) concept;
-			return cls.getName() + " (" + cls.getEPackage().getName() +"-Package - " + cls.getEPackage().getNsURI() +")";
+			return getLabel(cls.getName()) + " (" + cls.getEPackage().getName() +"-Package - " + cls.getEPackage().getNsURI() +")";
 		} else {
 			EStructuralFeature feature = (EStructuralFeature) concept;
 			cls = feature.getEContainingClass();
-			return cls.getName() + "." + feature.getName() + " (" + cls.getEPackage().getName() +"-Package - " + cls.getEPackage().getNsURI() +")";
+			return getLabel(cls.getName()) + "." + feature.getName() + " (" + cls.getEPackage().getName() +"-Package - " + cls.getEPackage().getNsURI() +")";
 		}
 	}
 
@@ -738,12 +759,17 @@ public class <%=genPackage.getModelWizardClassName()%> extends Wizard implements
   <%if (genModel.useGenerics()) {%>
 			for (String objectName : getInitialObjectNames())
 			{
-				initialObjectField.add(getLabel(objectName));
+<%/*Start of modifications by Institute of Automation, TU Dresden*/%>
+				initialObjectField.add(objectName);
+				
+<%/*end of modifications by Institute of Automation, TU Dresden*/%>
 			}
   <%} else {%>
 			for (Iterator i = getInitialObjectNames().iterator(); i.hasNext(); )
 			{
-				initialObjectField.add(getLabel((String)i.next()));
+<%/*Start of modifications by Institute of Automation, TU Dresden*/%>
+				initialObjectField.add((String)i.next());
+<%/*End of modifications by Institute of Automation, TU Dresden*/%>
 			}
   <%}%>
 
@@ -883,10 +909,9 @@ public class <%=genPackage.getModelWizardClassName()%> extends Wizard implements
   <%if (!genModel.useGenerics()) {%>
 				String name = (String)i.next();
   <%}%>
-				if (getLabel(name).equals(label))
-				{
-					return name;
-				}
+<%/*Start of modifications by Institute of Automation, TU Dresden*/%>
+				return name;
+<%/*End of modifications by Institute of Automation, TU Dresden*/%>
 			}
 			return null;
 		}
@@ -933,28 +958,6 @@ public class <%=genPackage.getModelWizardClassName()%> extends Wizard implements
 				fileField.setFocus();
 		}		
 <%}%>
-<%{ String type = genPackage.hasDocumentRoot() ? "feature" : "type"; String prefix = genPackage.hasDocumentRoot() ? "_UI_DocumentRoot_" : "_UI_";%>
-
-		/**
-		 * Returns the label for the specified <%=type%> name.
-		 * <!-- begin-user-doc -->
-		 * <!-- end-user-doc -->
-		 * @generated
-		 */
-		protected String getLabel(String <%=type%>Name)
-		{
-			try
-			{
-				return <%=genPackage.getEditPluginClassName()%>.INSTANCE.getString("<%=prefix%>" + <%=type%>Name + "_<%=type%>");<%=genModel.getNonNLS()%><%=genModel.getNonNLS(2)%>
-			}
-			catch(MissingResourceException mre)
-			{
-				<%=genModel.getImportedName(genModel.getQualifiedEditorPluginClassName())%>.INSTANCE.log(mre);
-			}
-			return <%=type%>Name;
-		}
-<%}%>
-
 		/**
 		 * <!-- begin-user-doc -->
 		 * <!-- end-user-doc -->
