@@ -17,8 +17,10 @@ import org.eclipse.emf.ecore.EStructuralFeature;
 public interface IModelImporter {
 
 	IModelConnector getConnector();
+	
+	void setConnector(IModelConnector connector);
 		
-	default void importModel(EList<EObject> target) {
+	default void importModel(Collection<EObject> target) {
 		if (!this.getConnector().isConnected()) {
 			this.getConnector().connect();
 		}
@@ -44,7 +46,7 @@ public interface IModelImporter {
 		}
 	}	
 
-	default void importRootContentNode (Object node, EList<EObject> target) {
+	default void importRootContentNode (Object node, Collection<EObject> target) {
 		INodeDescriptor descriptor = this.getConnector().getTypeInfo(node);
 		if (descriptor != null) {
 			EObject contentElement = this.createEObject(descriptor);
