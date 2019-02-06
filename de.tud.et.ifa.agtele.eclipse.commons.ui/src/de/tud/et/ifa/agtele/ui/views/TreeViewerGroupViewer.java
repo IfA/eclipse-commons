@@ -15,6 +15,7 @@ import org.eclipse.emf.edit.domain.EditingDomain;
 import org.eclipse.emf.edit.provider.ComposedAdapterFactory;
 import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
@@ -33,6 +34,7 @@ public class TreeViewerGroupViewer extends Viewer {
 				new TreeViewerGroup.TreeViewerGroupToolbarAddButtonOption(),
 				new TreeViewerGroup.TreeViewerGroupToolbarToggleSplitEditorVerticallyButtonOption(),
 				new TreeViewerGroup.TreeViewerGroupAddToolPaletteOption.TreeViewerGroupAddToolPaletteToolbarHideEMFPaletteOption());
+		group.getViewer().addSelectionChangedListener(e -> fireSelectionChanged(e));
 	}
 	
 	public TreeViewerGroup getTreeViewerGroup () {
@@ -70,5 +72,5 @@ public class TreeViewerGroupViewer extends Viewer {
 		group.getViewer().setSelection(selection, reveal);
 
 	}
-
+	
 }

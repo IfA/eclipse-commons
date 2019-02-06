@@ -51,11 +51,15 @@ public interface IModelImportStrategy {
 			}
 		}
 		if (!referencedElements.isEmpty()) {
-			if (reference.isMany()) {
-				((EList)eObject.eGet(reference)).addAll(referencedElements);
-			} else {
-				eObject.eSet(reference, referencedElements.get(0));
-			}				
+			try {
+				if (reference.isMany()) {
+					((EList)eObject.eGet(reference)).addAll(referencedElements);
+				} else {
+					eObject.eSet(reference, referencedElements.get(0));
+				}
+			} catch (Exception e) {
+				//Do nothing
+			}
 		}
 	}
 
