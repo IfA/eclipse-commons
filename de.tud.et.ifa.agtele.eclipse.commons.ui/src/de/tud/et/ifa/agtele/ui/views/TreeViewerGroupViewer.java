@@ -34,7 +34,15 @@ public class TreeViewerGroupViewer extends Viewer {
 				new TreeViewerGroup.TreeViewerGroupToolbarAddButtonOption(),
 				new TreeViewerGroup.TreeViewerGroupToolbarToggleSplitEditorVerticallyButtonOption(),
 				new TreeViewerGroup.TreeViewerGroupAddToolPaletteOption.TreeViewerGroupAddToolPaletteToolbarHideEMFPaletteOption());
-		group.getViewer().addSelectionChangedListener(e -> fireSelectionChanged(e));
+		group.getViewer().addSelectionChangedListener(
+				e -> {
+//					boolean hadFocus = this.group.getTreeViewer().getControl().isFocusControl();
+					fireSelectionChanged(e);
+//					if (hadFocus) {
+//						this.group.getTreeViewer().getControl().setFocus();
+//					}
+				}
+			);
 	}
 	
 	public TreeViewerGroup getTreeViewerGroup () {

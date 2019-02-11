@@ -434,7 +434,7 @@ public class TreeViewerGroup extends FilteredTree implements IPersistable, ISele
 	 *
 	 * @return The {@link TreeViewer}.
 	 */
-	protected TreeViewer getTreeViewer() {
+	public TreeViewer getTreeViewer() {
 
 		return this.treeViewer;
 	}

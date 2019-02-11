@@ -6,9 +6,10 @@ import org.eclipse.emf.ecore.EStructuralFeature;
 import org.eclipse.emf.ecore.impl.MinimalEObjectImpl;
 import org.eclipse.emf.ecore.xmi.impl.XMIResourceImpl;
 import org.eclipse.jface.viewers.DelegatingStyledCellLabelProvider;
+import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.StyledString;
 
-public class AgteleStyledLabelProvider extends DelegatingStyledCellLabelProvider {
+public class AgteleStyledLabelProvider extends DelegatingStyledCellLabelProvider implements ILabelProvider {
 
 	private EMFPlugin editPlugin = null;
 	
@@ -57,5 +58,10 @@ public class AgteleStyledLabelProvider extends DelegatingStyledCellLabelProvider
 			return typeString;
 		}
 		return result;
+	}
+
+	@Override
+	public String getText(Object element) {
+		return this.getStyledText(element).getString();
 	}
 }
