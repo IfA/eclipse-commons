@@ -140,6 +140,7 @@ import de.tud.et.ifa.agtele.emf.edit.IDragAndDropProvider;
 import de.tud.et.ifa.agtele.emf.edit.CommonItemProviderAdapter.AddCommandWithEnhancedGenericTypeSupport;
 import de.tud.et.ifa.agtele.ui.AgteleUIPlugin;
 import de.tud.et.ifa.agtele.ui.emf.editor.TooltipDisplayingDropAdapter;
+import de.tud.et.ifa.agtele.ui.listeners.CommonDragSourceListener;
 import de.tud.et.ifa.agtele.ui.providers.AgteleEcoreContentProvider;
 import de.tud.et.ifa.agtele.ui.providers.AgteleReflectiveItemProviderAdapterFactory;
 import de.tud.et.ifa.agtele.ui.util.UIHelper;
@@ -1025,7 +1026,7 @@ public class ClonableEcoreEditor extends ClonableEditor implements IEditingDomai
 		int dndOperations = DND.DROP_COPY | DND.DROP_MOVE | DND.DROP_LINK;
 		Transfer[] transfers = new Transfer[] { LocalTransfer.getInstance(), LocalSelectionTransfer.getTransfer(),
 				FileTransfer.getInstance() };
-		viewer.addDragSupport(dndOperations, transfers, new ViewerDragAdapter(viewer));
+		viewer.addDragSupport(dndOperations, transfers, new CommonDragSourceListener(viewer));
 
 		// Use the custom drop adapter that will display a tooltip to the user
 		viewer.addDropSupport(dndOperations, transfers, new TooltipDisplayingDropAdapter(editingDomain, viewer));
