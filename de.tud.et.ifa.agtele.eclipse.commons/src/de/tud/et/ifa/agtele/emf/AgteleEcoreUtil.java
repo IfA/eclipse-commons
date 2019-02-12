@@ -995,14 +995,17 @@ public interface AgteleEcoreUtil {
 		
 		Adapter adapter = EcoreUtil.getRegisteredAdapter(eObject, type);
 		
-		if (adapter == null && eObject.eResource() != null) {
-			AdapterFactory factory = EcoreUtil.getAdapterFactory(eObject.eResource().getResourceSet().getAdapterFactories(), type);
+		if (adapter == null) {
+			AdapterFactory factory = null;
+			if (eObject.eResource() != null && eObject.eResource().getResourceSet() != null) {
+				factory = EcoreUtil.getAdapterFactory(eObject.eResource().getResourceSet().getAdapterFactories(), type);
+			}
 			
 			if (factory == null) {
 				factory = AgteleEcoreUtil.createRegisteredAdapterFactory(eObject.eClass().getEPackage().getNsURI());
 				if (factory != null) {
 					adapter = factory.adapt(eObject, type);
-					if (adapter != null) {
+					if (adapter != null && eObject.eResource() != null && eObject.eResource().getResourceSet() != null) {
 						eObject.eResource().getResourceSet().getAdapterFactories().add(factory);
 						//TODO store factory in a local static map in order not to query the extension point all the time
 					}
