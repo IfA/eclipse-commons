@@ -53,7 +53,10 @@ public class StateRestoringViewerRefresh extends ViewerRefresh {
 
 	@Override
 	public void run() {
-
+		if (this.structuredViewer.getControl().isDisposed()) {
+			return;
+		}
+		
 		Object resource = this.structuredViewer.getInput();
 
 		// Save the selection and expansion before refreshing the viewer
