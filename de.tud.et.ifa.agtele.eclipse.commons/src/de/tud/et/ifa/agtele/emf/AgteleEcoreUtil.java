@@ -1043,4 +1043,20 @@ public interface AgteleEcoreUtil {
 		}
 		return null;
 	}
+	
+	/**
+	 * Returns a unique string that corresponds to the ecore element.
+	 * @param eElement
+	 * @return
+	 */
+	static String getEcoreElementUri (EObject eElement) {
+		if (eElement instanceof EPackage) {
+			return ((EPackage)eElement).getNsURI();
+		} else if (eElement instanceof EClassifier) {
+			return AgteleEcoreUtil.getEcoreElementUri(((EClassifier)eElement).getEPackage()) + "#" + ((EClassifier)eElement).getName();
+		} else if (eElement instanceof EStructuralFeature) {
+			return AgteleEcoreUtil.getEcoreElementUri(((EStructuralFeature)eElement).getEContainingClass()) + "/" + ((EStructuralFeature)eElement).getName();
+		}
+		return null;		
+	}
 }

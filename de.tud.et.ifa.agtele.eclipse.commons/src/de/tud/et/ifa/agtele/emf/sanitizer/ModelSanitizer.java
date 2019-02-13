@@ -5,15 +5,22 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IConfigurationElement;
+import org.eclipse.core.runtime.IExtensionRegistry;
+import org.eclipse.core.runtime.Platform;
 import org.eclipse.emf.common.command.AbstractCommand;
 import org.eclipse.emf.common.command.Command;
 import org.eclipse.emf.common.command.CompoundCommand;
 import org.eclipse.emf.ecore.EObject;
+import org.eclipse.emf.ecore.EPackage;
 import org.eclipse.emf.ecore.util.EcoreUtil;
 import org.eclipse.emf.ecore.xmi.XMIResource;
 import org.eclipse.emf.edit.command.CommandParameter;
 import org.eclipse.emf.edit.command.SetCommand;
 import org.eclipse.emf.edit.domain.EditingDomain;
+
+import de.tud.et.ifa.agtele.emf.AgteleEcoreUtil;
 
 /**
  * A Model Sanitizer is a feature that maintains things in the whole model, and thus ensures model sanity.
@@ -37,6 +44,8 @@ public abstract class ModelSanitizer {
 	protected EditingDomain domain = null;
 	
 	protected ArrayList<ModelSanitizer> subSanitizers = new ArrayList<>();
+
+	protected boolean expand;
 	
 	public ModelSanitizer () {}
 		
@@ -58,11 +67,9 @@ public abstract class ModelSanitizer {
 		this.domain = domain;
 
 		domain.getResourceSet().getResources().forEach(r -> {
-			if (r instanceof XMIResource) {
-				((XMIResource)r).getContents().forEach(o -> {
-					ModelSanitizer.this.addInput(o);
-				});
-			}
+			r.getContents().forEach(o -> {
+				ModelSanitizer.this.addInput(o);
+			});
 		});
 	}
 	
@@ -90,7 +97,7 @@ public abstract class ModelSanitizer {
 	public void process (boolean expand) {
 		this.checkState();
 		this.processed = true;
-		
+		this.expand = expand;
 		if (expand) {
 			this.expandInput();
 		} else {
@@ -131,14 +138,16 @@ public abstract class ModelSanitizer {
 	}
 	
 	protected void processSanitizer (ModelSanitizer sanitizer) {
+		boolean didIConfigure = false;
 		if (!sanitizer.isConfigured()) {
 			sanitizer.setExpandedInput(this.expandedInput);
+			didIConfigure = true;
 		}
 		if (sanitizer.domain == null) {
 			sanitizer.setEditingDomain(this.domain);
 		}
 		
-		sanitizer.process(false);
+		sanitizer.process(!didIConfigure && this.expand);
 		AbstractCommand result = sanitizer.getResult();
 		if (result != null) {
 			if (!(result instanceof CompoundCommand) || !((CompoundCommand)result).isEmpty()) {
@@ -149,6 +158,37 @@ public abstract class ModelSanitizer {
 	
 	public void addSubSanitizer (ModelSanitizer sanitizer) {
 		this.subSanitizers.add(sanitizer);
+	}
+	
+	public static final String MODEL_SANIZITER_FACTORY_EXTENSION_POINT_ID = "de.tud.et.ifa.agtele.eclipse.commons.ModelSanitizerFactoryRegistry";
+	
+	public static Collection<ModelSanitizerFactory> getRegisteredModelSanitizers (EPackage pkg) {
+		ArrayList<ModelSanitizerFactory> result = new ArrayList<>();
+		EPackage rootPackage = AgteleEcoreUtil.getRootEPackage(pkg);
+
+		IExtensionRegistry registry = Platform.getExtensionRegistry();
+		
+		IConfigurationElement[] elements
+	      = registry.getConfigurationElementsFor( MODEL_SANIZITER_FACTORY_EXTENSION_POINT_ID );
+		
+		for(IConfigurationElement element : elements) {
+			String uri = element.getAttribute("ePackage");
+			if (rootPackage.getNsURI().equals(uri)) {
+				try {
+					final Object o =
+							element.createExecutableExtension("factory");
+					if (o instanceof ModelSanitizerFactory) {
+						result.add((ModelSanitizerFactory)o);					
+					}
+				} catch (CoreException e) {
+					e.printStackTrace();
+				}
+			}
+			
+			
+            
+		}
+		return result;		
 	}
 	
 	public static class ModelSanitizerImpl extends ModelSanitizer {		
@@ -178,6 +218,27 @@ public abstract class ModelSanitizer {
 				result.addAll(this.getDefaultSanitizers());
 			}		
 			return result;
+		}		
+	}
+	
+	public static class DynamicModelSanitizer extends ModelSanitizer {
+		
+		public DynamicModelSanitizer (EditingDomain input) {
+			super();
+			this.addInput(input);
+		}
+		
+		@Override
+		public void addInput(EObject element) {
+			super.addInput(element);
+			Collection<ModelSanitizerFactory> sanitizerFactories = ModelSanitizer.getRegisteredModelSanitizers(element.eClass().getEPackage());
+			
+			for (ModelSanitizerFactory factory : sanitizerFactories) {
+				for (ModelSanitizer sanitizer : factory.createSanitizers()) {
+					sanitizer.addInput(element);
+					this.addSubSanitizer(sanitizer);					
+				}
+			}			
 		}		
 	}
 	
