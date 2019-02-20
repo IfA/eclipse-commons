@@ -18,6 +18,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.eclipse.emf.common.command.Command;
 import org.eclipse.emf.edit.domain.EditingDomain;
 import org.eclipse.emf.edit.ui.action.CreateChildAction;
 import org.eclipse.emf.edit.ui.action.CreateSiblingAction;
@@ -383,11 +384,15 @@ public abstract class ModelElementPalette {
 					@Override
 					public void mouseUp(MouseEvent e) {
 						if (e.x >= 0 && e.y >= 0 && e.x <= HoverLabel.this.getSize().x && e.y <= HoverLabel.this.getSize().y) {
+							Command lastCommand = ModelElementPalette.this.getEditingDomain().getCommandStack().getMostRecentCommand();
+							
 							HoverLabel.this.action.run();
+							Command newCommand = ModelElementPalette.this.getEditingDomain().getCommandStack().getMostRecentCommand();
 						}
 					}
 					@Override
 					public void mouseDown(MouseEvent e) {
+						ModelElementPalette.this.getTreeViewer().getTree().setFocus();
 					}
 
 					@Override
