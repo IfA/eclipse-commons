@@ -22,8 +22,8 @@ providerName = www.example.org
 <%if (genModel.getRuntimePlatform() != GenRuntimePlatform.GWT) {%>
 
 <%if (genModel.isCreationCommands()) {%>
-_UI_CreateChild_text = {0}
-_UI_CreateChild_text2 = {1} <%if (genModel.isCreationSubmenus()) {%>| <%}%>{0}
+_UI_CreateChild_text = {1} \u00bb <%if (genModel.isCreationSubmenus()) {%>| <%}%>{0}
+_UI_CreateChild_text2 = {1} \u00bb <%if (genModel.isCreationSubmenus()) {%>| <%}%>{0}
 _UI_CreateChild_text3 = {1}
 _UI_CreateChild_tooltip = Create New {0} Under {1} Feature
 _UI_CreateChild_description = Create a new child of type {0} for the {1} feature of the selected {2}.

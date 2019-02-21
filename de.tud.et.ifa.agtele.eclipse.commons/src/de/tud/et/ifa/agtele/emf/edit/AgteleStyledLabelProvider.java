@@ -21,8 +21,12 @@ public class AgteleStyledLabelProvider extends DelegatingStyledCellLabelProvider
 	public AgteleStyledLabelProvider(IStyledLabelProvider labelProvider) {
 		super(labelProvider);
 	}
-
+	
 	public String getReferenceNameSeparator () {
+		return AgteleStyledLabelProvider.getDefaultReferenceNameSeparator();
+	}
+
+	public static String getDefaultReferenceNameSeparator () {
 		return "\u0020\u00bb\u0020";
 	}
 	
@@ -52,7 +56,10 @@ public class AgteleStyledLabelProvider extends DelegatingStyledCellLabelProvider
 						+ this.getReferenceNameSeparator(),
 					StyledString.QUALIFIER_STYLER).append(typeString);
 			} catch (Exception ex) {
-				result = typeString;
+				result = new StyledString(
+						e.eContainingFeature().getName()
+						+ this.getReferenceNameSeparator(),
+						StyledString.QUALIFIER_STYLER).append(typeString);
 			}
 		} else {
 			return typeString;
