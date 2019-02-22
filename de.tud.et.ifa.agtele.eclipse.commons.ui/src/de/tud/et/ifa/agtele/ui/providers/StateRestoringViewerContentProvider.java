@@ -24,7 +24,7 @@ import org.eclipse.jface.viewers.TreeViewer;
  *
  * @author lbaron
  */
-public class StateRestoringViewerContentProvider extends AdapterFactoryContentProvider {
+public class StateRestoringViewerContentProvider extends AgteleContentProvider {
 
 	/**
 	 * This creates an instance.
