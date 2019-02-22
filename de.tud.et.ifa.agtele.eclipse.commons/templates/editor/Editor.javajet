@@ -240,6 +240,8 @@ import de.tud.et.ifa.agtele.ui.util.CommonEditingDomainViewerDropAdapter;
 import de.tud.et.ifa.agtele.ui.editors.ClonableEditor;
 import de.tud.et.ifa.agtele.ui.interfaces.IPersistable;
 import de.tud.et.ifa.agtele.ui.util.TreeViewNavigationLocation;
+import de.tud.et.ifa.agtele.ui.providers.StateRestoringViewerContentProvider;
+import de.tud.et.ifa.agtele.ui.providers.AgteleContentProvider;
 import de.tud.et.ifa.agtele.ui.views.EMFModelHelpView;
 import de.tud.et.ifa.agtele.ui.widgets.ModelElementPalette;
 import de.tud.et.ifa.agtele.ui.widgets.TreeViewerGroup;
@@ -584,13 +586,6 @@ public class <%=genPackage.getEditorClassName()%>
 	protected boolean updateProblemIndication = true;
 
 <%// Start of modifications by Institute of Automation, TU Dresden (integrate the 'HelpListener')%>
-	/**
-	 * This listens to the HelpEvent (F1)
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
-	 * @generated
-	 */
-	protected EMFModelHelpView.HelpListener helpListener;
 
 	/**
 	 * Stores the last executed model sanitizer
@@ -598,7 +593,8 @@ public class <%=genPackage.getEditorClassName()%>
 	 * <!-- end-user-doc -->
 	 * @generated
 	 **/
-	protected ModelSanitizerImpl sanitizer;
+	protected ModelSanitizer sanitizer;
+
 <%// End of modifications by Institute of Automation, TU Dresden%>
 	
 	/**
@@ -808,21 +804,8 @@ public class <%=genPackage.getEditorClassName()%>
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
-	private TreeViewerGroup tree;
+	protected TreeViewerGroup tree;
 
-	/**
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
-	 * @generated
-	 */
-	private SashForm treePaletteSeparator;
-
-	/**
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
-	 * @generated
-	 */
-	private ModelElementPalette elementPalette;
 <%// End of modifications by Institute of Automation, TU Dresden%>
 	
 	/**
@@ -1580,7 +1563,10 @@ public class <%=genPackage.getEditorClassName()%>
 								new TreeViewerGroup.TreeViewerGroupToolbarCollapseAllButtonOption(),
 								new TreeViewerGroup.TreeViewerGroupToolbarAddButtonOption(),
 								new TreeViewerGroup.TreeViewerGroupToolbarToggleSplitEditorVerticallyButtonOption(),
-								new TreeViewerGroup.TreeViewerGroupAddToolPaletteOption.TreeViewerGroupAddToolPaletteToolbarHideEMFPaletteOption());
+								new TreeViewerGroup.TreeViewerGroupAddToolPaletteOption.TreeViewerGroupAddToolPaletteToolbarHideEMFPaletteOption(),
+								new TreeViewerGroup.TreeViewerGroupBindHelpListenerOption(),
+								new TreeViewerGroup.TreeViewerGroupBindDoubleClickEditMultilineFeatureOption()
+							);
 							
 							<%=genPackage.getEditorClassName()%>.this.tree = viewer.getTreeViewerGroup();
 				
@@ -1603,19 +1589,11 @@ public class <%=genPackage.getEditorClassName()%>
 							
 				this.tree.getViewer().addSelectionChangedListener(event -> <%=genPackage.getEditorClassName()%>.this.updateNavigationHistory());
 	
-				//selectionViewer.setContentProvider(new AdapterFactoryContentProvider(adapterFactory));
+				selectionViewer.setContentProvider(new StateRestoringViewerContentProvider(this.adapterFactory, treeViewer));
 				selectionViewer.setLabelProvider(<%if (useStyledLabelProvider) {%>new <%=_DelegatingAdapterFactoryLabelProvider%>(<%}%><%if (genModel.getDecoration() != GenDecoration.NONE) {%>new <%=_DecoratingColumLabelProvider%>(<%}%>new <%=_AdapterFactoryLabelProvider%>(adapterFactory<%if (useExtendedLabelProvider) {%>, selectionViewer<%}%>)<%if (genModel.getDecoration() != GenDecoration.NONE) {%>, new <%=_DiagnosticDecorator%>(editingDomain<%if (genModel.getDecoration() == GenDecoration.MANUAL) {%>.getResourceSet()<%}%>, selectionViewer<%if (genModel.getDecoration() == GenDecoration.LIVE) {%>, <%=genPackage.getImportedEditorPluginClassName()%>.getPlugin().getDialogSettings()<%}%>))<%}%><%if (useStyledLabelProvider) {%>)<%}%>);
 				selectionViewer.setInput(editingDomain.getResourceSet());
 				selectionViewer.setSelection(new StructuredSelection(editingDomain.getResourceSet().getResources().get(0)), true);
 	
-				this.helpListener = new EMFModelHelpView.HelpListener();
-	
-				// Add a Help Listener (F1)
-				for (Control control : this.tree.getChildren()) {
-					control.addHelpListener(this.helpListener);
-				}
-	
-				this.selectionViewer.getControl().addHelpListener(this.helpListener);
 <%// End of modifications by Institute of Automation, TU Dresden%>
 
 new AdapterFactoryTreeEditor(treeViewer.getTree(), adapterFactory);
@@ -2024,7 +2002,7 @@ new AdapterFactoryTreeEditor(treeViewer.getTree(), adapterFactory);
 					getActionBarContributor().shareGlobalActions(this, actionBars);
 				}
 			};
-		propertySheetPage.setPropertySourceProvider(new AdapterFactoryContentProvider(adapterFactory));
+		propertySheetPage.setPropertySourceProvider(new AgteleContentProvider(adapterFactory));
 		propertySheetPages.add(propertySheetPage);
 
 		return propertySheetPage;
