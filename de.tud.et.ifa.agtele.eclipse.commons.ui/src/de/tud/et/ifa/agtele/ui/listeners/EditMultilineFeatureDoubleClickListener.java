@@ -103,4 +103,8 @@ public class EditMultilineFeatureDoubleClickListener implements IDoubleClickList
 		}
 	}
 
+	public void dispose() {
+		this.selectionViewer.removeDoubleClickListener(this);		
+	}
+
 }

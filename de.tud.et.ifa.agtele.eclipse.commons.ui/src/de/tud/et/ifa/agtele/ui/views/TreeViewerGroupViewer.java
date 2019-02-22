@@ -29,18 +29,10 @@ public class TreeViewerGroupViewer extends Viewer {
 	
 	public void createControl (Composite parent, ComposedAdapterFactory adapterFactory, EditingDomain editingDomain, IDialogSettings dialogSettings, String groupText, TreeViewerGroupOption... options) {
 		group = new TreeViewerGroup(parent,adapterFactory, editingDomain,
-				dialogSettings, null,
-				new TreeViewerGroup.TreeViewerGroupToolbarCollapseAllButtonOption(),
-				new TreeViewerGroup.TreeViewerGroupToolbarAddButtonOption(),
-				new TreeViewerGroup.TreeViewerGroupToolbarToggleSplitEditorVerticallyButtonOption(),
-				new TreeViewerGroup.TreeViewerGroupAddToolPaletteOption.TreeViewerGroupAddToolPaletteToolbarHideEMFPaletteOption());
+				dialogSettings, null, options);
 		group.getViewer().addSelectionChangedListener(
 				e -> {
-//					boolean hadFocus = this.group.getTreeViewer().getControl().isFocusControl();
 					fireSelectionChanged(e);
-//					if (hadFocus) {
-//						this.group.getTreeViewer().getControl().setFocus();
-//					}
 				}
 			);
 	}

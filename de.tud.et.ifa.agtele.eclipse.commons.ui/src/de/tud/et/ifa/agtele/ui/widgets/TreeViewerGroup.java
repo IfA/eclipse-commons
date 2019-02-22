@@ -13,6 +13,7 @@ package de.tud.et.ifa.agtele.ui.widgets;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -25,6 +26,7 @@ import org.eclipse.core.commands.NotHandledException;
 import org.eclipse.core.commands.Parameterization;
 import org.eclipse.core.commands.ParameterizedCommand;
 import org.eclipse.core.commands.common.NotDefinedException;
+import org.eclipse.emf.common.notify.AdapterFactory;
 import org.eclipse.emf.common.ui.viewer.ColumnViewerInformationControlToolTipSupport;
 import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.EObject;
@@ -60,6 +62,7 @@ import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.ToolBar;
 import org.eclipse.swt.widgets.ToolItem;
@@ -74,6 +77,7 @@ import de.tud.et.ifa.agtele.resources.BundleContentHelper;
 import de.tud.et.ifa.agtele.ui.AgteleUIPlugin;
 import de.tud.et.ifa.agtele.ui.emf.editor.ActionUtil;
 import de.tud.et.ifa.agtele.ui.interfaces.IPersistable;
+import de.tud.et.ifa.agtele.ui.listeners.EditMultilineFeatureDoubleClickListener;
 import de.tud.et.ifa.agtele.ui.listeners.SelectionListener2;
 import de.tud.et.ifa.agtele.ui.providers.StateRestoringViewerContentProvider;
 import de.tud.et.ifa.agtele.ui.views.EMFModelHelpView;
@@ -216,7 +220,7 @@ public class TreeViewerGroup extends FilteredTree implements IPersistable, ISele
 
 		return new TreeViewerGroupToolbarToggleSplitEditorVerticallyButtonOption();
 	}
-
+	
 	/**
 	 * The default option to add bind the {@link HelpListener} so that the user can press F1 to open the
 	 * {@link EMFModelHelpView}..
@@ -224,8 +228,16 @@ public class TreeViewerGroup extends FilteredTree implements IPersistable, ISele
 	 * @return a new instance of TreeViewerGroupBindHelpListenerOption
 	 */
 	public static TreeViewerGroupBindHelpListenerOption BIND_HELP_LISTENER() {
-
+		
 		return new TreeViewerGroupBindHelpListenerOption();
+	}
+
+	/**
+	 * @return a new instance of TreeViewerGroupBindDoubleClickEditMultilineFeatureOption
+	 */
+	public static TreeViewerGroupBindDoubleClickEditMultilineFeatureOption BIND_DOUBLE_CLICK_EDIT_MULTILINE_FEATURE_LISTENER() {
+
+		return new TreeViewerGroupBindDoubleClickEditMultilineFeatureOption();
 	}
 
 	/**
@@ -418,12 +430,12 @@ public class TreeViewerGroup extends FilteredTree implements IPersistable, ISele
 		new ColumnViewerInformationControlToolTipSupport(treeViewer,
 				new DiagnosticDecorator.Styled.EditingDomainLocationListener(this.editingDomain, treeViewer));
 
-		// If necessary, initialize and bind the HelpListener
+		// If necessary, initialize additional options
 		//
-		Optional<TreeViewerGroupOption> bindHelpListenerOption = Arrays.asList(this.options).parallelStream()
-				.filter(o -> o instanceof TreeViewerGroupBindHelpListenerOption).findAny();
-		if (bindHelpListenerOption.isPresent()) {
-			((TreeViewerGroupBindHelpListenerOption) bindHelpListenerOption.get()).initListener(treeViewer);
+		Collection<TreeViewerGroupOption> options = Arrays.asList(this.options).parallelStream()
+				.filter(o -> o instanceof TreeViewerGroupSelectionViewerOption).collect(Collectors.toList());
+		for (TreeViewerGroupOption option : options) {
+			((TreeViewerGroupSelectionViewerOption) option).init(treeViewer, this.adapterFactory, this);
 		}
 
 		return treeViewer;
@@ -609,15 +621,18 @@ public class TreeViewerGroup extends FilteredTree implements IPersistable, ISele
 	 *
 	 * @author Lukas
 	 */
-	@FunctionalInterface
 	public static interface TreeViewerGroupOption {
-
+		
 		/**
 		 * Disposes the created UI elements and removes created event listeners from other elements.
 		 */
 		public void dispose();
 	}
 
+	public static interface TreeViewerGroupSelectionViewerOption extends TreeViewerGroupOption {
+		default public void init(TreeViewer viewer, AdapterFactory factory, TreeViewerGroup group) {}
+	}
+	
 	/**
 	 * A ToolbarOption alters the contents of the Toolbar.
 	 *
@@ -1216,7 +1231,7 @@ public class TreeViewerGroup extends FilteredTree implements IPersistable, ISele
 	 *
 	 * @author mfreund
 	 */
-	public static class TreeViewerGroupBindHelpListenerOption implements TreeViewerGroupOption {
+	public static class TreeViewerGroupBindHelpListenerOption implements TreeViewerGroupSelectionViewerOption {
 
 		/**
 		 * The {@link TreeViewer} to which the help listener will be added.
@@ -1227,18 +1242,25 @@ public class TreeViewerGroup extends FilteredTree implements IPersistable, ISele
 		 * This listens to the HelpEvent (F1)
 		 */
 		protected EMFModelHelpView.HelpListener helpListener;
+		
+		protected TreeViewerGroup group;
 
 		/**
 		 * Initializes the {@link HelpListener} for the given {@link TreeViewer}.
 		 *
 		 * @param viewer
 		 */
-		public void initListener(TreeViewer viewer) {
+		@Override
+		public void init(TreeViewer viewer, AdapterFactory factory, TreeViewerGroup group) {
 
 			this.viewer = viewer;
 			this.helpListener = new EMFModelHelpView.HelpListener();
+			this.group = group;
 
 			this.viewer.addHelpListener(this.helpListener);
+			for (Control control : this.group.getChildren()) {
+				control.addHelpListener(this.helpListener);
+			}
 		}
 
 		@Override
@@ -1246,6 +1268,35 @@ public class TreeViewerGroup extends FilteredTree implements IPersistable, ISele
 
 			this.viewer.removeHelpListener(this.helpListener);
 
+		}
+	}
+	
+	public static class TreeViewerGroupBindDoubleClickEditMultilineFeatureOption implements TreeViewerGroupSelectionViewerOption {
+		
+		/**
+		 * The {@link TreeViewer} to which the help listener will be added.
+		 */
+		protected TreeViewer viewer;
+
+		/**
+		 * The {@link AdapterFactory} 
+		 */
+		protected AdapterFactory factory;
+		
+		protected EditMultilineFeatureDoubleClickListener doubleClickListener = null;
+		
+		protected TreeViewerGroup group = null;
+		
+		@Override
+		public void init(TreeViewer viewer, AdapterFactory factory, TreeViewerGroup group) {
+			this.viewer = viewer;
+			this.factory = factory;
+			this.doubleClickListener = new EditMultilineFeatureDoubleClickListener(this.viewer, this.factory);
+		}
+		
+		@Override
+		public void dispose() {
+			this.doubleClickListener.dispose();
 		}
 	}
 }
