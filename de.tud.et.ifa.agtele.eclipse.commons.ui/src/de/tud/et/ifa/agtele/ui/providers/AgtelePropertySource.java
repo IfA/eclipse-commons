@@ -2,11 +2,12 @@ package de.tud.et.ifa.agtele.ui.providers;
 
 import java.text.MessageFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
-import org.eclipse.emf.common.notify.AdapterFactory;
+import org.eclipse.emf.common.CommonPlugin;
 import org.eclipse.emf.common.ui.celleditor.ExtendedComboBoxCellEditor;
 import org.eclipse.emf.edit.provider.IItemPropertyDescriptor.ValueHandler;
 import org.eclipse.emf.common.ui.celleditor.ExtendedDialogCellEditor;
@@ -14,32 +15,33 @@ import org.eclipse.emf.ecore.EClassifier;
 import org.eclipse.emf.ecore.EDataType;
 import org.eclipse.emf.ecore.EReference;
 import org.eclipse.emf.ecore.EStructuralFeature;
-import org.eclipse.emf.edit.provider.ComposedAdapterFactory;
 import org.eclipse.emf.edit.provider.IItemPropertyDescriptor;
 import org.eclipse.emf.edit.provider.IItemPropertySource;
 import org.eclipse.emf.edit.provider.ItemPropertyDescriptor;
-import org.eclipse.emf.edit.provider.ItemProvider;
 import org.eclipse.emf.edit.ui.celleditor.FeatureEditorDialog;
-import org.eclipse.emf.edit.ui.provider.AdapterFactoryContentProvider;
 import org.eclipse.emf.edit.ui.provider.PropertyDescriptor;
 import org.eclipse.emf.edit.ui.provider.PropertySource;
 import org.eclipse.jface.dialogs.IInputValidator;
 import org.eclipse.jface.viewers.CellEditor;
+import org.eclipse.jface.viewers.ComboBoxCellEditor;
 import org.eclipse.jface.viewers.ICellEditorValidator;
 import org.eclipse.jface.viewers.ILabelProvider;
-import org.eclipse.jface.viewers.ISelectionChangedListener;
-import org.eclipse.jface.viewers.SelectionChangedEvent;
-import org.eclipse.jface.viewers.TableViewer;
-import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.CCombo;
+import org.eclipse.swt.events.FocusAdapter;
+import org.eclipse.swt.events.FocusEvent;
 import org.eclipse.swt.events.KeyAdapter;
 import org.eclipse.swt.events.KeyEvent;
 import org.eclipse.swt.events.KeyListener;
+import org.eclipse.swt.events.ModifyEvent;
+import org.eclipse.swt.events.ModifyListener;
+import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.events.SelectionListener;
+import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Table;
@@ -63,12 +65,12 @@ public class AgtelePropertySource extends PropertySource {
 	 */
 	public static class ExtendedFeatureEditorDialog extends FeatureEditorDialog {
 
-		private Button addButton;
-		private Composite choiceComposite;
-		private Composite buttonComposite;
-		private Composite dialogAreaComposite;
-		private Text choiceText;
-		private Table choiceTable;
+		protected Button addButton;
+		protected Composite choiceComposite;
+		protected Composite buttonComposite;
+		protected Composite dialogAreaComposite;
+		protected Text choiceText;
+		protected Table choiceTable;
 
 		public ExtendedFeatureEditorDialog(Shell parent, ILabelProvider labelProvider, Object object,
 				EClassifier eClassifier, List<?> currentValues, String displayName, List<?> choiceOfValues,
@@ -124,6 +126,229 @@ public class AgtelePropertySource extends PropertySource {
 		}
 	}
 	
+	public static class StringPositionPair implements Comparable<StringPositionPair> {
+		protected Comparator<String> comparator = CommonPlugin.INSTANCE.getComparator();
+
+		public String key;
+
+		public int position;
+
+		StringPositionPair(String key, int position) {
+			this.key = key;
+			this.position = position;
+		}
+
+		public int compareTo(StringPositionPair object) {
+			if (object == this) {
+				return 0;
+			} else {
+				StringPositionPair that = object;
+				return comparator.compare(key, that.key);
+			}
+		}
+	}
+	
+	//Extending this combobox is not really possible, again, all sub elements, like text and dropdown are inaccessible properties, creating a custom cell editor may be needed
+	public static class AgteleExtendedComboBoxCellEditor extends ExtendedComboBoxCellEditor {
+
+		public AgteleExtendedComboBoxCellEditor(Composite composite, ArrayList<? extends Object> list,
+				ILabelProvider labelProvider, boolean sortChoices, int style, ValueHandler valueHandler,
+				boolean autoShowDropDownList) {
+			super(composite, list, labelProvider, sortChoices, style + DROP_DOWN_ON_KEY_ACTIVATION, valueHandler, autoShowDropDownList);
+
+			final CCombo combo = (CCombo) getControl();
+
+			for (Listener listener : combo.getListeners(SWT.Modify)) {
+				combo.removeListener(SWT.Modify,listener);
+			}
+			
+			combo.addKeyListener(new KeyListener () {
+				@Override
+				public void keyPressed(KeyEvent e) {
+					if (e.character == ' ' && (e.stateMask & SWT.CTRL) > 0) {
+						e.doit = false;
+						combo.setListVisible(true); //
+					}
+				}
+
+				@Override
+				public void keyReleased(KeyEvent e) {
+					//do nothing
+				}
+				
+			});
+			
+			combo.addModifyListener(new ModifyListener() {
+				boolean updating;
+
+				public void modifyText(ModifyEvent e) {
+					if (!updating) {
+						updating = true;
+
+						String text = combo.getText();
+						ArrayList<Object> newList = new ArrayList<Object>(originalList);
+						Object valueToSelect = null;
+
+						try {
+							valueToSelect = valueHandler.toValue(text);
+							if (!newList.contains(valueToSelect)) {
+								newList.add(0, valueToSelect);
+							}
+						} catch (RuntimeException exception) {
+							// Ignore.
+						}
+
+						String[] items = null;
+						
+						if (valueToSelect != null && originalList.contains(valueToSelect)) {
+							items = AgteleExtendedComboBoxCellEditor.this.createFilteredItems(newList,
+								AgteleExtendedComboBoxCellEditor.this.labelProvider, null,
+								AgteleExtendedComboBoxCellEditor.this.sorted);
+						} else {
+							items = AgteleExtendedComboBoxCellEditor.this.createFilteredItems(newList,
+								AgteleExtendedComboBoxCellEditor.this.labelProvider, text,
+								AgteleExtendedComboBoxCellEditor.this.sorted);
+						}
+						
+						AgteleExtendedComboBoxCellEditor.this.list = newList;
+						combo.setItems(items);
+						
+						combo.notifyListeners(SWT.Selection, new Event());
+						combo.setRedraw(false);				
+						
+						
+						Point selection = combo.getSelection();
+						if (AgteleExtendedComboBoxCellEditor.this.list.contains(valueToSelect)) {
+							setValue(valueToSelect);
+						} else if (!AgteleExtendedComboBoxCellEditor.this.list.isEmpty()) {
+							setValue(AgteleExtendedComboBoxCellEditor.this.list.get(0));
+						}
+						combo.setText(text);
+						combo.setSelection(selection);
+						String oldErrorMessage = getErrorMessage();
+						String newErrorMessage = valueHandler.isValid(text);
+						setErrorMessage(
+								newErrorMessage == null ? null : MessageFormat.format(newErrorMessage, new Object[0]));
+						fireEditorValueChanged(oldErrorMessage == null, newErrorMessage == null);
+						combo.setRedraw(true);
+						updating = false;
+					}
+				}
+			});
+		}
+		
+		@Override
+		protected void refreshItems(String filter) {
+		    CCombo combo = (CCombo)getControl();
+		    if (combo != null && !combo.isDisposed()) {
+		    	ArrayList<Object> newList = new ArrayList<Object>(originalList);
+		    	String[] items = this.createFilteredItems(newList, labelProvider, filter, sorted);
+		    	if (!newList.equals(list)) {
+		    		Object previousValue = getValue();
+		    		list = newList;
+		    		combo.setItems(items);
+		    		if (list.contains(previousValue)) {
+		    			setValue(previousValue);
+		    		} else if (!list.isEmpty()) {
+		    			setValue(list.get(0));
+		    		}
+		    	}
+	    	}
+		}
+
+		public <T> String[] createFilteredItems(List<T> list, ILabelProvider labelProvider, String filter,
+				boolean sorted) {
+			String[] result;
+
+			if (filter != null && filter.length() > 0) {
+				sorted = true;
+			}
+
+			// If there are objects to populate...
+			//
+			if (list != null && list.size() > 0) {
+				if (sorted) {
+					List<T> unsortedList = new ArrayList<T>(list.size());
+					if (filter != null && filter.length() > 0) {
+						for (int i = 0; i < list.size(); i++) {
+							if (this.filter(filter, labelProvider.getText(list.get(i)))) {
+								unsortedList.add(list.get(i));
+							}
+						}
+					} else {
+						unsortedList.addAll(list);
+					}
+					list.clear();
+
+					StringPositionPair[] pairs = new StringPositionPair[unsortedList.size()];
+
+					for (int i = 0, size = unsortedList.size(); i < size; ++i) {
+						Object object = unsortedList.get(i);
+						pairs[i] = new StringPositionPair(labelProvider.getText(object), i);
+					}
+
+					Arrays.sort(pairs);
+
+					// Create a new array.
+					//
+					result = new String[unsortedList.size()];
+					// Fill in the result array with labels and re-populate the original list in
+					// order.
+					//
+					for (int i = 0, size = unsortedList.size(); i < size; ++i) {
+						result[i] = pairs[i].key;
+						list.add(unsortedList.get(pairs[i].position));
+					}
+				} else {
+					// Create a new array.
+					//
+					result = new String[list.size()];
+					// Fill in the array with labels.
+					//
+					for (int i = 0, size = list.size(); i < size; ++i) {
+						Object object = list.get(i);
+						result[i] = labelProvider.getText(object);
+					}
+				}
+			} else {
+				result = new String[] { "" };
+			}
+
+			return result;
+		}
+		
+		/**
+		 * Adapted select method in order to enable a better filtering for the remaining drop down items.
+		 * @param filter
+		 * @param labelValue
+		 * @return
+		 */
+		public boolean filter(String filter, String labelValue) {
+			if (filter != null && filter.length() > 0) {
+				if (filter.length() > labelValue.length()) {
+					return false;
+				}
+				labelValue = labelValue.toLowerCase();
+				filter = filter.toLowerCase();
+				
+				for (String fragment : filter.split("\\s")) {
+					if (!labelValue.contains(fragment)) {
+						return false;
+					}
+				}
+			}
+			return true;
+		}
+	}
+	
+//	public static class ExtendedCCombo extends CCombo {
+//
+//		public ExtendedCCombo(Composite parent, int style) {
+//			super(parent, style);
+//		}
+//		
+//	}
+	
 	public static class AgtelePropertyDescriptor extends PropertyDescriptor {
 		public AgtelePropertyDescriptor(Object object, IItemPropertyDescriptor itemPropertyDescriptor) {
 			super(object, itemPropertyDescriptor);
@@ -131,7 +356,7 @@ public class AgtelePropertySource extends PropertySource {
 		
 		//TODO extend the extended cell editor in order to filter the choice of values when arbitrary values are enabled.
 		public ExtendedComboBoxCellEditor createComboBoxEditor (Composite composite, Collection<? extends Object> choices, ILabelProvider labelProvider, boolean sortChoices, int style, ExtendedComboBoxCellEditor.ValueHandler handler, boolean autoShowDropDownList) {
-			return new ExtendedComboBoxCellEditor(composite, new ArrayList<>(choices), labelProvider, sortChoices, style, handler, autoShowDropDownList);
+			return new AgteleExtendedComboBoxCellEditor(composite, new ArrayList<>(choices), labelProvider, sortChoices, style, handler, autoShowDropDownList);
 		}
 		
 		public FeatureEditorDialog createFeatureEditorDialog(Control control, ILabelProvider labelProvider, EStructuralFeature feature, List<?> value, Collection<? extends Object> choices, boolean multiline, boolean sort, ValueHandler handler) {
@@ -229,7 +454,7 @@ public class AgtelePropertySource extends PropertySource {
 			                 itemPropertyDescriptor.isSortChoices(object),
 			                 SWT.NONE,
 			                 new EDataTypeValueHandler((EDataType)eType, ((IItemPropertyDescriptor.ValueHandlerProvider)itemPropertyDescriptor).getValueHandler(object)),
-			                 false
+			                 true
 			            );
 		          }
 		          else
