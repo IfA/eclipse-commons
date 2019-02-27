@@ -226,7 +226,7 @@ public class AgtelePropertySource extends PropertySource {
 						combo.setText(text);
 						combo.setSelection(selection);
 						String oldErrorMessage = getErrorMessage();
-						String newErrorMessage = valueHandler.isValid(text);
+						String newErrorMessage = valueHandler != null ? valueHandler.isValid(text) : null;
 						setErrorMessage(
 								newErrorMessage == null ? null : MessageFormat.format(newErrorMessage, new Object[0]));
 						fireEditorValueChanged(oldErrorMessage == null, newErrorMessage == null);
