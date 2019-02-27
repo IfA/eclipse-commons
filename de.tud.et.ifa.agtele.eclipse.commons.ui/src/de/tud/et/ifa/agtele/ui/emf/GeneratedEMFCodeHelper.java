@@ -262,9 +262,9 @@ public class GeneratedEMFCodeHelper {
 
 			// Check if there is an EOperation corresponding to the selection
 			//
-			Optional<EOperation> eOperation = eClass.getEOperations().stream()
+			Optional<EOperation> eOperation = eClass.getEAllOperations().stream()
 					.filter(o -> methodName.equals(o.getName())).findAny();
-			if (eOperation.isPresent()) {
+			if (eOperation.isPresent()) { //TODO this has to be extended in case of overloaded methods
 				return eOperation.get();
 			}
 
