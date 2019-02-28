@@ -596,13 +596,13 @@ public interface AgteleEcoreUtil {
 	 */
 	public static Collection<EObject> getAllInstances(EClass eClass, EObject root) {
 
-		Collection<EObject> result = new ArrayList<>();
+ 		Collection<EObject> result = new ArrayList<>();
 
 		Iterator<EObject> it = new AgteleContainmentTreeIterator(root, true, true);
 
 		while (it.hasNext()) {
 			EObject obj = it.next();
-			if (eClass.isSuperTypeOf(obj.eClass())) {
+			if (eClass.isSuperTypeOf(obj.eClass()) || eClass ==obj.eClass() || eClass == EcorePackage.Literals.EOBJECT) {
 				result.add(obj);
 			}
 		}
