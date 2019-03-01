@@ -595,14 +595,18 @@ public interface IRequireRelatedModelUpdateProvider {
 			return this.originalCommand.getLabel();
 		}
 
-		@SuppressWarnings("unchecked")
+		@SuppressWarnings({ "unchecked", "rawtypes" })
 		@Override
 		public Collection<?> getAffectedObjects() {
-			@SuppressWarnings({ "rawtypes" })
-			ArrayList result = new ArrayList(this.originalCommand.getAffectedObjects());
+			ArrayList result = new ArrayList();
+			if (this.originalCommand.getAffectedObjects() != null) {
+				result = new ArrayList(this.originalCommand.getAffectedObjects());
+			}
 			if (this.additionalCommands != null) {
 				for (Command cmd : this.additionalCommands) {
-					result.addAll(cmd.getAffectedObjects());
+					if (cmd.getAffectedObjects() != null) {
+					result.addAll(cmd.getAffectedObjects());						
+					}
 				}
 			}
 			return result;
