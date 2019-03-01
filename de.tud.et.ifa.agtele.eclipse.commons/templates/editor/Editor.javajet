@@ -585,7 +585,7 @@ public class <%=genPackage.getEditorClassName()%>
 	 */
 	protected boolean updateProblemIndication = true;
 
-<%// Start of modifications by Institute of Automation, TU Dresden (integrate the 'HelpListener')%>
+<%// Start of modifications by Institute of Automation, TU Dresden%>
 
 	/**
 	 * Stores the last executed model sanitizer
@@ -1721,7 +1721,10 @@ new AdapterFactoryTreeEditor(treeViewer.getTree(), adapterFactory);
 					new TreeViewerGroup.TreeViewerGroupToolbarCollapseAllButtonOption(),
 					new TreeViewerGroup.TreeViewerGroupToolbarAddButtonOption(),
 					new TreeViewerGroup.TreeViewerGroupToolbarToggleSplitEditorVerticallyButtonOption(),
-					new TreeViewerGroup.TreeViewerGroupAddToolPaletteOption.TreeViewerGroupAddToolPaletteToolbarHideEMFPaletteOption());
+					new TreeViewerGroup.TreeViewerGroupAddToolPaletteOption.TreeViewerGroupAddToolPaletteToolbarHideEMFPaletteOption(),
+					new TreeViewerGroup.TreeViewerGroupBindHelpListenerOption(),
+					new TreeViewerGroup.TreeViewerGroupBindDoubleClickEditMultilineFeatureOption()
+				);
 					
 			selectionViewer = this.tree.getViewer();
 			setCurrentViewer(this.selectionViewer);
@@ -1733,14 +1736,6 @@ new AdapterFactoryTreeEditor(treeViewer.getTree(), adapterFactory);
 			selectionViewer.setInput(editingDomain.getResourceSet());
 			selectionViewer.setSelection(new StructuredSelection(editingDomain.getResourceSet().getResources().get(0)), true);
 
-			this.helpListener = new EMFModelHelpView.HelpListener();
-
-			// Add a Help Listener (F1)
-			for (Control control : this.tree.getChildren()) {
-				control.addHelpListener(this.helpListener);
-			}
-
-			this.selectionViewer.getControl().addHelpListener(this.helpListener);
 <%// End of modifications by Institute of Automation, TU Dresden%>
 			new AdapterFactoryTreeEditor(selectionViewer.getTree(), adapterFactory);
 <%if (genModel.getDecoration() != GenDecoration.NONE) {%>
