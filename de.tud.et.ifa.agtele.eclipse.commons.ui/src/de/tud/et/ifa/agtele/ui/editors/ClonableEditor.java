@@ -39,6 +39,7 @@ import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IEditorSite;
 import org.eclipse.ui.IFileEditorInput;
 import org.eclipse.ui.actions.WorkspaceModifyOperation;
+import org.eclipse.ui.ide.FileStoreEditorInput;
 import org.eclipse.ui.part.MultiPageEditorPart;
 import org.eclipse.ui.views.properties.PropertySheetPage;
 
@@ -312,7 +313,11 @@ public abstract class ClonableEditor extends MultiPageEditorPart{
 	 */
 	@Override
 	public void init(IEditorSite site, IEditorInput editorInput) {
-		this.findEditingDomain(((IFileEditorInput)editorInput).getFile().toString());
+		if (editorInput instanceof IFileEditorInput) {
+			this.findEditingDomain(((IFileEditorInput)editorInput).getFile().toString());			
+		} else if (editorInput instanceof FileStoreEditorInput) {
+			this.findEditingDomain(((FileStoreEditorInput)editorInput).getURI().toString());
+		}
 	}
 
 	@Override
