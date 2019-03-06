@@ -196,7 +196,7 @@ public interface AgteleEcoreUtil {
 	 * @param ePackages
 	 * @return the set of classes
 	 */
-	public static Set<EClass> getAllClassesInEPackages(Collection<EPackage> ePackages) {
+	public static Set<EClass> getAllClassesInEPackages(Collection<? extends EPackage> ePackages) {
 
 		List<EClass> classesInPackage = ePackages.stream()
 				.flatMap(e -> e.getEClassifiers().stream().filter(EClass.class::isInstance).map(EClass.class::cast))
@@ -1059,4 +1059,50 @@ public interface AgteleEcoreUtil {
 		}
 		return null;		
 	}
-}
+	/**
+	 * Returns the EPackage-Namespace-URI from an element string that has been created with {@link #getEcoreElementUri(EObject)}. 
+	 * @param uri
+	 * @return
+	 */
+	static String getEcorePkgUriFromElementUri(String uri) {
+		if (uri == null || uri.isEmpty()) {
+			return null;
+		}
+		if (!uri.contains("#") ) {
+			return uri;
+		} 
+		return uri.substring(0, uri.indexOf('#'));
+	}
+
+	/**
+	 * Returns the EClass-Name from an element string that has been created with {@link #getEcoreElementUri(EObject)}. 
+	 * @param uri
+	 * @return
+	 */
+	static String getEClassNameFromElementUri(String uri) {		
+		if (uri == null || uri.isEmpty() || !uri.contains("#") || uri.length() <= uri.indexOf('#')) {
+			return null;
+		}
+		uri = uri.substring(uri.indexOf('#')+1);
+		if (uri.contains("/")) {
+			return uri.substring(0, uri.indexOf('/'));
+		}
+		return uri;
+	}
+
+	/**
+	 * Returns the Feature-Name from an element string that has been created with {@link #getEcoreElementUri(EObject)}. 
+	 * @param uri
+	 * @return
+	 */
+	static String getFeatureNameFromElementUri(String uri) {		
+		if (uri == null || uri.isEmpty() || !uri.contains("#") || uri.length() <= uri.indexOf('#')) {
+			return null;
+		}
+		uri = uri.substring(uri.indexOf('#')+1);
+		if (!uri.contains("/")|| uri.length() <= uri.indexOf('/')) {
+			return null;
+		}
+		return uri.substring(uri.indexOf('/') + 1);
+	}
+} 
