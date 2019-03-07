@@ -2619,8 +2619,10 @@ new AdapterFactoryTreeEditor(treeViewer.getTree(), adapterFactory);
 		int index = this.getActivePage();
 		settings.put("ACTIVE_PAGE", index);
 	
-		// persist the state of the pages displayed by the editor
-		this.tree.persist(settings.addNewSection("MAIN_PAGE"));
+		if (!this.tree.isDisposed()) {
+			// persist the state of the pages displayed by the editor
+			this.tree.persist(settings.addNewSection("MAIN_PAGE"));
+		}
 	}
 	
 	/**

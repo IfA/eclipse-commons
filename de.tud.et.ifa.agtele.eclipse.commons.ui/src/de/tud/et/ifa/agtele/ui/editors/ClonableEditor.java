@@ -34,6 +34,7 @@ import org.eclipse.emf.edit.domain.AdapterFactoryEditingDomain;
 import org.eclipse.emf.edit.provider.ComposedAdapterFactory;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.viewers.Viewer;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IEditorSite;
@@ -360,6 +361,8 @@ public abstract class ClonableEditor extends MultiPageEditorPart{
 	@Override
 	public void dispose() {
 		this.disposeFromEditorRegistry();
-		super.dispose();
+		if (Display.getCurrent() != null) {
+			super.dispose();
+		}
 	}
 }
