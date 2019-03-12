@@ -214,9 +214,12 @@ public abstract class ModelElementPalette {
 			createChildActions = ActionUtil.getCreateChildActions(this.getTreeViewer(),
 					(StructuredSelection) selection);
 		} else {
-
-			createChildActions = ActionUtil.getCreateChildActions(this.getTreeViewer());
-			createSiblingActions = ActionUtil.getCreateSiblingActions(this.getTreeViewer());
+			try {
+				createChildActions = ActionUtil.getCreateChildActions(this.getTreeViewer());
+				createSiblingActions = ActionUtil.getCreateSiblingActions(this.getTreeViewer());
+			} catch (Exception e) {
+				return;
+			}
 		}
 
 		// Populate the palette

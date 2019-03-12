@@ -49,7 +49,6 @@ public class AddDocumentationAnnotationHandler extends AbstractHandler {
 
 		List<EModelElement> targets = ((StructuredSelection) UIHelper.getCurrentSelection()).toList();
 
-		EditingDomain dom = AgteleEcoreUtil.getEditingDomainFor(targets.get(0));
 		CompoundCommand command = new CompoundCommand();
 
 		boolean singleElement = targets.size() == 1;
@@ -97,6 +96,7 @@ public class AddDocumentationAnnotationHandler extends AbstractHandler {
 				}
 			}
 
+			EditingDomain dom = AgteleEcoreUtil.getEditingDomainFor(targets.get(0));
 			dom.getCommandStack().execute(command);
 		}
 

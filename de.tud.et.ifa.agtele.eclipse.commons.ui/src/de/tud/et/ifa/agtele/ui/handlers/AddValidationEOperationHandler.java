@@ -207,10 +207,12 @@ public class AddValidationEOperationHandler extends AbstractHandler {
 		
 		@Override
 		public void undo() {
-			if (this.constraintAnnotation == null) {
-				this.eClass.getEAnnotation(EcorePackage.eNS_URI).getDetails().remove("constraints");
-			} else {
-				this.eClass.getEAnnotations().remove(this.constraintAnnotation);
+			if (this.createDummyConstraint) {
+				if (this.constraintAnnotation == null) {				
+					this.eClass.getEAnnotation(EcorePackage.eNS_URI).getDetails().remove("constraints");
+				} else {
+					this.eClass.getEAnnotations().remove(this.constraintAnnotation);
+				}
 			}
 			this.eClass.getEOperations().remove(this.validationEOperation);
 		}
