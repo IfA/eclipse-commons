@@ -218,6 +218,7 @@ public abstract class ModelElementPalette {
 				createChildActions = ActionUtil.getCreateChildActions(this.getTreeViewer());
 				createSiblingActions = ActionUtil.getCreateSiblingActions(this.getTreeViewer());
 			} catch (Exception e) {
+				e.printStackTrace();
 				return;
 			}
 		}
