@@ -440,7 +440,13 @@ public class TreeViewerGroup extends FilteredTree implements IPersistable, ISele
 
 		return treeViewer;
 	}
-
+	
+	@Override
+	public boolean isFocusControl() {
+		//This needs to be overridden in order to enable setting the focus after a model change
+		return this.getTreeViewer().getControl().isFocusControl();
+	}
+	
 	/**
 	 * Returns the tree viewer
 	 *
