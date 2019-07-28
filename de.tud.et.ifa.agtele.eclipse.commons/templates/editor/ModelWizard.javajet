@@ -536,7 +536,7 @@ public class <%=genPackage.getModelWizardClassName()%> extends Wizard implements
 					 	 <%=genModel.getImportedName("org.eclipse.core.runtime.Platform")%>.getContentTypeManager().getContentType(<%=genPackage.getImportedPackageInterfaceName()%>.eCONTENT_TYPE)).getId());
 <%}%>					 	 
 			}
-			catch (<%=genModel.getImportedName("org.eclipse.ui.PartInitException")%> exception)
+			<%/*Start of modification bey Institute of Automation, TU Dresden*/%>catch (Exception exception)<%/*End of modifications by Institute of Automation, TU Dresden*/%>
 			{
 				MessageDialog.openError(workbenchWindow.getShell(), <%=genPackage.getImportedEditorPluginClassName()%>.INSTANCE.getString("_UI_OpenEditorError_label"), exception.getMessage());<%=genModel.getNonNLS()%>
 				return false;
