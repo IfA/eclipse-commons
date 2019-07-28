@@ -3,6 +3,7 @@ package de.tud.et.ifa.agtele.emf.edit;
 import org.eclipse.emf.common.EMFPlugin;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.EStructuralFeature;
+import org.eclipse.emf.ecore.impl.DynamicEObjectImpl;
 import org.eclipse.emf.ecore.impl.MinimalEObjectImpl;
 import org.eclipse.emf.ecore.xmi.impl.XMIResourceImpl;
 import org.eclipse.jface.viewers.DelegatingStyledCellLabelProvider;
@@ -46,9 +47,10 @@ public class AgteleStyledLabelProvider extends DelegatingStyledCellLabelProvider
 		if (element instanceof XMIResourceImpl) {
 			return typeString;
 		}
-		if (element instanceof MinimalEObjectImpl && ((MinimalEObjectImpl)element).eContainer() == null) {
+		if (element instanceof MinimalEObjectImpl && ((MinimalEObjectImpl)element).eContainer() == null || 
+				element instanceof DynamicEObjectImpl && ((DynamicEObjectImpl)element).eContainer() == null) {
 			result = typeString;
-		} else if (element instanceof MinimalEObjectImpl) {
+		} else if (element instanceof MinimalEObjectImpl || element instanceof DynamicEObjectImpl) {
 			EObject e = (EObject) element;
 			try {
 				result = new StyledString(
