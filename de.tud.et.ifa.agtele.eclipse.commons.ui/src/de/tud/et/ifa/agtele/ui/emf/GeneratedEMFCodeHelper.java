@@ -272,8 +272,10 @@ public class GeneratedEMFCodeHelper {
 			// the selection
 			//
 			Optional<EStructuralFeature> eFeature = eClass.getEAllStructuralFeatures().stream()
-					.filter(o -> methodName.equalsIgnoreCase("get" + o.getName())
+					.filter(o -> methodName.equalsIgnoreCase("basicGet" + o.getName())
+							|| methodName.equalsIgnoreCase("get" + o.getName())
 							|| methodName.equalsIgnoreCase("is" + o.getName())
+							|| methodName.equalsIgnoreCase("basicSet" + o.getName())
 							|| methodName.equalsIgnoreCase("set" + o.getName())
 							|| methodName.equalsIgnoreCase("add" + o.getName() + "propertydescriptor"))
 					.findAny();
