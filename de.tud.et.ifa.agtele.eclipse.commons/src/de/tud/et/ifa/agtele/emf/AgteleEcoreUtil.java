@@ -617,10 +617,25 @@ public interface AgteleEcoreUtil {
 	 * @return All instances of the eClass
 	 */
 	public static Collection<EObject> getAllInstances(EClass eClass, Collection<EObject> roots) {
+		return AgteleEcoreUtil.getAllInstances(eClass, roots, false);
+	}
+
+	/**
+	 * Returns all instances of an eClass, that are contained in the list of roots.
+	 *
+	 * @param eClass
+	 * @param roots
+	 * @param includeRoots 
+	 * @return All instances of the eClass
+	 */
+	public static Collection<EObject> getAllInstances(EClass eClass, Collection<EObject> roots, boolean includeRoots) {
 
 		Collection<EObject> result = new ArrayList<>();
 
 		for (EObject root : roots) {
+			if (includeRoots && eClass.isSuperTypeOf(root.eClass())) {
+				result.add(root);
+			}
 			Iterator<EObject> it = new AgteleContainmentTreeIterator(root, true, true);
 			while (it.hasNext()) {
 				EObject obj = it.next();
@@ -631,7 +646,7 @@ public interface AgteleEcoreUtil {
 		}
 		return result;
 	}
-
+	
 	/**
 	 * Returns all instances of an eClass, that are contained in an eObject.
 	 *
