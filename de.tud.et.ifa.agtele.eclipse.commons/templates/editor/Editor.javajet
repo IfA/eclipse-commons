@@ -2605,7 +2605,15 @@ new AdapterFactoryTreeEditor(treeViewer.getTree(), adapterFactory);
 		if (project == null) {
 			project = section.addNewSection(file);
 		}
-		<%=genPackage.getEditorClassName()%>.this.persist(project);
+		
+		int instanceId = I40ComponentEditor.this.getInstanceId();
+		IDialogSettings instance = project.getSection(String.valueOf(instanceId));
+		
+		if (instance == null) {
+			instance = project.addNewSection(String.valueOf(instanceId));
+		}
+		
+		<%=genPackage.getEditorClassName()%>.this.persist(instance);
 	}
 	/**
 	 * <!-- begin-user-doc -->
@@ -2634,15 +2642,24 @@ new AdapterFactoryTreeEditor(treeViewer.getTree(), adapterFactory);
 	public void restore(final IDialogSettings settings) {
 		// perform the restore operations in an asynchronous way
 		try {
-			this.getSite().getShell().getDisplay().asyncExec(() -> {
+			this.getSite().getShell().getDisplay().asyncExec(() -> {			
+				IDialogSettings settingsToRestore = settings;
+				int instanceId = I40ComponentEditor.this.getInstanceId();
+				IDialogSettings instance = settings.getSection(String.valueOf(instanceId));
+				
+				if (instance != null) {
+					settingsToRestore = instance;
+				} else if (instanceId > 0) {
+					return;							
+				}
 				// restore the active page
-				int index = settings.getInt("ACTIVE_PAGE");
+				int index = settingsToRestore.getInt("ACTIVE_PAGE");
 				if (index >= 0 && index < <%=genPackage.getEditorClassName()%>.this.getPageCount()) {
 					<%=genPackage.getEditorClassName()%>.this.setActivePage(index);
 				}
 	
 				// restore the state of the pages displayed by the editor
-				IDialogSettings page = settings.getSection("MAIN_PAGE");
+				IDialogSettings page = settingsToRestore.getSection("MAIN_PAGE");
 				if (page != null) {
 					<%=genPackage.getEditorClassName()%>.this.tree.restore(page);
 				}

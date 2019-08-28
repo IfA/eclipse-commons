@@ -13,6 +13,7 @@ package de.tud.et.ifa.agtele.ui.editors;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -55,7 +56,7 @@ public abstract class ClonableEditor extends MultiPageEditorPart{
 	/**
 	 * stores each opened editor instance by editing domain
 	 */
-	protected static Map<AdapterFactoryEditingDomain, Collection<ClonableEditor>> editingDomainShare = new HashMap<>();
+	protected static Map<AdapterFactoryEditingDomain, List<ClonableEditor>> editingDomainShare = new HashMap<>();
 
 	protected CommandStackListener commandStackListener;
 
@@ -284,7 +285,7 @@ public abstract class ClonableEditor extends MultiPageEditorPart{
 		if (ClonableEditor.editingDomains.get(path) == null) {
 			//I am a new editor instance, update the editing domain registry
 			ClonableEditor.editingDomains.put(path, this.getEditingDomain());
-			Collection<ClonableEditor> editors = new ArrayList<>();
+			List<ClonableEditor> editors = new ArrayList<>();
 			editors.add(this);
 			ClonableEditor.editingDomainShare.put(this.getEditingDomain(), editors);
 			ResourcesPlugin.getWorkspace().addResourceChangeListener(this.getResourceChangeListener(), IResourceChangeEvent.POST_CHANGE);
@@ -364,5 +365,12 @@ public abstract class ClonableEditor extends MultiPageEditorPart{
 		if (Display.getCurrent() != null) {
 			super.dispose();
 		}
+	}
+	
+	public List<ClonableEditor> getEditorInstances() {
+		if (this.getEditingDomain() != null) {
+			return ClonableEditor.editingDomainShare.get(this.getEditingDomain());
+		}
+		return Collections.emptyList();
 	}
 }

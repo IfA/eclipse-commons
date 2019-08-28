@@ -32,4 +32,14 @@ public interface IPersistable {
 	 * @param settings
 	 */
 	public void restore(IDialogSettings settings);
+	
+	/**
+	 * Some persistable objects, by means of the settings path, may occur multiple times, e.g. in case of the clonable editor.
+	 * In this case, each instance may store individual settings in order to be able to restore the individual state per instance.
+	 * @return the instance id. When returning 0, also settings without an instance id in the path may be used for restoring the state.
+	 * @author lbaron
+	 */
+	public default int getInstanceId() {
+		return 0;
+	}
 }
