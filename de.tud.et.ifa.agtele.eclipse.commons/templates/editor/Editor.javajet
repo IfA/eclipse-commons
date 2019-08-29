@@ -2601,12 +2601,12 @@ new AdapterFactoryTreeEditor(treeViewer.getTree(), adapterFactory);
 			section = settings.addNewSection("UI_STATE");
 		}
 		String file = ((FileEditorInput) this.getEditorInput()).getFile().toString();
-		IDialogSettings project = settings.getSection(file);
+		IDialogSettings project = section.getSection(file);
 		if (project == null) {
 			project = section.addNewSection(file);
 		}
 		
-		int instanceId = <%=genPackage.getEditorClassName()%>.this.getInstanceId();
+		int instanceId = <%=genPackage.getEditorClassName()%>.this.instanceId;
 		IDialogSettings instance = project.getSection(String.valueOf(instanceId));
 		
 		if (instance == null) {
@@ -2614,6 +2614,7 @@ new AdapterFactoryTreeEditor(treeViewer.getTree(), adapterFactory);
 		}
 		
 		<%=genPackage.getEditorClassName()%>.this.persist(instance);
+		<%=genPackage.getEditorPluginClassName()%>.getPlugin().saveDialogSettings();
 	}
 	/**
 	 * <!-- begin-user-doc -->
@@ -2638,6 +2639,13 @@ new AdapterFactoryTreeEditor(treeViewer.getTree(), adapterFactory);
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	protected int instanceId = 0;
+		
+	/**
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 */
 	@Override
 	public void restore(final IDialogSettings settings) {
 		// perform the restore operations in an asynchronous way
@@ -2645,6 +2653,7 @@ new AdapterFactoryTreeEditor(treeViewer.getTree(), adapterFactory);
 			this.getSite().getShell().getDisplay().asyncExec(() -> {			
 				IDialogSettings settingsToRestore = settings;
 				int instanceId = <%=genPackage.getEditorClassName()%>.this.getInstanceId();
+				<%=genPackage.getEditorClassName()%>.this.instanceId = instanceId;
 				IDialogSettings instance = settings.getSection(String.valueOf(instanceId));
 				
 				if (instance != null) {

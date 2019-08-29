@@ -9,6 +9,7 @@
  * 
  * Contributors: 
  *   IBM - Initial API and implementation
+ *   Institute of Automation, TU Dresden - Extracted into this file from the original 'Class.javajet' template (modifications marked below)
  */
 %>
 <%GenModel genModel = (GenModel)argument;%>
