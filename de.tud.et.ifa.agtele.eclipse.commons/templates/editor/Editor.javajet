@@ -2606,7 +2606,7 @@ new AdapterFactoryTreeEditor(treeViewer.getTree(), adapterFactory);
 			project = section.addNewSection(file);
 		}
 		
-		int instanceId = I40ComponentEditor.this.getInstanceId();
+		int instanceId = <%=genPackage.getEditorClassName()%>.this.getInstanceId();
 		IDialogSettings instance = project.getSection(String.valueOf(instanceId));
 		
 		if (instance == null) {
@@ -2644,7 +2644,7 @@ new AdapterFactoryTreeEditor(treeViewer.getTree(), adapterFactory);
 		try {
 			this.getSite().getShell().getDisplay().asyncExec(() -> {			
 				IDialogSettings settingsToRestore = settings;
-				int instanceId = I40ComponentEditor.this.getInstanceId();
+				int instanceId = <%=genPackage.getEditorClassName()%>.this.getInstanceId();
 				IDialogSettings instance = settings.getSection(String.valueOf(instanceId));
 				
 				if (instance != null) {
@@ -2845,6 +2845,11 @@ new AdapterFactoryTreeEditor(treeViewer.getTree(), adapterFactory);
 	@Override
 	protected void setResourceChangeListener(IResourceChangeListener resourceChangeListener) {
 		this.resourceChangeListener = resourceChangeListener;
+	}
+	
+	@Override
+	public int getInstanceId() {
+		return this.getEditorInstances().indexOf(this);
 	}
 }
 <%// End of modifications by Institute of Automation, TU Dresden %>
