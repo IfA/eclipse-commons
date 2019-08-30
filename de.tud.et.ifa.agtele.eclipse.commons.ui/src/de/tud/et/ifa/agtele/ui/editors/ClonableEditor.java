@@ -368,7 +368,7 @@ public abstract class ClonableEditor extends MultiPageEditorPart{
 	}
 	
 	public List<ClonableEditor> getEditorInstances() {
-		if (this.getEditingDomain() != null) {
+		if (this.getEditingDomain() != null && ClonableEditor.editingDomainShare.get(this.getEditingDomain()) != null) {
 			return ClonableEditor.editingDomainShare.get(this.getEditingDomain());
 		}
 		return Collections.emptyList();
