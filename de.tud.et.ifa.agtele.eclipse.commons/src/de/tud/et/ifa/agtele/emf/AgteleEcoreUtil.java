@@ -48,6 +48,7 @@ import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.ecore.resource.ResourceSet;
 import org.eclipse.emf.ecore.util.EcoreUtil;
 import org.eclipse.emf.ecore.util.ExtendedMetaData;
+import org.eclipse.emf.edit.command.CommandParameter;
 import org.eclipse.emf.edit.domain.AdapterFactoryEditingDomain;
 import org.eclipse.emf.edit.domain.EditingDomain;
 import org.eclipse.emf.edit.domain.IEditingDomainProvider;
@@ -1119,5 +1120,46 @@ public interface AgteleEcoreUtil {
 			return null;
 		}
 		return uri.substring(uri.indexOf('/') + 1);
+	}
+	
+	/**
+	 * Filters a list of {@link CommandParameter}, if the created element is an instance of any of specified {@link EClass}es 
+	 * by the removeInstances List, except, the element is an instance of the exceptImplements List. 
+	 * @param parameters
+	 * @param removeInstances
+	 * @param exceptImplements
+	 * @return
+	 */
+	public static void filterCommandParameter(Collection<Object> parameters, List<EClass> removeInstances, List<EClass> exceptImplements) {
+		if (exceptImplements == null) {
+			exceptImplements = Collections.emptyList();
+		}
+		if (parameters != null) {
+			ParameterLoop:
+			for (Object o : new ArrayList<>(parameters)) {
+				if (o instanceof CommandParameter) {
+					CommandParameter c = (CommandParameter)o;
+					
+					EObject created = c.getEValue();
+					for (EClass cls : removeInstances) {
+						if (cls.isInstance(created)) {
+							if (exceptImplements.contains(created.eClass()) || new ArrayList<>(created.eClass().getEAllSuperTypes()).removeAll(exceptImplements)) {
+								continue ParameterLoop;
+							}			
+							parameters.remove(c);
+							continue ParameterLoop;		
+						}
+					}			
+				}
+			}
+		}
+	}
+	
+	public static <T> List<T> list (@SuppressWarnings("unchecked") T...element) {
+		ArrayList<T> result = new ArrayList<>();
+		for (T e : element) {
+			result.add(e);
+		}
+		return result;
 	}
 } 
