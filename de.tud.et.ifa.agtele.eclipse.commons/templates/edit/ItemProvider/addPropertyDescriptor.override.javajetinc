@@ -38,7 +38,12 @@
 				 getString("<%=genModel.getPropertyCategoryKey(genFeature.getPropertyCategory())%>"),<%=genModel.getNonNLS()%>
   <%}%>
   <%if (genFeature.getPropertyFilterFlags().isEmpty()) {%>
+    <%if (genModel.getRuntimeVersion().getValue() >= GenRuntimeVersion.EMF214_VALUE && genFeature.getPropertyEditorFactory() != null && genFeature.getPropertyEditorFactory().trim().length() != 0) {%>
+				 null,
+				 <%=genModel.getImportedName("org.eclipse.emf.common.util.URI")%>.createURI(<%=org.eclipse.emf.codegen.ecore.genmodel.impl.Literals.toStringLiteral(genFeature.getPropertyEditorFactory().trim(), genModel)%>)));<%=genModel.getNonNLS()%>
+    <%} else {%>
 				 null));
+    <%}%>
   <%} else {%>
 				 new String[] {
     <%for (Iterator<String> j = genFeature.getPropertyFilterFlags().iterator(); j.hasNext();) { String filterFlag = j.next();%>
