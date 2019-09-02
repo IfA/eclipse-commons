@@ -3,9 +3,9 @@
 /**
  * Copyright (c) 2005-2010 IBM Corporation and others.
  * All rights reserved.   This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
+ * are made available under the terms of the Eclipse Public License v2.0
  * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ * http://www.eclipse.org/legal/epl-v20.html
  * 
  * Contributors: 
  *   IBM - Initial API and implementation
@@ -16,15 +16,16 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 <%// Start of modifications by Institute of Automation, TU Dresden (change variable values)%>
-Bundle-Name: %pluginName
+Bundle-Name: <%=genModel.getEditorBundleNameKey()%>
 Bundle-SymbolicName: <%=genModel.getEditorPluginID()%>;singleton:=true
+Automatic-Module-Name: <%=genModel.getEditorPluginID()%>
 Bundle-Version: 1.0.0.qualifier
 Bundle-ClassPath: <%if (genModel.isRuntimeJar()) {%><%=genModel.getEditorPluginID()%>.jar<%}else{%>.<%}%>
 <%if (genModel.getRuntimePlatform() != GenRuntimePlatform.GWT) {%>
 Bundle-Activator: <%=genModel.getQualifiedEditorPluginClassName()%>$Implementation
 <%}%>
-Bundle-Vendor: %providerName
-Bundle-Localization: plugin
+Bundle-Vendor: <%=genModel.getEditorBundleVendorKey()%>
+Bundle-Localization: <%=genModel.getEditorBundleLocalization()%>
 <%// End of modifications by Institute of Automation, TU Dresden%>
 <%if (genModel.getComplianceLevel() == GenJDKLevel.JDK50_LITERAL) {%>
 Bundle-RequiredExecutionEnvironment: J2SE-1.5
@@ -34,6 +35,10 @@ Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 <%} else if (genModel.getComplianceLevel() == GenJDKLevel.JDK80_LITERAL) {%>
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+<%} else if (genModel.getComplianceLevel() == GenJDKLevel.JDK90_LITERAL) {%>
+Bundle-RequiredExecutionEnvironment: JavaSE-9
+<%} else if (genModel.getComplianceLevel() == GenJDKLevel.JDK100_LITERAL) {%>
+Bundle-RequiredExecutionEnvironment: JavaSE-10
 <%}%>
 <%Iterator<String> packagesIterator = genModel.getEditorQualifiedPackageNames().iterator(); if (packagesIterator.hasNext()) { String pack = packagesIterator.next();%>
 Export-Package: <%=pack%><%while(packagesIterator.hasNext()) { pack = packagesIterator.next();%>,
@@ -41,7 +46,7 @@ Export-Package: <%=pack%><%while(packagesIterator.hasNext()) { pack = packagesIt
 <%}%>
 <%Iterator<String> requiredPluginIterator = genModel.getEditorRequiredPlugins().iterator(); if (requiredPluginIterator.hasNext()) { String pluginID = requiredPluginIterator.next();%>
 Require-Bundle: <%=pluginID%><%if (!pluginID.startsWith("org.eclipse.core.runtime")){%>;visibility:=reexport<%} while(requiredPluginIterator.hasNext()) { pluginID = requiredPluginIterator.next();%>,
- <%=pluginID%><%if (!pluginID.startsWith("org.eclipse.core.runtime") && !pluginID.equals("org.eclipse.xtext.xbase.lib") && !pluginID.equals("org.eclipse.emf.ecore.xcore.lib")) {%>;visibility:=reexport<%}}%>
+ <%=pluginID%><%if (!pluginID.startsWith("org.eclipse.core.runtime") && !pluginID.equals("org.eclipse.jface.text") && !pluginID.equals("org.eclipse.xtext.xbase.lib") && !pluginID.equals("org.eclipse.emf.ecore.xcore.lib")) {%>;visibility:=reexport<%}}%>
 <%}%>,
 <%// Start of modifications by Institute of Automation, TU Dresden (add import declarations)%>
  de.tud.et.ifa.agtele.eclipse.commons.ui,
@@ -64,6 +69,8 @@ Import-Package: org.eclipse.emf.common.ui,
  org.eclipse.jface.action,
  org.eclipse.jface.dialogs,
  org.eclipse.jface.operation,
+ org.eclipse.jface.text,
+ org.eclipse.jface.util,
  org.eclipse.jface.viewers,
  org.eclipse.jface.window,
  org.eclipse.jface.wizard,
@@ -78,6 +85,7 @@ Import-Package: org.eclipse.emf.common.ui,
  org.eclipse.ui.actions;ui.workbench="split",
  org.eclipse.ui.application,
  org.eclipse.ui.part;ui.workbench="split",
+ org.eclipse.ui.plugin,
  org.eclipse.ui.views,
  org.eclipse.ui.views.contentoutline,
  org.eclipse.ui.views.properties;ui.views="split"
