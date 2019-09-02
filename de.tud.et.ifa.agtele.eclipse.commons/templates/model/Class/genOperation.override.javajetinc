@@ -18,15 +18,15 @@
 	 * <!-- begin-user-doc -->
 	 * <!-- end-user-doc -->
 	 * @see #<%=genOperation.getName()%>(<%=genOperation.getParameterTypes(", ")%>)
-    <%/*if (genOperation.hasAPITags()) {%>
+    <%if (genOperation.hasAPITags()) {%>
 	 * <%=genOperation.getAPITags(genModel.getIndentation(stringBuffer))%>
-    <%}*/%>
+    <%}%>
 	 * @generated
 	 * @ordered
 	 */
-	<%/*if (isJDK50 && genOperation.hasAPIDeprecatedTag()) {%>
+	<%if (isJDK50 && genOperation.hasAPIDeprecatedTag()) {%>
 	@Deprecated
-      <%}*/%>
+      <%}%>
 	protected static final <%=genModel.getImportedName("java.lang.String")%> <%=CodeGenUtil.upperName(genClass.getUniqueName(genOperation), genModel.getLocale())%>__EEXPRESSION = "<%=genOperation.getInvariantExpression("\t\t")%>";<%=genModel.getNonNLS()%>
 	 
     <%} else if (genOperation.hasInvocationDelegate()) {%>
@@ -35,15 +35,15 @@
 	 * <!-- begin-user-doc -->
 	 * <!-- end-user-doc -->
 	 * @see #<%=genOperation.getName()%>(<%=genOperation.getParameterTypes(", ")%>)
-    <%/*if (genOperation.hasAPITags()) {%>
+    <%if (genOperation.hasAPITags()) {%>
 	 * <%=genOperation.getAPITags(genModel.getIndentation(stringBuffer))%>
-    <%}*/%>
+    <%}%>
 	 * @generated
 	 * @ordered
 	 */
-    <%/*if (isJDK50 && genOperation.hasAPIDeprecatedTag()) {%>
+    <%if (isJDK50 && genOperation.hasAPIDeprecatedTag()) {%>
 	@Deprecated
-    <%}*/%>
+    <%}%>
 	protected static final <%=genModel.getImportedName("org.eclipse.emf.ecore.EOperation")%>.Internal.InvocationDelegate <%=CodeGenUtil.upperName(genClass.getUniqueName(genOperation), genModel.getLocale())%>__EINVOCATION_DELEGATE = ((<%=genModel.getImportedName("org.eclipse.emf.ecore.EOperation")%>.Internal)<%=genOperation.getQualifiedOperationAccessor()%>).getInvocationDelegate();
 
     <%}%>
@@ -86,24 +86,27 @@
 	/**
 	 * <!-- begin-user-doc -->
 	 * <!-- end-user-doc -->
-      <%/*if (genOperation.hasAPITags()) {%>
+      <%if (genOperation.hasAPITags()) {%>
 	 * <%=genOperation.getAPITags(genModel.getIndentation(stringBuffer))%>
-      <%}*/%>
+      <%}%>
 	 * @generated
 	 */
 <%if (isJDK50) { //Class/genOperation.annotations.insert.javajetinc%>
 <%@ include file="Class/genOperation.annotations.insert.javajetinc" fail="silent" %>
 <%}%>
 <%}%>
-<%/*if (isJDK50 && genOperation.hasAPIDeprecatedTag()) {%>
+<%if (isJDK50 && genOperation.hasAPIDeprecatedTag()) {%>
 	@Deprecated
-<%}*/%>
+<%}%>
 <%if (!isImplementation) {%>
 	<%=genOperation.getTypeParameters(genClass)%><%=genOperation.getImportedType(genClass)%> <%=genOperation.getName()%>(<%=genOperation.getParameters(genClass)%>)<%=genOperation.getThrows(genClass)%>;
 
 <%} else {%>
-  <%if (genModel.useGenerics() && !genOperation.hasBody() && (genOperation.isInvariant()||(!genOperation.isInvariant() && genOperation.hasInvocationDelegate() && genOperation.isUncheckedCast(genClass)))) {%>
+  <%if (genModel.useGenerics() && !genOperation.hasBody() && !genOperation.isInvariant() && genOperation.hasInvocationDelegate() && genOperation.isUncheckedCast(genClass)) {%>
 	@SuppressWarnings("unchecked")
+  <%}%>
+  <%if (useInterfaceOverrideAnnotation && !genClass.isMapEntry() && !genOperation.isSuppressedVisibility()) {%>
+	@Override
   <%}%>
 	public <%=genOperation.getTypeParameters(genClass)%><%=genOperation.getImportedType(genClass)%> <%=genOperation.getName()%>(<%=genOperation.getParameters(isImplementation, genClass)%>)<%=genOperation.getThrows(genClass)%>
 	{

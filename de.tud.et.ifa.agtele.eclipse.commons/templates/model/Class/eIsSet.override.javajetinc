@@ -135,8 +135,11 @@
 <%}%>
 		}
 <%if (genModel.isMinimalReflectiveMethods()) {%>
-		return super.eIsSet(featureID);
+<%=indentDefaultCase%>		return super.eIsSet(featureID);
 <%} else {%>
-		return eDynamicIsSet(featureID);
+<%=indentDefaultCase%>		return eDynamicIsSet(featureID);
 <%}%>
+<%if (forceDefaultCase) { // {%>
+		}
+<%} // }%>
 	}

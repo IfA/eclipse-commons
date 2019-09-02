@@ -14,22 +14,28 @@
 /**
 	 * <!-- begin-user-doc -->
 	 * <!-- end-user-doc -->
+    <%if (genFeature.hasAPITags()) {%>
+	 * <%=genFeature.getAPITags(genModel.getIndentation(stringBuffer))%>
+    <%}%>
 	 * @generated
 	 */
 <%if (isJDK50) { //Class/basicSetGenFeature.annotations.insert.javajetinc%>
 <%@ include file="Class/basicSetGenFeature.annotations.insert.javajetinc" fail="silent" %>
 <%}%>
+    <%if (isJDK50 && genFeature.hasAPIDeprecatedTag()) {%>
+	@Deprecated
+    <%}%>
 	public <%=genModel.getImportedName("org.eclipse.emf.common.notify.NotificationChain")%> basicSet<%=genFeature.getAccessorName()%>(<%=genFeature.getImportedInternalType(genClass)%> new<%=genFeature.getCapName()%>, <%=genModel.getImportedName("org.eclipse.emf.common.notify.NotificationChain")%> msgs)
 	{<%/*Start of modifications by Institute of Automation, TU Dresden (modify basicSetBody extension)*/if (de.tud.et.ifa.agtele.emf.generator.AgteleEcoreGeneratorHelper.hasBasicSetterOverride(genFeature)) {%>
 		<%=de.tud.et.ifa.agtele.emf.generator.AgteleEcoreGeneratorHelper.getBasicSetterBody(genFeature,genModel.getIndentation(stringBuffer))%><%} else {/*End of modifications by Institute of Automation, TU Dresden*/%>
     <%if (genFeature.isContainer()) {%>
 <%@ include file="Class/basicSetGenFeature.pre.insert.javajetinc" fail="silent" %>
-		msgs = eBasicSetContainer((<%=genModel.getImportedName("org.eclipse.emf.ecore.InternalEObject")%>)new<%=genFeature.getCapName()%>, <%=genClass.getQualifiedFeatureID(genFeature)%><%=positiveOffsetCorrection%>, msgs);
+		msgs = eBasicSetContainer(<%=genFeature.getAsInternalEObject("new" + genFeature.getCapName(), false)%>, <%=genClass.getQualifiedFeatureID(genFeature)%><%=positiveOffsetCorrection%>, msgs);
 <%@ include file="Class/basicSetGenFeature.post.insert.javajetinc" fail="silent" %>
 		return msgs;
     <%} else if (genModel.isDynamicDelegation()) {%>
 <%@ include file="Class/basicSetGenFeature.pre.insert.javajetinc" fail="silent" %>
-		msgs = eDynamicInverseAdd((<%=genModel.getImportedName("org.eclipse.emf.ecore.InternalEObject")%>)new<%=genFeature.getCapName()%>, <%=genClass.getQualifiedFeatureID(genFeature)%><%=positiveOffsetCorrection%>, msgs);
+		msgs = eDynamicInverseAdd(<%=genFeature.getAsInternalEObject("new" + genFeature.getCapName(), false)%>, <%=genClass.getQualifiedFeatureID(genFeature)%><%=positiveOffsetCorrection%>, msgs);
 <%@ include file="Class/basicSetGenFeature.post.insert.javajetinc" fail="silent" %>
 		return msgs;
     <%} else if (!genFeature.isVolatile()) {%>
