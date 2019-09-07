@@ -3,7 +3,9 @@ package de.tud.et.ifa.agtele.emf.importing;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 import org.eclipse.emf.common.util.EList;
 import org.eclipse.emf.ecore.EAttribute;
@@ -134,8 +136,8 @@ public interface IModelImporter {
 		this.getImportStrategy(eObject.eClass()).postImport(this, this.getConnector(), eObject);
 	}
 	
-	default Collection<Object> findRootContentNodes() {
-		ArrayList<Object> result = new ArrayList<>();
+	default Set<Object> findRootContentNodes() {
+		Set<Object> result = new HashSet<>();
 		Collection<Object> content = this.getConnector().browse(null);
 		if (content != null && !content.isEmpty()) {
 			for (Object obj : content) {
@@ -147,8 +149,8 @@ public interface IModelImporter {
 		return result;
 	}
 
-	default Collection<Object> findRootContentNodes(Object node) {		
-		ArrayList<Object> result = new ArrayList<>();
+	default Set<Object> findRootContentNodes(Object node) {		
+		Set<Object> result = new HashSet<>();
 		
 		if (this.getConnector().getTypeInfo(node) != null) {
 			result.add(node);
