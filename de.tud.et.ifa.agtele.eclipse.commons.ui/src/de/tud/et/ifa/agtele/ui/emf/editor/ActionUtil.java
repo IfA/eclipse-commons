@@ -131,7 +131,7 @@ public class ActionUtil {
 
 			return newChildDescriptors.stream()
 					.filter(d -> ActionUtil.isValidDescriptor(d, viewer.getContentProvider()))
-					.map(d -> new CreateChildAction(editor, selection, d)).collect(Collectors.toList());
+					.map(d -> new ExtendedCreateChildAction(editor, selection, d)).collect(Collectors.toList());
 
 		}
 
@@ -213,7 +213,7 @@ public class ActionUtil {
 
 			return newSiblingDescriptors.stream()
 					.filter(d -> ActionUtil.isValidDescriptor(d, viewer.getContentProvider()))
-					.map(d -> new CreateSiblingAction(editor, selection, d)).collect(Collectors.toList());
+					.map(d -> new ExtendedCreateSiblingAction(editor, selection, d)).collect(Collectors.toList());
 
 		}
 
