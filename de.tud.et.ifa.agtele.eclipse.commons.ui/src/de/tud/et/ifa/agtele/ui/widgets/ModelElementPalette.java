@@ -19,6 +19,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.eclipse.emf.common.command.Command;
+import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.edit.domain.EditingDomain;
 import org.eclipse.emf.edit.ui.action.CreateChildAction;
 import org.eclipse.emf.edit.ui.action.CreateSiblingAction;
@@ -45,10 +46,13 @@ import org.eclipse.swt.widgets.Listener;
 import org.eclipse.wb.swt.ResourceManager;
 import org.eclipse.wb.swt.SWTResourceManager;
 
+import de.tud.et.ifa.agtele.ui.emf.edit.action.filter.CreateActionChangeListener;
+import de.tud.et.ifa.agtele.ui.emf.edit.action.filter.FilterChangedNotification;
 import de.tud.et.ifa.agtele.ui.emf.editor.ActionUtil;
 import de.tud.et.ifa.agtele.ui.listeners.SelectionListener2;
+import de.tud.et.ifa.agtele.ui.widgets.TreeViewerGroup.TreeViewerGroupAddToolPaletteOption.AddToolPaletteFilterOption;
 
-public abstract class ModelElementPalette {
+public abstract class ModelElementPalette implements CreateActionChangeListener {
 
 	private Composite parent;
 
@@ -61,6 +65,8 @@ public abstract class ModelElementPalette {
 	private ArrayList<Composite> actionContainer;
 
 	private ArrayList<HoverLabel> currentHoverLabels;
+
+	private AddToolPaletteFilterOption filterOption;
 
 	public ModelElementPalette() {
 		this.actionContainer = new ArrayList<>();
@@ -78,8 +84,8 @@ public abstract class ModelElementPalette {
 
 		this.palettesSash = new SashForm(this.paletteContainerScroll, SWT.SMOOTH | SWT.VERTICAL);
 
-		this.createSubPalette(this.palettesSash, "Create Child");
-		this.createSubPalette(this.palettesSash, "Create Siblings");
+		this.createSubPalette(this.palettesSash, "Create Child", 0);
+		this.createSubPalette(this.palettesSash, "Create Siblings", 1);
 
 		this.palettesSash.setWeights(new int[] {2, 1});
 		this.paletteContainerScroll.setContent(this.palettesSash);
@@ -88,7 +94,7 @@ public abstract class ModelElementPalette {
 		this.createButtons();
 	}
 
-	protected void createSubPalette (Composite parent, String categoryString) {
+	protected void createSubPalette (Composite parent, String categoryString, int index) {
 		Composite styleComposite = new Composite(parent, SWT.BORDER);
 		styleComposite.setBackground(SWTResourceManager.getColor(SWT.COLOR_WIDGET_BACKGROUND));
 		GridLayout gl_styleComposite = new GridLayout(1, false);
@@ -98,6 +104,10 @@ public abstract class ModelElementPalette {
 		styleComposite.setLayout(gl_styleComposite);
 
 		this.createExpandButton(styleComposite, categoryString);
+		
+		if (this.filterOption != null) {
+			this.filterOption.createFilterBar(styleComposite, index);
+		}
 
 		ScrolledComposite scroll = new ScrolledComposite(styleComposite, SWT.V_SCROLL);
 		scroll.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 1, 1));
@@ -182,8 +192,27 @@ public abstract class ModelElementPalette {
 	protected TreeViewer getTreeViewer() {
 		return this.getTreeViewerGroup().getTreeViewer();
 	}
+	
+	protected EObject getSelectedElement () {
+		if (this.getSelection() instanceof IStructuredSelection) {			
+			Object object = ((IStructuredSelection)this.getSelection()).getFirstElement();
+			if (object == null) {
+				object = this.getTreeViewer().getInput();
+			}
+			if (!(object instanceof EObject)) {
+				return null;
+			}
+			return (EObject) object;
+		}
+		return null;
+	}
+	
 
 	public void update () {
+		if (this.filterOption != null) {
+			this.filterOption.updateSelection(this.getSelectedElement());
+		}		
+		
 		this.createButtons();
 	}
 
@@ -193,14 +222,15 @@ public abstract class ModelElementPalette {
 		//
 		this.removeButtons();
 
+		List<? extends IAction> createChildActions;
+		List<? extends IAction> createSiblingActions = new ArrayList<>();
+		
 		ISelection selection = this.getTreeViewer().getSelection();
 		if (!(selection instanceof IStructuredSelection) || ((IStructuredSelection) selection).size() > 1) {
 			// nothing to be done
 			return;
 		}
 
-		List<CreateChildAction> createChildActions;
-		List<CreateSiblingAction> createSiblingActions = new ArrayList<>();
 
 		if (((IStructuredSelection) selection).isEmpty()) {
 			// if nothing is selected,we manually select the viewer input; this will allow to add the
@@ -222,7 +252,11 @@ public abstract class ModelElementPalette {
 				return;
 			}
 		}
-
+		
+		if (this.filterOption != null) {
+			createChildActions = this.filterOption.filterChildren(createChildActions);
+			createSiblingActions = this.filterOption.filterChildren(createSiblingActions);
+		}
 		// Populate the palette
 		//
 		this.currentHoverLabels = new ArrayList<>();
@@ -416,5 +450,19 @@ public abstract class ModelElementPalette {
 
 	public void dispose() {
 		this.paletteContainerScroll.dispose();
+	}
+	
+
+	public void setFilterOption(AddToolPaletteFilterOption filterOption) {
+		if (this.filterOption != null) {
+			return;
+		}
+		this.filterOption = filterOption;
+		this.filterOption.addFilterChangeListener(this);
+	}
+	
+	@Override
+	public void notifiy(FilterChangedNotification notification) {
+		this.createButtons();
 	}
 }

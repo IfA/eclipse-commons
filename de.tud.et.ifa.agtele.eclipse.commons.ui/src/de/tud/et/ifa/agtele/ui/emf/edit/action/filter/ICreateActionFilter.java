@@ -1,18 +1,27 @@
 package de.tud.et.ifa.agtele.ui.emf.edit.action.filter;
 
-import java.util.ArrayList;
 import java.util.List;
 
-import org.eclipse.emf.edit.ui.action.CreateChildAction;
-import org.eclipse.jface.action.IAction;
+import org.eclipse.emf.edit.command.CommandParameter;
 import org.eclipse.jface.dialogs.IDialogSettings;
 
 import de.tud.et.ifa.agtele.notifier.INotifier;
-import de.tud.et.ifa.agtele.ui.emf.editor.IExtendedCreateElementAction;
 import de.tud.et.ifa.agtele.ui.interfaces.IPersistable;
 
 public interface ICreateActionFilter extends IPersistable, INotifier<FilterChangedNotification, CreateActionChangeListener> {
 	public boolean isActive();
+	
+	public default int getFilterState () {
+		return this.isActive() ? 1 : 0;
+	}
+	
+	public default void setFilterState (int state) {
+		if (state == 0) {
+			this.deactivate();
+		} else {
+			this.activate();
+		}
+	}
 	
 	public default void setActive(boolean active) {
 		if (this.isChangeAllowed()) {
@@ -47,11 +56,18 @@ public interface ICreateActionFilter extends IPersistable, INotifier<FilterChang
 	
 	public default void doPersist(IDialogSettings settings) {
 		settings.put("ACTIVE", this.isActive());
+		settings.put("FILTER_STATE", this.getFilterState());
 	}
 	
 	public default void doRestore(IDialogSettings settings) {
 		if (settings.getBoolean("ACTIVE")) {
 			this.setActive(true, null);
+		}
+		try {
+			int filterState = settings.getInt("FILTER_STATE");	
+			this.setFilterState(filterState);		
+		} catch (NumberFormatException e) {
+			this.setFilterState(this.isActive() ? 1 : 0);		
 		}
 	}
 	
@@ -66,18 +82,20 @@ public interface ICreateActionFilter extends IPersistable, INotifier<FilterChang
 		return true;
 	}
 	
-	public List<IAction> filterActions (List<? extends IAction> currentFilterState, List<? extends IAction> originalActions);
-	
-	public default List<? extends IExtendedCreateElementAction> getCreateChildActions(List<? extends IAction> actions) {
-		ArrayList<IExtendedCreateElementAction> result = new ArrayList<>();	
-		if (actions == null) {
-			return result;
-		}	
-		for (IAction action : actions) {
-			if (action instanceof IExtendedCreateElementAction) {
-				result.add((IExtendedCreateElementAction)action);
-			}			
-		}
-		return result;
-	}
+	public List<CommandParameter> filterCommands (List<? extends CommandParameter> currentFilterState, List<? extends CommandParameter> originalCommands);
+//	
+//	public default List<? extends CommandParameter> getCreateChildActions(List<? extends CommandParameter> actions) {
+//		ArrayList<CommandParameter> result = new ArrayList<>();	
+//		if (actions == null) {
+//			return result;
+//		}	
+//		for (IAction action : actions) {
+//			if (action instanceof IExtendedCreateElementAction) {
+//				result.add((IExtendedCreateElementAction)action);
+//			}			
+//		}
+//		return result;
+//	}
+
+	public void dispatchNotification(FilterChangedNotification notification);
 }

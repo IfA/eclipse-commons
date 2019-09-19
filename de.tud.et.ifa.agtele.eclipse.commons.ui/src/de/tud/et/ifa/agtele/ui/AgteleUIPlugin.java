@@ -93,6 +93,12 @@ public final class AgteleUIPlugin extends EMFPlugin {
 			//
 			plugin = this;
 		}
+		
+		@Override
+		public void saveDialogSettings() {
+			super.saveDialogSettings();
+		}
 	}
+
 
 }

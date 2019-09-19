@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.eclipse.jface.action.IAction;
+import org.eclipse.emf.edit.command.CommandParameter;
 import org.eclipse.jface.dialogs.IDialogSettings;
 
 public class CompoundCreateActionFilter extends CreateActionFilter implements ICompoundCreateActionFilter {
@@ -58,8 +58,8 @@ public class CompoundCreateActionFilter extends CreateActionFilter implements IC
 	}
 
 	@Override
-	public void addSubFilter(ICreateActionFilter filter) {	
-		FilterChangedNotification myNotification = new FilterChangedNotification();
+	public void addSubFilter(ICreateActionFilter filter, FilterChangedNotification notification) {	
+		FilterChangedNotification myNotification = notification != null ? notification : new FilterChangedNotification();
 		if (!this.subFilters.contains(filter)) {
 			if (filter.isActive()) {
 				if (this.isActive()) {
@@ -78,17 +78,20 @@ public class CompoundCreateActionFilter extends CreateActionFilter implements IC
 			} else {
 				this.subFilters.add(filter);				
 			}
+			filter.addListener(this);
 		}
 		if (this.type == CompoundFilterType.RADIO_GROUP_ALWAYS_ON && !this.isActive()) {
 			this.activate(myNotification);
 		}
-		this.dispatchNotification(myNotification);
+		if (notification == null) {
+			this.dispatchNotification(myNotification);			
+		}
 	}
 
 	@Override
-	public void removeSubFilter(ICreateActionFilter filter) {
-		if (!this.subFilters.contains(filter)) {
-			FilterChangedNotification myNotification = new FilterChangedNotification();			
+	public void removeSubFilter(ICreateActionFilter filter, FilterChangedNotification notification) {
+		if (this.subFilters.contains(filter)) {		
+			FilterChangedNotification myNotification = notification != null ? notification : new FilterChangedNotification();
 			if (!filter.isActive()) {
 				this.subFilters.remove(filter);
 			} else {
@@ -98,9 +101,11 @@ public class CompoundCreateActionFilter extends CreateActionFilter implements IC
 					this.activate(myNotification);
 				}
 			}
-			this.dispatchNotification(myNotification);
+			filter.removeListener(this);
+			if (notification == null) {
+				this.dispatchNotification(myNotification);			
+			}	
 		}
-				
 	}
 	
 	@Override
@@ -137,11 +142,11 @@ public class CompoundCreateActionFilter extends CreateActionFilter implements IC
 	}
 
 	@Override
-	public List<IAction> filterActions(List<? extends IAction> currentFilterState, List<? extends IAction> originalActions) {
-		List<IAction> result = new ArrayList<>(currentFilterState);
+	public List<CommandParameter> filterCommands(List<? extends CommandParameter> currentFilterState, List<? extends CommandParameter> originalCommands) {
+		List<CommandParameter> result = new ArrayList<>(currentFilterState);
 		
 		for (ICreateActionFilter filter : this.getActiveFilters()) {
-			result = filter.filterActions(this.getCreateChildActions(result), originalActions);
+			result = filter.filterCommands(result, originalCommands);
 		}		
 		return result;
 	}
@@ -155,6 +160,15 @@ public class CompoundCreateActionFilter extends CreateActionFilter implements IC
 				}
 			}
 		}		
+	}
+
+	@Override
+	public void notifiy(FilterChangedNotification notification) {
+		if (this.getOwner() == null) {
+			this.dispatchNotification(notification);
+		} else {
+			this.getOwner().notifiy(notification);
+		}
 	}
 
 }

@@ -14,7 +14,10 @@ package de.tud.et.ifa.agtele.ui.widgets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -32,6 +35,7 @@ import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.ecore.util.EcoreUtil;
+import org.eclipse.emf.edit.command.CommandParameter;
 import org.eclipse.emf.edit.command.CreateChildCommand;
 import org.eclipse.emf.edit.domain.EditingDomain;
 import org.eclipse.emf.edit.provider.ComposedAdapterFactory;
@@ -41,6 +45,7 @@ import org.eclipse.emf.edit.ui.provider.AdapterFactoryLabelProvider;
 import org.eclipse.emf.edit.ui.provider.DecoratingColumLabelProvider;
 import org.eclipse.emf.edit.ui.provider.DelegatingStyledCellLabelProvider;
 import org.eclipse.emf.edit.ui.provider.DiagnosticDecorator;
+import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.dialogs.IDialogSettings;
@@ -75,7 +80,12 @@ import org.eclipse.ui.services.IServiceLocator;
 
 import de.tud.et.ifa.agtele.resources.BundleContentHelper;
 import de.tud.et.ifa.agtele.ui.AgteleUIPlugin;
+import de.tud.et.ifa.agtele.ui.emf.edit.action.filter.CreateActionChangeListener;
+import de.tud.et.ifa.agtele.ui.emf.edit.action.filter.ICreateActionFilter;
+import de.tud.et.ifa.agtele.ui.emf.edit.action.filter.IFilterItemFactory;
+import de.tud.et.ifa.agtele.ui.emf.edit.action.filter.ItemProviderCreateActionFilter;
 import de.tud.et.ifa.agtele.ui.emf.editor.ActionUtil;
+import de.tud.et.ifa.agtele.ui.emf.editor.IExtendedCreateElementAction;
 import de.tud.et.ifa.agtele.ui.interfaces.IPersistable;
 import de.tud.et.ifa.agtele.ui.listeners.EditMultilineFeatureDoubleClickListener;
 import de.tud.et.ifa.agtele.ui.listeners.SelectionListener2;
@@ -1002,6 +1012,8 @@ public class TreeViewerGroup extends FilteredTree implements IPersistable, ISele
 		 * The weight, the palette had before hiding.
 		 */
 		protected float oldWeight = (float) -1.0;
+		
+		protected AddToolPaletteFilterOption toolPaletteFilterOption = null;
 
 		/**
 		 * The listener that listens for changed selections on the tree
@@ -1061,8 +1073,13 @@ public class TreeViewerGroup extends FilteredTree implements IPersistable, ISele
 		 * @return
 		 */
 		protected TreeViewerGroupModelElementPalette getElementPalette() {
-
-			return new TreeViewerGroupModelElementPalette();
+			TreeViewerGroupModelElementPalette result = new TreeViewerGroupModelElementPalette();
+			
+			if (this.toolPaletteFilterOption != null) {
+				result.setFilterOption(this.toolPaletteFilterOption);			
+			}
+			
+			return result;
 		}
 
 		/**
@@ -1146,33 +1163,158 @@ public class TreeViewerGroup extends FilteredTree implements IPersistable, ISele
 			int[] weights = this.group.treePaletteSeparator.getWeights();
 			return weights[this.index] <= 0;
 		}
-
+		
 		/**
 		 * Adds a show/hide button to the toolbar
 		 *
 		 * @author Lukas
 		 */
 		public class TreeViewerGroupToolbarHideEMFPaletteOption implements TreeViewerGroupToolbarOption {
-
+			
 			protected ToolItem item;
-
+			
 			protected SelectionListener2 listener;
-
+			
 			@Override
 			public void addToolbarControls(TreeViewerGroup group, ToolBar toolbar, TreeViewerGroupOption[] options) {
-
+				
 				this.item = new ToolItem(toolbar, SWT.PUSH | SWT.TRAIL);
 				this.item.setImage(BundleContentHelper.getBundleImage(group.bundleID, "icons/toggledetailpane_co.gif"));
 				this.item.setToolTipText("Show/Hide Tool Elemet Palette");
 				this.listener = (SelectionListener2) e -> TreeViewerGroupAddToolPaletteOption.this.toggleVisibility();
 				this.item.addSelectionListener(this.listener);
 			}
-
+			
 			@Override
 			public void dispose() {
-
+				
 				this.item.removeSelectionListener(this.listener);
 				this.item.dispose();
+			}
+		}
+		//TODO this needs to be made static and configured afterwards
+		public AddToolPaletteFilterOption createAddToolPaletteFilterOption (IFilterItemFactory factory) {
+			AddToolPaletteFilterOption option = new AddToolPaletteFilterOption(factory);
+			this.toolPaletteFilterOption = option; 
+			//TODO this does not work this way, configure the TreeViewerGrouAddToolPaletteOption when the filter option is present
+			return option;
+		}
+		
+		/**
+		 * Adds the filter feature to the element palette
+		 *
+		 * @author Lukas
+		 */
+		public class AddToolPaletteFilterOption
+			implements TreeViewerGroupSelectionViewerOption, TreeViewerGroupPersistableOption {
+
+			protected IFilterItemFactory factory;
+			protected ToolBar childrenFilterBar;
+			protected ToolBar siblingsFilterBar;
+			
+			protected ItemProviderCreateActionFilter childrenFilter, siblingsFilter;
+
+			public AddToolPaletteFilterOption(IFilterItemFactory factory) {
+				this.factory = factory;
+				this.childrenFilter = new ItemProviderCreateActionFilter();
+				this.siblingsFilter = new ItemProviderCreateActionFilter();
+				this.childrenFilter.setContext("CHILDREN_FILTER"); //needed for filter persistence
+				this.siblingsFilter.setContext("SIBLINGS_FILTER");
+			}
+			
+			@Override
+			public void dispose() {
+				this.childrenFilterBar.dispose();
+				this.siblingsFilterBar.dispose();
+			}
+
+			@Override
+			public void persist(IDialogSettings settings) {
+				this.childrenFilter.persist(settings);
+				this.siblingsFilter.persist(settings);
+			}
+
+			@Override
+			public void restore(IDialogSettings settings) {
+				this.childrenFilter.restore(settings);
+				this.siblingsFilter.restore(settings);
+			}
+			
+			public void createFilterBar(Composite parent, int index) {
+				if (index == 0) {
+					this.createChildrenFilterBar(parent);
+				} else {
+					this.createSiblingsFilterBar(parent);
+				}
+			}
+						
+			public void createChildrenFilterBar (Composite parent) {
+				this.childrenFilterBar = new ToolBar(parent, SWT.FLAT | SWT.RIGHT);
+			}
+			
+			public void createSiblingsFilterBar (Composite parent) {
+				this.siblingsFilterBar = new ToolBar(parent, SWT.FLAT | SWT.RIGHT);
+			}
+			
+			public void addFilterChangeListener (CreateActionChangeListener listener) {
+				this.childrenFilter.addListener(listener);
+				this.siblingsFilter.addListener(listener);
+			}
+			
+			public void removeFilterChangeListener (CreateActionChangeListener listener) {
+				this.childrenFilter.removeListener(listener);
+				this.siblingsFilter.removeListener(listener);
+			}
+			
+			
+			public void updateSelection(EObject selected) {
+				for (Control c : this.childrenFilterBar.getChildren()) {
+					c.dispose();
+				}
+				
+				for (Control c : this.siblingsFilterBar.getChildren()) {
+					c.dispose();
+				}
+				
+				if (selected != null) {
+					this.childrenFilter.getFilters(selected);
+					this.siblingsFilter.getFilters(selected.eContainer());
+					
+					this.factory.createControls(childrenFilter, this.childrenFilterBar);
+					this.factory.createControls(siblingsFilter, this.siblingsFilterBar);
+				}
+			}
+			
+			protected Map<IAction, CommandParameter> mapActions(List<? extends IAction> actions) {
+				 Map<IAction, CommandParameter> result = new LinkedHashMap<>();
+				 
+				 for (IAction action:actions) {
+					 if (action instanceof IExtendedCreateElementAction) {
+						 result.put(action, ((IExtendedCreateElementAction)action).getDescriptor());
+					 }
+				 }
+				 
+				 return result;
+			}
+			
+			public List<IAction> filterChildren (List<? extends IAction> actions) {
+				return filter(actions, this.childrenFilter);
+			}
+			
+			public List<IAction> filterSiblings (List<? extends IAction> actions) {
+				return filter(actions, this.siblingsFilter);
+			}
+
+			protected List<IAction> filter(List<? extends IAction> actions, ItemProviderCreateActionFilter filter) {
+				Map<IAction, CommandParameter> mapped = this.mapActions(actions);
+				List<IAction> result = new ArrayList<>(actions);
+				List<CommandParameter> parameters = new ArrayList<>(mapped.values());
+				
+				filter.filterCommands(parameters, parameters);
+				
+				result.removeIf(a -> !mapped.containsKey(a) || !parameters.contains(mapped.get(a)));
+				
+				return result;
 			}
 		}
 

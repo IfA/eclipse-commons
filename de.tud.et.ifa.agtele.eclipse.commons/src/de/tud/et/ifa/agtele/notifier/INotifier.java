@@ -6,9 +6,9 @@ public interface INotifier <NotificationType, ListenerType extends IListener<Not
 
 	List<ListenerType> getListeners();
 
-	void registerRegistrationChangeListener(ListenerType listener);
+	void addListener(ListenerType listener);
 
-	void deregisterRegistrationChangeListener(ListenerType listener);
+	void removeListener(ListenerType listener);
 
 	public default List<ListenerType> getRelevantListeners (NotificationType notification) {
 		return this.getListeners();

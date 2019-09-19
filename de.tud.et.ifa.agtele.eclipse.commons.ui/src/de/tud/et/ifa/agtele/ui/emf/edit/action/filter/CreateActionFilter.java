@@ -22,6 +22,7 @@ public abstract class CreateActionFilter extends Notifier<FilterChangedNotificat
 		this.context = context;
 	}
 	
+	@Override
 	public void dispatchNotification(FilterChangedNotification notification) {
 		Set<ICreateActionFilter> filtersToNotifiy = notification.getChangedFilters();
 		filtersToNotifiy.forEach(f -> f.notifiyListeners(notification));

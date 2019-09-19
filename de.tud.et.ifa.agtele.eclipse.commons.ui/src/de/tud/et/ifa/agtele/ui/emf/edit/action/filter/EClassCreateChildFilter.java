@@ -5,10 +5,7 @@ import java.util.List;
 
 import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.EObject;
-import org.eclipse.emf.edit.ui.action.CreateChildAction;
-import org.eclipse.jface.action.IAction;
-
-import de.tud.et.ifa.agtele.ui.emf.editor.IExtendedCreateElementAction;
+import org.eclipse.emf.edit.command.CommandParameter;
 
 public class EClassCreateChildFilter extends CreateActionFilter {	
 	protected EClass eClass;
@@ -26,12 +23,12 @@ public class EClassCreateChildFilter extends CreateActionFilter {
 	}
 	
 	@Override
-	public List<IAction> filterActions(List<? extends IAction> currentFilterState,
-			List<? extends IAction> originalActions) {
-		List<IExtendedCreateElementAction> result = new ArrayList<>(this.getCreateChildActions(currentFilterState));
+	public List<CommandParameter> filterCommands(List<? extends CommandParameter> currentFilterState,
+			List<? extends CommandParameter> originalCommands) {
+		List<CommandParameter> result = new ArrayList<>(currentFilterState);
 		
-		result.removeIf(a -> {
-			EObject child = a.getDescriptor().getEValue();
+		result.removeIf(p -> {
+			EObject child = p.getEValue();
 			if (child == null) {
 				return true;
 			}
@@ -44,8 +41,8 @@ public class EClassCreateChildFilter extends CreateActionFilter {
 			}
 			return true;
 		});
-		// TODO Auto-generated method stub
-		return null;
+
+		return result;
 	}
 
 }
