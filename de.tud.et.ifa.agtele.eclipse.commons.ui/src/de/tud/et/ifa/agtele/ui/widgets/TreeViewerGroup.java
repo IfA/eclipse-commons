@@ -1027,6 +1027,14 @@ public class TreeViewerGroup extends FilteredTree implements IPersistable, ISele
 			this.group = group;
 			this.index = index;
 			this.elementPalette = this.getElementPalette();
+			
+			for(TreeViewerGroupOption option : options) {
+				if (option instanceof AddToolPaletteFilterOption) {
+					this.toolPaletteFilterOption = (AddToolPaletteFilterOption)option;
+					this.elementPalette.setFilterOption(this.toolPaletteFilterOption);
+				}
+			}
+			
 			this.elementPalette.createPalette(sash);
 
 			if (this.oldWeight > -1) {
@@ -1192,20 +1200,13 @@ public class TreeViewerGroup extends FilteredTree implements IPersistable, ISele
 				this.item.dispose();
 			}
 		}
-		//TODO this needs to be made static and configured afterwards
-		public AddToolPaletteFilterOption createAddToolPaletteFilterOption (IFilterItemFactory factory) {
-			AddToolPaletteFilterOption option = new AddToolPaletteFilterOption(factory);
-			this.toolPaletteFilterOption = option; 
-			//TODO this does not work this way, configure the TreeViewerGrouAddToolPaletteOption when the filter option is present
-			return option;
-		}
 		
 		/**
 		 * Adds the filter feature to the element palette
 		 *
 		 * @author Lukas
 		 */
-		public class AddToolPaletteFilterOption
+		public static class AddToolPaletteFilterOption
 			implements TreeViewerGroupSelectionViewerOption, TreeViewerGroupPersistableOption {
 
 			protected IFilterItemFactory factory;
@@ -1268,11 +1269,11 @@ public class TreeViewerGroup extends FilteredTree implements IPersistable, ISele
 			
 			
 			public void updateSelection(EObject selected) {
-				for (Control c : this.childrenFilterBar.getChildren()) {
+				for (ToolItem c : new ArrayList<>(Arrays.asList(this.childrenFilterBar.getItems()))) {
 					c.dispose();
 				}
 				
-				for (Control c : this.siblingsFilterBar.getChildren()) {
+				for (ToolItem c : new ArrayList<>(Arrays.asList(this.siblingsFilterBar.getItems()))) {
 					c.dispose();
 				}
 				
@@ -1283,6 +1284,10 @@ public class TreeViewerGroup extends FilteredTree implements IPersistable, ISele
 					this.factory.createControls(childrenFilter, this.childrenFilterBar);
 					this.factory.createControls(siblingsFilter, this.siblingsFilterBar);
 				}
+				this.childrenFilterBar.redraw();
+				this.childrenFilterBar.update();
+				this.siblingsFilterBar.redraw();
+				this.siblingsFilterBar.update();
 			}
 			
 			protected Map<IAction, CommandParameter> mapActions(List<? extends IAction> actions) {
@@ -1310,9 +1315,9 @@ public class TreeViewerGroup extends FilteredTree implements IPersistable, ISele
 				List<IAction> result = new ArrayList<>(actions);
 				List<CommandParameter> parameters = new ArrayList<>(mapped.values());
 				
-				filter.filterCommands(parameters, parameters);
+				final List<CommandParameter> filteredParameters = filter.filterCommands(parameters, parameters);
 				
-				result.removeIf(a -> !mapped.containsKey(a) || !parameters.contains(mapped.get(a)));
+				result.removeIf(a -> mapped.containsKey(a) && !filteredParameters.contains(mapped.get(a)));
 				
 				return result;
 			}

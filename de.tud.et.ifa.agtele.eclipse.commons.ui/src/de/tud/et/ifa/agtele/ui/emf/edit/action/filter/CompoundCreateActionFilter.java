@@ -64,6 +64,7 @@ public class CompoundCreateActionFilter extends CreateActionFilter implements IC
 			if (filter.isActive()) {
 				if (this.isActive()) {
 					this.subFilters.add(filter);
+					filter.setOwner(this);
 					if (this.isRadioGroup()) {
 						this.subFilters.forEach(f -> {
 							if (f != filter) {
@@ -73,10 +74,12 @@ public class CompoundCreateActionFilter extends CreateActionFilter implements IC
 					}
 				} else {
 					this.subFilters.add(filter);
+					filter.setOwner(this);
 				}
 				myNotification.addChangedFilter(filter);
 			} else {
-				this.subFilters.add(filter);				
+				this.subFilters.add(filter);		
+				filter.setOwner(this);		
 			}
 			filter.addListener(this);
 		}
@@ -94,10 +97,12 @@ public class CompoundCreateActionFilter extends CreateActionFilter implements IC
 			FilterChangedNotification myNotification = notification != null ? notification : new FilterChangedNotification();
 			if (!filter.isActive()) {
 				this.subFilters.remove(filter);
+				filter.setOwner(null);
 			} else {
 				myNotification.addChangedFilter(filter);
 				if (this.type == CompoundFilterType.RADIO_GROUP_ALWAYS_ON) {
 					this.subFilters.remove(filter);
+					filter.setOwner(null);
 					this.activate(myNotification);
 				}
 			}
@@ -165,7 +170,7 @@ public class CompoundCreateActionFilter extends CreateActionFilter implements IC
 	@Override
 	public void notifiy(FilterChangedNotification notification) {
 		if (this.getOwner() == null) {
-			this.dispatchNotification(notification);
+			this.notifiyListeners(notification);
 		} else {
 			this.getOwner().notifiy(notification);
 		}

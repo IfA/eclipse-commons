@@ -91,7 +91,7 @@ public abstract class ModelElementPalette implements CreateActionChangeListener 
 		this.paletteContainerScroll.setContent(this.palettesSash);
 		this.paletteContainerScroll.setMinSize(this.palettesSash.computeSize(SWT.DEFAULT, SWT.DEFAULT));
 
-		this.createButtons();
+		this.update();
 	}
 
 	protected void createSubPalette (Composite parent, String categoryString, int index) {
@@ -255,7 +255,7 @@ public abstract class ModelElementPalette implements CreateActionChangeListener 
 		
 		if (this.filterOption != null) {
 			createChildActions = this.filterOption.filterChildren(createChildActions);
-			createSiblingActions = this.filterOption.filterChildren(createSiblingActions);
+			createSiblingActions = this.filterOption.filterSiblings(createSiblingActions);
 		}
 		// Populate the palette
 		//
@@ -278,6 +278,9 @@ public abstract class ModelElementPalette implements CreateActionChangeListener 
 	}
 
 	protected Composite getActionContainerScrollByStyleComposite (Composite styleContainer) {
+		if (this.filterOption != null) {
+			return (Composite)((Composite)styleContainer.getChildren()[2] /*ScrolledComposite*/).getChildren()[0];
+		}
 		return (Composite)((Composite)styleContainer.getChildren()[1] /*ScrolledComposite*/).getChildren()[0];
 	}
 
@@ -317,6 +320,7 @@ public abstract class ModelElementPalette implements CreateActionChangeListener 
 					actionContainer.redraw();
 					((ScrolledComposite)actionContainer.getParent()).setMinHeight(aSize.y);
 					actionContainer.getParent().layout(true, true);
+					actionContainer.getParent().redraw();
 
 				}
 				//		createChildrenScroll.layout();

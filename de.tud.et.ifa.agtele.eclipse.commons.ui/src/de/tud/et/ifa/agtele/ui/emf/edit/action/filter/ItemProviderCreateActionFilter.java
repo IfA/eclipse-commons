@@ -9,6 +9,7 @@ import java.util.Map;
 import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.edit.provider.ItemProvider;
+import org.eclipse.emf.edit.provider.ItemProviderAdapter;
 import org.eclipse.jface.dialogs.IDialogSettings;
 
 import de.tud.et.ifa.agtele.emf.AgteleEcoreUtil;
@@ -40,12 +41,14 @@ public class ItemProviderCreateActionFilter extends CompoundCreateActionFilter
 	}
 	
 	protected boolean areFiltersDifferent(List<ICreateActionFilter> filters) {
-		return this.subFilters.equals(filters); //TODO this may not work, if list classes differ
+		return !this.subFilters.equals(filters); //TODO this may not work, if list classes differ
 	}
 	
 	protected void activateFilters (List<ICreateActionFilter> filters, EClass cacheKey) {
 		if (filters == null || filters.isEmpty()) {
-			this.removeSubFilters(this.getSubFilters());
+			if (!this.getSubFilters().isEmpty()) {
+				this.removeSubFilters(this.getSubFilters());
+			}
 		} else if (this.areFiltersDifferent(filters)) {
 			FilterChangedNotification notification = new FilterChangedNotification();
 			this.removeSubFilters(this.getSubFilters(), notification);
@@ -66,13 +69,13 @@ public class ItemProviderCreateActionFilter extends CompoundCreateActionFilter
 			return Collections.emptyList();
 		}
 		
-		ItemProvider provider = AgteleEcoreUtil.adapt(selection, ItemProvider.class);
+		ItemProviderAdapter provider = AgteleEcoreUtil.adapt(selection, ItemProviderAdapter.class);
 	
 		List<ICreateActionFilter> result = Collections.emptyList();
 		if (provider instanceof CreateActionFilterItemProvider) {
 			CreateActionFilterItemProvider cafProvider = (CreateActionFilterItemProvider)provider;
 			EClass cacheKey = cafProvider.getCacheKey(selection);
-			if (cafProvider.isFilterReuseAllowed(selection) && cacheKey != null && this.filterCache.containsKey(cacheKey)) {
+			if (cafProvider.isFilterReuseAllowed(selection) && cacheKey != null && this.filterCache.containsKey(cacheKey) && this.filterCache.get(selection.eClass()) != null) {
 				result = this.filterCache.get(selection.eClass());
 				this.activateFilters(result, cacheKey);
 			} else {

@@ -67,7 +67,7 @@ public abstract class CreateActionFilter extends Notifier<FilterChangedNotificat
 			myNotification.addChangedFilter(this);
 		}
 		if (notification == null) {
-			this.notifiyListeners(myNotification);
+			this.dispatchNotification(myNotification);
 		}
 	}
 }
