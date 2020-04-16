@@ -235,7 +235,7 @@ public class CommonItemProviderAdapter extends ItemProviderAdapter {
 				}
 			}
 
-			if (this.owner != null && this.domain.isReadOnly(this.owner.eResource())) {
+			if (this.owner != null && this.owner.eResource() != null && this.domain.isReadOnly(this.owner.eResource())) {
 				return false;
 			}
 
