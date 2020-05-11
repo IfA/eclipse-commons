@@ -34,9 +34,17 @@ public interface IModelImportStrategy {
 		}
 		if (!createdElements.isEmpty()) {
 			if (reference.isMany()) {
-				((EList)eObject.eGet(reference)).addAll(createdElements);
+				try {
+					((EList)eObject.eGet(reference)).addAll(createdElements);
+				} catch (Exception e) {
+					//TODO log error
+				}
 			} else {
-				eObject.eSet(reference, createdElements.get(0));
+				try {
+					eObject.eSet(reference, createdElements.get(0));
+				} catch (Exception e) {
+					//TODO log error
+				}
 			}				
 		}
 	}
