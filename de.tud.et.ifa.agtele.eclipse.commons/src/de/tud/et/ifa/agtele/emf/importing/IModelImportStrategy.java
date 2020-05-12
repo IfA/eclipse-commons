@@ -76,6 +76,9 @@ public interface IModelImportStrategy {
 		ArrayList<Object> attrValues = new ArrayList<>();
 		for (Object val : connector.readAttribute(adapter.getOriginalNode(eObject), attribute)) {
 			Object restored = null;
+			if (val == null) {
+				continue;
+			}
 			if (val instanceof String) {
 				restored = this.convertAttributeValue((String)val, attribute);					
 			} else {
