@@ -94,7 +94,13 @@ public class ReferencingIdentifierTransfer extends ByteArrayTransfer {
 	
 	@Override
 	public Object nativeToJava(TransferData transferData) {		
+		if (transferData == null) {
+			return null;
+		}
 		byte[] bytes = (byte[])super.nativeToJava(transferData);
+		if (bytes == null) {
+			return null;
+		}
 		String text = new String(bytes);
 		if (text != null) {
 			try {
