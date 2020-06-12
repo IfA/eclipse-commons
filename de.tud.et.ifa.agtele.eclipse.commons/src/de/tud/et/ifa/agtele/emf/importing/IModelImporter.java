@@ -223,7 +223,7 @@ public interface IModelImporter {
 			if (currentStrategy == null) {
 				break;
 			}
-			currentStrategy = wrappers[wrappers.length -1].wrap(currentStrategy);
+			currentStrategy = wrappers[i].wrap(currentStrategy);
 		}
 		return currentStrategy;
 	}
