@@ -1012,10 +1012,10 @@ public interface AgteleEcoreUtil {
 		Resource res = eObject.eResource();
 		ResourceSet set = res != null ? res.getResourceSet() : null;
 		if (set != null) {
-			List<Adapter> adapters = new ArrayList<>(set.eAdapters());
-			for (int i = adapters.size() -1 ; i >= 0; i-=1) {
-				if (adapters.get(i) == null) {
-					adapters.remove(i);
+			List<AdapterFactory> factories = new ArrayList<>(set.getAdapterFactories());
+			for (int i = factories.size() -1 ; i >= 0; i-=1) {
+				if (factories.get(i) == null) {
+					factories.remove(i);
 				}
 			}
 		}
