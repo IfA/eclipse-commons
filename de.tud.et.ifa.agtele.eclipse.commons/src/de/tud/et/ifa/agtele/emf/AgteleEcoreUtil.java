@@ -1009,7 +1009,22 @@ public interface AgteleEcoreUtil {
 			return null;
 		}
 		
-		Adapter adapter = EcoreUtil.getRegisteredAdapter(eObject, type);
+		Resource res = eObject.eResource();
+		ResourceSet set = res != null ? res.getResourceSet() : null;
+		if (set != null) {
+			List<Adapter> adapters = new ArrayList<>(set.eAdapters());
+			for (int i = adapters.size() -1 ; i >= 0; i-=1) {
+				if (adapters.get(i) == null) {
+					adapters.remove(i);
+				}
+			}
+		}
+		Adapter adapter = null;
+		try {
+			adapter = EcoreUtil.getRegisteredAdapter(eObject, type);			
+		} catch (Exception e) {
+			//Do nothing
+		}
 		
 		if (adapter == null) {
 			AdapterFactory factory = null;
