@@ -69,6 +69,7 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Group;
+import org.eclipse.swt.widgets.Text;
 import org.eclipse.swt.widgets.ToolBar;
 import org.eclipse.swt.widgets.ToolItem;
 import org.eclipse.ui.PlatformUI;
@@ -101,7 +102,7 @@ import de.tud.et.ifa.agtele.ui.views.EMFModelHelpView.HelpListener;
  * @author mfreund
  *
  */
-public class TreeViewerGroup extends FilteredTree implements IPersistable, ISelectionProvider {
+public class TreeViewerGroup extends SelectionRestoringFilteredTree implements IPersistable, ISelectionProvider {
 
 	protected final String bundleID = AgteleUIPlugin.getPlugin().getSymbolicName();
 
@@ -181,7 +182,7 @@ public class TreeViewerGroup extends FilteredTree implements IPersistable, ISele
 	public TreeViewerGroup(Composite parent, ComposedAdapterFactory adapterFactory, EditingDomain editingDomain,
 			IDialogSettings dialogSettings, String groupText, TreeViewerGroupOption... options) {
 
-		super(parent, true);
+		super(parent,true,true);
 		this.parent = parent;
 		this.groupText = groupText;
 		this.editingDomain = editingDomain;
