@@ -5,6 +5,7 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.StructuredSelection;
+import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.TreeItem;
@@ -22,6 +23,30 @@ public class SelectionRestoringFilteredTree extends FilteredTree {
 	public SelectionRestoringFilteredTree(Composite parent, int treeStyle, PatternFilter filter, boolean useNewLook,
 			boolean useFastHashLookup) {
 		super(parent, treeStyle, filter, useNewLook, useFastHashLookup);
+	}
+	
+
+	@Deprecated
+	protected SelectionRestoringFilteredTree(Composite parent) {
+		super(parent);
+	}
+	
+
+	@Deprecated
+	protected SelectionRestoringFilteredTree(Composite parent, boolean useNewLook) {
+		super(parent, useNewLook);
+	}
+	
+
+	@Deprecated
+	public SelectionRestoringFilteredTree(Composite parent, int treeStyle, PatternFilter filter) {
+		super(parent, treeStyle, filter);
+	}
+	
+
+	@Deprecated
+	public SelectionRestoringFilteredTree(Composite parent, int treeStyle, PatternFilter filter, boolean useNewLook) {
+		super(parent, treeStyle, filter, useNewLook);
 	}
 
 	protected static final long SOFT_MAX_EXPAND_TIME2 = 200;
