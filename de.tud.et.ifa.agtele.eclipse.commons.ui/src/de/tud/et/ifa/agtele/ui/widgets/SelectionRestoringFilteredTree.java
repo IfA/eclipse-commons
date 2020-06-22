@@ -17,12 +17,12 @@ import org.eclipse.ui.progress.WorkbenchJob;
 public class SelectionRestoringFilteredTree extends FilteredTree {
 	
 	public SelectionRestoringFilteredTree(Composite parent, boolean useNewLook, boolean useFastHashLookup) {
-		super(parent, useNewLook);
+		super(parent, useNewLook, useFastHashLookup);
 	}
 	
 	public SelectionRestoringFilteredTree(Composite parent, int treeStyle, PatternFilter filter, boolean useNewLook,
 			boolean useFastHashLookup) {
-		super(parent, treeStyle, filter, useNewLook);
+		super(parent, treeStyle, filter, useNewLook, useFastHashLookup);
 	}
 	
 
