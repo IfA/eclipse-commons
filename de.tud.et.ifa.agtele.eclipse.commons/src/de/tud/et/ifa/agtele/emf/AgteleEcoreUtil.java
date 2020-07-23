@@ -55,6 +55,9 @@ import org.eclipse.emf.edit.domain.IEditingDomainProvider;
 import org.eclipse.emf.edit.provider.AdapterFactoryItemDelegator;
 import org.eclipse.emf.edit.provider.ComposedAdapterFactory;
 import org.eclipse.emf.edit.provider.IEditingDomainItemProvider;
+import org.eclipse.emf.edit.provider.ItemProviderAdapter;
+
+import de.tud.et.ifa.agtele.emf.edit.IReferencingIdentificationStringProvider;
 
 /**
  * This class contains convenient static methods for working with EMF objects.
@@ -1176,5 +1179,21 @@ public interface AgteleEcoreUtil {
 			result.add(e);
 		}
 		return result;
+	}
+	
+	public static List<String> getReferencableStrings(EObject eObject) {
+		Adapter itemProviderAdapter = null;
+		try {
+			itemProviderAdapter = AgteleEcoreUtil.getAdapter(eObject, ItemProviderAdapter.class);
+		} catch (Exception e) {
+			//Do nothing
+		}
+		
+		if (itemProviderAdapter != null && 
+				itemProviderAdapter instanceof IReferencingIdentificationStringProvider) {
+			ArrayList<String> identifiers = new ArrayList<>(((IReferencingIdentificationStringProvider)itemProviderAdapter).getReferencingIdentificationStrings(eObject));
+			return identifiers;
+		}
+		return Collections.emptyList();
 	}
 } 
