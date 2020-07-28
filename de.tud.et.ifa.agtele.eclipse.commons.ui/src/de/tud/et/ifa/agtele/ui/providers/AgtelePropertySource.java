@@ -15,6 +15,7 @@ import org.eclipse.emf.ecore.EStructuralFeature;
 import org.eclipse.emf.edit.provider.IItemPropertyDescriptor;
 import org.eclipse.emf.edit.provider.IItemPropertySource;
 import org.eclipse.emf.edit.provider.ItemPropertyDescriptor;
+import org.eclipse.emf.edit.provider.ItemPropertyDescriptor.PropertyValueWrapper;
 import org.eclipse.emf.edit.ui.celleditor.FeatureEditorDialog;
 import org.eclipse.emf.edit.ui.provider.PropertyDescriptor;
 import org.eclipse.emf.edit.ui.provider.PropertySource;
@@ -212,7 +213,10 @@ public class AgtelePropertySource extends PropertySource {
 		          if (itemPropertyDescriptor instanceof IItemPropertyDescriptor.ValueHandlerProvider &&
 		                ((IItemPropertyDescriptor.ValueHandlerProvider)itemPropertyDescriptor).isChoiceArbitrary(object))
 		          {
-		        	values.add(0, ((ItemPropertyDescriptor.PropertyValueWrapper)itemPropertyDescriptor.getPropertyValue(object)).getEditableValue(object));
+		        	  ItemPropertyDescriptor.PropertyValueWrapper currentValue = (PropertyValueWrapper) itemPropertyDescriptor.getPropertyValue(object);
+		        	  if (currentValue != null && currentValue.getEditableValue(object) != null) {
+		        		  values.add(0, currentValue.getEditableValue(object));		        		  
+		        	  }
 		            result = createComboBoxEditor(composite,
 			                 values,
 			                 getEditLabelProvider(),
