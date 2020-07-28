@@ -20,6 +20,7 @@ import org.eclipse.emf.edit.ui.provider.PropertyDescriptor;
 import org.eclipse.emf.edit.ui.provider.PropertySource;
 import org.eclipse.jface.dialogs.IInputValidator;
 import org.eclipse.jface.viewers.CellEditor;
+import org.eclipse.jface.viewers.ColumnViewerEditorActivationEvent;
 import org.eclipse.jface.viewers.ICellEditorValidator;
 import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.swt.SWT;
@@ -211,6 +212,7 @@ public class AgtelePropertySource extends PropertySource {
 		          if (itemPropertyDescriptor instanceof IItemPropertyDescriptor.ValueHandlerProvider &&
 		                ((IItemPropertyDescriptor.ValueHandlerProvider)itemPropertyDescriptor).isChoiceArbitrary(object))
 		          {
+		        	values.add(0, ((ItemPropertyDescriptor.PropertyValueWrapper)itemPropertyDescriptor.getPropertyValue(object)).getEditableValue(object));
 		            result = createComboBoxEditor(composite,
 			                 values,
 			                 getEditLabelProvider(),
@@ -219,6 +221,7 @@ public class AgtelePropertySource extends PropertySource {
 			                 new EDataTypeValueHandler((EDataType)eType, ((IItemPropertyDescriptor.ValueHandlerProvider)itemPropertyDescriptor).getValueHandler(object)),
 			                 false
 			            );
+//		            ((ExtendedComboBoxCellEditor)result);
 		          }
 		          else
 		          {
