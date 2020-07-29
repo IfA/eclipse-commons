@@ -1180,6 +1180,25 @@ public interface AgteleEcoreUtil {
 		}
 		return result;
 	}
+		
+	public static boolean isReferencable(Object o) {
+		if (o instanceof EObject) {
+			return AgteleEcoreUtil.isReferencable((EObject)o);
+		}
+		return false;
+	}
+	
+	public static boolean isReferencable(EObject eObject) {
+		try {
+			Adapter a = AgteleEcoreUtil.getAdapter(eObject, ItemProviderAdapter.class);
+			if (a != null && a instanceof IReferencingIdentificationStringProvider) {
+				return true;
+			}
+		} catch (Exception e) {
+			//Do nothing
+		}
+		return false;
+	}
 	
 	public static List<String> getReferencableStrings(EObject eObject) {
 		Adapter itemProviderAdapter = null;
