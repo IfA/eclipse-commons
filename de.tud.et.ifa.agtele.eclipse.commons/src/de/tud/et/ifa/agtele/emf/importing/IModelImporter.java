@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
@@ -15,6 +16,7 @@ import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.EPackage;
 import org.eclipse.emf.ecore.EReference;
 import org.eclipse.emf.ecore.EStructuralFeature;
+import org.eclipse.emf.ecore.util.EcoreUtil;
 
 public interface IModelImporter {
 
@@ -59,8 +61,21 @@ public interface IModelImporter {
 	
 	default void importAllContents (EObject element) {
 		this.importContents(element);
-		for(EObject obj : element.eContents()) {
-			this.importAllContents(obj);
+		Iterator<EObject> it = element.eContents().iterator();
+		int i = 0;
+		while (true) {
+			try {
+				if (it.hasNext()) {
+					this.importAllContents(it.next());
+				} else {
+					break;
+				}
+			} catch (Exception e) {
+				//Do something
+				System.err.println("Error on restoring the " + i + "th content element of element '" + element.toString() + "' with uri '" + EcoreUtil.getURI(element) + "'");
+				e.printStackTrace();
+			}
+			i+=1;
 		}
 	}
 	
