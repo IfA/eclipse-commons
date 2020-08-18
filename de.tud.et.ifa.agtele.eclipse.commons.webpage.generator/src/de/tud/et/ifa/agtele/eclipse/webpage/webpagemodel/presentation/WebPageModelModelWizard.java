@@ -212,20 +212,21 @@ public class WebPageModelModelWizard extends Wizard implements INewWizard {
 	 * Returns the eClass objects of the types that can be created as the root object.
 	 * <!-- begin-user-doc -->
 	 * <!-- end-user-doc -->
-	 * @generated
+	 * @generated NOT
 	 */	
 	@SuppressWarnings("unchecked")
 	protected Collection<EObject> getCreatableRootElements () {
 		ArrayList<EObject> result = new ArrayList<>();
 
-			for (EClassifier eClassifier : webPageModelPackage.getEClassifiers()) {
-				if (eClassifier instanceof EClass) {
-					EClass eClass = (EClass)eClassifier;
-					if (!eClass.isAbstract()) {
-						result.add(eClass);
-					}
-				}
-			}
+//			for (EClassifier eClassifier : webPageModelPackage.getEClassifiers()) {
+//				if (eClassifier instanceof EClass) {
+//					EClass eClass = (EClass)eClassifier;
+//					if (!eClass.isAbstract()) {
+//						result.add(eClass);
+//					}
+//				}
+//			}
+		result.add(WebPageModelPackage.Literals.WEB_PAGE);
 
 		result.sort(new Comparator<EObject>() {
 			@Override
