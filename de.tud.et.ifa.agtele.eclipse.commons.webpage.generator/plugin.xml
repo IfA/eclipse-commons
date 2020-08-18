@@ -6,54 +6,6 @@
 
 <plugin>
 
-   <extension point="org.eclipse.emf.ecore.generated_package">
-      <!-- @generated webpage -->
-      <package
-            uri="http://et.tu-dresden.de/ifa/WebPage/model/v0.1"
-            class="de.tud.et.ifa.agtele.eclipse.webpage.WebpagePackage"
-            genModel="model/webpage.genmodel"/>
-   </extension>
-
-   <extension point="org.eclipse.emf.edit.itemProviderAdapterFactories">
-      <!-- @generated webpage -->
-      <factory
-            uri="http://et.tu-dresden.de/ifa/WebPage/model/v0.1"
-            class="de.tud.et.ifa.agtele.eclipse.webpage.provider.WebpageItemProviderAdapterFactory"
-            supportedTypes=
-              "org.eclipse.emf.edit.provider.IEditingDomainItemProvider
-               org.eclipse.emf.edit.provider.IStructuredItemContentProvider
-               org.eclipse.emf.edit.provider.ITreeItemContentProvider
-               org.eclipse.emf.edit.provider.IItemLabelProvider
-               org.eclipse.emf.edit.provider.IItemPropertySource"/>
-   </extension>
-
-   <extension point="org.eclipse.ui.newWizards">
-      <!-- @generated webpage -->
-      <category
-            id="org.eclipse.emf.ecore.Wizard.category.ID"
-            name="%_UI_Wizard_category"/>
-      <wizard
-            id="de.tud.et.ifa.agtele.eclipse.webpage.presentation.WebpageModelWizardID"
-            name="%_UI_WebpageModelWizard_label"
-            class="de.tud.et.ifa.agtele.eclipse.webpage.presentation.WebpageModelWizard"
-            category="org.eclipse.emf.ecore.Wizard.category.ID"
-            icon="icons/full/obj16/WebpageModelFile.gif">
-         <description>%_UI_WebpageModelWizard_description</description>
-         <selection class="org.eclipse.core.resources.IResource"/>
-      </wizard>
-   </extension>
-
-   <extension point="org.eclipse.ui.editors">
-      <!-- @generated webpage -->
-      <editor
-            id="de.tud.et.ifa.agtele.eclipse.webpage.presentation.WebpageEditorID"
-            name="%_UI_WebpageEditor_label"
-            icon="icons/full/obj16/WebpageModelFile.gif"
-            extensions="webpage"
-            class="de.tud.et.ifa.agtele.eclipse.webpage.presentation.WebpageEditor"
-            contributorClass="de.tud.et.ifa.agtele.eclipse.webpage.presentation.WebpageActionBarContributor">
-      </editor>
-   </extension>
    <extension
          point="org.eclipse.ui.menus">
       <menuContribution
@@ -71,4 +23,52 @@
       </command>
    </extension>
 
+   <extension point="org.eclipse.emf.ecore.generated_package">
+      <!-- @generated webpage -->
+      <package
+            uri="http://et.tu-dresden.de/ifa/WebPage/model/v0.1"
+            class="de.tud.et.ifa.agtele.eclipse.webpage.webpagemodel.WebPageModelPackage"
+            genModel="model/webpage.genmodel"/>
+   </extension>
+
+   <extension point="org.eclipse.emf.edit.itemProviderAdapterFactories">
+      <!-- @generated webpage -->
+      <factory
+            uri="http://et.tu-dresden.de/ifa/WebPage/model/v0.1"
+            class="de.tud.et.ifa.agtele.eclipse.webpage.webpagemodel.provider.WebPageModelItemProviderAdapterFactory"
+            supportedTypes=
+              "org.eclipse.emf.edit.provider.IEditingDomainItemProvider
+               org.eclipse.emf.edit.provider.IStructuredItemContentProvider
+               org.eclipse.emf.edit.provider.ITreeItemContentProvider
+               org.eclipse.emf.edit.provider.IItemLabelProvider
+               org.eclipse.emf.edit.provider.IItemPropertySource"/>
+   </extension>
+
+   <extension point="org.eclipse.ui.newWizards">
+      <!-- @generated webpage -->
+      <category
+            id="org.eclipse.emf.ecore.Wizard.category.ID"
+            name="%_UI_Wizard_category"/>
+      <wizard
+            id="de.tud.et.ifa.agtele.eclipse.webpage.webpagemodel.presentation.WebPageModelModelWizardID"
+            name="%_UI_WebPageModelModelWizard_label"
+            class="de.tud.et.ifa.agtele.eclipse.webpage.webpagemodel.presentation.WebPageModelModelWizard"
+            category="org.eclipse.emf.ecore.Wizard.category.ID"
+            icon="icons/full/obj16/WebPageModelModelFile.gif">
+         <description>%_UI_WebPageModelModelWizard_description</description>
+         <selection class="org.eclipse.core.resources.IResource"/>
+      </wizard>
+   </extension>
+
+   <extension point="org.eclipse.ui.editors">
+      <!-- @generated webpage -->
+      <editor
+            id="de.tud.et.ifa.agtele.eclipse.webpage.webpagemodel.presentation.WebPageModelEditorID"
+            name="%_UI_WebPageModelEditor_label"
+            icon="icons/full/obj16/WebPageModelModelFile.gif"
+            extensions="webpagemodel"
+            class="de.tud.et.ifa.agtele.eclipse.webpage.webpagemodel.presentation.WebPageModelEditor"
+            contributorClass="de.tud.et.ifa.agtele.eclipse.webpage.webpagemodel.presentation.WebPageModelActionBarContributor">
+      </editor>
+   </extension>
 </plugin>

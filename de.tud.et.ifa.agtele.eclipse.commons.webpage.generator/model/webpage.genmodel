@@ -10,20 +10,49 @@
     importOrganizing="true">
   <foreignModel>webpage.ecore</foreignModel>
   <templatePluginVariables>AGTELE_EMF_COMMONS=de.tud.et.ifa.agtele.eclipse.commons</templatePluginVariables>
-  <genPackages prefix="Webpage" basePackage="de.tud.et.ifa.agtele.eclipse" disposableProviderFactory="true"
-      multipleEditorPages="false" ecorePackage="webpage.ecore#/">
+  <genPackages prefix="WebPageModel" basePackage="de.tud.et.ifa.agtele.eclipse.webpage"
+      disposableProviderFactory="true" multipleEditorPages="false" ecorePackage="webpage.ecore#/">
     <genClasses ecoreClass="webpage.ecore#//WebPage">
       <genFeatures createChild="false" ecoreFeature="ecore:EAttribute webpage.ecore#//WebPage/baseUrl"/>
-      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute webpage.ecore#//WebPage/out"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute webpage.ecore#//WebPage/outDir"/>
       <genFeatures createChild="false" ecoreFeature="ecore:EAttribute webpage.ecore#//WebPage/lang"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute webpage.ecore#//WebPage/resourcesOutPathFragment"/>
     </genClasses>
     <genClasses ecoreClass="webpage.ecore#//MainPage">
       <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference webpage.ecore#//MainPage/mainPages"/>
       <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference webpage.ecore#//MainPage/additionalPages"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute webpage.ecore#//MainPage/srcPath"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute webpage.ecore#//MainPage/suppressMainMenu"/>
+      <genOperations ecoreOperation="webpage.ecore#//MainPage/validateMainPageNotContainingWebPage">
+        <genParameters ecoreParameter="webpage.ecore#//MainPage/validateMainPageNotContainingWebPage/diagnostics"/>
+        <genParameters ecoreParameter="webpage.ecore#//MainPage/validateMainPageNotContainingWebPage/context"/>
+      </genOperations>
     </genClasses>
     <genClasses ecoreClass="webpage.ecore#//Page">
-      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute webpage.ecore#//Page/name"/>
-      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute webpage.ecore#//Page/footer"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute webpage.ecore#//Page/navIcon"/>
+    </genClasses>
+    <genClasses image="false" ecoreClass="webpage.ecore#//AbstractHTML">
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference webpage.ecore#//AbstractHTML/footer"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference webpage.ecore#//AbstractHTML/header"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute webpage.ecore#//AbstractHTML/srcPathFragment"/>
+      <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference webpage.ecore#//AbstractHTML/scripts"/>
+      <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference webpage.ecore#//AbstractHTML/styles"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute webpage.ecore#//AbstractHTML/title"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute webpage.ecore#//AbstractHTML/staticResources"/>
+    </genClasses>
+    <genClasses ecoreClass="webpage.ecore#//SubPage">
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference webpage.ecore#//SubPage/subPage"/>
+    </genClasses>
+    <genClasses image="false" ecoreClass="webpage.ecore#//AbstractKeyVal">
+      <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference webpage.ecore#//AbstractKeyVal/value"/>
+    </genClasses>
+    <genClasses ecoreClass="webpage.ecore#//HtmlInclude"/>
+    <genClasses image="false" ecoreClass="webpage.ecore#//Value"/>
+    <genClasses ecoreClass="webpage.ecore#//FileValue"/>
+    <genClasses ecoreClass="webpage.ecore#//StringValue"/>
+    <genClasses image="false" ecoreClass="webpage.ecore#//Base">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute webpage.ecore#//Base/name"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute webpage.ecore#//Base/id"/>
     </genClasses>
   </genPackages>
 </genmodel:GenModel>

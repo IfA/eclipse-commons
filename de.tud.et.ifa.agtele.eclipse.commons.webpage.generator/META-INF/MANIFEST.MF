@@ -1,17 +1,18 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
-Bundle-Name: WebPage Generator
+Bundle-Name: %pluginName
 Bundle-SymbolicName: de.tud.et.ifa.agtele.eclipse.commons.webpage.generator;singleton:=true
 Bundle-Version: 1.0.0.qualifier
 Bundle-ClassPath: .
-Bundle-Activator: de.tud.et.ifa.agtele.eclipse.webpage.provider.WebpageEditPlugin$Implementation
-Bundle-Vendor: AgTele
+Bundle-Activator: de.tud.et.ifa.agtele.eclipse.webpage.webpagemodel.provider.WebpageEditPlugin$Implementation
+Bundle-Vendor: %providerName
 Bundle-Localization: plugin
-Export-Package: de.tud.et.ifa.agtele.eclipse.webpage,
- de.tud.et.ifa.agtele.eclipse.webpage.impl,
- de.tud.et.ifa.agtele.eclipse.webpage.presentation,
- de.tud.et.ifa.agtele.eclipse.webpage.provider,
- de.tud.et.ifa.agtele.eclipse.webpage.util
+Export-Package: de.tud.et.ifa.agtele.eclipse.webpage.util,
+ de.tud.et.ifa.agtele.eclipse.webpage.webpagemodel,
+ de.tud.et.ifa.agtele.eclipse.webpage.webpagemodel.impl,
+ de.tud.et.ifa.agtele.eclipse.webpage.webpagemodel.presentation,
+ de.tud.et.ifa.agtele.eclipse.webpage.webpagemodel.provider,
+ de.tud.et.ifa.agtele.eclipse.webpage.webpagemodel.util
 Require-Bundle: org.eclipse.ui,
  org.eclipse.core.runtime,
  org.eclipse.emf.common,

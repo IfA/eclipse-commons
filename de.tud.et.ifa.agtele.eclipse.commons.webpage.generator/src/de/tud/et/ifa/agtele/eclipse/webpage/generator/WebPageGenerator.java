@@ -14,7 +14,7 @@ import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.handlers.HandlerUtil;
 
-import de.tud.et.ifa.agtele.eclipse.webpage.WebPage;
+import de.tud.et.ifa.agtele.eclipse.webpage.webpagemodel.WebPage;
 
 public class WebPageGenerator  extends Job  {
 	protected ExecutionEvent event;

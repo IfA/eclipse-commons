@@ -9,7 +9,7 @@ import org.eclipse.core.runtime.jobs.JobChangeAdapter;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 
-import de.tud.et.ifa.agtele.eclipse.webpage.WebPage;
+import de.tud.et.ifa.agtele.eclipse.webpage.webpagemodel.WebPage;
 import de.tud.et.ifa.agtele.eclipse.webpage.generator.WebPageGenerator;
 import de.tud.et.ifa.agtele.emf.AgteleEcoreUtil;
 import de.tud.et.ifa.agtele.ui.util.UIHelper;
