@@ -38,8 +38,6 @@ import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.action.Separator;
 
 import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.jface.dialogs.ProgressMonitorDialog;
-
 import org.eclipse.jface.util.LocalSelectionTransfer;
 
 import org.eclipse.jface.viewers.ISelection;
@@ -68,8 +66,6 @@ import org.eclipse.swt.graphics.Rectangle;
 
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Menu;
-import org.eclipse.swt.widgets.Tree;
-
 import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
@@ -83,8 +79,6 @@ import org.eclipse.ui.dialogs.SaveAsDialog;
 import org.eclipse.ui.ide.IGotoMarker;
 
 import org.eclipse.ui.part.FileEditorInput;
-import org.eclipse.ui.part.MultiPageEditorPart;
-
 import org.eclipse.ui.views.contentoutline.ContentOutline;
 import org.eclipse.ui.views.contentoutline.ContentOutlinePage;
 import org.eclipse.ui.views.contentoutline.IContentOutlinePage;
@@ -119,7 +113,6 @@ import org.eclipse.emf.ecore.util.EContentAdapter;
 import org.eclipse.emf.ecore.util.EcoreUtil;
 
 import org.eclipse.emf.edit.domain.AdapterFactoryEditingDomain;
-import org.eclipse.emf.edit.domain.EditingDomain;
 import org.eclipse.emf.edit.domain.IEditingDomainProvider;
 
 import org.eclipse.emf.edit.provider.AdapterFactoryItemDelegator;
@@ -131,13 +124,12 @@ import org.eclipse.emf.edit.provider.resource.ResourceItemProviderAdapterFactory
 import org.eclipse.emf.edit.ui.action.EditingDomainActionBarContributor;
 
 import org.eclipse.emf.edit.ui.celleditor.AdapterFactoryTreeEditor;
-
-import org.eclipse.emf.edit.ui.dnd.EditingDomainViewerDropAdapter;
 import org.eclipse.emf.edit.ui.dnd.LocalTransfer;
 import org.eclipse.emf.edit.ui.dnd.ViewerDragAdapter;
 
 import org.eclipse.emf.edit.ui.provider.AdapterFactoryContentProvider;
 import org.eclipse.emf.edit.ui.provider.AdapterFactoryLabelProvider;
+import org.eclipse.emf.edit.ui.provider.DecoratingColumLabelProvider;
 import org.eclipse.emf.edit.ui.provider.UnwrappingSelectionProvider;
 
 import org.eclipse.emf.edit.ui.util.EditUIMarkerHelper;
@@ -150,24 +142,18 @@ import de.tud.et.ifa.agtele.ui.util.CommonEditingDomainViewerDropAdapter;
 import de.tud.et.ifa.agtele.ui.editors.ClonableEditor;
 import de.tud.et.ifa.agtele.ui.interfaces.IPersistable;
 import de.tud.et.ifa.agtele.ui.util.TreeViewNavigationLocation;
-import de.tud.et.ifa.agtele.ui.providers.StateRestoringViewerContentProvider;
 import de.tud.et.ifa.agtele.ui.providers.AgteleContentProvider;
-import de.tud.et.ifa.agtele.ui.views.EMFModelHelpView;
-import de.tud.et.ifa.agtele.ui.widgets.ModelElementPalette;
 import de.tud.et.ifa.agtele.ui.widgets.TreeViewerGroup;
-import de.tud.et.ifa.agtele.ui.views.TreeViewerGroupViewer;
 import de.tud.et.ifa.agtele.eclipse.webpage.webpagemodel.provider.WebpageEditPlugin;
 import org.eclipse.jface.dialogs.IDialogSettings;
-import org.eclipse.swt.custom.SashForm;
-import org.eclipse.swt.widgets.Control;
 import org.eclipse.ui.INavigationLocation;
 import org.eclipse.ui.INavigationLocationProvider;
 import org.eclipse.emf.common.EMFPlugin;
 
+import de.tud.et.ifa.agtele.emf.edit.AgteleStyledLabelProvider;
 import de.tud.et.ifa.agtele.emf.sanitizer.ModelSanitizer;
-import de.tud.et.ifa.agtele.emf.sanitizer.ModelSanitizer.ModelSanitizerImpl;
-
-import org.eclipse.ui.actions.WorkspaceModifyOperation;
+import org.eclipse.emf.edit.ui.provider.DelegatingStyledCellLabelProvider;
+import org.eclipse.emf.edit.ui.provider.DiagnosticDecorator;
 
 
 /**
@@ -1008,7 +994,7 @@ public class WebPageModelEditor
 	 * This is the method used by the framework to install your own controls.
 	 * <!-- begin-user-doc -->
 	 * <!-- end-user-doc -->
-	 * @generated
+	 * @generated NOT due to changing label provider
 	 */
 	@Override
 	public void createPages() {
@@ -1039,7 +1025,11 @@ public class WebPageModelEditor
 
 			selectionViewer.setUseHashlookup(true);
 			//selectionViewer.setContentProvider(new AdapterFactoryContentProvider(adapterFactory));
-			selectionViewer.setLabelProvider(new AdapterFactoryLabelProvider(adapterFactory));
+			selectionViewer.setLabelProvider(new AgteleStyledLabelProvider(new DecoratingColumLabelProvider.StyledLabelProvider(
+					new AdapterFactoryLabelProvider.StyledLabelProvider(this.adapterFactory,
+							this.selectionViewer),
+					new DiagnosticDecorator.Styled(this.editingDomain, this.selectionViewer,
+							WebpageEditPlugin.getPlugin().getDialogSettings())), WebpageEditPlugin.INSTANCE));
 			selectionViewer.setInput(editingDomain.getResourceSet());
 			selectionViewer.setSelection(new StructuredSelection(editingDomain.getResourceSet().getResources().get(0)), true);
 
@@ -1181,7 +1171,7 @@ public class WebPageModelEditor
 					//
 					contentOutlineViewer.setUseHashlookup(true);
 					contentOutlineViewer.setContentProvider(new AdapterFactoryContentProvider(adapterFactory));
-					contentOutlineViewer.setLabelProvider(new AdapterFactoryLabelProvider(adapterFactory));
+					contentOutlineViewer.setLabelProvider(new DelegatingStyledCellLabelProvider(new AdapterFactoryLabelProvider.StyledLabelProvider(adapterFactory, contentOutlineViewer)));
 					contentOutlineViewer.setInput(editingDomain.getResourceSet());
 
 					// Make sure our popups work.

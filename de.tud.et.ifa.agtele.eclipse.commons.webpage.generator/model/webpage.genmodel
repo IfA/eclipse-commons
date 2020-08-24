@@ -7,7 +7,7 @@
     testsDirectory="" importerID="org.eclipse.emf.importer.ecore" complianceLevel="11.0"
     suppressGenModelAnnotations="false" copyrightFields="false" providerRootExtendsClass="de.tud.et.ifa.agtele.eclipse.webpage.util.WebPageItemProviderAdapter"
     editPluginID="de.tud.et.ifa.agtele.eclipse.commons.webpage.generator" operationReflection="true"
-    importOrganizing="true">
+    importOrganizing="true" styleProviders="true">
   <foreignModel>webpage.ecore</foreignModel>
   <templatePluginVariables>AGTELE_EMF_COMMONS=de.tud.et.ifa.agtele.eclipse.commons</templatePluginVariables>
   <genPackages prefix="WebPageModel" basePackage="de.tud.et.ifa.agtele.eclipse.webpage"

@@ -12,14 +12,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.MissingResourceException;
 import java.util.StringTokenizer;
-
-import org.eclipse.emf.common.CommonPlugin;
-
 import org.eclipse.emf.common.util.URI;
 
 import org.eclipse.emf.ecore.EClass;
-import org.eclipse.emf.ecore.EClassifier;
-
 import org.eclipse.emf.ecore.EStructuralFeature;
 import java.util.Comparator;
 import org.eclipse.emf.ecore.resource.Resource;
@@ -288,7 +283,7 @@ public class WebPageModelModelWizard extends Wizard implements INewWizard {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
-	protected EObject createInitialModel() {
+	protected EObject createInitialModel() {		
 		String initialObjectName = initialObjectCreationPage.getInitialObjectName();
 		EObject rootConcept = this.modelRootConcepts.get(this.initialObjectNames.indexOf(initialObjectName));
 		if (rootConcept instanceof EClass) {
@@ -487,8 +482,7 @@ public class WebPageModelModelWizard extends Wizard implements INewWizard {
 		 */
 		@Override
 		public void createControl(Composite parent) {
-			Composite composite = new Composite(parent, SWT.NONE);
-			{
+			Composite composite = new Composite(parent, SWT.NONE); {
 				GridLayout layout = new GridLayout();
 				layout.numColumns = 1;
 				layout.verticalSpacing = 12;
