@@ -5,11 +5,17 @@ package de.tud.et.ifa.agtele.eclipse.webpage.webpagemodel.impl;
 import de.tud.et.ifa.agtele.eclipse.webpage.webpagemodel.WebPage;
 import de.tud.et.ifa.agtele.eclipse.webpage.webpagemodel.WebPageModelPackage;
 
+import java.util.Collection;
 import org.eclipse.emf.common.notify.Notification;
 
+import org.eclipse.emf.common.notify.NotificationChain;
+import org.eclipse.emf.common.util.EList;
 import org.eclipse.emf.ecore.EClass;
 
+import org.eclipse.emf.ecore.InternalEObject;
 import org.eclipse.emf.ecore.impl.ENotificationImpl;
+import org.eclipse.emf.ecore.util.EObjectWithInverseResolvingEList;
+import org.eclipse.emf.ecore.util.InternalEList;
 
 /**
  * <!-- begin-user-doc -->
@@ -23,6 +29,8 @@ import org.eclipse.emf.ecore.impl.ENotificationImpl;
  *   <li>{@link de.tud.et.ifa.agtele.eclipse.webpage.webpagemodel.impl.WebPageImpl#getOutDir <em>Out Dir</em>}</li>
  *   <li>{@link de.tud.et.ifa.agtele.eclipse.webpage.webpagemodel.impl.WebPageImpl#getLang <em>Lang</em>}</li>
  *   <li>{@link de.tud.et.ifa.agtele.eclipse.webpage.webpagemodel.impl.WebPageImpl#getResourcesOutPathFragment <em>Resources Out Path Fragment</em>}</li>
+ *   <li>{@link de.tud.et.ifa.agtele.eclipse.webpage.webpagemodel.impl.WebPageImpl#getAlternatives <em>Alternatives</em>}</li>
+ *   <li>{@link de.tud.et.ifa.agtele.eclipse.webpage.webpagemodel.impl.WebPageImpl#getInvAlternatives <em>Inv Alternatives</em>}</li>
  * </ul>
  *
  * @generated
@@ -105,6 +113,25 @@ public class WebPageImpl extends MainPageImpl implements WebPage {
 	 */
     protected String resourcesOutPathFragment = RESOURCES_OUT_PATH_FRAGMENT_EDEFAULT;
 	/**
+	 * The cached value of the '{@link #getAlternatives() <em>Alternatives</em>}' reference list.
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @see #getAlternatives()
+	 * @generated
+	 * @ordered
+	 */
+	protected EList<WebPage> alternatives;
+
+	/**
+	 * The cached value of the '{@link #getInvAlternatives() <em>Inv Alternatives</em>}' reference list.
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @see #getInvAlternatives()
+	 * @generated
+	 * @ordered
+	 */
+	protected EList<WebPage> invAlternatives;
+	/**
 	 * <!-- begin-user-doc -->
 	 * <!-- end-user-doc -->
 	 * @generated
@@ -129,7 +156,7 @@ public class WebPageImpl extends MainPageImpl implements WebPage {
 	 * @generated
 	 */
 	@Override
-	public String getBaseUrl() {
+	public String getBaseUrl() {	
 	
 		return baseUrl;
 	}
@@ -153,7 +180,7 @@ public class WebPageImpl extends MainPageImpl implements WebPage {
 	 * @generated
 	 */
 	@Override
-	public String getOutDir() {
+	public String getOutDir() {	
 	
 		return outDir;
 	}
@@ -177,7 +204,7 @@ public class WebPageImpl extends MainPageImpl implements WebPage {
 	 * @generated
 	 */
 	@Override
-	public String getLang() {
+	public String getLang() {	
 	
 		return lang;
 	}
@@ -201,7 +228,7 @@ public class WebPageImpl extends MainPageImpl implements WebPage {
 	 * @generated
 	 */
 	@Override
-	public String getResourcesOutPathFragment() {
+	public String getResourcesOutPathFragment() {	
 	
 		return resourcesOutPathFragment;
 	}
@@ -225,6 +252,67 @@ public class WebPageImpl extends MainPageImpl implements WebPage {
 	 * @generated
 	 */
 	@Override
+	public EList<WebPage> getAlternatives() {	
+	
+		if (alternatives == null) {
+			alternatives = new EObjectWithInverseResolvingEList.ManyInverse<WebPage>(WebPage.class, this, WebPageModelPackage.WEB_PAGE__ALTERNATIVES, WebPageModelPackage.WEB_PAGE__INV_ALTERNATIVES);
+		}
+		return alternatives;
+	}
+
+	/**
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 */
+	@Override
+	public EList<WebPage> getInvAlternatives() {	
+	
+		if (invAlternatives == null) {
+			invAlternatives = new EObjectWithInverseResolvingEList.ManyInverse<WebPage>(WebPage.class, this, WebPageModelPackage.WEB_PAGE__INV_ALTERNATIVES, WebPageModelPackage.WEB_PAGE__ALTERNATIVES);
+		}
+		return invAlternatives;
+	}
+
+	/**
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 */
+	@SuppressWarnings("unchecked")
+	@Override
+	public NotificationChain eInverseAdd(InternalEObject otherEnd, int featureID, NotificationChain msgs) {
+		switch (featureID) {
+			case WebPageModelPackage.WEB_PAGE__ALTERNATIVES:
+				return ((InternalEList<InternalEObject>)(InternalEList<?>)getAlternatives()).basicAdd(otherEnd, msgs);
+			case WebPageModelPackage.WEB_PAGE__INV_ALTERNATIVES:
+				return ((InternalEList<InternalEObject>)(InternalEList<?>)getInvAlternatives()).basicAdd(otherEnd, msgs);
+		}
+		return super.eInverseAdd(otherEnd, featureID, msgs);
+	}
+
+	/**
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 */
+	@Override
+	public NotificationChain eInverseRemove(InternalEObject otherEnd, int featureID, NotificationChain msgs) {
+		switch (featureID) {
+			case WebPageModelPackage.WEB_PAGE__ALTERNATIVES:
+				return ((InternalEList<?>)getAlternatives()).basicRemove(otherEnd, msgs);
+			case WebPageModelPackage.WEB_PAGE__INV_ALTERNATIVES:
+				return ((InternalEList<?>)getInvAlternatives()).basicRemove(otherEnd, msgs);
+		}
+		return super.eInverseRemove(otherEnd, featureID, msgs);
+	}
+
+	/**
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 */
+	@Override
 	public Object eGet(int featureID, boolean resolve, boolean coreType) {
 		switch (featureID) {
 			case WebPageModelPackage.WEB_PAGE__BASE_URL:
@@ -235,6 +323,10 @@ public class WebPageImpl extends MainPageImpl implements WebPage {
 				return getLang();
 			case WebPageModelPackage.WEB_PAGE__RESOURCES_OUT_PATH_FRAGMENT:
 				return getResourcesOutPathFragment();
+			case WebPageModelPackage.WEB_PAGE__ALTERNATIVES:
+				return getAlternatives();
+			case WebPageModelPackage.WEB_PAGE__INV_ALTERNATIVES:
+				return getInvAlternatives();
 		}
 		return super.eGet(featureID, resolve, coreType);
 	}
@@ -244,6 +336,7 @@ public class WebPageImpl extends MainPageImpl implements WebPage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@SuppressWarnings("unchecked")
 	@Override
 	public void eSet(int featureID, Object newValue) {
 		switch (featureID) {
@@ -258,6 +351,14 @@ public class WebPageImpl extends MainPageImpl implements WebPage {
 				return;
 			case WebPageModelPackage.WEB_PAGE__RESOURCES_OUT_PATH_FRAGMENT:
 				setResourcesOutPathFragment((String)newValue);
+				return;
+			case WebPageModelPackage.WEB_PAGE__ALTERNATIVES:
+				getAlternatives().clear();
+				getAlternatives().addAll((Collection<? extends WebPage>)newValue);
+				return;
+			case WebPageModelPackage.WEB_PAGE__INV_ALTERNATIVES:
+				getInvAlternatives().clear();
+				getInvAlternatives().addAll((Collection<? extends WebPage>)newValue);
 				return;
 		}
 		super.eSet(featureID, newValue);
@@ -283,6 +384,12 @@ public class WebPageImpl extends MainPageImpl implements WebPage {
 			case WebPageModelPackage.WEB_PAGE__RESOURCES_OUT_PATH_FRAGMENT:
 				setResourcesOutPathFragment(RESOURCES_OUT_PATH_FRAGMENT_EDEFAULT);
 				return;
+			case WebPageModelPackage.WEB_PAGE__ALTERNATIVES:
+				getAlternatives().clear();
+				return;
+			case WebPageModelPackage.WEB_PAGE__INV_ALTERNATIVES:
+				getInvAlternatives().clear();
+				return;
 		}
 		super.eUnset(featureID);
 	}
@@ -303,6 +410,10 @@ public class WebPageImpl extends MainPageImpl implements WebPage {
 				return LANG_EDEFAULT == null ? lang != null : !LANG_EDEFAULT.equals(lang);
 			case WebPageModelPackage.WEB_PAGE__RESOURCES_OUT_PATH_FRAGMENT:
 				return RESOURCES_OUT_PATH_FRAGMENT_EDEFAULT == null ? resourcesOutPathFragment != null : !RESOURCES_OUT_PATH_FRAGMENT_EDEFAULT.equals(resourcesOutPathFragment);
+			case WebPageModelPackage.WEB_PAGE__ALTERNATIVES:
+				return alternatives != null && !alternatives.isEmpty();
+			case WebPageModelPackage.WEB_PAGE__INV_ALTERNATIVES:
+				return invAlternatives != null && !invAlternatives.isEmpty();
 		}
 		return super.eIsSet(featureID);
 	}

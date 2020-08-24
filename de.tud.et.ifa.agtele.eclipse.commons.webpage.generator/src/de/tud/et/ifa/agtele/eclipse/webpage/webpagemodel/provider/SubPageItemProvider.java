@@ -130,7 +130,7 @@ public class SubPageItemProvider extends AbstractHTMLItemProvider {
 	 * that can be created under this object.
 	 * <!-- begin-user-doc -->
 	 * <!-- end-user-doc -->
-	 * @generated
+	 * @generated NOT only create SubPages
 	 */
 	@Override
 	protected void collectNewChildDescriptors(Collection<Object> newChildDescriptors, Object object) {
@@ -141,20 +141,6 @@ public class SubPageItemProvider extends AbstractHTMLItemProvider {
 				(WebPageModelPackage.Literals.SUB_PAGE__SUB_PAGE,
 				 WebPageModelFactory.eINSTANCE.createSubPage()));
 
-		newChildDescriptors.add
-			(createChildParameter
-				(WebPageModelPackage.Literals.SUB_PAGE__SUB_PAGE,
-				 WebPageModelFactory.eINSTANCE.createPage()));
-
-		newChildDescriptors.add
-			(createChildParameter
-				(WebPageModelPackage.Literals.SUB_PAGE__SUB_PAGE,
-				 WebPageModelFactory.eINSTANCE.createMainPage()));
-
-		newChildDescriptors.add
-			(createChildParameter
-				(WebPageModelPackage.Literals.SUB_PAGE__SUB_PAGE,
-				 WebPageModelFactory.eINSTANCE.createWebPage()));
 	}
 
 	/**
@@ -170,7 +156,10 @@ public class SubPageItemProvider extends AbstractHTMLItemProvider {
 
 		boolean qualify =
 			childFeature == WebPageModelPackage.Literals.ABSTRACT_HTML__FOOTER ||
-			childFeature == WebPageModelPackage.Literals.ABSTRACT_HTML__HEADER;
+			childFeature == WebPageModelPackage.Literals.ABSTRACT_HTML__HEADER ||
+			childFeature == WebPageModelPackage.Literals.ABSTRACT_HTML__CONTENT ||
+			childFeature == WebPageModelPackage.Literals.ABSTRACT_HTML__SCRIPTS ||
+			childFeature == WebPageModelPackage.Literals.ABSTRACT_HTML__STYLES;
 
 		if (qualify) {
 			return getString

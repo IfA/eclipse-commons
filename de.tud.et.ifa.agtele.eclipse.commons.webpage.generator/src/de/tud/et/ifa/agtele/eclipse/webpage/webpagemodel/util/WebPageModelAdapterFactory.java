@@ -84,6 +84,10 @@ public class WebPageModelAdapterFactory extends AdapterFactoryImpl {
 				return createAbstractHTMLAdapter();
 			}
 			@Override
+			public Adapter caseAnnouncement(Announcement object) {
+				return createAnnouncementAdapter();
+			}
+			@Override
 			public Adapter caseSubPage(SubPage object) {
 				return createSubPageAdapter();
 			}
@@ -184,6 +188,20 @@ public class WebPageModelAdapterFactory extends AdapterFactoryImpl {
 	 * @generated
 	 */
 	public Adapter createAbstractHTMLAdapter() {
+		return null;
+	}
+
+	/**
+	 * Creates a new adapter for an object of class '{@link de.tud.et.ifa.agtele.eclipse.webpage.webpagemodel.Announcement <em>Announcement</em>}'.
+	 * <!-- begin-user-doc -->
+	 * This default implementation returns null so that we can easily ignore cases;
+	 * it's useful to ignore a case when inheritance will catch all the cases anyway.
+	 * <!-- end-user-doc -->
+	 * @return the new adapter.
+	 * @see de.tud.et.ifa.agtele.eclipse.webpage.webpagemodel.Announcement
+	 * @generated
+	 */
+	public Adapter createAnnouncementAdapter() {
 		return null;
 	}
 

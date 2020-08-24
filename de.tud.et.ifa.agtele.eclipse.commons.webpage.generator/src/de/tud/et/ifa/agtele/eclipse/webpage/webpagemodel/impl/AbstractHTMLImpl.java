@@ -3,6 +3,7 @@
 package de.tud.et.ifa.agtele.eclipse.webpage.webpagemodel.impl;
 
 import de.tud.et.ifa.agtele.eclipse.webpage.webpagemodel.AbstractHTML;
+import de.tud.et.ifa.agtele.eclipse.webpage.webpagemodel.Announcement;
 import de.tud.et.ifa.agtele.eclipse.webpage.webpagemodel.HtmlInclude;
 import de.tud.et.ifa.agtele.eclipse.webpage.webpagemodel.Value;
 import de.tud.et.ifa.agtele.eclipse.webpage.webpagemodel.WebPageModelPackage;
@@ -20,7 +21,8 @@ import org.eclipse.emf.ecore.InternalEObject;
 import org.eclipse.emf.ecore.impl.ENotificationImpl;
 
 import org.eclipse.emf.ecore.util.EDataTypeUniqueEList;
-import org.eclipse.emf.ecore.util.EObjectResolvingEList;
+import org.eclipse.emf.ecore.util.EObjectContainmentEList;
+import org.eclipse.emf.ecore.util.InternalEList;
 
 /**
  * <!-- begin-user-doc -->
@@ -37,6 +39,9 @@ import org.eclipse.emf.ecore.util.EObjectResolvingEList;
  *   <li>{@link de.tud.et.ifa.agtele.eclipse.webpage.webpagemodel.impl.AbstractHTMLImpl#getStyles <em>Styles</em>}</li>
  *   <li>{@link de.tud.et.ifa.agtele.eclipse.webpage.webpagemodel.impl.AbstractHTMLImpl#getTitle <em>Title</em>}</li>
  *   <li>{@link de.tud.et.ifa.agtele.eclipse.webpage.webpagemodel.impl.AbstractHTMLImpl#getStaticResources <em>Static Resources</em>}</li>
+ *   <li>{@link de.tud.et.ifa.agtele.eclipse.webpage.webpagemodel.impl.AbstractHTMLImpl#getContent <em>Content</em>}</li>
+ *   <li>{@link de.tud.et.ifa.agtele.eclipse.webpage.webpagemodel.impl.AbstractHTMLImpl#getExternalUrl <em>External Url</em>}</li>
+ *   <li>{@link de.tud.et.ifa.agtele.eclipse.webpage.webpagemodel.impl.AbstractHTMLImpl#getAnnouncement <em>Announcement</em>}</li>
  * </ul>
  *
  * @generated
@@ -82,7 +87,7 @@ public abstract class AbstractHTMLImpl extends BaseImpl implements AbstractHTML 
 	 */
     protected String srcPathFragment = SRC_PATH_FRAGMENT_EDEFAULT;
 	/**
-	 * The cached value of the '{@link #getScripts() <em>Scripts</em>}' reference list.
+	 * The cached value of the '{@link #getScripts() <em>Scripts</em>}' containment reference list.
 	 * <!-- begin-user-doc -->
 	 * <!-- end-user-doc -->
 	 * @see #getScripts()
@@ -92,7 +97,7 @@ public abstract class AbstractHTMLImpl extends BaseImpl implements AbstractHTML 
 	protected EList<HtmlInclude> scripts;
 
 	/**
-	 * The cached value of the '{@link #getStyles() <em>Styles</em>}' reference list.
+	 * The cached value of the '{@link #getStyles() <em>Styles</em>}' containment reference list.
 	 * <!-- begin-user-doc -->
 	 * <!-- end-user-doc -->
 	 * @see #getStyles()
@@ -131,6 +136,46 @@ public abstract class AbstractHTMLImpl extends BaseImpl implements AbstractHTML 
 	protected EList<String> staticResources;
 
 	/**
+	 * The cached value of the '{@link #getContent() <em>Content</em>}' containment reference.
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @see #getContent()
+	 * @generated
+	 * @ordered
+	 */
+	protected Value content;
+
+	/**
+	 * The default value of the '{@link #getExternalUrl() <em>External Url</em>}' attribute.
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @see #getExternalUrl()
+	 * @generated
+	 * @ordered
+	 */
+	protected static final String EXTERNAL_URL_EDEFAULT = null;
+
+	/**
+	 * The cached value of the '{@link #getExternalUrl() <em>External Url</em>}' attribute.
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @see #getExternalUrl()
+	 * @generated
+	 * @ordered
+	 */
+    protected String externalUrl = EXTERNAL_URL_EDEFAULT;
+
+	/**
+	 * The cached value of the '{@link #getAnnouncement() <em>Announcement</em>}' containment reference list.
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @see #getAnnouncement()
+	 * @generated
+	 * @ordered
+	 */
+	protected EList<Announcement> announcement;
+
+	/**
 	 * <!-- begin-user-doc -->
 	 * <!-- end-user-doc -->
 	 * @generated
@@ -155,7 +200,7 @@ public abstract class AbstractHTMLImpl extends BaseImpl implements AbstractHTML 
 	 * @generated
 	 */
 	@Override
-	public Value getFooter() {
+	public Value getFooter() {	
 	
 		return footer;
 	}
@@ -200,7 +245,7 @@ public abstract class AbstractHTMLImpl extends BaseImpl implements AbstractHTML 
 	 * @generated
 	 */
 	@Override
-	public Value getHeader() {
+	public Value getHeader() {	
 	
 		return header;
 	}
@@ -245,7 +290,7 @@ public abstract class AbstractHTMLImpl extends BaseImpl implements AbstractHTML 
 	 * @generated
 	 */
 	@Override
-	public String getSrcPathFragment() {
+	public String getSrcPathFragment() {	
 	
 		return srcPathFragment;
 	}
@@ -269,10 +314,10 @@ public abstract class AbstractHTMLImpl extends BaseImpl implements AbstractHTML 
 	 * @generated
 	 */
 	@Override
-	public EList<HtmlInclude> getScripts() {
+	public EList<HtmlInclude> getScripts() {	
 	
 		if (scripts == null) {
-			scripts = new EObjectResolvingEList<HtmlInclude>(HtmlInclude.class, this, WebPageModelPackage.ABSTRACT_HTML__SCRIPTS);
+			scripts = new EObjectContainmentEList<HtmlInclude>(HtmlInclude.class, this, WebPageModelPackage.ABSTRACT_HTML__SCRIPTS);
 		}
 		return scripts;
 	}
@@ -282,10 +327,10 @@ public abstract class AbstractHTMLImpl extends BaseImpl implements AbstractHTML 
 	 * @generated
 	 */
 	@Override
-	public EList<HtmlInclude> getStyles() {
+	public EList<HtmlInclude> getStyles() {	
 	
 		if (styles == null) {
-			styles = new EObjectResolvingEList<HtmlInclude>(HtmlInclude.class, this, WebPageModelPackage.ABSTRACT_HTML__STYLES);
+			styles = new EObjectContainmentEList<HtmlInclude>(HtmlInclude.class, this, WebPageModelPackage.ABSTRACT_HTML__STYLES);
 		}
 		return styles;
 	}
@@ -295,7 +340,7 @@ public abstract class AbstractHTMLImpl extends BaseImpl implements AbstractHTML 
 	 * @generated
 	 */
 	@Override
-	public String getTitle() {
+	public String getTitle() {	
 	
 		return title;
 	}
@@ -319,7 +364,7 @@ public abstract class AbstractHTMLImpl extends BaseImpl implements AbstractHTML 
 	 * @generated
 	 */
 	@Override
-	public EList<String> getStaticResources() {
+	public EList<String> getStaticResources() {	
 	
 		if (staticResources == null) {
 			staticResources = new EDataTypeUniqueEList<String>(String.class, this, WebPageModelPackage.ABSTRACT_HTML__STATIC_RESOURCES);
@@ -332,12 +377,108 @@ public abstract class AbstractHTMLImpl extends BaseImpl implements AbstractHTML 
 	 * @generated
 	 */
 	@Override
+	public Value getContent() {	
+	
+		return content;
+	}
+
+	/**
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 */
+	public NotificationChain basicSetContent(Value newContent, NotificationChain msgs) {
+		Value oldContent = content;
+		content = newContent;
+		if (eNotificationRequired()) {
+			ENotificationImpl notification = new ENotificationImpl(this, Notification.SET, WebPageModelPackage.ABSTRACT_HTML__CONTENT, oldContent, newContent);
+			if (msgs == null) msgs = notification; else msgs.add(notification);
+		}
+		return msgs;
+	}
+
+	/**
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 */
+	@Override
+	public void setContent(Value newContent) {
+	
+		if (newContent != content) {
+			NotificationChain msgs = null;
+			if (content != null)
+				msgs = ((InternalEObject)content).eInverseRemove(this, EOPPOSITE_FEATURE_BASE - WebPageModelPackage.ABSTRACT_HTML__CONTENT, null, msgs);
+			if (newContent != null)
+				msgs = ((InternalEObject)newContent).eInverseAdd(this, EOPPOSITE_FEATURE_BASE - WebPageModelPackage.ABSTRACT_HTML__CONTENT, null, msgs);
+			msgs = basicSetContent(newContent, msgs);
+			if (msgs != null) msgs.dispatch();
+		}
+		else if (eNotificationRequired())
+			eNotify(new ENotificationImpl(this, Notification.SET, WebPageModelPackage.ABSTRACT_HTML__CONTENT, newContent, newContent));
+	
+	}
+
+	/**
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 */
+	@Override
+	public String getExternalUrl() {	
+	
+		return externalUrl;
+	}
+
+	/**
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 */
+	@Override
+	public void setExternalUrl(String newExternalUrl) {
+	
+		String oldExternalUrl = externalUrl;
+		externalUrl = newExternalUrl;
+		if (eNotificationRequired())
+			eNotify(new ENotificationImpl(this, Notification.SET, WebPageModelPackage.ABSTRACT_HTML__EXTERNAL_URL, oldExternalUrl, externalUrl));
+	
+	}
+
+	/**
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 */
+	@Override
+	public EList<Announcement> getAnnouncement() {
+	
+		if (announcement == null) {
+			announcement = new EObjectContainmentEList<Announcement>(Announcement.class, this, WebPageModelPackage.ABSTRACT_HTML__ANNOUNCEMENT);
+		}
+		return announcement;
+	}
+
+	/**
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 */
+	@Override
 	public NotificationChain eInverseRemove(InternalEObject otherEnd, int featureID, NotificationChain msgs) {
 		switch (featureID) {
 			case WebPageModelPackage.ABSTRACT_HTML__FOOTER:
 				return basicSetFooter(null, msgs);
 			case WebPageModelPackage.ABSTRACT_HTML__HEADER:
 				return basicSetHeader(null, msgs);
+			case WebPageModelPackage.ABSTRACT_HTML__SCRIPTS:
+				return ((InternalEList<?>)getScripts()).basicRemove(otherEnd, msgs);
+			case WebPageModelPackage.ABSTRACT_HTML__STYLES:
+				return ((InternalEList<?>)getStyles()).basicRemove(otherEnd, msgs);
+			case WebPageModelPackage.ABSTRACT_HTML__CONTENT:
+				return basicSetContent(null, msgs);
+			case WebPageModelPackage.ABSTRACT_HTML__ANNOUNCEMENT:
+				return ((InternalEList<?>)getAnnouncement()).basicRemove(otherEnd, msgs);
 		}
 		return super.eInverseRemove(otherEnd, featureID, msgs);
 	}
@@ -364,6 +505,12 @@ public abstract class AbstractHTMLImpl extends BaseImpl implements AbstractHTML 
 				return getTitle();
 			case WebPageModelPackage.ABSTRACT_HTML__STATIC_RESOURCES:
 				return getStaticResources();
+			case WebPageModelPackage.ABSTRACT_HTML__CONTENT:
+				return getContent();
+			case WebPageModelPackage.ABSTRACT_HTML__EXTERNAL_URL:
+				return getExternalUrl();
+			case WebPageModelPackage.ABSTRACT_HTML__ANNOUNCEMENT:
+				return getAnnouncement();
 		}
 		return super.eGet(featureID, resolve, coreType);
 	}
@@ -401,6 +548,16 @@ public abstract class AbstractHTMLImpl extends BaseImpl implements AbstractHTML 
 				getStaticResources().clear();
 				getStaticResources().addAll((Collection<? extends String>)newValue);
 				return;
+			case WebPageModelPackage.ABSTRACT_HTML__CONTENT:
+				setContent((Value)newValue);
+				return;
+			case WebPageModelPackage.ABSTRACT_HTML__EXTERNAL_URL:
+				setExternalUrl((String)newValue);
+				return;
+			case WebPageModelPackage.ABSTRACT_HTML__ANNOUNCEMENT:
+				getAnnouncement().clear();
+				getAnnouncement().addAll((Collection<? extends Announcement>)newValue);
+				return;
 		}
 		super.eSet(featureID, newValue);
 	}
@@ -434,6 +591,15 @@ public abstract class AbstractHTMLImpl extends BaseImpl implements AbstractHTML 
 			case WebPageModelPackage.ABSTRACT_HTML__STATIC_RESOURCES:
 				getStaticResources().clear();
 				return;
+			case WebPageModelPackage.ABSTRACT_HTML__CONTENT:
+				setContent((Value)null);
+				return;
+			case WebPageModelPackage.ABSTRACT_HTML__EXTERNAL_URL:
+				setExternalUrl(EXTERNAL_URL_EDEFAULT);
+				return;
+			case WebPageModelPackage.ABSTRACT_HTML__ANNOUNCEMENT:
+				getAnnouncement().clear();
+				return;
 		}
 		super.eUnset(featureID);
 	}
@@ -460,6 +626,12 @@ public abstract class AbstractHTMLImpl extends BaseImpl implements AbstractHTML 
 				return TITLE_EDEFAULT == null ? title != null : !TITLE_EDEFAULT.equals(title);
 			case WebPageModelPackage.ABSTRACT_HTML__STATIC_RESOURCES:
 				return staticResources != null && !staticResources.isEmpty();
+			case WebPageModelPackage.ABSTRACT_HTML__CONTENT:
+				return content != null;
+			case WebPageModelPackage.ABSTRACT_HTML__EXTERNAL_URL:
+				return EXTERNAL_URL_EDEFAULT == null ? externalUrl != null : !EXTERNAL_URL_EDEFAULT.equals(externalUrl);
+			case WebPageModelPackage.ABSTRACT_HTML__ANNOUNCEMENT:
+				return announcement != null && !announcement.isEmpty();
 		}
 		return super.eIsSet(featureID);
 	}
@@ -479,6 +651,8 @@ public abstract class AbstractHTMLImpl extends BaseImpl implements AbstractHTML 
 		result.append(title);
 		result.append(", staticResources: ");
 		result.append(staticResources);
+		result.append(", externalUrl: ");
+		result.append(externalUrl);
 		result.append(')');
 		return result.toString();
 	}

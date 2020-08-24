@@ -6,15 +6,19 @@ package de.tud.et.ifa.agtele.eclipse.webpage.webpagemodel.provider;
 import de.tud.et.ifa.agtele.eclipse.webpage.webpagemodel.AbstractHTML;
 import de.tud.et.ifa.agtele.eclipse.webpage.webpagemodel.WebPageModelFactory;
 import de.tud.et.ifa.agtele.eclipse.webpage.webpagemodel.WebPageModelPackage;
+import de.tud.et.ifa.agtele.eclipse.webpage.webpagemodel.util.WebPageModelUtils;
 
 import java.util.Collection;
 import java.util.List;
 
+import org.eclipse.emf.common.command.Command;
+import org.eclipse.emf.common.command.CompoundCommand;
 import org.eclipse.emf.common.notify.AdapterFactory;
 import org.eclipse.emf.common.notify.Notification;
-
+import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.EStructuralFeature;
-
+import org.eclipse.emf.edit.command.SetCommand;
+import org.eclipse.emf.edit.domain.EditingDomain;
 import org.eclipse.emf.edit.provider.ComposeableAdapterFactory;
 import org.eclipse.emf.edit.provider.IItemPropertyDescriptor;
 import org.eclipse.emf.edit.provider.ItemPropertyDescriptor;
@@ -49,10 +53,9 @@ public class AbstractHTMLItemProvider extends BaseItemProvider {
 			super.getPropertyDescriptors(object);
 
 			addSrcPathFragmentPropertyDescriptor(object);
-			addScriptsPropertyDescriptor(object);
-			addStylesPropertyDescriptor(object);
 			addTitlePropertyDescriptor(object);
 			addStaticResourcesPropertyDescriptor(object);
+			addExternalUrlPropertyDescriptor(object);
 		}
 		return itemPropertyDescriptors;
 	}
@@ -75,50 +78,6 @@ public class AbstractHTMLItemProvider extends BaseItemProvider {
 				 false,
 				 false,
 				 ItemPropertyDescriptor.GENERIC_VALUE_IMAGE,
-				 null,
-				 null));
-	}
-
-	/**
-	 * This adds a property descriptor for the Scripts feature.
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
-	 * @generated
-	 */
-	protected void addScriptsPropertyDescriptor(Object object) {
-		itemPropertyDescriptors.add
-			(createItemPropertyDescriptor
-				(((ComposeableAdapterFactory)adapterFactory).getRootAdapterFactory(),
-				 getResourceLocator(),
-				 getString("_UI_AbstractHTML_scripts_feature"),
-				 getString("_UI_PropertyDescriptor_description", "_UI_AbstractHTML_scripts_feature", "_UI_AbstractHTML_type"),
-				 WebPageModelPackage.Literals.ABSTRACT_HTML__SCRIPTS,
-				 true,
-				 false,
-				 true,
-				 null,
-				 null,
-				 null));
-	}
-
-	/**
-	 * This adds a property descriptor for the Styles feature.
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
-	 * @generated
-	 */
-	protected void addStylesPropertyDescriptor(Object object) {
-		itemPropertyDescriptors.add
-			(createItemPropertyDescriptor
-				(((ComposeableAdapterFactory)adapterFactory).getRootAdapterFactory(),
-				 getResourceLocator(),
-				 getString("_UI_AbstractHTML_styles_feature"),
-				 getString("_UI_PropertyDescriptor_description", "_UI_AbstractHTML_styles_feature", "_UI_AbstractHTML_type"),
-				 WebPageModelPackage.Literals.ABSTRACT_HTML__STYLES,
-				 true,
-				 false,
-				 true,
-				 null,
 				 null,
 				 null));
 	}
@@ -168,6 +127,28 @@ public class AbstractHTMLItemProvider extends BaseItemProvider {
 	}
 
 	/**
+	 * This adds a property descriptor for the External Url feature.
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 */
+	protected void addExternalUrlPropertyDescriptor(Object object) {
+		itemPropertyDescriptors.add
+			(createItemPropertyDescriptor
+				(((ComposeableAdapterFactory)adapterFactory).getRootAdapterFactory(),
+				 getResourceLocator(),
+				 getString("_UI_AbstractHTML_externalUrl_feature"),
+				 getString("_UI_PropertyDescriptor_description", "_UI_AbstractHTML_externalUrl_feature", "_UI_AbstractHTML_type"),
+				 WebPageModelPackage.Literals.ABSTRACT_HTML__EXTERNAL_URL,
+				 true,
+				 false,
+				 false,
+				 ItemPropertyDescriptor.GENERIC_VALUE_IMAGE,
+				 null,
+				 null));
+	}
+
+	/**
 	 * This specifies how to implement {@link #getChildren} and is used to deduce an appropriate feature for an
 	 * {@link org.eclipse.emf.edit.command.AddCommand}, {@link org.eclipse.emf.edit.command.RemoveCommand} or
 	 * {@link org.eclipse.emf.edit.command.MoveCommand} in {@link #createCommand}.
@@ -181,6 +162,10 @@ public class AbstractHTMLItemProvider extends BaseItemProvider {
 			super.getChildrenFeatures(object);
 			childrenFeatures.add(WebPageModelPackage.Literals.ABSTRACT_HTML__FOOTER);
 			childrenFeatures.add(WebPageModelPackage.Literals.ABSTRACT_HTML__HEADER);
+			childrenFeatures.add(WebPageModelPackage.Literals.ABSTRACT_HTML__SCRIPTS);
+			childrenFeatures.add(WebPageModelPackage.Literals.ABSTRACT_HTML__STYLES);
+			childrenFeatures.add(WebPageModelPackage.Literals.ABSTRACT_HTML__CONTENT);
+			childrenFeatures.add(WebPageModelPackage.Literals.ABSTRACT_HTML__ANNOUNCEMENT);
 		}
 		return childrenFeatures;
 	}
@@ -228,10 +213,15 @@ public class AbstractHTMLItemProvider extends BaseItemProvider {
 			case WebPageModelPackage.ABSTRACT_HTML__SRC_PATH_FRAGMENT:
 			case WebPageModelPackage.ABSTRACT_HTML__TITLE:
 			case WebPageModelPackage.ABSTRACT_HTML__STATIC_RESOURCES:
+			case WebPageModelPackage.ABSTRACT_HTML__EXTERNAL_URL:
 				fireNotifyChanged(new ViewerNotification(notification, notification.getNotifier(), false, true));
 				return;
 			case WebPageModelPackage.ABSTRACT_HTML__FOOTER:
 			case WebPageModelPackage.ABSTRACT_HTML__HEADER:
+			case WebPageModelPackage.ABSTRACT_HTML__SCRIPTS:
+			case WebPageModelPackage.ABSTRACT_HTML__STYLES:
+			case WebPageModelPackage.ABSTRACT_HTML__CONTENT:
+			case WebPageModelPackage.ABSTRACT_HTML__ANNOUNCEMENT:
 				fireNotifyChanged(new ViewerNotification(notification, notification.getNotifier(), true, false));
 				return;
 		}
@@ -268,6 +258,31 @@ public class AbstractHTMLItemProvider extends BaseItemProvider {
 			(createChildParameter
 				(WebPageModelPackage.Literals.ABSTRACT_HTML__HEADER,
 				 WebPageModelFactory.eINSTANCE.createStringValue()));
+
+		newChildDescriptors.add
+			(createChildParameter
+				(WebPageModelPackage.Literals.ABSTRACT_HTML__SCRIPTS,
+				 WebPageModelFactory.eINSTANCE.createHtmlInclude()));
+
+		newChildDescriptors.add
+			(createChildParameter
+				(WebPageModelPackage.Literals.ABSTRACT_HTML__STYLES,
+				 WebPageModelFactory.eINSTANCE.createHtmlInclude()));
+
+		newChildDescriptors.add
+			(createChildParameter
+				(WebPageModelPackage.Literals.ABSTRACT_HTML__CONTENT,
+				 WebPageModelFactory.eINSTANCE.createFileValue()));
+
+		newChildDescriptors.add
+			(createChildParameter
+				(WebPageModelPackage.Literals.ABSTRACT_HTML__CONTENT,
+				 WebPageModelFactory.eINSTANCE.createStringValue()));
+
+		newChildDescriptors.add
+			(createChildParameter
+				(WebPageModelPackage.Literals.ABSTRACT_HTML__ANNOUNCEMENT,
+				 WebPageModelFactory.eINSTANCE.createAnnouncement()));
 	}
 
 	/**
@@ -283,7 +298,10 @@ public class AbstractHTMLItemProvider extends BaseItemProvider {
 
 		boolean qualify =
 			childFeature == WebPageModelPackage.Literals.ABSTRACT_HTML__FOOTER ||
-			childFeature == WebPageModelPackage.Literals.ABSTRACT_HTML__HEADER;
+			childFeature == WebPageModelPackage.Literals.ABSTRACT_HTML__HEADER ||
+			childFeature == WebPageModelPackage.Literals.ABSTRACT_HTML__CONTENT ||
+			childFeature == WebPageModelPackage.Literals.ABSTRACT_HTML__SCRIPTS ||
+			childFeature == WebPageModelPackage.Literals.ABSTRACT_HTML__STYLES;
 
 		if (qualify) {
 			return getString
@@ -291,6 +309,24 @@ public class AbstractHTMLItemProvider extends BaseItemProvider {
 				 new Object[] { getTypeText(childObject), getFeatureText(childFeature), getTypeText(owner) });
 		}
 		return super.getCreateChildText(owner, feature, child, selection);
+	}
+	
+	@Override
+	protected Command createSetCommand(EditingDomain domain, EObject owner, EStructuralFeature feature, Object value) {
+		if (feature == WebPageModelPackage.Literals.BASE__NAME) {
+			AbstractHTML html = (AbstractHTML) owner;
+			String oldValue = html.getName(), newValue = (String) value, oldFSName = WebPageModelUtils.getUrlSafeName(oldValue),
+					title = html.getTitle();
+			if (newValue != null && !newValue.isBlank()) {
+				CompoundCommand cmd = new CompoundCommand();
+				cmd.append(super.createSetCommand(domain, owner, feature, value));
+				if (title == null || title.equals(oldValue)) {
+					cmd.append(SetCommand.create(domain, owner, WebPageModelPackage.Literals.ABSTRACT_HTML__TITLE, newValue));					
+				}				
+				return cmd;
+			}
+		}
+		return super.createSetCommand(domain, owner, feature, value);
 	}
 
 }

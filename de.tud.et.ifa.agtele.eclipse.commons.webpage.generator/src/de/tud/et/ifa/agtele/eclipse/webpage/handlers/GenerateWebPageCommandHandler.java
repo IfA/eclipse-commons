@@ -1,16 +1,28 @@
 package de.tud.et.ifa.agtele.eclipse.webpage.handlers;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.MultiStatus;
+import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.IJobChangeEvent;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.core.runtime.jobs.JobChangeAdapter;
+import org.eclipse.jface.action.IStatusLineManager;
+import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.ui.IActionBars;
+import org.eclipse.ui.handlers.HandlerUtil;
 
 import de.tud.et.ifa.agtele.eclipse.webpage.webpagemodel.WebPage;
 import de.tud.et.ifa.agtele.eclipse.webpage.generator.WebPageGenerator;
+import de.tud.et.ifa.agtele.eclipse.webpage.util.GenerateJob;
 import de.tud.et.ifa.agtele.emf.AgteleEcoreUtil;
 import de.tud.et.ifa.agtele.ui.util.UIHelper;
 
@@ -27,16 +39,16 @@ public class GenerateWebPageCommandHandler extends AbstractHandler {
 		if (generator == null) {
 			return null;
 		}
-		
-		generator.setPriority(Job.INTERACTIVE);
-		generator.setUser(true);
+		GenerateJob job = generator.getJob();
+		job.setPriority(Job.INTERACTIVE);
+		job.setUser(true);
 		UIHelper.getCurrentEditor().getEditorSite().getActionBars().getStatusLineManager()
 			.setErrorMessage(null);
 		
 		if (generator.isGeneratable()) {
-			generator.start(event);			
+			job.start(event);			
 		}
-		generator.addJobChangeListener(new JobChangeAdapter() {
+		job.addJobChangeListener(new JobChangeAdapter() {
 			@Override
 			public void done(IJobChangeEvent event) {
 				super.done(event);
@@ -68,10 +80,14 @@ public class GenerateWebPageCommandHandler extends AbstractHandler {
 			for (Object o : selection) {
 				if (o instanceof WebPage) {
 					generator.addWebPage((WebPage) o);
+					for (WebPage p : ((WebPage)o).getAllAlternativePages()) {
+						generator.addWebPage(p);
+					}
 				} 
 			}
 		}
 		
 		return currentGenerator.isGeneratable();
 	}
+	
 }

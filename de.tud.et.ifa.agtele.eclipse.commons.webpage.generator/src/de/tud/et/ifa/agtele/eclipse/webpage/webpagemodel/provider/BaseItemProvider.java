@@ -63,6 +63,10 @@ public class BaseItemProvider
 
 			addNamePropertyDescriptor(object);
 			addIdPropertyDescriptor(object);
+			addCreatedOnPropertyDescriptor(object);
+			addCreatedByPropertyDescriptor(object);
+			addLastModifiedPropertyDescriptor(object);
+			addLastModifiedByPropertyDescriptor(object);
 		}
 		return itemPropertyDescriptors;
 	}
@@ -112,6 +116,94 @@ public class BaseItemProvider
 	}
 
 	/**
+	 * This adds a property descriptor for the Created On feature.
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 */
+	protected void addCreatedOnPropertyDescriptor(Object object) {
+		itemPropertyDescriptors.add
+			(createItemPropertyDescriptor
+				(((ComposeableAdapterFactory)adapterFactory).getRootAdapterFactory(),
+				 getResourceLocator(),
+				 getString("_UI_Base_createdOn_feature"),
+				 getString("_UI_PropertyDescriptor_description", "_UI_Base_createdOn_feature", "_UI_Base_type"),
+				 WebPageModelPackage.Literals.BASE__CREATED_ON,
+				 true,
+				 false,
+				 false,
+				 ItemPropertyDescriptor.GENERIC_VALUE_IMAGE,
+				 null,
+				 null));
+	}
+
+	/**
+	 * This adds a property descriptor for the Created By feature.
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 */
+	protected void addCreatedByPropertyDescriptor(Object object) {
+		itemPropertyDescriptors.add
+			(createItemPropertyDescriptor
+				(((ComposeableAdapterFactory)adapterFactory).getRootAdapterFactory(),
+				 getResourceLocator(),
+				 getString("_UI_Base_createdBy_feature"),
+				 getString("_UI_PropertyDescriptor_description", "_UI_Base_createdBy_feature", "_UI_Base_type"),
+				 WebPageModelPackage.Literals.BASE__CREATED_BY,
+				 true,
+				 false,
+				 false,
+				 ItemPropertyDescriptor.GENERIC_VALUE_IMAGE,
+				 null,
+				 null));
+	}
+
+	/**
+	 * This adds a property descriptor for the Last Modified feature.
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 */
+	protected void addLastModifiedPropertyDescriptor(Object object) {
+		itemPropertyDescriptors.add
+			(createItemPropertyDescriptor
+				(((ComposeableAdapterFactory)adapterFactory).getRootAdapterFactory(),
+				 getResourceLocator(),
+				 getString("_UI_Base_lastModified_feature"),
+				 getString("_UI_PropertyDescriptor_description", "_UI_Base_lastModified_feature", "_UI_Base_type"),
+				 WebPageModelPackage.Literals.BASE__LAST_MODIFIED,
+				 true,
+				 false,
+				 false,
+				 ItemPropertyDescriptor.GENERIC_VALUE_IMAGE,
+				 null,
+				 null));
+	}
+
+	/**
+	 * This adds a property descriptor for the Last Modified By feature.
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 */
+	protected void addLastModifiedByPropertyDescriptor(Object object) {
+		itemPropertyDescriptors.add
+			(createItemPropertyDescriptor
+				(((ComposeableAdapterFactory)adapterFactory).getRootAdapterFactory(),
+				 getResourceLocator(),
+				 getString("_UI_Base_lastModifiedBy_feature"),
+				 getString("_UI_PropertyDescriptor_description", "_UI_Base_lastModifiedBy_feature", "_UI_Base_type"),
+				 WebPageModelPackage.Literals.BASE__LAST_MODIFIED_BY,
+				 true,
+				 false,
+				 false,
+				 ItemPropertyDescriptor.GENERIC_VALUE_IMAGE,
+				 null,
+				 null));
+	}
+
+	/**
 	 * This returns the label text for the adapted class.
 	 * <!-- begin-user-doc -->
 	 * <!-- end-user-doc -->
@@ -140,6 +232,10 @@ public class BaseItemProvider
 		switch (notification.getFeatureID(Base.class)) {
 			case WebPageModelPackage.BASE__NAME:
 			case WebPageModelPackage.BASE__ID:
+			case WebPageModelPackage.BASE__CREATED_ON:
+			case WebPageModelPackage.BASE__CREATED_BY:
+			case WebPageModelPackage.BASE__LAST_MODIFIED:
+			case WebPageModelPackage.BASE__LAST_MODIFIED_BY:
 				fireNotifyChanged(new ViewerNotification(notification, notification.getNotifier(), false, true));
 				return;
 		}

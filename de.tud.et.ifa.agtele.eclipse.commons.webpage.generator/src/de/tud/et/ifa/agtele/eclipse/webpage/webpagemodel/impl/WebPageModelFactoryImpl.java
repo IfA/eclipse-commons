@@ -5,6 +5,7 @@ package de.tud.et.ifa.agtele.eclipse.webpage.webpagemodel.impl;
 import de.tud.et.ifa.agtele.eclipse.webpage.webpagemodel.*;
 
 import org.eclipse.emf.ecore.EClass;
+import org.eclipse.emf.ecore.EDataType;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.EPackage;
 
@@ -59,12 +60,47 @@ public class WebPageModelFactoryImpl extends EFactoryImpl implements WebPageMode
 			case WebPageModelPackage.WEB_PAGE: return createWebPage();
 			case WebPageModelPackage.MAIN_PAGE: return createMainPage();
 			case WebPageModelPackage.PAGE: return createPage();
+			case WebPageModelPackage.ANNOUNCEMENT: return createAnnouncement();
 			case WebPageModelPackage.SUB_PAGE: return createSubPage();
 			case WebPageModelPackage.HTML_INCLUDE: return createHtmlInclude();
 			case WebPageModelPackage.FILE_VALUE: return createFileValue();
 			case WebPageModelPackage.STRING_VALUE: return createStringValue();
 			default:
 				throw new IllegalArgumentException("The class '" + eClass.getName() + "' is not a valid classifier");
+		}
+	}
+
+	/**
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 */
+	@Override
+	public Object createFromString(EDataType eDataType, String initialValue) {
+		switch (eDataType.getClassifierID()) {
+			case WebPageModelPackage.ANNOUNCEMENT_TYPE_ENUM:
+				return createAnnouncementTypeEnumFromString(eDataType, initialValue);
+			case WebPageModelPackage.ANNOUNCEMENT_LOCATION_ENUM:
+				return createAnnouncementLocationEnumFromString(eDataType, initialValue);
+			default:
+				throw new IllegalArgumentException("The datatype '" + eDataType.getName() + "' is not a valid classifier");
+		}
+	}
+
+	/**
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 */
+	@Override
+	public String convertToString(EDataType eDataType, Object instanceValue) {
+		switch (eDataType.getClassifierID()) {
+			case WebPageModelPackage.ANNOUNCEMENT_TYPE_ENUM:
+				return convertAnnouncementTypeEnumToString(eDataType, instanceValue);
+			case WebPageModelPackage.ANNOUNCEMENT_LOCATION_ENUM:
+				return convertAnnouncementLocationEnumToString(eDataType, instanceValue);
+			default:
+				throw new IllegalArgumentException("The datatype '" + eDataType.getName() + "' is not a valid classifier");
 		}
 	}
 
@@ -99,6 +135,17 @@ public class WebPageModelFactoryImpl extends EFactoryImpl implements WebPageMode
 	public Page createPage() {
 		PageImpl page = new PageImpl();
 		return page;
+	}
+
+	/**
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 */
+	@Override
+	public Announcement createAnnouncement() {
+		AnnouncementImpl announcement = new AnnouncementImpl();
+		return announcement;
 	}
 
 	/**
@@ -143,6 +190,46 @@ public class WebPageModelFactoryImpl extends EFactoryImpl implements WebPageMode
 	public StringValue createStringValue() {
 		StringValueImpl stringValue = new StringValueImpl();
 		return stringValue;
+	}
+
+	/**
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 */
+	public AnnouncementTypeEnum createAnnouncementTypeEnumFromString(EDataType eDataType, String initialValue) {
+		AnnouncementTypeEnum result = AnnouncementTypeEnum.get(initialValue);
+		if (result == null) throw new IllegalArgumentException("The value '" + initialValue + "' is not a valid enumerator of '" + eDataType.getName() + "'");
+		return result;
+	}
+
+	/**
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 */
+	public String convertAnnouncementTypeEnumToString(EDataType eDataType, Object instanceValue) {
+		return instanceValue == null ? null : instanceValue.toString();
+	}
+
+	/**
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 */
+	public AnnouncementLocationEnum createAnnouncementLocationEnumFromString(EDataType eDataType, String initialValue) {
+		AnnouncementLocationEnum result = AnnouncementLocationEnum.get(initialValue);
+		if (result == null) throw new IllegalArgumentException("The value '" + initialValue + "' is not a valid enumerator of '" + eDataType.getName() + "'");
+		return result;
+	}
+
+	/**
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 */
+	public String convertAnnouncementLocationEnumToString(EDataType eDataType, Object instanceValue) {
+		return instanceValue == null ? null : instanceValue.toString();
 	}
 
 	/**

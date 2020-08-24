@@ -49,6 +49,8 @@ public class WebPageItemProvider extends MainPageItemProvider {
 			addOutDirPropertyDescriptor(object);
 			addLangPropertyDescriptor(object);
 			addResourcesOutPathFragmentPropertyDescriptor(object);
+			addAlternativesPropertyDescriptor(object);
+			addInvAlternativesPropertyDescriptor(object);
 		}
 		return itemPropertyDescriptors;
 	}
@@ -142,6 +144,50 @@ public class WebPageItemProvider extends MainPageItemProvider {
 	}
 
 	/**
+	 * This adds a property descriptor for the Alternatives feature.
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 */
+	protected void addAlternativesPropertyDescriptor(Object object) {
+		itemPropertyDescriptors.add
+			(createItemPropertyDescriptor
+				(((ComposeableAdapterFactory)adapterFactory).getRootAdapterFactory(),
+				 getResourceLocator(),
+				 getString("_UI_WebPage_alternatives_feature"),
+				 getString("_UI_PropertyDescriptor_description", "_UI_WebPage_alternatives_feature", "_UI_WebPage_type"),
+				 WebPageModelPackage.Literals.WEB_PAGE__ALTERNATIVES,
+				 true,
+				 false,
+				 true,
+				 null,
+				 null,
+				 null));
+	}
+
+	/**
+	 * This adds a property descriptor for the Inv Alternatives feature.
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 */
+	protected void addInvAlternativesPropertyDescriptor(Object object) {
+		itemPropertyDescriptors.add
+			(createItemPropertyDescriptor
+				(((ComposeableAdapterFactory)adapterFactory).getRootAdapterFactory(),
+				 getResourceLocator(),
+				 getString("_UI_WebPage_invAlternatives_feature"),
+				 getString("_UI_PropertyDescriptor_description", "_UI_WebPage_invAlternatives_feature", "_UI_WebPage_type"),
+				 WebPageModelPackage.Literals.WEB_PAGE__INV_ALTERNATIVES,
+				 false,
+				 false,
+				 true,
+				 null,
+				 null,
+				 null));
+	}
+
+	/**
 	 * This returns WebPage.gif.
 	 * <!-- begin-user-doc -->
 	 * <!-- end-user-doc -->
@@ -214,7 +260,14 @@ public class WebPageItemProvider extends MainPageItemProvider {
 
 		boolean qualify =
 			childFeature == WebPageModelPackage.Literals.ABSTRACT_HTML__FOOTER ||
-			childFeature == WebPageModelPackage.Literals.ABSTRACT_HTML__HEADER;
+			childFeature == WebPageModelPackage.Literals.ABSTRACT_HTML__HEADER ||
+			childFeature == WebPageModelPackage.Literals.ABSTRACT_HTML__CONTENT ||
+			childFeature == WebPageModelPackage.Literals.PAGE__NAV_ICON ||
+			childFeature == WebPageModelPackage.Literals.ABSTRACT_HTML__SCRIPTS ||
+			childFeature == WebPageModelPackage.Literals.ABSTRACT_HTML__STYLES ||
+			childFeature == WebPageModelPackage.Literals.SUB_PAGE__SUB_PAGE ||
+			childFeature == WebPageModelPackage.Literals.MAIN_PAGE__ADDITIONAL_PAGES ||
+			childFeature == WebPageModelPackage.Literals.MAIN_PAGE__MAIN_PAGES;
 
 		if (qualify) {
 			return getString

@@ -141,6 +141,29 @@ public class WebPageModelItemProviderAdapterFactory extends WebPageModelAdapterF
 	}
 
 	/**
+	 * This keeps track of the one adapter used for all {@link de.tud.et.ifa.agtele.eclipse.webpage.webpagemodel.Announcement} instances.
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 */
+	protected AnnouncementItemProvider announcementItemProvider;
+
+	/**
+	 * This creates an adapter for a {@link de.tud.et.ifa.agtele.eclipse.webpage.webpagemodel.Announcement}.
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 */
+	@Override
+	public Adapter createAnnouncementAdapter() {
+		if (announcementItemProvider == null) {
+			announcementItemProvider = new AnnouncementItemProvider(this);
+		}
+
+		return announcementItemProvider;
+	}
+
+	/**
 	 * This keeps track of the one adapter used for all {@link de.tud.et.ifa.agtele.eclipse.webpage.webpagemodel.SubPage} instances.
 	 * <!-- begin-user-doc -->
 	 * <!-- end-user-doc -->
@@ -340,6 +363,7 @@ public class WebPageModelItemProviderAdapterFactory extends WebPageModelAdapterF
 		if (webPageItemProvider != null) webPageItemProvider.dispose();
 		if (mainPageItemProvider != null) mainPageItemProvider.dispose();
 		if (pageItemProvider != null) pageItemProvider.dispose();
+		if (announcementItemProvider != null) announcementItemProvider.dispose();
 		if (subPageItemProvider != null) subPageItemProvider.dispose();
 		if (htmlIncludeItemProvider != null) htmlIncludeItemProvider.dispose();
 		if (fileValueItemProvider != null) fileValueItemProvider.dispose();

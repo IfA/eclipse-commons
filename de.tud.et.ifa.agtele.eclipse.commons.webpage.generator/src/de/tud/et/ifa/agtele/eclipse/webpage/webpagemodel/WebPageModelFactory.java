@@ -49,6 +49,15 @@ public interface WebPageModelFactory extends EFactory {
 	Page createPage();
 
 	/**
+	 * Returns a new object of class '<em>Announcement</em>'.
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @return a new object of class '<em>Announcement</em>'.
+	 * @generated
+	 */
+	Announcement createAnnouncement();
+
+	/**
 	 * Returns a new object of class '<em>Sub Page</em>'.
 	 * <!-- begin-user-doc -->
 	 * <!-- end-user-doc -->

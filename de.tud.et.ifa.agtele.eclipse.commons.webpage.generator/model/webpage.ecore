@@ -8,13 +8,19 @@
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="lang" lowerBound="1" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="resourcesOutPathFragment"
         eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="alternatives" upperBound="-1"
+        eType="#//WebPage" eOpposite="#//WebPage/invAlternatives"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="invAlternatives" upperBound="-1"
+        eType="#//WebPage" eOpposite="#//WebPage/alternatives"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="MainPage" eSuperTypes="#//Page">
     <eAnnotations source="http://www.eclipse.org/emf/2002/Ecore">
       <details key="constraints" value="DummyConstraint"/>
     </eAnnotations>
     <eOperations name="validateMainPageNotContainingWebPage" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean">
-      <eAnnotations source="http://www.eclipse.org/emf/2002/GenModel"/>
+      <eAnnotations source="http://www.eclipse.org/emf/2002/GenModel">
+        <details key="body" value="for (&lt;%org.eclipse.emf.ecore.EObject%> o : this.eContents()) {&#xD;&#xA;&#x9;if (o instanceof &lt;%de.tud.et.ifa.agtele.eclipse.webpage.webpagemodel.WebPage%>) {&#xD;&#xA;&#x9;&#x9;if (diagnostics != null) {&#xD;&#xA;&#x9;&#x9;&#x9;diagnostics.add(new &lt;%org.eclipse.emf.common.util.BasicDiagnostic%>(&lt;%org.eclipse.emf.common.util.Diagnostic%>.ERROR, &lt;%de.tud.et.ifa.agtele.eclipse.webpage.webpagemodel.util.WebPageModelValidator%>.DIAGNOSTIC_SOURCE,&#xD;&#xA;&#x9;&#x9;&#x9;&#x9;&#x9;WebPageModelValidator.MAIN_PAGE__VALIDATE_MAIN_PAGE_NOT_CONTAINING_WEB_PAGE,&#xD;&#xA;&#x9;&#x9;&#x9;&#x9;&#x9;&quot;WebPage must be the model root&quot;, new Object[] { this }));&#xD;&#xA;&#x9;&#x9;}&#xD;&#xA;&#x9;&#x9;return false;&#xD;&#xA;&#x9;}&#xD;&#xA;}&#xD;&#xA;return true;"/>
+      </eAnnotations>
       <eParameters name="diagnostics" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDiagnosticChain"/>
       <eParameters name="context">
         <eGenericType eClassifier="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EMap">
@@ -28,42 +34,113 @@
     <eStructuralFeatures xsi:type="ecore:EReference" name="additionalPages" upperBound="-1"
         eType="#//Page" containment="true"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="srcPath" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="suppressMainMenu" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"
-        defaultValueLiteral="false"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="Page" eSuperTypes="#//SubPage">
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="navIcon" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="suppressMainMenu" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"
+        defaultValueLiteral="false"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="navIcon" eType="#//Value"
+        containment="true"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="AbstractHTML" abstract="true" eSuperTypes="#//Base">
     <eStructuralFeatures xsi:type="ecore:EReference" name="footer" eType="#//Value"
         containment="true"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="header" eType="#//Value"
         containment="true"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="srcPathFragment" lowerBound="1"
-        eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="srcPathFragment" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="scripts" upperBound="-1"
-        eType="#//HtmlInclude"/>
+        eType="#//HtmlInclude" containment="true"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="styles" upperBound="-1"
-        eType="#//HtmlInclude"/>
+        eType="#//HtmlInclude" containment="true"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="title" lowerBound="1" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="staticResources" upperBound="-1"
         eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="content" eType="#//Value"
+        containment="true"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="externalUrl" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="announcement" upperBound="-1"
+        eType="#//Announcement" containment="true"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="Announcement" eSuperTypes="#//Base">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="propagate" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"
+        defaultValueLiteral="false"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="type" eType="#//AnnouncementTypeEnum"
+        defaultValueLiteral="primary"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="location" eType="#//AnnouncementLocationEnum"
+        defaultValueLiteral="AboveHeading"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="content" eType="#//Value"
+        containment="true"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="closable" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"
+        defaultValueLiteral="false"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EEnum" name="AnnouncementTypeEnum">
+    <eLiterals name="primary"/>
+    <eLiterals name="secondary" value="1"/>
+    <eLiterals name="success" value="2"/>
+    <eLiterals name="danger" value="3"/>
+    <eLiterals name="warning" value="4"/>
+    <eLiterals name="info" value="5"/>
+    <eLiterals name="light" value="6"/>
+    <eLiterals name="dark" value="7"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EEnum" name="AnnouncementLocationEnum">
+    <eLiterals name="AbovePage"/>
+    <eLiterals name="AboveContent" value="1"/>
+    <eLiterals name="AboveHeading" value="2"/>
+    <eLiterals name="BelowHeading" value="3"/>
+    <eLiterals name="BelowContent" value="4"/>
+    <eLiterals name="AboveFooter" value="5"/>
+    <eLiterals name="BelowFooter" value="6"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="SubPage" eSuperTypes="#//AbstractHTML">
+    <eOperations name="validateSubPage" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean">
+      <eAnnotations source="http://www.eclipse.org/emf/2002/GenModel">
+        <details key="body" value="boolean valid = true;&#xD;&#xA;for (&lt;%de.tud.et.ifa.agtele.eclipse.webpage.webpagemodel.SubPage%> page : this.getSubPage()) {&#xD;&#xA;&#x9;if (page instanceof &lt;%de.tud.et.ifa.agtele.eclipse.webpage.webpagemodel.Page%>) {&#xD;&#xA;&#x9;&#x9;if (diagnostics != null) {&#xD;&#xA;&#x9;&#x9;&#x9;diagnostics.add(new &lt;%org.eclipse.emf.common.util.BasicDiagnostic%>(&lt;%org.eclipse.emf.common.util.Diagnostic%>.ERROR, &lt;%de.tud.et.ifa.agtele.eclipse.webpage.webpagemodel.util.WebPageModelValidator%>.DIAGNOSTIC_SOURCE,&#xD;&#xA;&#x9;&#x9;&#x9;&#x9;&#x9;WebPageModelValidator.SUB_PAGE__VALIDATE_SUB_PAGE, &quot;SubPage must only contain SubPages&quot;,&#xD;&#xA;&#x9;&#x9;&#x9;&#x9;&#x9;new Object[] { this, page }));&#xD;&#xA;&#x9;&#x9;}&#xD;&#xA;&#x9;&#x9;valid = false;&#xD;&#xA;&#x9;}&#xD;&#xA;}&#xD;&#xA;return valid;"/>
+      </eAnnotations>
+      <eParameters name="diagnostics" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDiagnosticChain"/>
+      <eParameters name="context">
+        <eGenericType eClassifier="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EMap">
+          <eTypeArguments/>
+          <eTypeArguments/>
+        </eGenericType>
+      </eParameters>
+    </eOperations>
     <eStructuralFeatures xsi:type="ecore:EReference" name="subPage" upperBound="-1"
         eType="#//SubPage" containment="true"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="AbstractKeyVal" abstract="true" eSuperTypes="#//Base">
+    <eOperations name="validateName" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean">
+      <eAnnotations source="http://www.eclipse.org/emf/2002/GenModel">
+        <details key="body" value="&lt;%org.eclipse.emf.ecore.EStructuralFeature%> feature = this.eContainingFeature();&#xD;&#xA;&lt;%org.eclipse.emf.ecore.EObject%> container = this.eContainer();&#xD;&#xA;boolean result = true;&#xD;&#xA;if (feature.isMany()) {&#xD;&#xA;&#x9;&lt;%org.eclipse.emf.common.util.EList%>&lt;? extends &lt;%de.tud.et.ifa.agtele.eclipse.webpage.webpagemodel.AbstractKeyVal%>> value = (EList&lt;? extends AbstractKeyVal>) container.eGet(feature);&#xD;&#xA;&#x9;int index = value.indexOf(this);&#xD;&#xA;&#xD;&#xA;&#x9;for (int i = 0; i &lt; index; i += 1) {&#xD;&#xA;&#x9;&#x9;AbstractKeyVal val = value.get(i);&#xD;&#xA;&#x9;&#x9;if (val.getName() != null &amp;&amp; val.getName().equals(this.getName())) {&#xD;&#xA;&#x9;&#x9;&#x9;if (diagnostics != null) {&#xD;&#xA;&#x9;&#x9;&#x9;&#x9;diagnostics&#xD;&#xA;&#x9;&#x9;&#x9;&#x9;&#x9;&#x9;.add(new &lt;%org.eclipse.emf.common.util.BasicDiagnostic%>(&lt;%org.eclipse.emf.common.util.Diagnostic%>.ERROR, &lt;%de.tud.et.ifa.agtele.eclipse.webpage.webpagemodel.util.WebPageModelValidator%>.DIAGNOSTIC_SOURCE,&#xD;&#xA;&#x9;&#x9;&#x9;&#x9;&#x9;&#x9;&#x9;&#x9;WebPageModelValidator.ABSTRACT_KEY_VAL__VALIDATE_NAME, &quot;Duplicate name '&quot;&#xD;&#xA;&#x9;&#x9;&#x9;&#x9;&#x9;&#x9;&#x9;&#x9;&#x9;&#x9;+ this.getName() + &quot;' in feature '&quot; + feature.getName() + &quot;'&quot;,&#xD;&#xA;&#x9;&#x9;&#x9;&#x9;&#x9;&#x9;&#x9;&#x9;new Object[] { this }));&#xD;&#xA;&#x9;&#x9;&#x9;}&#xD;&#xA;&#x9;&#x9;&#x9;result = false;&#xD;&#xA;&#x9;&#x9;}&#xD;&#xA;&#x9;}&#xD;&#xA;&#xD;&#xA;}&#xD;&#xA;&#xD;&#xA;if (this.getName() == null || this.getName().isBlank()) {&#xD;&#xA;&#x9;if (diagnostics != null) {&#xD;&#xA;&#x9;&#x9;diagnostics.add(new BasicDiagnostic(Diagnostic.ERROR, WebPageModelValidator.DIAGNOSTIC_SOURCE,&#xD;&#xA;&#x9;&#x9;&#x9;&#x9;WebPageModelValidator.ABSTRACT_KEY_VAL__VALIDATE_NAME, &quot;name must be set&quot;,&#xD;&#xA;&#x9;&#x9;&#x9;&#x9;new Object[] { this }));&#xD;&#xA;&#x9;}&#xD;&#xA;&#x9;result = false;&#xD;&#xA;}&#xD;&#xA;return result;"/>
+      </eAnnotations>
+      <eParameters name="diagnostics" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDiagnosticChain"/>
+      <eParameters name="context">
+        <eGenericType eClassifier="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EMap">
+          <eTypeArguments/>
+          <eTypeArguments/>
+        </eGenericType>
+      </eParameters>
+    </eOperations>
     <eStructuralFeatures xsi:type="ecore:EReference" name="value" upperBound="-1"
-        eType="#//Value"/>
+        eType="#//Value" containment="true"/>
   </eClassifiers>
-  <eClassifiers xsi:type="ecore:EClass" name="HtmlInclude" eSuperTypes="#//AbstractKeyVal"/>
+  <eClassifiers xsi:type="ecore:EClass" name="HtmlInclude" eSuperTypes="#//AbstractKeyVal">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="inline" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"
+        defaultValueLiteral="false"/>
+  </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="Value" abstract="true"/>
-  <eClassifiers xsi:type="ecore:EClass" name="FileValue" eSuperTypes="#//Value"/>
-  <eClassifiers xsi:type="ecore:EClass" name="StringValue" eSuperTypes="#//Value"/>
+  <eClassifiers xsi:type="ecore:EClass" name="FileValue" eSuperTypes="#//Value">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="value" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="StringValue" eSuperTypes="#//Value">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="value" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+  </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="Base" abstract="true">
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="name" lowerBound="1" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="id" lowerBound="1" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"
         iD="true"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="createdOn" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="createdBy" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="lastModified" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="lastModifiedBy" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
   </eClassifiers>
 </ecore:EPackage>

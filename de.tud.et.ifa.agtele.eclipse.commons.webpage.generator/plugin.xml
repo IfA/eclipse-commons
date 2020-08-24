@@ -47,13 +47,13 @@
    <extension point="org.eclipse.ui.newWizards">
       <!-- @generated webpage -->
       <category
-            id="org.eclipse.emf.ecore.Wizard.category.ID"
-            name="%_UI_Wizard_category"/>
+            id="de.tud.et.ifa.agtele.eclipse.commons.new.category"
+            name="Agtele Commons"/>
       <wizard
             id="de.tud.et.ifa.agtele.eclipse.webpage.webpagemodel.presentation.WebPageModelModelWizardID"
             name="%_UI_WebPageModelModelWizard_label"
             class="de.tud.et.ifa.agtele.eclipse.webpage.webpagemodel.presentation.WebPageModelModelWizard"
-            category="org.eclipse.emf.ecore.Wizard.category.ID"
+            category="de.tud.et.ifa.agtele.eclipse.commons.new.category"
             icon="icons/full/obj16/WebPageModelModelFile.gif">
          <description>%_UI_WebPageModelModelWizard_description</description>
          <selection class="org.eclipse.core.resources.IResource"/>

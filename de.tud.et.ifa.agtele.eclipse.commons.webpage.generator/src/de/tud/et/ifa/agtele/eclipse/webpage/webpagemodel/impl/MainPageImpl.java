@@ -4,6 +4,7 @@ package de.tud.et.ifa.agtele.eclipse.webpage.webpagemodel.impl;
 
 import de.tud.et.ifa.agtele.eclipse.webpage.webpagemodel.MainPage;
 import de.tud.et.ifa.agtele.eclipse.webpage.webpagemodel.Page;
+import de.tud.et.ifa.agtele.eclipse.webpage.webpagemodel.WebPage;
 import de.tud.et.ifa.agtele.eclipse.webpage.webpagemodel.WebPageModelPackage;
 
 import de.tud.et.ifa.agtele.eclipse.webpage.webpagemodel.util.WebPageModelValidator;
@@ -22,14 +23,11 @@ import org.eclipse.emf.common.util.DiagnosticChain;
 import org.eclipse.emf.common.util.EList;
 
 import org.eclipse.emf.ecore.EClass;
+import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.InternalEObject;
 
 import org.eclipse.emf.ecore.impl.ENotificationImpl;
-
-import org.eclipse.emf.ecore.plugin.EcorePlugin;
-
 import org.eclipse.emf.ecore.util.EObjectContainmentEList;
-import org.eclipse.emf.ecore.util.EObjectValidator;
 import org.eclipse.emf.ecore.util.InternalEList;
 
 /**
@@ -43,7 +41,6 @@ import org.eclipse.emf.ecore.util.InternalEList;
  *   <li>{@link de.tud.et.ifa.agtele.eclipse.webpage.webpagemodel.impl.MainPageImpl#getMainPages <em>Main Pages</em>}</li>
  *   <li>{@link de.tud.et.ifa.agtele.eclipse.webpage.webpagemodel.impl.MainPageImpl#getAdditionalPages <em>Additional Pages</em>}</li>
  *   <li>{@link de.tud.et.ifa.agtele.eclipse.webpage.webpagemodel.impl.MainPageImpl#getSrcPath <em>Src Path</em>}</li>
- *   <li>{@link de.tud.et.ifa.agtele.eclipse.webpage.webpagemodel.impl.MainPageImpl#isSuppressMainMenu <em>Suppress Main Menu</em>}</li>
  * </ul>
  *
  * @generated
@@ -89,25 +86,6 @@ public class MainPageImpl extends PageImpl implements MainPage {
 	 */
     protected String srcPath = SRC_PATH_EDEFAULT;
 	/**
-	 * The default value of the '{@link #isSuppressMainMenu() <em>Suppress Main Menu</em>}' attribute.
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
-	 * @see #isSuppressMainMenu()
-	 * @generated
-	 * @ordered
-	 */
-	protected static final boolean SUPPRESS_MAIN_MENU_EDEFAULT = false;
-
-	/**
-	 * The cached value of the '{@link #isSuppressMainMenu() <em>Suppress Main Menu</em>}' attribute.
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
-	 * @see #isSuppressMainMenu()
-	 * @generated
-	 * @ordered
-	 */
-    protected boolean suppressMainMenu = SUPPRESS_MAIN_MENU_EDEFAULT;
-	/**
 	 * <!-- begin-user-doc -->
 	 * <!-- end-user-doc -->
 	 * @generated
@@ -132,7 +110,7 @@ public class MainPageImpl extends PageImpl implements MainPage {
 	 * @generated
 	 */
 	@Override
-	public EList<MainPage> getMainPages() {
+	public EList<MainPage> getMainPages() {	
 	
 		if (mainPages == null) {
 			mainPages = new EObjectContainmentEList<MainPage>(MainPage.class, this, WebPageModelPackage.MAIN_PAGE__MAIN_PAGES);
@@ -145,7 +123,7 @@ public class MainPageImpl extends PageImpl implements MainPage {
 	 * @generated
 	 */
 	@Override
-	public EList<Page> getAdditionalPages() {
+	public EList<Page> getAdditionalPages() {	
 	
 		if (additionalPages == null) {
 			additionalPages = new EObjectContainmentEList<Page>(Page.class, this, WebPageModelPackage.MAIN_PAGE__ADDITIONAL_PAGES);
@@ -158,7 +136,7 @@ public class MainPageImpl extends PageImpl implements MainPage {
 	 * @generated
 	 */
 	@Override
-	public String getSrcPath() {
+	public String getSrcPath() {	
 	
 		return srcPath;
 	}
@@ -182,46 +160,16 @@ public class MainPageImpl extends PageImpl implements MainPage {
 	 * @generated
 	 */
 	@Override
-	public boolean isSuppressMainMenu() {
-	
-		return suppressMainMenu;
-	}
-	/**
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
-	 * @generated
-	 */
-	@Override
-	public void setSuppressMainMenu(boolean newSuppressMainMenu) {
-	
-		boolean oldSuppressMainMenu = suppressMainMenu;
-		suppressMainMenu = newSuppressMainMenu;
-		if (eNotificationRequired())
-			eNotify(new ENotificationImpl(this, Notification.SET, WebPageModelPackage.MAIN_PAGE__SUPPRESS_MAIN_MENU, oldSuppressMainMenu, suppressMainMenu));
-	
-	}
-	/**
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
-	 * @generated
-	 */
-	@Override
-	public boolean validateMainPageNotContainingWebPage(DiagnosticChain diagnostics, Map<?, ?> context) {
-		// TODO: implement this method
-		// -> specify the condition that violates the invariant
-		// -> verify the details of the diagnostic, including severity and message
-		// Ensure that you remove @generated or mark it @generated NOT
-		if (false) {
-			if (diagnostics != null) {
-				diagnostics.add
-					(new BasicDiagnostic
-						(Diagnostic.ERROR,
-						 WebPageModelValidator.DIAGNOSTIC_SOURCE,
-						 WebPageModelValidator.MAIN_PAGE__VALIDATE_MAIN_PAGE_NOT_CONTAINING_WEB_PAGE,
-						 EcorePlugin.INSTANCE.getString("_UI_GenericInvariant_diagnostic", new Object[] { "validateMainPageNotContainingWebPage", EObjectValidator.getObjectLabel(this, (Map<Object, Object>) context) }),
-						 new Object [] { this }));
+	public boolean validateMainPageNotContainingWebPage(final DiagnosticChain diagnostics, final Map<?, ?> context) {
+		for (EObject o : this.eContents()) {
+			if (o instanceof WebPage) {
+				if (diagnostics != null) {
+					diagnostics.add(new BasicDiagnostic(Diagnostic.ERROR, WebPageModelValidator.DIAGNOSTIC_SOURCE,
+							WebPageModelValidator.MAIN_PAGE__VALIDATE_MAIN_PAGE_NOT_CONTAINING_WEB_PAGE,
+							"WebPage must be the model root", new Object[] { this }));
+				}
+				return false;
 			}
-			return false;
 		}
 		return true;	
 	}
@@ -255,8 +203,6 @@ public class MainPageImpl extends PageImpl implements MainPage {
 				return getAdditionalPages();
 			case WebPageModelPackage.MAIN_PAGE__SRC_PATH:
 				return getSrcPath();
-			case WebPageModelPackage.MAIN_PAGE__SUPPRESS_MAIN_MENU:
-				return isSuppressMainMenu();
 		}
 		return super.eGet(featureID, resolve, coreType);
 	}
@@ -281,9 +227,6 @@ public class MainPageImpl extends PageImpl implements MainPage {
 			case WebPageModelPackage.MAIN_PAGE__SRC_PATH:
 				setSrcPath((String)newValue);
 				return;
-			case WebPageModelPackage.MAIN_PAGE__SUPPRESS_MAIN_MENU:
-				setSuppressMainMenu((Boolean)newValue);
-				return;
 		}
 		super.eSet(featureID, newValue);
 	}
@@ -305,9 +248,6 @@ public class MainPageImpl extends PageImpl implements MainPage {
 			case WebPageModelPackage.MAIN_PAGE__SRC_PATH:
 				setSrcPath(SRC_PATH_EDEFAULT);
 				return;
-			case WebPageModelPackage.MAIN_PAGE__SUPPRESS_MAIN_MENU:
-				setSuppressMainMenu(SUPPRESS_MAIN_MENU_EDEFAULT);
-				return;
 		}
 		super.eUnset(featureID);
 	}
@@ -326,8 +266,6 @@ public class MainPageImpl extends PageImpl implements MainPage {
 				return additionalPages != null && !additionalPages.isEmpty();
 			case WebPageModelPackage.MAIN_PAGE__SRC_PATH:
 				return SRC_PATH_EDEFAULT == null ? srcPath != null : !SRC_PATH_EDEFAULT.equals(srcPath);
-			case WebPageModelPackage.MAIN_PAGE__SUPPRESS_MAIN_MENU:
-				return suppressMainMenu != SUPPRESS_MAIN_MENU_EDEFAULT;
 		}
 		return super.eIsSet(featureID);
 	}
@@ -357,8 +295,6 @@ public class MainPageImpl extends PageImpl implements MainPage {
 		StringBuilder result = new StringBuilder(super.toString());
 		result.append(" (srcPath: ");
 		result.append(srcPath);
-		result.append(", suppressMainMenu: ");
-		result.append(suppressMainMenu);
 		result.append(')');
 		return result.toString();
 	}

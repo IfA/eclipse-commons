@@ -2,18 +2,24 @@
  */
 package de.tud.et.ifa.agtele.eclipse.webpage.webpagemodel.impl;
 
+import de.tud.et.ifa.agtele.eclipse.webpage.webpagemodel.Page;
 import de.tud.et.ifa.agtele.eclipse.webpage.webpagemodel.SubPage;
 import de.tud.et.ifa.agtele.eclipse.webpage.webpagemodel.WebPageModelPackage;
 
+import de.tud.et.ifa.agtele.eclipse.webpage.webpagemodel.util.WebPageModelValidator;
+import java.lang.reflect.InvocationTargetException;
 import java.util.Collection;
 
+import java.util.Map;
 import org.eclipse.emf.common.notify.NotificationChain;
 
+import org.eclipse.emf.common.util.BasicDiagnostic;
+import org.eclipse.emf.common.util.Diagnostic;
+import org.eclipse.emf.common.util.DiagnosticChain;
 import org.eclipse.emf.common.util.EList;
 
 import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.InternalEObject;
-
 import org.eclipse.emf.ecore.util.EObjectContainmentEList;
 import org.eclipse.emf.ecore.util.InternalEList;
 
@@ -66,13 +72,34 @@ public class SubPageImpl extends AbstractHTMLImpl implements SubPage {
 	 * @generated
 	 */
 	@Override
-	public EList<SubPage> getSubPage() {
+	public EList<SubPage> getSubPage() {	
 	
 		if (subPage == null) {
 			subPage = new EObjectContainmentEList<SubPage>(SubPage.class, this, WebPageModelPackage.SUB_PAGE__SUB_PAGE);
 		}
 		return subPage;
 	}
+	/**
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 */
+	@Override
+	public boolean validateSubPage(final DiagnosticChain diagnostics, final Map<?, ?> context) {
+		boolean valid = true;
+		for (SubPage page : this.getSubPage()) {
+			if (page instanceof Page) {
+				if (diagnostics != null) {
+					diagnostics.add(new BasicDiagnostic(Diagnostic.ERROR, WebPageModelValidator.DIAGNOSTIC_SOURCE,
+							WebPageModelValidator.SUB_PAGE__VALIDATE_SUB_PAGE, "SubPage must only contain SubPages",
+							new Object[] { this, page }));
+				}
+				valid = false;
+			}
+		}
+		return valid;	
+	}
+
 	/**
 	 * <!-- begin-user-doc -->
 	 * <!-- end-user-doc -->
@@ -145,5 +172,19 @@ public class SubPageImpl extends AbstractHTMLImpl implements SubPage {
 				return subPage != null && !subPage.isEmpty();
 		}
 		return super.eIsSet(featureID);
+	}
+
+		/**
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 */
+	@Override
+	public Object eInvoke(int operationID, EList<?> arguments) throws InvocationTargetException {
+		switch (operationID) {
+			case WebPageModelPackage.SUB_PAGE___VALIDATE_SUB_PAGE__DIAGNOSTICCHAIN_MAP:
+				return validateSubPage((DiagnosticChain)arguments.get(0), (Map<?, ?>)arguments.get(1));
+		}
+		return super.eInvoke(operationID, arguments);
 	}
 } //SubPageImpl
