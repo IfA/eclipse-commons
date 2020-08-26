@@ -11,7 +11,7 @@
       <menuContribution
             allPopups="false"
             class="de.tud.et.ifa.agtele.eclipse.webpage.contributions.GenerateWebPageMenuContribution"
-            locationURI="popup:de.tud.et.ifa.agtele.eclipse.webpage.presentation.WebpageEditorID?before=additions">
+            locationURI="popup:de.tud.et.ifa.agtele.eclipse.webpage.webpagemodel.presentation.WebPageModelEditorID?before=additions">
       </menuContribution>
    </extension>
    <extension

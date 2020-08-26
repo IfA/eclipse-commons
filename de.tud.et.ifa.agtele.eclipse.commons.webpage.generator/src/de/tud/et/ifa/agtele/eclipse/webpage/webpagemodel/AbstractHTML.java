@@ -34,6 +34,7 @@ import de.tud.et.ifa.agtele.emf.AgteleEcoreUtil;
  *   <li>{@link de.tud.et.ifa.agtele.eclipse.webpage.webpagemodel.AbstractHTML#getContent <em>Content</em>}</li>
  *   <li>{@link de.tud.et.ifa.agtele.eclipse.webpage.webpagemodel.AbstractHTML#getExternalUrl <em>External Url</em>}</li>
  *   <li>{@link de.tud.et.ifa.agtele.eclipse.webpage.webpagemodel.AbstractHTML#getAnnouncement <em>Announcement</em>}</li>
+ *   <li>{@link de.tud.et.ifa.agtele.eclipse.webpage.webpagemodel.AbstractHTML#getNavName <em>Nav Name</em>}</li>
  * </ul>
  *
  * @see de.tud.et.ifa.agtele.eclipse.webpage.webpagemodel.WebPageModelPackage#getAbstractHTML()
@@ -221,12 +222,34 @@ public interface AbstractHTML extends Base {
 	 */
 	EList<Announcement> getAnnouncement();
 
+	/**
+	 * Returns the value of the '<em><b>Nav Name</b></em>' attribute.
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @return the value of the '<em>Nav Name</em>' attribute.
+	 * @see #setNavName(String)
+	 * @see de.tud.et.ifa.agtele.eclipse.webpage.webpagemodel.WebPageModelPackage#getAbstractHTML_NavName()
+	 * @model
+	 * @generated
+	 */
+	String getNavName();
+
+	/**
+	 * Sets the value of the '{@link de.tud.et.ifa.agtele.eclipse.webpage.webpagemodel.AbstractHTML#getNavName <em>Nav Name</em>}' attribute.
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @param value the new value of the '<em>Nav Name</em>' attribute.
+	 * @see #getNavName()
+	 * @generated
+	 */
+	void setNavName(String value);
+
 	default List<HtmlInclude> getLocalScriptList () {		
 		return WebPageModelUtils.uniqueifyNames(this.getScripts());
 	}
 	
 	default List<HtmlInclude> scriptList () {
-		if (!(this.eContainer() instanceof AbstractHTML)) {
+		if (this.eContainer() instanceof AbstractHTML) {
 			return WebPageModelUtils.applyKeyVal(this.getLocalScriptList(), ((AbstractHTML)this.eContainer()).scriptList());
 		}
 		return this.getLocalScriptList();
@@ -236,7 +259,7 @@ public interface AbstractHTML extends Base {
 		return WebPageModelUtils.uniqueifyNames(this.getStyles());
 	}	
 	default List<HtmlInclude> styleList () {
-		if (!(this.eContainer() instanceof AbstractHTML)) {
+		if (this.eContainer() instanceof AbstractHTML) {
 			return WebPageModelUtils.applyKeyVal(this.getLocalStyleList(), ((AbstractHTML)this.eContainer()).styleList());
 		}
 		return this.getLocalStyleList();
@@ -295,7 +318,22 @@ public interface AbstractHTML extends Base {
 		return parentDir + "/" + WebPageModelUtils.getUrlSafeName(this.getName());
 	}
 	default String getTargetFilePath () {
-		return this.getTargetDir() + "/" + this.getTargetFileName();
+		String dir = this.getTargetDir();
+		return dir + (!dir.isBlank() ? "/" : "") + this.getTargetFileName();
+	}
+	default String getRelativeTargetDir () {
+		String parentDir = "";
+		if (this.eContainer() instanceof AbstractHTML) {
+			parentDir = ((AbstractHTML) this.eContainer()).getRelativeTargetDir();
+		}
+		if (!this.isNode()) {
+			return parentDir;
+		}
+		return parentDir + (!parentDir.isBlank() ? "/" : "") + WebPageModelUtils.getUrlSafeName(this.getName());
+	}
+	default String getRelativeTargetFilePath() {
+		String dir = this.getRelativeTargetDir();
+		return dir + (!dir.isBlank() ? "/" : "") + this.getTargetFileName();
 	}
 	
 	default String getParentUrl () {
@@ -402,12 +440,28 @@ public interface AbstractHTML extends Base {
 	}
 
 	default URI getSrcPath(IStringSubstitutor substitutor, String appendix) {
-		String srcPath = appendix != null && WebPageModelUtils.isAbsolutePath(appendix) ? substitutor.substitute(appendix) : substitutor.substitute(this.getSrcDir() + "/" + appendix);
+		String srcPath = "";
+		if (appendix != null && !appendix.isBlank()) {
+			if (WebPageModelUtils.isAbsolutePath(appendix)) {
+				srcPath = appendix; 
+			} else {
+				srcPath = (this.getSrcDir() != null && !this.getSrcDir().isBlank()? this.getSrcDir() + "/" : "") + appendix;
+			}
+		} else {
+			srcPath = this.getSrcDir();
+		}
+		
+		srcPath = substitutor.substitute(srcPath);
+		
 		URI p = URI.createURI(srcPath);
 		if (!p.hasAbsolutePath()) {
 			return p.resolve(this.getWebPage().getBasePath().appendSegment("someFile.tmp"));
 		}
 		return URI.createURI(srcPath);
+	}
+	
+	default boolean isSuppressArtifact () {
+		return this.isExternal();
 	}
 	
 	default boolean isExternal() {
@@ -417,7 +471,7 @@ public interface AbstractHTML extends Base {
 	default Map<String, Announcement> getLocalAnnouncements(AnnouncementLocationEnum type, boolean propagateOnly) {
 		Map<String, Announcement> result = new LinkedHashMap<>();
 		for (Announcement a : this.getAnnouncement()) {
-			if (a.getName() == null || a.getName().isBlank()) {
+			if (a.getName() == null || a.getName().isBlank() || a.isDisable()) {
 				continue;
 			}
 			if (a.getLocation() == type && (!propagateOnly || a.isPropagate())) {
@@ -454,6 +508,12 @@ public interface AbstractHTML extends Base {
 		}
 		
 		return new ArrayList<>(result.values());
-		
+	}
+	
+	default String compiledNavName () {
+		if (this.getNavName() == null) {
+			return this.getTitle();
+		}
+		return this.getNavName();
 	}
 } // AbstractHTML

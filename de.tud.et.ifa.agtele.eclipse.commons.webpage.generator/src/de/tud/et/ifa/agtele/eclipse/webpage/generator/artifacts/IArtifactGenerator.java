@@ -1,7 +1,11 @@
 package de.tud.et.ifa.agtele.eclipse.webpage.generator.artifacts;
 
+import java.io.BufferedReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -25,13 +29,15 @@ import org.eclipse.emf.common.util.URI;
 public interface IArtifactGenerator {
 	public default boolean generate() throws Exception {
 		AbstractHTML html = this.getHtmlFragment();
-		String fileUri = html.getTargetFilePath();
-		IFile file = DirectoryManager.getRoot().getFile(new Path(fileUri));
+		URI uri=DirectoryManager.getOutputPath(this.getHtmlFragment().getWebPage(), html.getRelativeTargetFilePath(), this.getStringSubstitutor());
+		IFile file = DirectoryManager.getRoot().getFile(new Path(uri.toPlatformString(true) != null ? uri.toPlatformString(true) : uri.toString()));
 		
 		FileWriter writer = null;
 		try {
-			writer = new FileWriter(file.getLocation().toOSString());
-			writer.write(this.getContent());
+			writer = new FileWriter(file.getLocation().toOSString(), StandardCharsets.UTF_8);
+			String content = this.getContent();
+			content = this.getStringSubstitutor().substitute(content);
+			writer.write(content);
 		} catch (Exception e) {
 			throw e;
 		} finally {
@@ -40,6 +46,10 @@ public interface IArtifactGenerator {
 			}
 		}
 		return true;
+	}
+	
+	public default boolean isSuppressArtifact() {
+		return false;
 	}
 	
 	public AbstractHTML getHtmlFragment();
@@ -62,10 +72,24 @@ public interface IArtifactGenerator {
 			URI fileUri = ((FileValue)val).getSrcUri(this.getStringSubstitutor());
 						
 			IFile file = ResourcesPlugin.getWorkspace().getRoot().getFile(new Path(fileUri.toPlatformString(true)));
+			InputStream stream = null;
 			try {
-				return new String(file.getContents().readAllBytes());
+				StringBuilder result = new StringBuilder();
+				stream = file.getContents();
+				InputStreamReader reader = new InputStreamReader(stream, file.getCharset());
+				BufferedReader buf = new BufferedReader(reader);
+				buf.lines().forEach(s -> result.append(s + "\n"));
+				return result.toString();
 			} catch (IOException | CoreException e) {
 				this.getReporter().addError(e);
+			} finally {
+				if (stream != null) {
+					try {
+						stream.close();
+					} catch (IOException e) {
+						e.printStackTrace();
+					}
+				}
 			}
 			return null;
 		}

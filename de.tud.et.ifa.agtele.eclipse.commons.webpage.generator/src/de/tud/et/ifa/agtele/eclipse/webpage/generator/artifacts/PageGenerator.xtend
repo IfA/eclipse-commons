@@ -11,6 +11,7 @@ import de.tud.et.ifa.agtele.eclipse.webpage.webpagemodel.MainPage
 import de.tud.et.ifa.agtele.eclipse.webpage.webpagemodel.WebPage
 import java.util.List
 import java.util.ArrayList
+import de.tud.et.ifa.agtele.eclipse.webpage.webpagemodel.AnnouncementLocationEnum
 
 class PageGenerator extends AbstractPageGenerator implements BootstrapHtmlGenerator{
 	
@@ -23,7 +24,12 @@ class PageGenerator extends AbstractPageGenerator implements BootstrapHtmlGenera
 		return '''
 			<div class="col-3 border">
 				<div class="just-padding">
-					<h4>Contents</h4>
+					<h4>
+						<svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-diagram-3-fill" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+					  		<path fill-rule="evenodd" d="M8 5a.5.5 0 0 1 .5.5V7H14a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-1 0V8h-5v.5a.5.5 0 0 1-1 0V8h-5v.5a.5.5 0 0 1-1 0v-1A.5.5 0 0 1 2 7h5.5V5.5A.5.5 0 0 1 8 5zm-8 6.5A1.5 1.5 0 0 1 1.5 10h1A1.5 1.5 0 0 1 4 11.5v1A1.5 1.5 0 0 1 2.5 14h-1A1.5 1.5 0 0 1 0 12.5v-1zm6 0A1.5 1.5 0 0 1 7.5 10h1a1.5 1.5 0 0 1 1.5 1.5v1A1.5 1.5 0 0 1 8.5 14h-1A1.5 1.5 0 0 1 6 12.5v-1zm6 0a1.5 1.5 0 0 1 1.5-1.5h1a1.5 1.5 0 0 1 1.5 1.5v1a1.5 1.5 0 0 1-1.5 1.5h-1a1.5 1.5 0 0 1-1.5-1.5v-1z"/>
+					  		<path fill-rule="evenodd" d="M6 3.5A1.5 1.5 0 0 1 7.5 2h1A1.5 1.5 0 0 1 10 3.5v1A1.5 1.5 0 0 1 8.5 6h-1A1.5 1.5 0 0 1 6 4.5v-1z"/>
+						</svg>
+					</h4>
 					<div class="list-group list-group-root list-group-flush">
 						«IF this.fragment.eContainingFeature == WebPageModelPackage.Literals.SUB_PAGE__SUB_PAGE»
 							<a class="btn btn-light up-link" href="«(this.fragment.eContainer as AbstractHTML).url»">
@@ -65,8 +71,8 @@ class PageGenerator extends AbstractPageGenerator implements BootstrapHtmlGenera
 	
 	def List<Page> getMainBreadCrumbs(AbstractHTML element) {
 		var List<Page> result = new ArrayList();
-		var Page page = element.page;
-		while (!this.isRootNode(page)) {
+		var Page page = element instanceof Page ? element as Page : element.page;
+		while (page !== null && ! (page instanceof WebPage)) {
 			result.add(0,page);
 			page = page.eContainer() instanceof Page ? page.eContainer() as Page : null;
 		}
@@ -93,8 +99,6 @@ class PageGenerator extends AbstractPageGenerator implements BootstrapHtmlGenera
 	}
 	
 	override String rootNavBarContent() {
-		var  List<Page> breadCrumbs = this.getMainBreadCrumbs(this.fragment);
-		var  List<Page> mainPages = this.mainPages(this.fragment);
 		return '''
 			«IF this.fragment.webPage !== null»
 				<li class="nav-item btn btn-outline-light">
@@ -106,38 +110,50 @@ class PageGenerator extends AbstractPageGenerator implements BootstrapHtmlGenera
 «««							  <path fill-rule="evenodd" d="M7.293 1.5a1 1 0 011.414 0l6.647 6.646a.5.5 0 01-.708.708L8 2.207 1.354 8.854a.5.5 0 11-.708-.708L7.293 1.5z" clip-rule="evenodd"/>
 «««							</svg>
 «««						</span>
-						«this.fragment.webPage.name»
+						«this.fragment.webPage.compiledNavName»
 					</a>
 				</li>
 				«FOR MainPage page : this.webPage.mainPages»
-					<li class="nav-item btn btn-outline-light">
+					<li class="nav-item btn btn-outline-light «this.getNavbarItemClass(page)»">
 						<a class="nav-link text-white «BootstrapTreeMenuHelper.containsActiveElement(page, this.fragment) ? "active" : ""»" href="«page.url»">
 							«this.getIcon(page)»
-							«page.name»
+							«page.compiledNavName»
 						</a>
 					</li>
 				«ENDFOR»
 				«FOR Page page : this.webPage.additionalPages»
-					<li class="nav-item btn btn-outline-light ml-auto">
+					<li class="nav-item btn btn-outline-light ml-auto «this.getNavbarItemClass(page)»">
 						<a class="nav-link text-white «BootstrapTreeMenuHelper.containsActiveElement(page, this.fragment) ? "active" : ""»" href="«page.url»">
 							«this.getIcon(page)»
-							«page.name»
+							«page.compiledNavName»
 						</a>
 					</li>
 				«ENDFOR»
 			«ENDIF»
-			«IF !this.isRootNode(this.fragment) && !this.isRootNode(this.fragment.page)»
-			<br/>
-			<nav class="navbar navbar-expand-sm navbar-light bg-tu">
-				<ul class="navbar-nav navbar-breadcrumbs">
+		''';
+	}
+	def String getNavbarItemClass(AbstractHTML menuItem) {
+		if (BootstrapTreeMenuHelper.containsActiveElement(menuItem, this.fragment) || this.fragment == menuItem) {
+			return "active";
+		}
+		return "";
+	}
+	
+	override String additionalRooNavbarContent () {
+		var  List<Page> breadCrumbs = this.getMainBreadCrumbs(this.fragment);
+		var  List<Page> mainPages = this.mainPages(this.fragment);
+		return '''
+			«IF !(this.fragment instanceof WebPage)»
+			<nav class="navbar navbar-expand-sm navbar-light navbar-breadcrumbs" aria-label="breadcrumb">
+				<ul class="navbar-nav">
 					«FOR Page page : breadCrumbs»
-						<li class="nav-item btn btn-outline-light ml-auto">
-							<a class="nav-link text-white" href="«page.url»">
+						<li class="nav-item btn btn-outline ml-auto «IF breadCrumbs.indexOf(page) == breadCrumbs.size-1» active" aria-current="page"«ELSE»"«ENDIF»>
+							<a class="nav-link text-tud" href="«page.url»">
 								«this.getIcon(page)»
-								«page.name»
+								«page.compiledNavName»
 							</a>
 							«IF breadCrumbs.indexOf(page) < breadCrumbs.size -1»
-							<svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-chevron-compact-right" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+							<svg width="1.5em" height="2em" viewBox="4 0 10 16" class="bi bi-chevron-compact-right breadcrumb-separator" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
 							  <path fill-rule="evenodd" d="M6.776 1.553a.5.5 0 0 1 .671.223l3 6a.5.5 0 0 1 0 .448l-3 6a.5.5 0 1 1-.894-.448L9.44 8 6.553 2.224a.5.5 0 0 1 .223-.671z"/>
 							</svg>
 							«ENDIF»
@@ -147,20 +163,19 @@ class PageGenerator extends AbstractPageGenerator implements BootstrapHtmlGenera
 			</nav>
 			«ENDIF»
 			«IF !mainPages.empty»
-				<br/>
-				<nav class="navbar navbar-expand-sm navbar-dark bg-tu-light">
-					<ul class="navbar-nav navbar-main">
+				<nav class="navbar navbar-expand-sm navbar-dark bg-tu2 navbar-sub">
+					<ul class="navbar-nav">
 						«FOR Page page : mainPages»
 							<li class="nav-item btn btn-outline-light ml-auto">
 								<a class="nav-link text-white" href="«page.url»">
 									«this.getIcon(page)»
-									«page.name»
+									«page.compiledNavName»
 								</a>
 							</li>
 						«ENDFOR»
 					</ul>
 				</nav>
-			«ENDIF»			
+			«ENDIF»
 		''';
 	}
 	
@@ -172,17 +187,47 @@ class PageGenerator extends AbstractPageGenerator implements BootstrapHtmlGenera
 		var String content = this.getValueContent(this.htmlFragment.content);
 		return '''
 			<div class="col">
-				<h2>«pageTitleText»</h2>
-				<div class="row justify-content-end">
+				<div class="row justify-content-end">					
+					«this.beforeContent»
 					«IF content !== null»
 						«content»
 					«ELSE»
 						[NO CONTENT]
 					«ENDIF»
+					«this.belowContent»
 				</div>
 				«this.printMetaData(this.htmlFragment)»
 			</div>
 		''';	
+	}
+	
+	
+	def String belowContent() {
+		return this.printAnnouncements(this.fragment.getCompiledAnnouncements(AnnouncementLocationEnum.BELOW_CONTENT));
+	}
+	
+	def String beforeContent() {
+		return this.printAnnouncements(this.fragment.getCompiledAnnouncements(AnnouncementLocationEnum.ABOVE_CONTENT));
+	}
+	
+	override beforeFooter() {
+		return this.printAnnouncements(this.fragment.getCompiledAnnouncements(AnnouncementLocationEnum.ABOVE_FOOTER));
+	}
+	
+	override beforeHeader() {
+		return this.printAnnouncements(this.fragment.getCompiledAnnouncements(AnnouncementLocationEnum.ABOVE_PAGE));
+	}
+	
+	override belowFooter() {
+		return this.printAnnouncements(this.fragment.getCompiledAnnouncements(AnnouncementLocationEnum.BELOW_FOOTER));
+	}
+	
+	override beforeTitle() {
+		return this.printAnnouncements(this.fragment.getCompiledAnnouncements(AnnouncementLocationEnum.ABOVE_HEADING));
+	}	
+		
+	override belowTitle() {
+		return this.printAnnouncements(this.fragment.getCompiledAnnouncements(AnnouncementLocationEnum.BELOW_HEADING));
 	}
 	
 	override getPageTitleText(){
@@ -190,6 +235,11 @@ class PageGenerator extends AbstractPageGenerator implements BootstrapHtmlGenera
 			«this.htmlFragment.title»
 		''';
 	}
+	
+	override String title() {
+		return '''«this.htmlFragment.title»''';
+	}
+	
 	
 	override useNavigation () {
 		return this.asSubPage !== null ? (

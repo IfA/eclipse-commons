@@ -15,6 +15,7 @@ import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.emf.common.util.URI;
@@ -41,8 +42,10 @@ public class DirectoryManager extends ResultReporter {
 	public static final String BUNDLE_ID = "de.tud.et.ifa.agtele.eclipse.commons.webpage.generator";	
 	public static final String SEGMENT_SEPARATOR = "/";
 	
-	public DirectoryManager (List<WebPage> pages) {
+	public DirectoryManager (List<WebPage> pages, IStringSubstitutor substitutor) {
 		this.pages = pages;
+		this.root = DirectoryManager.getRoot();
+		this.stringSubstitutor = substitutor;
 	}
 	
 	public static IWorkspaceRoot getRoot () {
@@ -80,12 +83,15 @@ public class DirectoryManager extends ResultReporter {
 		return this.getOutputPath(page, null);
 	}
 	public URI getOutputPath (AbstractHTML page, String appendix) {
-		String outputPath = appendix != null && WebPageModelUtils.isAbsolutePath(appendix) ? this.substitute(appendix) : this.substitute(page.getTargetDir() + "/" + appendix);
+		return DirectoryManager.getOutputPath(page, appendix, this.stringSubstitutor);
+	}
+	static public URI getOutputPath(AbstractHTML page, String appendix, IStringSubstitutor substitutor) {
+		String outputPath = appendix != null && WebPageModelUtils.isAbsolutePath(appendix) ? substitutor.substitute(appendix) : (substitutor.substitute(page.getTargetDir() + (appendix!=null? "/" + appendix:"")));
 		URI p = URI.createURI(outputPath);
 		if (!p.hasAbsolutePath()) {
 			return p.resolve(page.getWebPage().getBasePath().appendSegment("someFile.tmp"));
 		}
-		return URI.createURI(outputPath);
+		return p;
 	}
 
 	public URI getSrcPath (AbstractHTML page) {
@@ -96,29 +102,29 @@ public class DirectoryManager extends ResultReporter {
 	}
 	
 	protected IFolder getFolder(URI uri) {
-		return this.getFolder(new Path(uri.toPlatformString(true)));
+		return this.getFolder(new Path(uri.toPlatformString(true) != null ? uri.toPlatformString(true) : uri.toString()));
 	}
 	protected IFolder getFolder(Path path) {
-		return root.getFolder(path);
+		return this.root.getFolder(path);
 	}
 	protected IFile getFile(URI uri) {
 		return this.getFile(new Path(uri.toPlatformString(true)));
 	}
 	protected IFile getFile(Path path) {
-		return root.getFile(path);
+		return this.root.getFile(path);
 	}
 	
 	protected void determineDirectoriesToCreate() {
 		for (WebPage page : this.pages) {
-			IFolder outFolder = this.getFolder(this.getOutputPath(page));
-			this.folders.add(outFolder);
+//			IFolder outFolder = this.getFolder(this.getOutputPath(page));
+//			this.folders.add(outFolder);
 			for (AbstractHTML node : page.getAllNodes()) {
 				this.folders.add(this.getFolder(this.getOutputPath(node)));
 			}
 			Map<String, String> resourceMap = page.getAllResourcesToCopy();
 			for (String src : resourceMap.keySet()) {
 				if (this.isFolder(page, src)) {
-					this.folders.add(this.getFolder(this.getOutputPath(page, resourceMap.get(src))));
+					this.folders.add(this.getFolder(page.getBasePath().appendSegments(resourceMap.get(src).split("/"))));
 				}
 			}
 		}
@@ -150,7 +156,9 @@ public class DirectoryManager extends ResultReporter {
 		if (this.pages.size() > 0 && 
 				this.pages.get(0).eResource() != null &&
 				this.pages.get(0).eResource().getResourceSet() != null) {
-			return this.pages.get(0).eResource().getResourceSet().getResources().get(0).getURI().toPlatformString(true);
+			URI uri = this.pages.get(0).eResource().getResourceSet().getResources().get(0).getURI();
+			uri = uri.trimSegments(1);
+			return uri.toPlatformString(true);
 		}
 		return null;
 	}
@@ -178,16 +186,80 @@ public class DirectoryManager extends ResultReporter {
 	protected boolean createTargetDirectories(IProgressMonitor monitor) {
 		boolean error = false;
 		for (IFolder folder : this.folders) {
-			try {
-				if (!folder.exists()) {
-					folder.create(true, true, monitor);					
-				}
-			} catch (CoreException e) {
-				this.addError(e);
+			if (!this.createHierarchy(folder.getFullPath(), monitor)) {
 				error = true;
 			}
 		}
 		return !error;
+	}
+	
+	protected boolean createHierarchy(IPath target, IProgressMonitor monitor) {
+		String[] segments = target.segments();
+		String currentPath = "";
+		for (int i = 1; i<segments.length; i+= 1) {
+			if (i == 1) {
+				currentPath = segments[0] + "/" + segments[1];
+			} else {
+				currentPath = currentPath + "/" + segments[i];
+			}
+			IFolder folder = this.root.getFolder(new Path(currentPath));
+			if (!folder.exists()) {
+				try {
+					folder.create(true, true, monitor);
+				} catch (CoreException e) {
+					this.addError(e);
+					return false;
+				}
+			}			
+		}		
+		return true;
+	}
+	
+	protected boolean copyFolder(IFolder source, IPath target, IProgressMonitor monitor) {
+		boolean error = false;
+		if (!this.createHierarchy(target.removeLastSegments(1), monitor)) {
+			return false;
+		}
+		if (this.root.getFolder(target).exists()) {
+			IResource [] members = null;
+			try {
+				members = source.members();
+			} catch (CoreException e) {
+				this.addError(e);
+				return false;
+			}
+			for (IResource res : members) {
+				if (res instanceof IFile && !this.copyFile((IFile)res, target.append(res.getName()), monitor)) {
+					error = true;
+				}
+				if (res instanceof IFolder && !this.copyFolder((IFolder)res, target.append(res.getName()), monitor)) {
+					error = true;
+				}
+			}
+		} else {			
+			try {
+				source.copy(target, true, monitor);
+			} catch (Exception e) {
+				this.addError(e);
+				error = true;
+			} 
+		}
+		return !error;
+	}
+
+	protected boolean copyFile(IFile source, IPath target, IProgressMonitor monitor) {
+		if (!this.createHierarchy(target.removeLastSegments(1), monitor)) {
+			return false;
+		}
+		if (!this.root.getFile(target).exists()) {			
+			try {
+				source.copy(target, true, monitor);
+			} catch (Exception e) {
+				this.addError(e);
+				return false;
+			} 
+		}
+		return true;
 	}
 	
 	protected boolean copyStaticResources(IProgressMonitor monitor) {
@@ -204,25 +276,19 @@ public class DirectoryManager extends ResultReporter {
 			Map<IFolder,String> folders = new LinkedHashMap<>();
 			for (String src : resourceMap.keySet()) {
 				if (this.isFolder(page, src)) {
-					folders.put(this.getFolder(this.getOutputPath(page, src)), resourceMap.get(src));
+					folders.put(this.getFolder(page.getSrcPath(stringSubstitutor, src)), resourceMap.get(src));
 				} else {
-					files.put(this.getFile(this.getOutputPath(page, src)), resourceMap.get(src));
+					files.put(this.getFile(page.getSrcPath(stringSubstitutor,src)), resourceMap.get(src));
 				}
 			}
 			
 			for (IFolder folder : folders.keySet()) {
-				try {
-					folder.copy(new Path(this.getOutputPath(page, folders.get(folder)).toPlatformString(true)), true, monitor);
-				} catch (Exception e) {
-					this.addError(e);
+				if (!this.copyFolder(folder, new Path(page.getBasePath().appendSegments(folders.get(folder).split("/")).toPlatformString(true)), monitor)) {
 					error = true;
-				} 
+				}
 			}
 			for (IFile file : files.keySet()) {
-				try {
-					file.copy(new Path(this.getOutputPath(page, files.get(file)).toPlatformString(true)), true, monitor);
-				} catch (Exception e) {
-					this.addError(e);
+				if (!this.copyFile(file, new Path(page.getBasePath().appendSegments(files.get(file).split("/")).toPlatformString(true)), monitor)) {
 					error = true;
 				} 
 			}
@@ -232,7 +298,10 @@ public class DirectoryManager extends ResultReporter {
 	
 	protected IFile getTempFile (File file, IProgressMonitor monitor) throws CoreException {
 		URI path = URI.createURI(this.getTempPath() + DirectoryManager.SEGMENT_SEPARATOR + file.getName());
-		IFile result = this.root.getFile(new Path(path.toPlatformString(true)));
+		IFile result = this.root.getFile(new Path(path.toString()));
+		if (result.exists()) {
+			result.delete(true, monitor);
+		}
 		result.createLink(Path.fromOSString(file.toPath().toString()), IFile.FORCE, monitor);
 		return result;
 	}
@@ -248,8 +317,10 @@ public class DirectoryManager extends ResultReporter {
 				sourceFile = this.getTempFile(sourceF, monitor);
 				IFile targetFile = this.getStaticResourceTargetFile(
 						sourceF,
-						this.getTempPath());
-				sourceFile.copy(targetFile.getFullPath(), true, monitor);
+						RESOURCE_DIRECTORY);
+				if (!this.copyFile(sourceFile, targetFile.getFullPath(), monitor)) {
+					error = true;
+				}
 			} catch (Exception e) {
 				this.addError(e);
 				error = true;
@@ -272,9 +343,9 @@ public class DirectoryManager extends ResultReporter {
 	}
 	
 	protected IFile getStaticResourceTargetFile (File sourceFile, String sourceDirName) throws IOException {
-		String sourcePath = sourceFile.getCanonicalPath().replaceAll("\\\\", DirectoryManager.SEGMENT_SEPARATOR),
-				separator = DirectoryManager.SEGMENT_SEPARATOR+ sourceDirName+ DirectoryManager.SEGMENT_SEPARATOR,
-				relativePath = sourcePath.substring(sourcePath.indexOf(separator)+ separator.length());
+		String sourcePath = sourceFile.getCanonicalPath().replaceAll("\\\\", DirectoryManager.SEGMENT_SEPARATOR).replaceAll("//", DirectoryManager.SEGMENT_SEPARATOR),
+				separator = DirectoryManager.SEGMENT_SEPARATOR + sourceDirName + DirectoryManager.SEGMENT_SEPARATOR,
+				relativePath = sourcePath.substring(sourcePath.indexOf(separator) + 1);
 				
 		return this.getFile(this.getOutputPath(this.getPrimaryWebPage(), relativePath));	
 	}
@@ -300,7 +371,7 @@ public class DirectoryManager extends ResultReporter {
 	public void refreshOutDirectories(IProgressMonitor monitor) {
 		for (WebPage page : this.pages) {			
 			try {
-				this.getFolder(new Path(page.getOutDir()))
+				this.getFolder(this.getOutputPath(page))
 					.refreshLocal(IResource.DEPTH_INFINITE, monitor);
 			} catch (CoreException e) {
 				this.addError(e);

@@ -2,6 +2,7 @@
 <ecore:EPackage xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xmlns:ecore="http://www.eclipse.org/emf/2002/Ecore" name="webpagemodel" nsURI="http://et.tu-dresden.de/ifa/WebPage/model/v0.1"
     nsPrefix="wp">
+  <eAnnotations source="http://www.eclipse.org/emf/2002/GenModel"/>
   <eClassifiers xsi:type="ecore:EClass" name="WebPage" eSuperTypes="#//MainPage">
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="baseUrl" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="outDir" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
@@ -59,6 +60,7 @@
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="externalUrl" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="announcement" upperBound="-1"
         eType="#//Announcement" containment="true"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="navName" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="Announcement" eSuperTypes="#//Base">
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="propagate" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"
@@ -70,6 +72,8 @@
     <eStructuralFeatures xsi:type="ecore:EReference" name="content" eType="#//Value"
         containment="true"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="closable" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"
+        defaultValueLiteral="false"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="disable" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"
         defaultValueLiteral="false"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EEnum" name="AnnouncementTypeEnum">

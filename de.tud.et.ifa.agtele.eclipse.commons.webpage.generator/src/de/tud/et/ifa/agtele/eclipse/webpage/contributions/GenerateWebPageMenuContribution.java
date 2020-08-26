@@ -19,9 +19,9 @@ public class GenerateWebPageMenuContribution extends ExtensionContributionFactor
 		//
 		CommandContributionItemParameter downloadAASFileCommandParameter = new CommandContributionItemParameter(
 				serviceLocator, "", "de.tud.et.ifa.agtele.eclipse.commons.webpage.generator.GenerateWebPageCommand", SWT.PUSH);
-		downloadAASFileCommandParameter.label = "Download File";
+		downloadAASFileCommandParameter.label = "Generate";
 		downloadAASFileCommandParameter.icon = BundleContentHelper
-				.getBundleImageDescriptor(GenerateWebPageMenuContribution.BUNDLE_ID, "icons/generate.gif");
+				.getBundleImageDescriptor(GenerateWebPageMenuContribution.BUNDLE_ID, "icons/generate1.gif");
 		downloadAASFileCommandParameter.tooltip = "Generate the static web page.";
 		
 		//TODO only make the command visible, if a File (FSElement) or a collection of thereof is selected

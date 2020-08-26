@@ -164,7 +164,9 @@ public interface WebPage extends MainPage {
 		}
 		return "/out";
 	}
-	
+	default String getRelativeTargetDir () {
+		return "";
+	}
 	default List<WebPage> getAllAlternativePages () {
 		Set<WebPage> result = new LinkedHashSet<>();
 		result.addAll(this.getAlternatives());

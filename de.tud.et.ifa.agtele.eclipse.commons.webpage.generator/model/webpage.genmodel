@@ -69,6 +69,7 @@
       <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference webpage.ecore#//AbstractHTML/content"/>
       <genFeatures createChild="false" ecoreFeature="ecore:EAttribute webpage.ecore#//AbstractHTML/externalUrl"/>
       <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference webpage.ecore#//AbstractHTML/announcement"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute webpage.ecore#//AbstractHTML/navName"/>
     </genClasses>
     <genClasses ecoreClass="webpage.ecore#//Announcement">
       <genFeatures createChild="false" ecoreFeature="ecore:EAttribute webpage.ecore#//Announcement/propagate"/>
@@ -76,6 +77,7 @@
       <genFeatures createChild="false" ecoreFeature="ecore:EAttribute webpage.ecore#//Announcement/location"/>
       <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference webpage.ecore#//Announcement/content"/>
       <genFeatures createChild="false" ecoreFeature="ecore:EAttribute webpage.ecore#//Announcement/closable"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute webpage.ecore#//Announcement/disable"/>
     </genClasses>
     <genClasses ecoreClass="webpage.ecore#//SubPage">
       <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference webpage.ecore#//SubPage/subPage"/>

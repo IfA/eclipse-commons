@@ -8,8 +8,13 @@ public class DefaultStringSubstitutor implements IStringSubstitutor {
 	protected IStringVariableManager manager;
 	protected ResultReporter reporter;
 	
-	public DefaultStringSubstitutor(ResultReporter reporter) {
+	public DefaultStringSubstitutor() {
 		this.manager = VariablesPlugin.getDefault().getStringVariableManager();
+		this.reporter = new ResultReporter() {};
+	}
+	
+	public DefaultStringSubstitutor(ResultReporter reporter) {
+		this();
 		this.reporter = reporter;
 	}
 	@Override
@@ -20,5 +25,9 @@ public class DefaultStringSubstitutor implements IStringSubstitutor {
 			this.reporter.addError(e);
 		}
 		return original;
+	}
+	
+	public void setResultReporter (ResultReporter reporter) {
+		this.reporter = reporter;
 	}
 }

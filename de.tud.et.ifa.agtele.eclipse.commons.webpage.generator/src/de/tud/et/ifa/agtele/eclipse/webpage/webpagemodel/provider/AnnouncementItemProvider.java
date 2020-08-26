@@ -53,6 +53,7 @@ public class AnnouncementItemProvider extends BaseItemProvider {
 			addTypePropertyDescriptor(object);
 			addLocationPropertyDescriptor(object);
 			addClosablePropertyDescriptor(object);
+			addDisablePropertyDescriptor(object);
 		}
 		return itemPropertyDescriptors;
 	}
@@ -137,6 +138,28 @@ public class AnnouncementItemProvider extends BaseItemProvider {
 				 getString("_UI_Announcement_closable_feature"),
 				 getString("_UI_PropertyDescriptor_description", "_UI_Announcement_closable_feature", "_UI_Announcement_type"),
 				 WebPageModelPackage.Literals.ANNOUNCEMENT__CLOSABLE,
+				 true,
+				 false,
+				 false,
+				 ItemPropertyDescriptor.BOOLEAN_VALUE_IMAGE,
+				 null,
+				 null));
+	}
+
+	/**
+	 * This adds a property descriptor for the Disable feature.
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 */
+	protected void addDisablePropertyDescriptor(Object object) {
+		itemPropertyDescriptors.add
+			(createItemPropertyDescriptor
+				(((ComposeableAdapterFactory)adapterFactory).getRootAdapterFactory(),
+				 getResourceLocator(),
+				 getString("_UI_Announcement_disable_feature"),
+				 getString("_UI_PropertyDescriptor_description", "_UI_Announcement_disable_feature", "_UI_Announcement_type"),
+				 WebPageModelPackage.Literals.ANNOUNCEMENT__DISABLE,
 				 true,
 				 false,
 				 false,
@@ -232,6 +255,7 @@ public class AnnouncementItemProvider extends BaseItemProvider {
 			case WebPageModelPackage.ANNOUNCEMENT__TYPE:
 			case WebPageModelPackage.ANNOUNCEMENT__LOCATION:
 			case WebPageModelPackage.ANNOUNCEMENT__CLOSABLE:
+			case WebPageModelPackage.ANNOUNCEMENT__DISABLE:
 				fireNotifyChanged(new ViewerNotification(notification, notification.getNotifier(), false, true));
 				return;
 			case WebPageModelPackage.ANNOUNCEMENT__CONTENT:

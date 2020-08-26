@@ -23,6 +23,7 @@ import org.eclipse.emf.ecore.EReference;
  * <!-- end-user-doc -->
  * @see de.tud.et.ifa.agtele.eclipse.webpage.webpagemodel.WebPageModelFactory
  * @model kind="package"
+ *        annotation="http://www.eclipse.org/emf/2002/GenModel"
  * @generated
  */
 public interface WebPageModelPackage extends EPackage {
@@ -295,13 +296,22 @@ public interface WebPageModelPackage extends EPackage {
 	int ABSTRACT_HTML__ANNOUNCEMENT = BASE_FEATURE_COUNT + 9;
 
 	/**
+	 * The feature id for the '<em><b>Nav Name</b></em>' attribute.
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 * @ordered
+	 */
+	int ABSTRACT_HTML__NAV_NAME = BASE_FEATURE_COUNT + 10;
+
+	/**
 	 * The number of structural features of the '<em>Abstract HTML</em>' class.
 	 * <!-- begin-user-doc -->
 	 * <!-- end-user-doc -->
 	 * @generated
 	 * @ordered
 	 */
-	int ABSTRACT_HTML_FEATURE_COUNT = BASE_FEATURE_COUNT + 10;
+	int ABSTRACT_HTML_FEATURE_COUNT = BASE_FEATURE_COUNT + 11;
 
 	/**
 	 * The number of operations of the '<em>Abstract HTML</em>' class.
@@ -465,6 +475,15 @@ public interface WebPageModelPackage extends EPackage {
 	 * @ordered
 	 */
 	int SUB_PAGE__ANNOUNCEMENT = ABSTRACT_HTML__ANNOUNCEMENT;
+
+	/**
+	 * The feature id for the '<em><b>Nav Name</b></em>' attribute.
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 * @ordered
+	 */
+	int SUB_PAGE__NAV_NAME = ABSTRACT_HTML__NAV_NAME;
 
 	/**
 	 * The feature id for the '<em><b>Sub Page</b></em>' containment reference list.
@@ -655,6 +674,15 @@ public interface WebPageModelPackage extends EPackage {
 	 * @ordered
 	 */
 	int PAGE__ANNOUNCEMENT = SUB_PAGE__ANNOUNCEMENT;
+
+	/**
+	 * The feature id for the '<em><b>Nav Name</b></em>' attribute.
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 * @ordered
+	 */
+	int PAGE__NAV_NAME = SUB_PAGE__NAV_NAME;
 
 	/**
 	 * The feature id for the '<em><b>Sub Page</b></em>' containment reference list.
@@ -863,6 +891,15 @@ public interface WebPageModelPackage extends EPackage {
 	 * @ordered
 	 */
 	int MAIN_PAGE__ANNOUNCEMENT = PAGE__ANNOUNCEMENT;
+
+	/**
+	 * The feature id for the '<em><b>Nav Name</b></em>' attribute.
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 * @ordered
+	 */
+	int MAIN_PAGE__NAV_NAME = PAGE__NAV_NAME;
 
 	/**
 	 * The feature id for the '<em><b>Sub Page</b></em>' containment reference list.
@@ -1107,6 +1144,15 @@ public interface WebPageModelPackage extends EPackage {
 	 * @ordered
 	 */
 	int WEB_PAGE__ANNOUNCEMENT = MAIN_PAGE__ANNOUNCEMENT;
+
+	/**
+	 * The feature id for the '<em><b>Nav Name</b></em>' attribute.
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 * @ordered
+	 */
+	int WEB_PAGE__NAV_NAME = MAIN_PAGE__NAV_NAME;
 
 	/**
 	 * The feature id for the '<em><b>Sub Page</b></em>' containment reference list.
@@ -1362,13 +1408,22 @@ public interface WebPageModelPackage extends EPackage {
 	int ANNOUNCEMENT__CLOSABLE = BASE_FEATURE_COUNT + 4;
 
 	/**
+	 * The feature id for the '<em><b>Disable</b></em>' attribute.
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 * @ordered
+	 */
+	int ANNOUNCEMENT__DISABLE = BASE_FEATURE_COUNT + 5;
+
+	/**
 	 * The number of structural features of the '<em>Announcement</em>' class.
 	 * <!-- begin-user-doc -->
 	 * <!-- end-user-doc -->
 	 * @generated
 	 * @ordered
 	 */
-	int ANNOUNCEMENT_FEATURE_COUNT = BASE_FEATURE_COUNT + 5;
+	int ANNOUNCEMENT_FEATURE_COUNT = BASE_FEATURE_COUNT + 6;
 
 	/**
 	 * The number of operations of the '<em>Announcement</em>' class.
@@ -1994,6 +2049,17 @@ public interface WebPageModelPackage extends EPackage {
 	EReference getAbstractHTML_Announcement();
 
 	/**
+	 * Returns the meta object for the attribute '{@link de.tud.et.ifa.agtele.eclipse.webpage.webpagemodel.AbstractHTML#getNavName <em>Nav Name</em>}'.
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @return the meta object for the attribute '<em>Nav Name</em>'.
+	 * @see de.tud.et.ifa.agtele.eclipse.webpage.webpagemodel.AbstractHTML#getNavName()
+	 * @see #getAbstractHTML()
+	 * @generated
+	 */
+	EAttribute getAbstractHTML_NavName();
+
+	/**
 	 * Returns the meta object for class '{@link de.tud.et.ifa.agtele.eclipse.webpage.webpagemodel.Announcement <em>Announcement</em>}'.
 	 * <!-- begin-user-doc -->
 	 * <!-- end-user-doc -->
@@ -2057,6 +2123,17 @@ public interface WebPageModelPackage extends EPackage {
 	 * @generated
 	 */
 	EAttribute getAnnouncement_Closable();
+
+	/**
+	 * Returns the meta object for the attribute '{@link de.tud.et.ifa.agtele.eclipse.webpage.webpagemodel.Announcement#isDisable <em>Disable</em>}'.
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @return the meta object for the attribute '<em>Disable</em>'.
+	 * @see de.tud.et.ifa.agtele.eclipse.webpage.webpagemodel.Announcement#isDisable()
+	 * @see #getAnnouncement()
+	 * @generated
+	 */
+	EAttribute getAnnouncement_Disable();
 
 	/**
 	 * Returns the meta object for class '{@link de.tud.et.ifa.agtele.eclipse.webpage.webpagemodel.SubPage <em>Sub Page</em>}'.
@@ -2529,6 +2606,14 @@ public interface WebPageModelPackage extends EPackage {
 		EReference ABSTRACT_HTML__ANNOUNCEMENT = eINSTANCE.getAbstractHTML_Announcement();
 
 		/**
+		 * The meta object literal for the '<em><b>Nav Name</b></em>' attribute feature.
+		 * <!-- begin-user-doc -->
+		 * <!-- end-user-doc -->
+		 * @generated
+		 */
+		EAttribute ABSTRACT_HTML__NAV_NAME = eINSTANCE.getAbstractHTML_NavName();
+
+		/**
 		 * The meta object literal for the '{@link de.tud.et.ifa.agtele.eclipse.webpage.webpagemodel.impl.AnnouncementImpl <em>Announcement</em>}' class.
 		 * <!-- begin-user-doc -->
 		 * <!-- end-user-doc -->
@@ -2577,6 +2662,14 @@ public interface WebPageModelPackage extends EPackage {
 		 * @generated
 		 */
 		EAttribute ANNOUNCEMENT__CLOSABLE = eINSTANCE.getAnnouncement_Closable();
+
+		/**
+		 * The meta object literal for the '<em><b>Disable</b></em>' attribute feature.
+		 * <!-- begin-user-doc -->
+		 * <!-- end-user-doc -->
+		 * @generated
+		 */
+		EAttribute ANNOUNCEMENT__DISABLE = eINSTANCE.getAnnouncement_Disable();
 
 		/**
 		 * The meta object literal for the '{@link de.tud.et.ifa.agtele.eclipse.webpage.webpagemodel.impl.SubPageImpl <em>Sub Page</em>}' class.

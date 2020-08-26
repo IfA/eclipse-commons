@@ -32,7 +32,7 @@ public class BootstrapTreeMenuHelper {
   }
   
   public static boolean containsActiveElement(final AbstractHTML parent, final AbstractHTML page) {
-    return AgteleEcoreUtil.getAllContainers(parent).contains(page);
+    return AgteleEcoreUtil.getAllContainers(page).contains(parent);
   }
   
   public boolean containsActiveElement(final AbstractHTML page) {
@@ -163,8 +163,8 @@ public class BootstrapTreeMenuHelper {
     _builder.append("\">");
     _builder.newLineIfNotEmpty();
     _builder.append("\t\t");
-    String _name = node.getName();
-    _builder.append(_name, "\t\t");
+    String _compiledNavName = node.compiledNavName();
+    _builder.append(_compiledNavName, "\t\t");
     _builder.newLineIfNotEmpty();
     _builder.append("\t");
     _builder.append("</a>");
@@ -229,8 +229,8 @@ public class BootstrapTreeMenuHelper {
     _builder.append("</svg>");
     _builder.newLine();
     _builder.append("\t\t");
-    String _name = element.getName();
-    _builder.append(_name, "\t\t");
+    String _compiledNavName = element.compiledNavName();
+    _builder.append(_compiledNavName, "\t\t");
     _builder.newLineIfNotEmpty();
     _builder.append("\t");
     _builder.append("</a>");

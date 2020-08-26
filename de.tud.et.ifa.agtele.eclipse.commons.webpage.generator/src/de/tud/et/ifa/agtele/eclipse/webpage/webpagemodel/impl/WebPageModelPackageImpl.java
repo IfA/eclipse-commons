@@ -474,6 +474,16 @@ public class WebPageModelPackageImpl extends EPackageImpl implements WebPageMode
 	 * @generated
 	 */
 	@Override
+	public EAttribute getAbstractHTML_NavName() {
+		return (EAttribute)abstractHTMLEClass.getEStructuralFeatures().get(10);
+	}
+
+	/**
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 */
+	@Override
 	public EClass getAnnouncement() {
 		return announcementEClass;
 	}
@@ -526,6 +536,16 @@ public class WebPageModelPackageImpl extends EPackageImpl implements WebPageMode
 	@Override
 	public EAttribute getAnnouncement_Closable() {
 		return (EAttribute)announcementEClass.getEStructuralFeatures().get(4);
+	}
+
+	/**
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 */
+	@Override
+	public EAttribute getAnnouncement_Disable() {
+		return (EAttribute)announcementEClass.getEStructuralFeatures().get(5);
 	}
 
 	/**
@@ -806,6 +826,7 @@ public class WebPageModelPackageImpl extends EPackageImpl implements WebPageMode
 		createEReference(abstractHTMLEClass, ABSTRACT_HTML__CONTENT);
 		createEAttribute(abstractHTMLEClass, ABSTRACT_HTML__EXTERNAL_URL);
 		createEReference(abstractHTMLEClass, ABSTRACT_HTML__ANNOUNCEMENT);
+		createEAttribute(abstractHTMLEClass, ABSTRACT_HTML__NAV_NAME);
 
 		announcementEClass = createEClass(ANNOUNCEMENT);
 		createEAttribute(announcementEClass, ANNOUNCEMENT__PROPAGATE);
@@ -813,6 +834,7 @@ public class WebPageModelPackageImpl extends EPackageImpl implements WebPageMode
 		createEAttribute(announcementEClass, ANNOUNCEMENT__LOCATION);
 		createEReference(announcementEClass, ANNOUNCEMENT__CONTENT);
 		createEAttribute(announcementEClass, ANNOUNCEMENT__CLOSABLE);
+		createEAttribute(announcementEClass, ANNOUNCEMENT__DISABLE);
 
 		subPageEClass = createEClass(SUB_PAGE);
 		createEReference(subPageEClass, SUB_PAGE__SUB_PAGE);
@@ -923,6 +945,7 @@ public class WebPageModelPackageImpl extends EPackageImpl implements WebPageMode
 		initEReference(getAbstractHTML_Content(), this.getValue(), null, "content", null, 0, 1, AbstractHTML.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, IS_COMPOSITE, !IS_RESOLVE_PROXIES, !IS_UNSETTABLE, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
 		initEAttribute(getAbstractHTML_ExternalUrl(), ecorePackage.getEString(), "externalUrl", null, 0, 1, AbstractHTML.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, !IS_UNSETTABLE, !IS_ID, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
 		initEReference(getAbstractHTML_Announcement(), this.getAnnouncement(), null, "announcement", null, 0, -1, AbstractHTML.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, IS_COMPOSITE, !IS_RESOLVE_PROXIES, !IS_UNSETTABLE, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
+		initEAttribute(getAbstractHTML_NavName(), ecorePackage.getEString(), "navName", null, 0, 1, AbstractHTML.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, !IS_UNSETTABLE, !IS_ID, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
 
 		initEClass(announcementEClass, Announcement.class, "Announcement", !IS_ABSTRACT, !IS_INTERFACE, IS_GENERATED_INSTANCE_CLASS);
 		initEAttribute(getAnnouncement_Propagate(), ecorePackage.getEBoolean(), "propagate", "false", 0, 1, Announcement.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, !IS_UNSETTABLE, !IS_ID, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
@@ -930,6 +953,7 @@ public class WebPageModelPackageImpl extends EPackageImpl implements WebPageMode
 		initEAttribute(getAnnouncement_Location(), this.getAnnouncementLocationEnum(), "location", "AboveHeading", 0, 1, Announcement.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, !IS_UNSETTABLE, !IS_ID, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
 		initEReference(getAnnouncement_Content(), this.getValue(), null, "content", null, 0, 1, Announcement.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, IS_COMPOSITE, !IS_RESOLVE_PROXIES, !IS_UNSETTABLE, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
 		initEAttribute(getAnnouncement_Closable(), ecorePackage.getEBoolean(), "closable", "false", 0, 1, Announcement.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, !IS_UNSETTABLE, !IS_ID, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
+		initEAttribute(getAnnouncement_Disable(), ecorePackage.getEBoolean(), "disable", "false", 0, 1, Announcement.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, !IS_UNSETTABLE, !IS_ID, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
 
 		initEClass(subPageEClass, SubPage.class, "SubPage", !IS_ABSTRACT, !IS_INTERFACE, IS_GENERATED_INSTANCE_CLASS);
 		initEReference(getSubPage_SubPage(), this.getSubPage(), null, "subPage", null, 0, -1, SubPage.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, IS_COMPOSITE, !IS_RESOLVE_PROXIES, !IS_UNSETTABLE, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
@@ -998,10 +1022,10 @@ public class WebPageModelPackageImpl extends EPackageImpl implements WebPageMode
 		createResource(eNS_URI);
 
 		// Create annotations
-		// http://www.eclipse.org/emf/2002/Ecore
-		createEcoreAnnotations();
 		// http://www.eclipse.org/emf/2002/GenModel
 		createGenModelAnnotations();
+		// http://www.eclipse.org/emf/2002/Ecore
+		createEcoreAnnotations();
 	}
 
 	/**
@@ -1028,6 +1052,11 @@ public class WebPageModelPackageImpl extends EPackageImpl implements WebPageMode
 	 */
 	protected void createGenModelAnnotations() {
 		String source = "http://www.eclipse.org/emf/2002/GenModel";
+		addAnnotation
+		  (this,
+		   source,
+		   new String[] {
+		   });
 		addAnnotation
 		  (getMainPage__ValidateMainPageNotContainingWebPage__DiagnosticChain_Map(),
 		   source,

@@ -42,6 +42,7 @@ import org.eclipse.emf.ecore.util.InternalEList;
  *   <li>{@link de.tud.et.ifa.agtele.eclipse.webpage.webpagemodel.impl.AbstractHTMLImpl#getContent <em>Content</em>}</li>
  *   <li>{@link de.tud.et.ifa.agtele.eclipse.webpage.webpagemodel.impl.AbstractHTMLImpl#getExternalUrl <em>External Url</em>}</li>
  *   <li>{@link de.tud.et.ifa.agtele.eclipse.webpage.webpagemodel.impl.AbstractHTMLImpl#getAnnouncement <em>Announcement</em>}</li>
+ *   <li>{@link de.tud.et.ifa.agtele.eclipse.webpage.webpagemodel.impl.AbstractHTMLImpl#getNavName <em>Nav Name</em>}</li>
  * </ul>
  *
  * @generated
@@ -174,6 +175,26 @@ public abstract class AbstractHTMLImpl extends BaseImpl implements AbstractHTML 
 	 * @ordered
 	 */
 	protected EList<Announcement> announcement;
+
+	/**
+	 * The default value of the '{@link #getNavName() <em>Nav Name</em>}' attribute.
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @see #getNavName()
+	 * @generated
+	 * @ordered
+	 */
+	protected static final String NAV_NAME_EDEFAULT = null;
+
+	/**
+	 * The cached value of the '{@link #getNavName() <em>Nav Name</em>}' attribute.
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @see #getNavName()
+	 * @generated
+	 * @ordered
+	 */
+    protected String navName = NAV_NAME_EDEFAULT;
 
 	/**
 	 * <!-- begin-user-doc -->
@@ -451,12 +472,38 @@ public abstract class AbstractHTMLImpl extends BaseImpl implements AbstractHTML 
 	 * @generated
 	 */
 	@Override
-	public EList<Announcement> getAnnouncement() {
+	public EList<Announcement> getAnnouncement() {	
 	
 		if (announcement == null) {
 			announcement = new EObjectContainmentEList<Announcement>(Announcement.class, this, WebPageModelPackage.ABSTRACT_HTML__ANNOUNCEMENT);
 		}
 		return announcement;
+	}
+
+	/**
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 */
+	@Override
+	public String getNavName() {
+	
+		return navName;
+	}
+
+	/**
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 */
+	@Override
+	public void setNavName(String newNavName) {
+	
+		String oldNavName = navName;
+		navName = newNavName;
+		if (eNotificationRequired())
+			eNotify(new ENotificationImpl(this, Notification.SET, WebPageModelPackage.ABSTRACT_HTML__NAV_NAME, oldNavName, navName));
+	
 	}
 
 	/**
@@ -511,6 +558,8 @@ public abstract class AbstractHTMLImpl extends BaseImpl implements AbstractHTML 
 				return getExternalUrl();
 			case WebPageModelPackage.ABSTRACT_HTML__ANNOUNCEMENT:
 				return getAnnouncement();
+			case WebPageModelPackage.ABSTRACT_HTML__NAV_NAME:
+				return getNavName();
 		}
 		return super.eGet(featureID, resolve, coreType);
 	}
@@ -558,6 +607,9 @@ public abstract class AbstractHTMLImpl extends BaseImpl implements AbstractHTML 
 				getAnnouncement().clear();
 				getAnnouncement().addAll((Collection<? extends Announcement>)newValue);
 				return;
+			case WebPageModelPackage.ABSTRACT_HTML__NAV_NAME:
+				setNavName((String)newValue);
+				return;
 		}
 		super.eSet(featureID, newValue);
 	}
@@ -600,6 +652,9 @@ public abstract class AbstractHTMLImpl extends BaseImpl implements AbstractHTML 
 			case WebPageModelPackage.ABSTRACT_HTML__ANNOUNCEMENT:
 				getAnnouncement().clear();
 				return;
+			case WebPageModelPackage.ABSTRACT_HTML__NAV_NAME:
+				setNavName(NAV_NAME_EDEFAULT);
+				return;
 		}
 		super.eUnset(featureID);
 	}
@@ -632,6 +687,8 @@ public abstract class AbstractHTMLImpl extends BaseImpl implements AbstractHTML 
 				return EXTERNAL_URL_EDEFAULT == null ? externalUrl != null : !EXTERNAL_URL_EDEFAULT.equals(externalUrl);
 			case WebPageModelPackage.ABSTRACT_HTML__ANNOUNCEMENT:
 				return announcement != null && !announcement.isEmpty();
+			case WebPageModelPackage.ABSTRACT_HTML__NAV_NAME:
+				return NAV_NAME_EDEFAULT == null ? navName != null : !NAV_NAME_EDEFAULT.equals(navName);
 		}
 		return super.eIsSet(featureID);
 	}
@@ -653,6 +710,8 @@ public abstract class AbstractHTMLImpl extends BaseImpl implements AbstractHTML 
 		result.append(staticResources);
 		result.append(", externalUrl: ");
 		result.append(externalUrl);
+		result.append(", navName: ");
+		result.append(navName);
 		result.append(')');
 		return result.toString();
 	}

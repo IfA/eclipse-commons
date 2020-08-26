@@ -57,6 +57,7 @@ public class AbstractHTMLItemProvider extends BaseItemProvider {
 			addTitlePropertyDescriptor(object);
 			addStaticResourcesPropertyDescriptor(object);
 			addExternalUrlPropertyDescriptor(object);
+			addNavNamePropertyDescriptor(object);
 		}
 		return itemPropertyDescriptors;
 	}
@@ -150,6 +151,28 @@ public class AbstractHTMLItemProvider extends BaseItemProvider {
 	}
 
 	/**
+	 * This adds a property descriptor for the Nav Name feature.
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 */
+	protected void addNavNamePropertyDescriptor(Object object) {
+		itemPropertyDescriptors.add
+			(createItemPropertyDescriptor
+				(((ComposeableAdapterFactory)adapterFactory).getRootAdapterFactory(),
+				 getResourceLocator(),
+				 getString("_UI_AbstractHTML_navName_feature"),
+				 getString("_UI_PropertyDescriptor_description", "_UI_AbstractHTML_navName_feature", "_UI_AbstractHTML_type"),
+				 WebPageModelPackage.Literals.ABSTRACT_HTML__NAV_NAME,
+				 true,
+				 false,
+				 false,
+				 ItemPropertyDescriptor.GENERIC_VALUE_IMAGE,
+				 null,
+				 null));
+	}
+
+	/**
 	 * This specifies how to implement {@link #getChildren} and is used to deduce an appropriate feature for an
 	 * {@link org.eclipse.emf.edit.command.AddCommand}, {@link org.eclipse.emf.edit.command.RemoveCommand} or
 	 * {@link org.eclipse.emf.edit.command.MoveCommand} in {@link #createCommand}.
@@ -230,6 +253,7 @@ public class AbstractHTMLItemProvider extends BaseItemProvider {
 			case WebPageModelPackage.ABSTRACT_HTML__TITLE:
 			case WebPageModelPackage.ABSTRACT_HTML__STATIC_RESOURCES:
 			case WebPageModelPackage.ABSTRACT_HTML__EXTERNAL_URL:
+			case WebPageModelPackage.ABSTRACT_HTML__NAV_NAME:
 				fireNotifyChanged(new ViewerNotification(notification, notification.getNotifier(), false, true));
 				return;
 			case WebPageModelPackage.ABSTRACT_HTML__FOOTER:

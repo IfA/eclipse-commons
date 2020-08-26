@@ -10,10 +10,10 @@ public interface BootstrapHtmlGenerator extends BasicHtmlGenerator {
   default List<String> linkedStylesheets() {
     final List<String> list = BasicHtmlGenerator.super.linkedStylesheets();
     String _baseUrl = this.getWebPage().getBaseUrl();
-    String _plus = (_baseUrl + "/resources/bootstrap/css/bootstrap.min.css");
+    String _plus = (_baseUrl + "/templateResources/css/bootstrap.min.css");
     list.add(_plus);
     String _baseUrl_1 = this.getWebPage().getBaseUrl();
-    String _plus_1 = (_baseUrl_1 + "/resources/bootstrap/css/style.css");
+    String _plus_1 = (_baseUrl_1 + "/templateResources/css/style.css");
     list.add(_plus_1);
     return list;
   }
@@ -22,18 +22,23 @@ public interface BootstrapHtmlGenerator extends BasicHtmlGenerator {
   default List<String> linkedScripts() {
     final List<String> list = BasicHtmlGenerator.super.linkedScripts();
     String _baseUrl = this.getWebPage().getBaseUrl();
-    String _plus = (_baseUrl + "/resources/bootstrap/js/jquery-3.3.1.slim.min.js");
+    String _plus = (_baseUrl + "/templateResources/js/jquery-3.3.1.slim.min.js");
     list.add(_plus);
     String _baseUrl_1 = this.getWebPage().getBaseUrl();
-    String _plus_1 = (_baseUrl_1 + "/resources/bootstrap/js/bootstrap.bundle.min.js");
+    String _plus_1 = (_baseUrl_1 + "/templateResources/js/bootstrap.bundle.min.js");
     list.add(_plus_1);
     String _baseUrl_2 = this.getWebPage().getBaseUrl();
-    String _plus_2 = (_baseUrl_2 + "/resources/bootstrap/js/application.js");
+    String _plus_2 = (_baseUrl_2 + "/templateResources/js/application.js");
     list.add(_plus_2);
     return list;
   }
   
   default String rootNavBarContent() {
+    StringConcatenation _builder = new StringConcatenation();
+    return _builder.toString();
+  }
+  
+  default String additionalRooNavbarContent() {
     StringConcatenation _builder = new StringConcatenation();
     return _builder.toString();
   }
@@ -44,6 +49,28 @@ public interface BootstrapHtmlGenerator extends BasicHtmlGenerator {
   
   default String getLangSwitchLinks() {
     StringConcatenation _builder = new StringConcatenation();
+    return _builder.toString();
+  }
+  
+  @Override
+  default String pageTitle() {
+    StringConcatenation _builder = new StringConcatenation();
+    _builder.append("<div class=\"row\">");
+    _builder.newLine();
+    _builder.append("\t");
+    _builder.append("<div class=\"col\">");
+    _builder.newLine();
+    _builder.append("\t\t");
+    _builder.append("<h1>");
+    String _title = this.title();
+    _builder.append(_title, "\t\t");
+    _builder.append("</h1>");
+    _builder.newLineIfNotEmpty();
+    _builder.append("\t");
+    _builder.append("</div>");
+    _builder.newLine();
+    _builder.append("</div>");
+    _builder.newLine();
     return _builder.toString();
   }
   
@@ -61,7 +88,7 @@ public interface BootstrapHtmlGenerator extends BasicHtmlGenerator {
     _builder.append("<div class=\"row\">");
     _builder.newLine();
     _builder.append("\t\t");
-    String _valueContent = this.getValueContent(this.getHtmlFragment().getHeader());
+    String _valueContent = this.getValueContent(this.getHtmlFragment().getTargetHeader());
     _builder.append(_valueContent, "\t\t");
     _builder.newLineIfNotEmpty();
     _builder.append("\t");
@@ -112,6 +139,10 @@ public interface BootstrapHtmlGenerator extends BasicHtmlGenerator {
         _builder.append("\t");
         _builder.append("</nav>");
         _builder.newLine();
+        _builder.append("\t");
+        String _additionalRooNavbarContent = this.additionalRooNavbarContent();
+        _builder.append(_additionalRooNavbarContent, "\t");
+        _builder.newLineIfNotEmpty();
         _builder.append("</div>");
         _builder.newLine();
       }
@@ -131,9 +162,12 @@ public interface BootstrapHtmlGenerator extends BasicHtmlGenerator {
     _builder.append("<div class=\"row\">");
     _builder.newLine();
     _builder.append("\t\t\t");
-    String _valueContent = this.getValueContent(this.getHtmlFragment().getFooter());
+    String _valueContent = this.getValueContent(this.getHtmlFragment().getTargetFooter());
     _builder.append(_valueContent, "\t\t\t");
     _builder.newLineIfNotEmpty();
+    _builder.append("\t\t");
+    _builder.append("</div>");
+    _builder.newLine();
     _builder.append("\t");
     _builder.append("</div>");
     _builder.newLine();
@@ -153,11 +187,25 @@ public interface BootstrapHtmlGenerator extends BasicHtmlGenerator {
       boolean _isBlank = this.getPageTitleText().isBlank();
       boolean _not = (!_isBlank);
       if (_not) {
-        _builder.append("<div class=\"row\">");
-        _builder.newLine();
+        _builder.append("<div class=\"row ");
+        {
+          boolean _useNavigation = this.useNavigation();
+          if (_useNavigation) {
+            _builder.append("justify-content-end");
+          }
+        }
+        _builder.append("\">");
+        _builder.newLineIfNotEmpty();
         _builder.append("\t");
-        _builder.append("<div class=\"col\">\t\t");
-        _builder.newLine();
+        _builder.append("<div class=\"col");
+        {
+          boolean _useNavigation_1 = this.useNavigation();
+          if (_useNavigation_1) {
+            _builder.append("-11");
+          }
+        }
+        _builder.append("\">\t\t");
+        _builder.newLineIfNotEmpty();
         _builder.append("\t\t");
         _builder.append("<h1>");
         String _pageTitleText = this.getPageTitleText();
@@ -180,8 +228,16 @@ public interface BootstrapHtmlGenerator extends BasicHtmlGenerator {
     _builder.append("<div class=\"container\">");
     _builder.newLine();
     _builder.append("\t");
+    String _beforeTitle = this.beforeTitle();
+    _builder.append(_beforeTitle, "\t");
+    _builder.newLineIfNotEmpty();
+    _builder.append("\t");
     String _pageTitle = this.getPageTitle();
     _builder.append(_pageTitle, "\t");
+    _builder.newLineIfNotEmpty();
+    _builder.append("\t");
+    String _belowTitle = this.belowTitle();
+    _builder.append(_belowTitle, "\t");
     _builder.newLineIfNotEmpty();
     _builder.append("\t");
     _builder.append("<div class=\"row section-padding\">");
@@ -205,5 +261,13 @@ public interface BootstrapHtmlGenerator extends BasicHtmlGenerator {
     _builder.append("</div>");
     _builder.newLine();
     return _builder.toString();
+  }
+  
+  default String belowTitle() {
+    return "";
+  }
+  
+  default String beforeTitle() {
+    return "";
   }
 }

@@ -19,9 +19,10 @@ import de.tud.et.ifa.agtele.eclipse.webpage.generator.WebPageGenerator;
 public class GenerateJob extends Job {
 	protected AbstractGenerator generator;
 	protected ExecutionEvent event;
-	protected List<Exception> errors;
+	protected List<Exception> errors = new ArrayList<>();
 	protected String jobName = null;
 	protected String bundleId = null;
+	protected boolean isRunning = false;
 
 	public GenerateJob(String name, AbstractGenerator generator, String bundleId) {
 		super(name);
@@ -30,6 +31,10 @@ public class GenerateJob extends Job {
 		this.generator = generator;
 	}
 
+	public boolean isRunning() {
+		return this.isRunning;
+	}
+	
 	protected void updateStatusLine () {
 		IActionBars actionBars = HandlerUtil.getActiveEditor(this.event).getEditorSite().getActionBars();
 		if (actionBars != null) {
@@ -86,6 +91,7 @@ public class GenerateJob extends Job {
 
 	public void start(ExecutionEvent event) {
 		this.event = event;
+		this.isRunning = true;
 		this.schedule();
 	}
 	
@@ -94,6 +100,8 @@ public class GenerateJob extends Job {
 	protected IStatus run(IProgressMonitor monitor) {
 		
 		this.generator.generate(monitor);
+		
+		this.errors.addAll(this.generator.getErrors());
 		
 		try {
 			if (this.event != null) {

@@ -14,13 +14,27 @@
 	--tud-blue-70: rgb(calc(255 - (255 - var(--tud-blue-r))*0.7),calc(255 - (255 - var(--tud-blue-g))*0.7),calc(255 - (255 - var(--tud-blue-b))*0.7));
 	--tud-blue-80: rgb(calc(255 - (255 - var(--tud-blue-r))*0.8),calc(255 - (255 - var(--tud-blue-g))*0.8),calc(255 - (255 - var(--tud-blue-b))*0.8));
 	--tud-blue-90: rgb(calc(255 - (255 - var(--tud-blue-r))*0.9),calc(255 - (255 - var(--tud-blue-g))*0.9),calc(255 - (255 - var(--tud-blue-b))*0.9));
+	--tud2:#5a7094;
 }
 
+main {
+	min-height:500px;
+}
+
+.text-tud {
+	color: var(--tud-blue);
+}
+
+.text-tud2 {
+	color: var(--tud2);
+}
 
 .bg-tu {
     background-color: var(--tud-blue);
 }
-
+.bg-tu2 {
+    background-color: var(--tud2);
+}
 .bg-tu-gray {
     background-color: #eeeeee;
 }
@@ -29,6 +43,7 @@
 
 header {
 	color:white !important;
+    margin-bottom:6px;
 }
 
 header .navcontainer{
@@ -41,11 +56,38 @@ header .navbar{
     padding-top:2px;
     padding-bottom:2px;
     color:white;
-    margin-bottom:6px;
+    margin-bottom:0;
+}
+
+header .navbar-breadcrumbs {
+	padding-top:0;
+	padding-bottom:0;
+	padding-left: 3rem;
+}
+
+header .navbar-sub {
+	padding-top:0;
+	padding-bottom:0;
+	padding-left: 3rem;
+}
+
+.navbar .btn,
+.navbar .btn-outline,
+.navbar .btn-outline-light {
+	padding: .05rem .375rem;
+	border-radius:0;
 }
 
 .navbar .btn-outline-light {
 	border: 1px solid transparent;
+}
+
+.navbar .nav-link{
+	display:inline-block;
+}
+
+.navbar .breadcrumb-separator {
+	display:inline-block;
 }
 
 .navbar .btn-outline-light:not(:disabled):not(.disabled):hover,
@@ -53,9 +95,34 @@ header .navbar{
 .navbar .btn-outline-light:not(:disabled):not(.disabled):active{
 	border: 1px solid white;
 	color:white;
-	background-color:var(--tud-blue);
+	background-color:transparent;
+}
+.navbar .btn-outline-light:not(:disabled):not(.disabled).active,
+.navbar .btn-outline-light:not(:disabled):not(.disabled):active{
+	border-bottom:white solid 4px;
+}
+.navbar .btn-outline-light:not(:disabled):not(.disabled).active:not(:hover):not(.hover),
+.navbar .btn-outline-light:not(:disabled):not(.disabled):active:not(:hover):not(.hover){
+	border-color:transparent;
+	border-bottom:white solid 4px;
 }
 
+.navbar .btn-outline:not(:disabled):not(.disabled):hover,
+.navbar .btn-outline:not(:disabled):not(.disabled).active,
+.navbar .btn-outline:not(:disabled):not(.disabled):active{
+	border: 1px solid var(--tud2);
+	color:var(--tud-blue-80);
+	background-color:transparent;
+}
+.navbar .btn-outline:not(:disabled):not(.disabled).active,
+.navbar .btn-outline:not(:disabled):not(.disabled):active{
+	border-bottom:var(--tud2) solid 8px;
+}
+.navbar .btn-outline:not(:disabled):not(.disabled).active:not(:hover):not(.hover),
+.navbar .btn-outline:not(:disabled):not(.disabled):active:not(:hover):not(.hover){
+	border-color:transparent;
+	border-bottom: var(--tud2) solid 8px;
+}
 /***** Typography *****/
 .section-padding {
     padding-top: 20px;

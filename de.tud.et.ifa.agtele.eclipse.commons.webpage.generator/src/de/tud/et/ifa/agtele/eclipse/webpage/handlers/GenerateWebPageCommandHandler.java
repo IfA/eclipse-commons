@@ -1,29 +1,20 @@
 package de.tud.et.ifa.agtele.eclipse.webpage.handlers;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
-import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.MultiStatus;
-import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.IJobChangeEvent;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.core.runtime.jobs.JobChangeAdapter;
-import org.eclipse.jface.action.IStatusLineManager;
-import org.eclipse.jface.dialogs.ErrorDialog;
+import org.eclipse.emf.ecore.EObject;
+import org.eclipse.emf.ecore.xmi.XMIResource;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
-import org.eclipse.ui.IActionBars;
-import org.eclipse.ui.handlers.HandlerUtil;
-
 import de.tud.et.ifa.agtele.eclipse.webpage.webpagemodel.WebPage;
 import de.tud.et.ifa.agtele.eclipse.webpage.generator.WebPageGenerator;
 import de.tud.et.ifa.agtele.eclipse.webpage.util.GenerateJob;
-import de.tud.et.ifa.agtele.emf.AgteleEcoreUtil;
 import de.tud.et.ifa.agtele.ui.util.UIHelper;
 
 public class GenerateWebPageCommandHandler extends AbstractHandler {
@@ -64,7 +55,7 @@ public class GenerateWebPageCommandHandler extends AbstractHandler {
 
 	@Override
 	public boolean isEnabled() {
-		if (onlySingleInstances && currentGenerator != null) {
+		if (onlySingleInstances && currentGenerator != null && currentGenerator.getJob().isRunning()) {
 			return false;
 		}
 		currentGenerator = new WebPageGenerator();
@@ -83,7 +74,15 @@ public class GenerateWebPageCommandHandler extends AbstractHandler {
 					for (WebPage p : ((WebPage)o).getAllAlternativePages()) {
 						generator.addWebPage(p);
 					}
-				} 
+				}
+				if (o instanceof XMIResource) {
+					List<EObject> contents = ((XMIResource)o).getContents();
+					if (!contents.stream().anyMatch(e -> !(e instanceof WebPage))) {
+						for (EObject e : contents) {
+							generator.addWebPage((WebPage)e);
+						}
+					}
+				}
 			}
 		}
 		

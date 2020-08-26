@@ -7,6 +7,7 @@ import de.tud.et.ifa.agtele.eclipse.webpage.generator.artifacts.BootstrapTreeMen
 import de.tud.et.ifa.agtele.eclipse.webpage.util.IStringSubstitutor;
 import de.tud.et.ifa.agtele.eclipse.webpage.util.ResultReporter;
 import de.tud.et.ifa.agtele.eclipse.webpage.webpagemodel.AbstractHTML;
+import de.tud.et.ifa.agtele.eclipse.webpage.webpagemodel.AnnouncementLocationEnum;
 import de.tud.et.ifa.agtele.eclipse.webpage.webpagemodel.MainPage;
 import de.tud.et.ifa.agtele.eclipse.webpage.webpagemodel.Page;
 import de.tud.et.ifa.agtele.eclipse.webpage.webpagemodel.StringValue;
@@ -45,7 +46,22 @@ public class PageGenerator extends AbstractPageGenerator implements BootstrapHtm
     _builder.append("<div class=\"just-padding\">");
     _builder.newLine();
     _builder.append("\t\t");
-    _builder.append("<h4>Contents</h4>");
+    _builder.append("<h4>");
+    _builder.newLine();
+    _builder.append("\t\t\t");
+    _builder.append("<svg width=\"1em\" height=\"1em\" viewBox=\"0 0 16 16\" class=\"bi bi-diagram-3-fill\" fill=\"currentColor\" xmlns=\"http://www.w3.org/2000/svg\">");
+    _builder.newLine();
+    _builder.append("\t\t  \t\t");
+    _builder.append("<path fill-rule=\"evenodd\" d=\"M8 5a.5.5 0 0 1 .5.5V7H14a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-1 0V8h-5v.5a.5.5 0 0 1-1 0V8h-5v.5a.5.5 0 0 1-1 0v-1A.5.5 0 0 1 2 7h5.5V5.5A.5.5 0 0 1 8 5zm-8 6.5A1.5 1.5 0 0 1 1.5 10h1A1.5 1.5 0 0 1 4 11.5v1A1.5 1.5 0 0 1 2.5 14h-1A1.5 1.5 0 0 1 0 12.5v-1zm6 0A1.5 1.5 0 0 1 7.5 10h1a1.5 1.5 0 0 1 1.5 1.5v1A1.5 1.5 0 0 1 8.5 14h-1A1.5 1.5 0 0 1 6 12.5v-1zm6 0a1.5 1.5 0 0 1 1.5-1.5h1a1.5 1.5 0 0 1 1.5 1.5v1a1.5 1.5 0 0 1-1.5 1.5h-1a1.5 1.5 0 0 1-1.5-1.5v-1z\"/>");
+    _builder.newLine();
+    _builder.append("\t\t  \t\t");
+    _builder.append("<path fill-rule=\"evenodd\" d=\"M6 3.5A1.5 1.5 0 0 1 7.5 2h1A1.5 1.5 0 0 1 10 3.5v1A1.5 1.5 0 0 1 8.5 6h-1A1.5 1.5 0 0 1 6 4.5v-1z\"/>");
+    _builder.newLine();
+    _builder.append("\t\t\t");
+    _builder.append("</svg>");
+    _builder.newLine();
+    _builder.append("\t\t");
+    _builder.append("</h4>");
     _builder.newLine();
     _builder.append("\t\t");
     _builder.append("<div class=\"list-group list-group-root list-group-flush\">");
@@ -152,19 +168,25 @@ public class PageGenerator extends AbstractPageGenerator implements BootstrapHtm
   
   public List<Page> getMainBreadCrumbs(final AbstractHTML element) {
     List<Page> result = new ArrayList<Page>();
-    Page page = element.getPage();
-    while ((!this.isRootNode(page))) {
+    Page _xifexpression = null;
+    if ((element instanceof Page)) {
+      _xifexpression = ((Page) element);
+    } else {
+      _xifexpression = element.getPage();
+    }
+    Page page = _xifexpression;
+    while (((page != null) && (!(page instanceof WebPage)))) {
       {
         result.add(0, page);
-        Page _xifexpression = null;
+        Page _xifexpression_1 = null;
         EObject _eContainer = page.eContainer();
         if ((_eContainer instanceof Page)) {
           EObject _eContainer_1 = page.eContainer();
-          _xifexpression = ((Page) _eContainer_1);
+          _xifexpression_1 = ((Page) _eContainer_1);
         } else {
-          _xifexpression = null;
+          _xifexpression_1 = null;
         }
-        page = _xifexpression;
+        page = _xifexpression_1;
       }
     }
     return result;
@@ -187,8 +209,6 @@ public class PageGenerator extends AbstractPageGenerator implements BootstrapHtm
   
   @Override
   public String rootNavBarContent() {
-    List<Page> breadCrumbs = this.getMainBreadCrumbs(this.fragment);
-    List<Page> mainPages = this.mainPages(this.fragment);
     StringConcatenation _builder = new StringConcatenation();
     {
       WebPage _webPage = this.fragment.getWebPage();
@@ -207,8 +227,8 @@ public class PageGenerator extends AbstractPageGenerator implements BootstrapHtm
         _builder.append(_icon, "\t\t");
         _builder.newLineIfNotEmpty();
         _builder.append("\t\t");
-        String _name = this.fragment.getWebPage().getName();
-        _builder.append(_name, "\t\t");
+        String _compiledNavName = this.fragment.getWebPage().compiledNavName();
+        _builder.append(_compiledNavName, "\t\t");
         _builder.newLineIfNotEmpty();
         _builder.append("\t");
         _builder.append("</a>");
@@ -218,8 +238,11 @@ public class PageGenerator extends AbstractPageGenerator implements BootstrapHtm
         {
           EList<MainPage> _mainPages = this.getWebPage().getMainPages();
           for(final MainPage page : _mainPages) {
-            _builder.append("<li class=\"nav-item btn btn-outline-light\">");
-            _builder.newLine();
+            _builder.append("<li class=\"nav-item btn btn-outline-light ");
+            String _navbarItemClass = this.getNavbarItemClass(page);
+            _builder.append(_navbarItemClass);
+            _builder.append("\">");
+            _builder.newLineIfNotEmpty();
             _builder.append("\t");
             _builder.append("<a class=\"nav-link text-white ");
             String _xifexpression = null;
@@ -240,8 +263,8 @@ public class PageGenerator extends AbstractPageGenerator implements BootstrapHtm
             _builder.append(_icon_1, "\t\t");
             _builder.newLineIfNotEmpty();
             _builder.append("\t\t");
-            String _name_1 = page.getName();
-            _builder.append(_name_1, "\t\t");
+            String _compiledNavName_1 = page.compiledNavName();
+            _builder.append(_compiledNavName_1, "\t\t");
             _builder.newLineIfNotEmpty();
             _builder.append("\t");
             _builder.append("</a>");
@@ -253,8 +276,11 @@ public class PageGenerator extends AbstractPageGenerator implements BootstrapHtm
         {
           EList<Page> _additionalPages = this.getWebPage().getAdditionalPages();
           for(final Page page_1 : _additionalPages) {
-            _builder.append("<li class=\"nav-item btn btn-outline-light ml-auto\">");
-            _builder.newLine();
+            _builder.append("<li class=\"nav-item btn btn-outline-light ml-auto ");
+            String _navbarItemClass_1 = this.getNavbarItemClass(page_1);
+            _builder.append(_navbarItemClass_1);
+            _builder.append("\">");
+            _builder.newLineIfNotEmpty();
             _builder.append("\t");
             _builder.append("<a class=\"nav-link text-white ");
             String _xifexpression_1 = null;
@@ -275,8 +301,8 @@ public class PageGenerator extends AbstractPageGenerator implements BootstrapHtm
             _builder.append(_icon_2, "\t\t");
             _builder.newLineIfNotEmpty();
             _builder.append("\t\t");
-            String _name_2 = page_1.getName();
-            _builder.append(_name_2, "\t\t");
+            String _compiledNavName_2 = page_1.compiledNavName();
+            _builder.append(_compiledNavName_2, "\t\t");
             _builder.newLineIfNotEmpty();
             _builder.append("\t");
             _builder.append("</a>");
@@ -287,50 +313,75 @@ public class PageGenerator extends AbstractPageGenerator implements BootstrapHtm
         }
       }
     }
+    return _builder.toString();
+  }
+  
+  public String getNavbarItemClass(final AbstractHTML menuItem) {
+    if ((BootstrapTreeMenuHelper.containsActiveElement(menuItem, this.fragment) || Objects.equal(this.fragment, menuItem))) {
+      return "active";
+    }
+    return "";
+  }
+  
+  @Override
+  public String additionalRooNavbarContent() {
+    List<Page> breadCrumbs = this.getMainBreadCrumbs(this.fragment);
+    List<Page> mainPages = this.mainPages(this.fragment);
+    StringConcatenation _builder = new StringConcatenation();
     {
-      if (((!this.isRootNode(this.fragment)) && (!this.isRootNode(this.fragment.getPage())))) {
-        _builder.append("<br/>");
-        _builder.newLine();
-        _builder.append("<nav class=\"navbar navbar-expand-sm navbar-light bg-tu\">");
+      if ((!(this.fragment instanceof WebPage))) {
+        _builder.append("<nav class=\"navbar navbar-expand-sm navbar-light navbar-breadcrumbs\" aria-label=\"breadcrumb\">");
         _builder.newLine();
         _builder.append("\t");
-        _builder.append("<ul class=\"navbar-nav navbar-breadcrumbs\">");
+        _builder.append("<ul class=\"navbar-nav\">");
         _builder.newLine();
         {
-          for(final Page page_2 : breadCrumbs) {
+          for(final Page page : breadCrumbs) {
             _builder.append("\t\t");
-            _builder.append("<li class=\"nav-item btn btn-outline-light ml-auto\">");
-            _builder.newLine();
+            _builder.append("<li class=\"nav-item btn btn-outline ml-auto ");
+            {
+              int _indexOf = breadCrumbs.indexOf(page);
+              int _size = breadCrumbs.size();
+              int _minus = (_size - 1);
+              boolean _equals = (_indexOf == _minus);
+              if (_equals) {
+                _builder.append(" active\" aria-current=\"page\"");
+              } else {
+                _builder.append("\"");
+              }
+            }
+            _builder.append(">");
+            _builder.newLineIfNotEmpty();
             _builder.append("\t\t");
             _builder.append("\t");
-            _builder.append("<a class=\"nav-link text-white\" href=\"");
-            String _url_3 = page_2.getUrl();
-            _builder.append(_url_3, "\t\t\t");
+            _builder.append("<a class=\"nav-link text-tud\" href=\"");
+            String _url = page.getUrl();
+            _builder.append(_url, "\t\t\t");
             _builder.append("\">");
             _builder.newLineIfNotEmpty();
             _builder.append("\t\t");
             _builder.append("\t\t");
-            String _icon_3 = this.getIcon(page_2);
-            _builder.append(_icon_3, "\t\t\t\t");
+            String _icon = this.getIcon(page);
+            _builder.append(_icon, "\t\t\t\t");
             _builder.newLineIfNotEmpty();
             _builder.append("\t\t");
             _builder.append("\t\t");
-            String _name_3 = page_2.getName();
-            _builder.append(_name_3, "\t\t\t\t");
+            String _compiledNavName = page.compiledNavName();
+            _builder.append(_compiledNavName, "\t\t\t\t");
             _builder.newLineIfNotEmpty();
             _builder.append("\t\t");
             _builder.append("\t");
             _builder.append("</a>");
             _builder.newLine();
             {
-              int _indexOf = breadCrumbs.indexOf(page_2);
-              int _size = breadCrumbs.size();
-              int _minus = (_size - 1);
-              boolean _lessThan = (_indexOf < _minus);
+              int _indexOf_1 = breadCrumbs.indexOf(page);
+              int _size_1 = breadCrumbs.size();
+              int _minus_1 = (_size_1 - 1);
+              boolean _lessThan = (_indexOf_1 < _minus_1);
               if (_lessThan) {
                 _builder.append("\t\t");
                 _builder.append("\t");
-                _builder.append("<svg width=\"1em\" height=\"1em\" viewBox=\"0 0 16 16\" class=\"bi bi-chevron-compact-right\" fill=\"currentColor\" xmlns=\"http://www.w3.org/2000/svg\">");
+                _builder.append("<svg width=\"1.5em\" height=\"2em\" viewBox=\"4 0 10 16\" class=\"bi bi-chevron-compact-right breadcrumb-separator\" fill=\"currentColor\" xmlns=\"http://www.w3.org/2000/svg\">");
                 _builder.newLine();
                 _builder.append("\t\t");
                 _builder.append("\t");
@@ -359,34 +410,32 @@ public class PageGenerator extends AbstractPageGenerator implements BootstrapHtm
       boolean _isEmpty = mainPages.isEmpty();
       boolean _not = (!_isEmpty);
       if (_not) {
-        _builder.append("<br/>");
-        _builder.newLine();
-        _builder.append("<nav class=\"navbar navbar-expand-sm navbar-dark bg-tu-light\">");
+        _builder.append("<nav class=\"navbar navbar-expand-sm navbar-dark bg-tu2 navbar-sub\">");
         _builder.newLine();
         _builder.append("\t");
-        _builder.append("<ul class=\"navbar-nav navbar-main\">");
+        _builder.append("<ul class=\"navbar-nav\">");
         _builder.newLine();
         {
-          for(final Page page_3 : mainPages) {
+          for(final Page page_1 : mainPages) {
             _builder.append("\t\t");
             _builder.append("<li class=\"nav-item btn btn-outline-light ml-auto\">");
             _builder.newLine();
             _builder.append("\t\t");
             _builder.append("\t");
             _builder.append("<a class=\"nav-link text-white\" href=\"");
-            String _url_4 = page_3.getUrl();
-            _builder.append(_url_4, "\t\t\t");
+            String _url_1 = page_1.getUrl();
+            _builder.append(_url_1, "\t\t\t");
             _builder.append("\">");
             _builder.newLineIfNotEmpty();
             _builder.append("\t\t");
             _builder.append("\t\t");
-            String _icon_4 = this.getIcon(page_3);
-            _builder.append(_icon_4, "\t\t\t\t");
+            String _icon_1 = this.getIcon(page_1);
+            _builder.append(_icon_1, "\t\t\t\t");
             _builder.newLineIfNotEmpty();
             _builder.append("\t\t");
             _builder.append("\t\t");
-            String _name_4 = page_3.getName();
-            _builder.append(_name_4, "\t\t\t\t");
+            String _compiledNavName_1 = page_1.compiledNavName();
+            _builder.append(_compiledNavName_1, "\t\t\t\t");
             _builder.newLineIfNotEmpty();
             _builder.append("\t\t");
             _builder.append("\t");
@@ -427,14 +476,12 @@ public class PageGenerator extends AbstractPageGenerator implements BootstrapHtm
     _builder.append("<div class=\"col\">");
     _builder.newLine();
     _builder.append("\t");
-    _builder.append("<h2>");
-    String _pageTitleText = this.getPageTitleText();
-    _builder.append(_pageTitleText, "\t");
-    _builder.append("</h2>");
-    _builder.newLineIfNotEmpty();
-    _builder.append("\t");
-    _builder.append("<div class=\"row justify-content-end\">");
+    _builder.append("<div class=\"row justify-content-end\">\t\t\t\t\t");
     _builder.newLine();
+    _builder.append("\t\t");
+    String _beforeContent = this.beforeContent();
+    _builder.append(_beforeContent, "\t\t");
+    _builder.newLineIfNotEmpty();
     {
       if ((content != null)) {
         _builder.append("\t\t");
@@ -446,6 +493,10 @@ public class PageGenerator extends AbstractPageGenerator implements BootstrapHtm
         _builder.newLine();
       }
     }
+    _builder.append("\t\t");
+    String _belowContent = this.belowContent();
+    _builder.append(_belowContent, "\t\t");
+    _builder.newLineIfNotEmpty();
     _builder.append("\t");
     _builder.append("</div>");
     _builder.newLine();
@@ -458,12 +509,53 @@ public class PageGenerator extends AbstractPageGenerator implements BootstrapHtm
     return _builder.toString();
   }
   
+  public String belowContent() {
+    return this.printAnnouncements(this.fragment.getCompiledAnnouncements(AnnouncementLocationEnum.BELOW_CONTENT));
+  }
+  
+  public String beforeContent() {
+    return this.printAnnouncements(this.fragment.getCompiledAnnouncements(AnnouncementLocationEnum.ABOVE_CONTENT));
+  }
+  
+  @Override
+  public String beforeFooter() {
+    return this.printAnnouncements(this.fragment.getCompiledAnnouncements(AnnouncementLocationEnum.ABOVE_FOOTER));
+  }
+  
+  @Override
+  public String beforeHeader() {
+    return this.printAnnouncements(this.fragment.getCompiledAnnouncements(AnnouncementLocationEnum.ABOVE_PAGE));
+  }
+  
+  @Override
+  public String belowFooter() {
+    return this.printAnnouncements(this.fragment.getCompiledAnnouncements(AnnouncementLocationEnum.BELOW_FOOTER));
+  }
+  
+  @Override
+  public String beforeTitle() {
+    return this.printAnnouncements(this.fragment.getCompiledAnnouncements(AnnouncementLocationEnum.ABOVE_HEADING));
+  }
+  
+  @Override
+  public String belowTitle() {
+    return this.printAnnouncements(this.fragment.getCompiledAnnouncements(AnnouncementLocationEnum.BELOW_HEADING));
+  }
+  
   @Override
   public String getPageTitleText() {
     StringConcatenation _builder = new StringConcatenation();
     String _title = this.getHtmlFragment().getTitle();
     _builder.append(_title);
     _builder.newLineIfNotEmpty();
+    return _builder.toString();
+  }
+  
+  @Override
+  public String title() {
+    StringConcatenation _builder = new StringConcatenation();
+    String _title = this.getHtmlFragment().getTitle();
+    _builder.append(_title);
     return _builder.toString();
   }
   

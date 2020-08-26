@@ -17,6 +17,7 @@ package de.tud.et.ifa.agtele.eclipse.webpage.webpagemodel;
  *   <li>{@link de.tud.et.ifa.agtele.eclipse.webpage.webpagemodel.Announcement#getLocation <em>Location</em>}</li>
  *   <li>{@link de.tud.et.ifa.agtele.eclipse.webpage.webpagemodel.Announcement#getContent <em>Content</em>}</li>
  *   <li>{@link de.tud.et.ifa.agtele.eclipse.webpage.webpagemodel.Announcement#isClosable <em>Closable</em>}</li>
+ *   <li>{@link de.tud.et.ifa.agtele.eclipse.webpage.webpagemodel.Announcement#isDisable <em>Disable</em>}</li>
  * </ul>
  *
  * @see de.tud.et.ifa.agtele.eclipse.webpage.webpagemodel.WebPageModelPackage#getAnnouncement()
@@ -143,5 +144,28 @@ public interface Announcement extends Base {
 	 * @generated
 	 */
 	void setClosable(boolean value);
+
+	/**
+	 * Returns the value of the '<em><b>Disable</b></em>' attribute.
+	 * The default value is <code>"false"</code>.
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @return the value of the '<em>Disable</em>' attribute.
+	 * @see #setDisable(boolean)
+	 * @see de.tud.et.ifa.agtele.eclipse.webpage.webpagemodel.WebPageModelPackage#getAnnouncement_Disable()
+	 * @model default="false"
+	 * @generated
+	 */
+	boolean isDisable();
+
+	/**
+	 * Sets the value of the '{@link de.tud.et.ifa.agtele.eclipse.webpage.webpagemodel.Announcement#isDisable <em>Disable</em>}' attribute.
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @param value the new value of the '<em>Disable</em>' attribute.
+	 * @see #isDisable()
+	 * @generated
+	 */
+	void setDisable(boolean value);
 
 } // Announcement

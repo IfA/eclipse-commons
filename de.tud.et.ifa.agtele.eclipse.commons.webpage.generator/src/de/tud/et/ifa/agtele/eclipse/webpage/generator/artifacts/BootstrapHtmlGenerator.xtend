@@ -4,29 +4,29 @@ import java.util.List
 
 interface BootstrapHtmlGenerator extends BasicHtmlGenerator {
 		
-		
 	override List<String> linkedStylesheets() {
 		val list = BasicHtmlGenerator.super.linkedStylesheets;
-		list.add(this.webPage.baseUrl+"/resources/bootstrap/css/bootstrap.min.css");
-		list.add(this.webPage.baseUrl+"/resources/bootstrap/css/style.css");
+		list.add(this.webPage.baseUrl+"/templateResources/css/bootstrap.min.css");
+		list.add(this.webPage.baseUrl+"/templateResources/css/style.css");
 		return list;		
 	}
 
 	override List<String> linkedScripts() {		 
 		val list = BasicHtmlGenerator.super.linkedScripts;
-		list.add(this.webPage.baseUrl+"/resources/bootstrap/js/jquery-3.3.1.slim.min.js");
-		list.add(this.webPage.baseUrl+"/resources/bootstrap/js/bootstrap.bundle.min.js");
-		list.add(this.webPage.baseUrl+"/resources/bootstrap/js/application.js");
+		list.add(this.webPage.baseUrl+"/templateResources/js/jquery-3.3.1.slim.min.js");
+		list.add(this.webPage.baseUrl+"/templateResources/js/bootstrap.bundle.min.js");
+		list.add(this.webPage.baseUrl+"/templateResources/js/application.js");
 		return list;
 	}
 	
 	def String rootNavBarContent() {
 		return '''''';
 	}
-//	def String mainNavBarContent() {
-//		return '''''';
-//	}
 	
+	def String additionalRooNavbarContent(){
+		return '''''';
+	}
+
 	def boolean suppressNavBar(){
 		return false;
 	}
@@ -35,6 +35,16 @@ interface BootstrapHtmlGenerator extends BasicHtmlGenerator {
 		return '''''';
 	}
 	
+	override pageTitle() {
+		return '''
+			<div class="row">
+				<div class="col">
+					<h1>«this.title»</h1>
+				</div>
+			</div>
+		''';
+	}
+		
 	def getPageTitleText(){
 		return '''''';
 	}
@@ -42,10 +52,7 @@ interface BootstrapHtmlGenerator extends BasicHtmlGenerator {
 		return '''
 			<div class="container bg-tu p-3">
 				<div class="row">
-					«this.getValueContent(this.htmlFragment.header)»
-«««					<div class="col">
-«««						<img src="«this.webPage.baseUrl»/resources/bootstrap/img/tud_logo.png" width="143" height="42" class="d-inline-block align-top ml-0" alt=""/>
-«««					</div>
+					«this.getValueContent(this.htmlFragment.targetHeader)»
 				</div>
 			</div>
 			«IF !this.suppressNavBar»
@@ -89,6 +96,7 @@ interface BootstrapHtmlGenerator extends BasicHtmlGenerator {
 	«««						«ENDIF»
 						</div> 
 					</nav>
+					«this.additionalRooNavbarContent()»
 				</div>
 			«ENDIF»
 		''';
@@ -99,32 +107,8 @@ interface BootstrapHtmlGenerator extends BasicHtmlGenerator {
 			<footer>
 			    <div class="container bg-tu p-3">
 					<div class="row">
-						«this.getValueContent(this.htmlFragment.footer)»
-«««					             «IF catalogueContext.organizationInfo !== null»
-«««				«""»            <div class="col">
-«««				«""»                <h4>Organization</h4>
-«««				«""»                <p>«printOrganizationInfo(catalogueContext.organizationInfo)»</p>
-«««				«""»            </div>
-«««				«ENDIF»
-«««				«IF catalogueContext.contactInfo !== null»
-«««			«""»        	<div class="col">
-«««			«""»				<h4>Contact</h4>
-«««			«""»				<p>«printContactInfo(catalogueContext.contactInfo)»</p>
-«««			«""»			</div>
-«««					«ENDIF»
-«««					«IF catalogueContext.legalInfo !== null»
-«««			«""»			<div class="col">
-«««			«""»				<h4>Legal Information</h4>
-«««			«""»				<p>«printLegalInfo(catalogueContext.legalInfo)»</p>
-«««			«""»			</div>
-«««						«ENDIF»
-«««						«IF catalogueContext.licenseInfo !== null»
-«««			«""»			<div class="col">
-«««			«""»				<h4>License</h4>
-«««			«""»				<p>«printLicenseInfo(catalogueContext.licenseInfo)»</p>
-«««			«""»			</div>
-«««							«ENDIF»
-«««							</div>
+						«this.getValueContent(this.htmlFragment.targetFooter)»
+					</div>
 				</div>
 			</footer>
 		''';
@@ -137,8 +121,8 @@ interface BootstrapHtmlGenerator extends BasicHtmlGenerator {
 	def String getPageTitle () {
 		return '''			
 			«IF !getPageTitleText.blank»
-				<div class="row">
-					<div class="col">		
+				<div class="row «IF this.useNavigation»justify-content-end«ENDIF»">
+					<div class="col«IF this.useNavigation»-11«ENDIF»">		
 						<h1>«getPageTitleText»</h1>
 					</div>
 				</div>
@@ -149,7 +133,9 @@ interface BootstrapHtmlGenerator extends BasicHtmlGenerator {
 	override String mainStructure() {
 		return '''
 			<div class="container">
+				«this.beforeTitle»
 				«getPageTitle»
+				«this.belowTitle»
 				<div class="row section-padding">
 					«IF this.useNavigation»
 						«navigation»
@@ -158,6 +144,14 @@ interface BootstrapHtmlGenerator extends BasicHtmlGenerator {
 				</div>
 			</div>
 		''';
+	}
+	
+	def String belowTitle() {
+		return "";
+	}
+	
+	def String beforeTitle() {
+		return "";
 	}
 	
 	//Helper Methods

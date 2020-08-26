@@ -94,6 +94,18 @@ public interface BasicHtmlGenerator extends IArtifactGenerator {
     return true;
   }
   
+  default String beforeHeader() {
+    return "";
+  }
+  
+  default String beforeFooter() {
+    return "";
+  }
+  
+  default String belowFooter() {
+    return "";
+  }
+  
   @Override
   default String getContent() {
     StringConcatenation _builder = new StringConcatenation();
@@ -170,6 +182,10 @@ public interface BasicHtmlGenerator extends IArtifactGenerator {
     _builder.append("<body>");
     _builder.newLine();
     _builder.append("\t\t");
+    String _beforeHeader = this.beforeHeader();
+    _builder.append(_beforeHeader, "\t\t");
+    _builder.newLineIfNotEmpty();
+    _builder.append("\t\t");
     _builder.append("<header>");
     _builder.newLine();
     _builder.append("\t\t\t");
@@ -179,22 +195,6 @@ public interface BasicHtmlGenerator extends IArtifactGenerator {
     _builder.append("\t\t");
     _builder.append("</header>");
     _builder.newLine();
-    {
-      boolean _useNavigation = this.useNavigation();
-      if (_useNavigation) {
-        _builder.append("\t\t");
-        _builder.append("<nav>");
-        _builder.newLine();
-        _builder.append("\t\t");
-        _builder.append("\t");
-        String _navigation = this.navigation();
-        _builder.append(_navigation, "\t\t\t");
-        _builder.newLineIfNotEmpty();
-        _builder.append("\t\t");
-        _builder.append("</nav>");
-        _builder.newLine();
-      }
-    }
     _builder.append("\t\t");
     _builder.append("<main>");
     _builder.newLine();
@@ -209,8 +209,16 @@ public interface BasicHtmlGenerator extends IArtifactGenerator {
     _builder.append("<footer>");
     _builder.newLine();
     _builder.append("\t\t\t");
+    String _beforeFooter = this.beforeFooter();
+    _builder.append(_beforeFooter, "\t\t\t");
+    _builder.newLineIfNotEmpty();
+    _builder.append("\t\t\t");
     String _footer = this.footer();
     _builder.append(_footer, "\t\t\t");
+    _builder.newLineIfNotEmpty();
+    _builder.append("\t\t\t");
+    String _belowFooter = this.belowFooter();
+    _builder.append(_belowFooter, "\t\t\t");
     _builder.newLineIfNotEmpty();
     _builder.append("\t\t");
     _builder.append("</footer>");
@@ -325,7 +333,10 @@ public interface BasicHtmlGenerator extends IArtifactGenerator {
       return _builder.toString();
     }
     StringConcatenation _builder_1 = new StringConcatenation();
-    _builder_1.append("<div class=\"alert alert-primary ");
+    _builder_1.append("<div class=\"alert alert-");
+    String _announcementCssClass = this.getAnnouncementCssClass(a);
+    _builder_1.append(_announcementCssClass);
+    _builder_1.append(" ");
     {
       boolean _isClosable = a.isClosable();
       if (_isClosable) {

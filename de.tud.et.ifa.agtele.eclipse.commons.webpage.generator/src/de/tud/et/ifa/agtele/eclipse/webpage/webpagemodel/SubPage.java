@@ -61,7 +61,7 @@ public interface SubPage extends AbstractHTML {
 		} else {
 			srcPathFragment = WebPageModelUtils.getUrlSafeName(this.getName());
 		}
-		return parentDir + "/" + srcPathFragment;
+		return (!parentDir.isBlank() ? parentDir + "/" : "") + srcPathFragment;
 	}
 	
 	default boolean isNode () {

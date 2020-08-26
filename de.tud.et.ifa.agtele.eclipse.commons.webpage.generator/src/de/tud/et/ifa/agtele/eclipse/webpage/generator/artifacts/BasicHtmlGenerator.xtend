@@ -8,7 +8,6 @@ import de.tud.et.ifa.agtele.eclipse.webpage.webpagemodel.Base
 interface BasicHtmlGenerator extends IArtifactGenerator {
 		
 	def String title() {
-
 		return "NO_NAME";
 	}
 	
@@ -83,6 +82,15 @@ interface BasicHtmlGenerator extends IArtifactGenerator {
 	def boolean useNavigation() {
 		return true;
 	}
+	def String beforeHeader() {
+		return "";
+	}
+	def String beforeFooter() {
+		return "";
+	}
+	def String belowFooter() {
+		return "";
+	}
 	override String getContent() {
 		return '''
 			<!DOCTYPE html>
@@ -110,19 +118,17 @@ interface BasicHtmlGenerator extends IArtifactGenerator {
 					«ENDFOR»
 				</head>
 				<body>
+					«this.beforeHeader»
 					<header>
 						«header»
 					</header>
-					«IF useNavigation»
-						<nav>
-							«navigation»
-						</nav>
-					«ENDIF»
 					<main>
 						«mainStructure»
 					</main>
 					<footer>
+						«this.beforeFooter»
 						«footer»
+						«this.belowFooter»
 					</footer>
 					«FOR inlineScript : inlineScripts»
 						«IF inlineScript !== null && !inlineScript.blank»
@@ -170,7 +176,7 @@ interface BasicHtmlGenerator extends IArtifactGenerator {
 			return '''''';
 		}
 		return '''
-			<div class="alert alert-primary «IF a.closable»alert-dismissible«ENDIF»" role="alert">
+			<div class="alert alert-«this.getAnnouncementCssClass(a)» «IF a.closable»alert-dismissible«ENDIF»" role="alert">
 			 	«content»«this.printMetaData(a)»
 			 	«IF a.closable»
 			 		<button type="button" class="close" data-dismiss="alert" aria-label="Close">
