@@ -176,7 +176,7 @@ interface BasicHtmlGenerator extends IArtifactGenerator {
 			return '''''';
 		}
 		return '''
-			<div class="alert alert-«this.getAnnouncementCssClass(a)» «IF a.closable»alert-dismissible«ENDIF»" role="alert">
+			<div class="alert alert-«this.getAnnouncementCssClass(a)» w-100«IF a.closable» alert-dismissible«ENDIF»" role="alert">
 			 	«content»«this.printMetaData(a)»
 			 	«IF a.closable»
 			 		<button type="button" class="close" data-dismiss="alert" aria-label="Close">

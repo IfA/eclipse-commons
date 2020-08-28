@@ -23,7 +23,7 @@ interface BootstrapHtmlGenerator extends BasicHtmlGenerator {
 		return '''''';
 	}
 	
-	def String additionalRooNavbarContent(){
+	def String additionalRootNavbarContent(){
 		return '''''';
 	}
 
@@ -96,7 +96,7 @@ interface BootstrapHtmlGenerator extends BasicHtmlGenerator {
 	«««						«ENDIF»
 						</div> 
 					</nav>
-					«this.additionalRooNavbarContent()»
+					«this.additionalRootNavbarContent()»
 				</div>
 			«ENDIF»
 		''';
@@ -136,7 +136,7 @@ interface BootstrapHtmlGenerator extends BasicHtmlGenerator {
 				«this.beforeTitle»
 				«getPageTitle»
 				«this.belowTitle»
-				<div class="row section-padding">
+				<div class="row section-padding justify-content-end">
 					«IF this.useNavigation»
 						«navigation»
 					«ENDIF»

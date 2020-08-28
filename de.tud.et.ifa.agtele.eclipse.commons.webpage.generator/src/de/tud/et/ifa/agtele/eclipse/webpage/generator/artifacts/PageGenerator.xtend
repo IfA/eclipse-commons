@@ -22,7 +22,7 @@ class PageGenerator extends AbstractPageGenerator implements BootstrapHtmlGenera
 	override navigation(){
 		val BootstrapTreeMenuHelper helper = new BootstrapTreeMenuHelper(this.asPage !== null ? this.asPage : this.fragment.page, this.fragment);
 		return '''
-			<div class="col-3 border">
+			<div class="col-sm-3 col-11 border">
 				<div class="just-padding">
 					<h4>
 						<svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-diagram-3-fill" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
@@ -139,7 +139,7 @@ class PageGenerator extends AbstractPageGenerator implements BootstrapHtmlGenera
 		return "";
 	}
 	
-	override String additionalRooNavbarContent () {
+	override String additionalRootNavbarContent () {
 		var  List<Page> breadCrumbs = this.getMainBreadCrumbs(this.fragment);
 		var  List<Page> mainPages = this.mainPages(this.fragment);
 		return '''
