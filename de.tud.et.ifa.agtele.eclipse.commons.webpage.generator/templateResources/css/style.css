@@ -380,3 +380,18 @@ footer {
 .carousel-dark .carousel-indicators li.active{
 	background-color:rgba(0,0,0,1.0);
 }
+
+.carousel-inner.fixed-height > .item {
+  height: 70vh;
+}
+
+.carousel-inner.fixed-height > .item > img {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  -webkit-transform: translate(-50%, -50%);
+  -ms-transform: translate(-50%, -50%);
+  transform: translate(-50%, -50%);
+  max-height: 800px;
+  width: auto;
+}
