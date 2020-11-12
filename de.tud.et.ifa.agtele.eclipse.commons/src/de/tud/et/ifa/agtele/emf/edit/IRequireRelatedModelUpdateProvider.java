@@ -19,6 +19,7 @@ import java.util.List;
 import org.eclipse.emf.common.command.AbstractCommand;
 import org.eclipse.emf.common.command.Command;
 import org.eclipse.emf.ecore.EObject;
+import org.eclipse.emf.edit.EMFEditPlugin;
 import org.eclipse.emf.edit.command.AddCommand;
 import org.eclipse.emf.edit.command.CommandActionDelegate;
 import org.eclipse.emf.edit.command.CopyCommand;
@@ -27,6 +28,9 @@ import org.eclipse.emf.edit.command.DragAndDropFeedback;
 import org.eclipse.emf.edit.command.MoveCommand;
 import org.eclipse.emf.edit.command.RemoveCommand;
 import org.eclipse.emf.edit.command.SetCommand;
+import org.eclipse.emf.edit.provider.ComposeableAdapterFactory;
+import org.eclipse.emf.edit.provider.ComposedImage;
+import org.eclipse.emf.edit.provider.IItemLabelProvider;
 import org.eclipse.emf.edit.provider.ItemProvider;
 
 import de.tud.et.ifa.agtele.emf.AgteleEcoreUtil;
@@ -652,7 +656,15 @@ public interface IRequireRelatedModelUpdateProvider {
 
 		@Override
 		public Object getImage() {
-			return ((CommandActionDelegate) this.originalCommand).getImage();
+			Object image = ((CommandActionDelegate) this.originalCommand).getImage();
+			if (image instanceof ComposedImage) {
+				//try to prevent null pointers, sometimes this happens, when the genmodel is malconfigured
+				ComposedImage cImage = (ComposedImage)image;
+				if (cImage.getImages().contains(null)) {
+					cImage.getImages().removeIf(c -> c == null);
+				}
+			}
+			return image;
 		}
 
 		@Override
