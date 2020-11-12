@@ -113,10 +113,12 @@ public interface IModelImportStrategy {
 	default Object convertAttributeValue(String value, EAttribute attribute) {
 		String fixedValue =  value.indexOf('(') > 0 ? 
 			value.substring(0, value.indexOf('(')).trim().replaceAll("\\s", ",") : 
-				value.trim().replaceAll("\\s", ",");
+				value.trim().replaceAll("\\s", ","),
+				pattern1 = "EEE,MMM,dd,yyyy,HH:mm:ss,'GMT'Z",
+				pattern2 = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'";
 		try {
 			if (attribute.getEType() == EcorePackage.Literals.EDATE) {
-				DateTimeFormatter format = DateTimeFormatter.ofPattern("EEE,MMM,dd,yyyy,HH:mm:ss,'GMT'Z", Locale.US);
+				DateTimeFormatter format = DateTimeFormatter.ofPattern(pattern1, Locale.US);
 				
 				LocalDateTime time = LocalDateTime.parse(fixedValue, format);
 				return Date.from(time.toInstant(ZoneOffset.ofHoursMinutes(0, 0)));
@@ -125,14 +127,15 @@ public interface IModelImportStrategy {
 		} catch (Exception e1) {
 				//e.g. 2020-05-25T12:17:18.005Z
 //			DateTimeFormatter format = DateTimeFormatter.ofPattern("yyyy-MM-ddEHH:mm.SSSVV", Locale.US);
-			DateTimeFormatter format = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.US);
+			DateTimeFormatter format = DateTimeFormatter.ofPattern(pattern2, Locale.US);
 
 			try {
 				LocalDateTime time = LocalDateTime.parse(fixedValue, format);
 				return Date.from(time.toInstant(ZoneOffset.ofHoursMinutes(0, 0)));
 			} catch (Exception e2) {
-				e1.printStackTrace();
-				e2.printStackTrace();
+				System.err.println("Could not parse date time string :'" + fixedValue + "', 1st try pattern: '" + pattern1 + "', 2nd try pattern: '" + pattern2 + "'");
+//				e1.printStackTrace();
+//				e2.printStackTrace();
 			}
 		}
 		return null;
