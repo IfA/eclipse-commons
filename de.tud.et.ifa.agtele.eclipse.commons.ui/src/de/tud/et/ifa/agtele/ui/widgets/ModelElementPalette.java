@@ -35,6 +35,8 @@ import org.eclipse.swt.custom.SashForm;
 import org.eclipse.swt.custom.ScrolledComposite;
 import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.events.MouseListener;
+import org.eclipse.swt.graphics.Color;
+import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -43,6 +45,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Listener;
+import org.eclipse.swt.widgets.Widget;
 import org.eclipse.wb.swt.ResourceManager;
 import org.eclipse.wb.swt.SWTResourceManager;
 
@@ -168,6 +171,8 @@ public abstract class ModelElementPalette implements CreateActionChangeListener 
 	}
 
 	public void removeButtons () {
+		this.currentHoverLabels.forEach(l -> l.dispose());
+		
 		Iterator<Composite> c = this.actionContainer.iterator();
 
 		while (c.hasNext()) {
@@ -343,41 +348,49 @@ public abstract class ModelElementPalette implements CreateActionChangeListener 
 		return labels;
 	}
 
-	public class HoverLabel extends CLabel {
+	public class HoverLabel {
 		protected boolean hovering = false;
 		protected boolean enabled = false;
 		protected Listener mouseHoverListener;
+		protected MouseListener mouseActionListener;
 		protected IAction action;
+		protected Image greyImage = null;
 
-		protected Display display = this.getDisplay();
+		
+		protected CLabel label = null;
+		protected Display display = null;
+		protected Composite parent;
 
 		@SuppressWarnings("restriction")
 		public HoverLabel(Composite parent, IAction action) {
-			super(parent, SWT.SHADOW_NONE | SWT.RIGHT); //SWT.BORDER | SWT.SHADOW_IN |
+			this.parent = parent;
+			this.label = new CLabel(parent,  SWT.SHADOW_NONE | SWT.RIGHT);
+			this.display = this.label.getDisplay();
+//			super(parent,); //SWT.BORDER | SWT.SHADOW_IN |
 			this.action = action;
 			//lblNewLabel_1.setForeground(SWTResourceManager.getColor(SWT.COLOR_WIDGET_FOREGROUND));
-			this.setAlignment(SWT.LEFT);
-			this.setLeftMargin(8);
+			this.label.setAlignment(SWT.LEFT);
+			this.label.setLeftMargin(8);
 			GridData gd_lblNewLabel_1 = new GridData(SWT.FILL, SWT.FILL, false, false, 1, 1);
-			this.setLayoutData(gd_lblNewLabel_1);
-			this.setImage(ResourceManager.getImage(action.getImageDescriptor()));
+			this.label.setLayoutData(gd_lblNewLabel_1);
+			this.label.setImage(ResourceManager.getImage(action.getImageDescriptor()));
 			//lblNewLabel_1.setBackground(SWTResourceManager.getColor(SWT.COLOR_WIDGET_LIGHT_SHADOW));
-			this.setText(action.getText());
+			this.label.setText(action.getText());
 			this.setEnabled(action.isEnabled());
-			this.setToolTipText(action.getToolTipText());
+			this.label.setToolTipText(action.getToolTipText());
 
 			// ColorRegistry registry = JFaceResources.getColorRegistry();
 
 			this.mouseHoverListener = e -> {
 				HoverLabel.this.hovering = e.type == SWT.MouseEnter || e.type == SWT.MouseMove;
-				HoverLabel.this.redraw();
+				HoverLabel.this.label.redraw();
 			};
 
-			this.addListener(SWT.MouseEnter, this.mouseHoverListener);
-			this.addListener(SWT.MouseMove, this.mouseHoverListener);
-			this.addListener(SWT.MouseExit, this.mouseHoverListener);
+			this.label.addListener(SWT.MouseEnter, this.mouseHoverListener);
+			this.label.addListener(SWT.MouseMove, this.mouseHoverListener);
+			this.label.addListener(SWT.MouseExit, this.mouseHoverListener);
 
-			this.addListener(SWT.Paint, e -> {
+			this.label.addListener(SWT.Paint, e -> {
 				// if (HoverLabel.this.enabled) {
 				// HoverLabel.this.setBackground(HoverLabel.this.hovering ?
 				// registry.get("org.eclipse.ui.workbench.ACTIVE_TAB_BG_START")
@@ -397,13 +410,27 @@ public abstract class ModelElementPalette implements CreateActionChangeListener 
 				// registry.get("org.eclipse.ui.workbench.INACTIVE_TAB_TEXT_COLOR"));
 				// }
 				if (HoverLabel.this.enabled) {
-					HoverLabel.this.setBackground(
-							this.hovering ? this.display.getSystemColor(SWT.COLOR_TITLE_BACKGROUND_GRADIENT)
-									: this.display.getSystemColor(SWT.COLOR_WIDGET_BACKGROUND));
+					if (this.hovering) {
+						HoverLabel.this.label.setBackground(
+								this.display.getSystemColor(SWT.COLOR_WIDGET_NORMAL_SHADOW)
+								);
+						HoverLabel.this.label.setForeground(new Color(Display.getCurrent(), 0, 0, 0));
+					} else {
+						HoverLabel.this.label.setBackground(
+								this.parent.getBackground()
+								);
+						HoverLabel.this.label.setForeground(this.parent.getForeground());
+					}
 				} else {
-					HoverLabel.this.setBackground(
-							this.hovering ? this.display.getSystemColor(SWT.COLOR_TITLE_INACTIVE_BACKGROUND)
-									: this.display.getSystemColor(SWT.COLOR_WIDGET_BACKGROUND));
+					if (this.hovering) {
+						HoverLabel.this.label.setBackground(
+								this.display.getSystemColor(SWT.COLOR_WIDGET_DISABLED_FOREGROUND)
+								);
+					} else {
+						HoverLabel.this.label.setBackground(
+								this.parent.getBackground()
+								);
+					}
 				}
 			});
 			//		    HoverLabel.this.addListener(SWT., new Listener() {
@@ -415,17 +442,18 @@ public abstract class ModelElementPalette implements CreateActionChangeListener 
 			//			});
 		}
 
-		@Override
+		public Point computeSize(int wHint, int hHint) {
+			return this.label.computeSize(wHint, hHint);
+		}
+
 		public void setEnabled(boolean enabled) {
 			this.enabled = enabled;
 
-			this.setForeground(enabled ? this.display.getSystemColor(SWT.COLOR_WIDGET_FOREGROUND) : this.display.getSystemColor(SWT.COLOR_WIDGET_NORMAL_SHADOW));
-
 			if(enabled) {
-				this.addMouseListener(new MouseListener() {
+				this.mouseActionListener = new MouseListener() {
 					@Override
 					public void mouseUp(MouseEvent e) {
-						if (e.x >= 0 && e.y >= 0 && e.x <= HoverLabel.this.getSize().x && e.y <= HoverLabel.this.getSize().y) {
+						if (e.x >= 0 && e.y >= 0 && e.x <= HoverLabel.this.label.getSize().x && e.y <= HoverLabel.this.label.getSize().y) {
 							Command lastCommand = ModelElementPalette.this.getEditingDomain().getCommandStack().getMostRecentCommand();
 							
 							HoverLabel.this.action.run();
@@ -440,10 +468,34 @@ public abstract class ModelElementPalette implements CreateActionChangeListener 
 					@Override
 					public void mouseDoubleClick(MouseEvent e) {
 					}
-				});
+				};
+				this.label.addMouseListener(this.mouseActionListener);
 			} else {
 			}
-			super.setEnabled(enabled);
+//			this.label.setEnabled(enabled);
+			if (enabled) {
+				this.label.setForeground(this.parent.getForeground());
+//				this.label.setForeground(new Color(Display.getCurrent(), 255, 0, 0));
+			} else {
+				this.label.setForeground(this.display.getSystemColor(SWT.COLOR_WIDGET_DARK_SHADOW));
+				Image i = ResourceManager.getImage(action.getImageDescriptor());
+				Image grey = new Image(Display.getDefault(), i, SWT.IMAGE_GRAY);
+				this.label.setImage(grey);
+//				this.label.setForeground(new Color(Display.getCurrent(), 0, 255, 0));
+			}
+
+		}
+		public void dispose () {
+			this.label.removeListener(SWT.MouseEnter, this.mouseHoverListener);
+			this.label.removeListener(SWT.MouseMove, this.mouseHoverListener);
+			this.label.removeListener(SWT.MouseExit, this.mouseHoverListener);
+			if (this.mouseActionListener != null) {
+				this.label.removeMouseListener(this.mouseActionListener);
+			}
+			if (this.greyImage != null) {
+				this.greyImage.dispose();
+			}
+			this.label.dispose();
 		}
 	}
 
