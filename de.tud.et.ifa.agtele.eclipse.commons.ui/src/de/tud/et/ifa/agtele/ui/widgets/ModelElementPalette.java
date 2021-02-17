@@ -486,16 +486,18 @@ public abstract class ModelElementPalette implements CreateActionChangeListener 
 
 		}
 		public void dispose () {
-			this.label.removeListener(SWT.MouseEnter, this.mouseHoverListener);
-			this.label.removeListener(SWT.MouseMove, this.mouseHoverListener);
-			this.label.removeListener(SWT.MouseExit, this.mouseHoverListener);
-			if (this.mouseActionListener != null) {
-				this.label.removeMouseListener(this.mouseActionListener);
+			if (!this.label.isDisposed()) {
+				this.label.removeListener(SWT.MouseEnter, this.mouseHoverListener);
+				this.label.removeListener(SWT.MouseMove, this.mouseHoverListener);
+				this.label.removeListener(SWT.MouseExit, this.mouseHoverListener);
+				if (this.mouseActionListener != null) {
+					this.label.removeMouseListener(this.mouseActionListener);
+				}
+				this.label.dispose();
 			}
 			if (this.greyImage != null) {
 				this.greyImage.dispose();
 			}
-			this.label.dispose();
 		}
 	}
 
