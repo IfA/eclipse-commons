@@ -633,17 +633,22 @@ public interface AgteleEcoreUtil {
 	 * @return All instances of the eClass
 	 */
 	public static Collection<EObject> getAllInstances(EClass eClass, Collection<EObject> roots, boolean includeRoots) {
-
 		Collection<EObject> result = new ArrayList<>();
 
 		for (EObject root : roots) {
-			if (includeRoots && eClass.isSuperTypeOf(root.eClass())) {
+			if (root == null) {
+				continue;
+			}
+			if (includeRoots && (eClass == null || eClass.isSuperTypeOf(root.eClass()) || (eClass == EcorePackage.Literals.EOBJECT && root instanceof EObject))) {
 				result.add(root);
 			}
 			Iterator<EObject> it = new AgteleContainmentTreeIterator(root, true, true);
 			while (it.hasNext()) {
 				EObject obj = it.next();
-				if (eClass.isSuperTypeOf(obj.eClass())) {
+				if (obj == null) {
+					continue;
+				}
+				if (eClass == null || eClass.isSuperTypeOf(obj.eClass()) || (eClass == EcorePackage.Literals.EOBJECT && obj instanceof EObject)) {
 					result.add(obj);
 				}
 			}

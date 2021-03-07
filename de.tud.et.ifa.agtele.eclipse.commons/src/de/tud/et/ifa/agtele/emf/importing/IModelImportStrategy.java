@@ -23,7 +23,7 @@ public interface IModelImportStrategy {
 		for (Object node : connector.readReference(adapter.getOriginalNode(eObject), reference)) {
 			INodeDescriptor descriptor = connector.getTypeInfo(node);
 			if (descriptor != null) {
-				if (eObject.eContainer() != null && adapter.getOriginalNode(eObject.eContainer()).equals(node)) {
+				if (eObject.eContainer() != null && adapter.getOriginalNode(eObject.eContainer()).equals(node)) { //ignore container references
 					continue;
 				}
 				EObject obj = adapter.createEObject(descriptor);
@@ -54,8 +54,10 @@ public interface IModelImportStrategy {
 		ArrayList<EObject> referencedElements = new ArrayList<>();
 		for (Object node : connector.readReference(adapter.getOriginalNode(eObject), reference)) {
 			EObject referencedElement = adapter.getCreatedEObject(node);
-			if (referencedElement != null) {
-				referencedElements.add(referencedElement);
+			if (referencedElement != null && reference.getEType().isInstance(referencedElements)) {
+				referencedElements.add(referencedElement);				
+			} else if (node != null && node instanceof EObject && (reference.getEType().isInstance(node) || (reference.getEType() == EcorePackage.Literals.EOBJECT))) {
+				referencedElements.add((EObject) node);	
 			}
 		}
 		if (!referencedElements.isEmpty()) {
@@ -103,7 +105,7 @@ public interface IModelImportStrategy {
 	}
 
 	default Collection<EReference> getEReferencesForImport(IModelImporter adapter, IModelConnector connector, EObject eObject) {
-		return eObject.eClass().getEAllReferences().stream().filter(f -> /*!f.isDerived() &&*/ !f.isContainer()).collect(Collectors.toList());
+		return eObject.eClass().getEAllReferences().stream().filter(f -> /*!f.isDerived() &&*/ !f.isContainer() && !f.isContainment()).collect(Collectors.toList());
 	}
 
 	default Collection<EAttribute> getEAttributesForImport(IModelImporter adapter, IModelConnector connector, EObject eObject) {
