@@ -13,12 +13,20 @@ public interface IModelConnector {
 	
 	boolean isConnected();
 	
-	IModelImporter getImportAdapter();
+	IModelImporter createImportAdapter();
+	
+	IModelImporter getCurrentImportAdapter();
 	
 	Collection<Object> browse (Object node);
 	
 	INodeDescriptor getTypeInfo(Object node);
 	
+	/**
+	 * Reads a reference and returns the original target element, not a reconstructed.
+	 * @param node
+	 * @param ref
+	 * @return
+	 */
 	Collection<Object> readReference(Object node, EReference ref);
 	
 	Collection<Object> readAttribute(Object node, EAttribute attribute);
@@ -26,4 +34,8 @@ public interface IModelConnector {
 	default boolean isValidRootSearchNode(Object node) {
 		return true;
 	};
+	
+	default IModelElementImportRegistry getImportRegistry () {
+		return this.getCurrentImportAdapter() != null ? this.getCurrentImportAdapter().getImportRegistry() : null;
+	}
 }

@@ -2,6 +2,7 @@ package de.tud.et.ifa.agtele.emf.importing;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.eclipse.emf.ecore.EObject;
@@ -20,4 +21,11 @@ public interface IModelElementImportRegistry {
 	
 	Collection<EObject> getImportedElements ();
 	Collection<Object> getOriginalElements ();
+	void setContext(EObject contentElement);
+	Collection<EObject> getContexts();
+	EObject getContextOfImported(EObject element);
+	Collection<EObject> getImportedElementsOfContext(EObject context);
+	Map<EObject, EObject> getImportedElementsByContext(Object original);
+	EObject getImportedElement(Object original, EObject context);
+	EObject getCurrentContext();
 }

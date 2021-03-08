@@ -3,6 +3,7 @@ package de.tud.et.ifa.agtele.emf.importing;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -16,6 +17,9 @@ public class ModelElementImportRegistry implements IModelElementImportRegistry {
 
 	protected Map<Object,LinkedHashSet<EObject>> importedObjects = new HashMap<>(); //TODO there may be multiple imported objects per aas element
 	protected Map<EObject,Object> originalNodes = new HashMap<>();
+	protected EObject creationContext;
+	
+	protected Map<EObject, Set<EObject>> contextMap = new HashMap<>();
 	
 	
 	@Override
@@ -27,6 +31,9 @@ public class ModelElementImportRegistry implements IModelElementImportRegistry {
 		}
 		set.add(imported);
 		this.originalNodes.put(imported, original);
+		if (this.creationContext != null) {
+			this.contextMap.get(this.creationContext).add(imported);
+		}
 	}
 	@Override
 	public void registerImportedElementUnique(Object original, EObject imported) {
@@ -42,6 +49,12 @@ public class ModelElementImportRegistry implements IModelElementImportRegistry {
 		}
 		
 		return null;
+	}
+	
+	@Override
+	public EObject getImportedElement(Object original, EObject context) {
+		Map<EObject, EObject> byContext = this.getImportedElementsByContext(original);		
+		return byContext.get(context);
 	}
 
 	@Override
@@ -64,6 +77,19 @@ public class ModelElementImportRegistry implements IModelElementImportRegistry {
 			this.importedObjects.remove(original);
 			for (EObject imp : imported) {
 				this.originalNodes.remove(imp);
+				
+				//clear from context map
+				if (this.contextMap.containsKey(imp)) {
+					this.contextMap.remove(imp);
+				}
+				EObject context = this.getContextOfImported(imp);
+				if (context != null) {
+					Collection<EObject> importedByContext = this.contextMap.get(context);
+					importedByContext.remove(imp);
+					if (importedByContext.isEmpty()) {
+						this.contextMap.remove(context);
+					}
+				}
 			}
 		} else if (this.originalNodes.containsKey(createdOrOriginal)) {
 			//one of many imported elements was handed
@@ -75,7 +101,20 @@ public class ModelElementImportRegistry implements IModelElementImportRegistry {
 			if (imported.isEmpty() ) {
 				this.importedObjects.remove(original);
 			}
-			this.originalNodes.remove(oneImported);			
+			this.originalNodes.remove(oneImported);	
+			
+			//clear from context map
+			if (this.contextMap.containsKey(oneImported)) {
+				this.contextMap.remove(oneImported);
+			}
+			EObject context = this.getContextOfImported(oneImported);
+			if (context != null) {
+				Collection<EObject> importedByContext = this.contextMap.get(context);
+				importedByContext.remove(oneImported);
+				if (importedByContext.isEmpty()) {
+					this.contextMap.remove(context);
+				}
+			}
 		} else if (this.importedObjects.containsValue(createdOrOriginal)) {
 			//a list of imported objects was specified
 			imported = (Set)createdOrOriginal;
@@ -87,10 +126,33 @@ public class ModelElementImportRegistry implements IModelElementImportRegistry {
 			this.importedObjects.remove(original);
 			for (EObject imp : imported) {
 				this.originalNodes.remove(imp);
+				
+				//clear from context map
+				if (this.contextMap.containsKey(imp)) {
+					this.contextMap.remove(imp);
+				}
+				EObject context = this.getContextOfImported(imp);
+				if (context != null) {
+					Collection<EObject> importedByContext = this.contextMap.get(context);
+					importedByContext.remove(imp);
+					if (importedByContext.isEmpty()) {
+						this.contextMap.remove(context);
+					}
+				}
 			}
 		}
+		
 	}
-
+	
+	@Override
+	public Collection<EObject> getContexts() {
+		return this.contextMap.keySet();
+	}
+	
+	@Override
+	public Collection<EObject> getImportedElementsOfContext(EObject context) {
+		return this.contextMap.get(context);
+	}
 	
 	@Override
 	public Collection<EObject> getImportedElements() {
@@ -110,6 +172,35 @@ public class ModelElementImportRegistry implements IModelElementImportRegistry {
 		}
 		return null;
 	}
+	
+	@Override
+	public EObject getContextOfImported(EObject element) {
+		for (Entry<EObject, Set<EObject>> entry : this.contextMap.entrySet()) {
+			if (entry.getValue().contains(element)) {
+				return entry.getKey();
+			}
+		}
+		return null;
+	}
+	
+	@Override
+	public Map<EObject, EObject> getImportedElementsByContext (Object original) {
+		Collection<EObject> imported = this.getImportedElements(original);
+		Map<EObject, EObject> result = new HashMap<>();
+		
+		if (imported == null) {
+			return result;
+		}
+		
+		for (EObject i : imported) {
+			EObject context = this.getContextOfImported(i);
+			if (context != null) {
+				result.put(context, i);
+			}			
+		}
+		
+		return result;
+	}
 
 	@Override
 	public EObject getImportedElement(Resource res, Object original) {
@@ -123,5 +214,16 @@ public class ModelElementImportRegistry implements IModelElementImportRegistry {
 		}
 		return null;
 	}
+	@Override
+	public void setContext(EObject modelRoot) {
+		this.creationContext = modelRoot;	
+		if (modelRoot != null && !this.contextMap.containsKey(modelRoot)) {
+			this.contextMap.put(modelRoot, new HashSet<>());
+		}
+	}
 
+	@Override
+	public EObject getCurrentContext () {
+		return this.creationContext;
+	}
 }

@@ -5,6 +5,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -48,18 +49,25 @@ public interface IModelImporter {
 			}			
 			this.getConnector().disconnect();
 		}
-	}	
+	}
 
 	default void importRootContentNode (Object node, Collection<EObject> target) {
+		//set the context explicitly to null before importing determining the type of the next root node
+		this.getImportRegistry().setContext(null);
 		INodeDescriptor descriptor = this.getConnector().getTypeInfo(node);
 		if (descriptor != null) {
 			EObject contentElement = this.createEObject(descriptor);
 			target.add(contentElement);
+			this.getImportRegistry().setContext(contentElement);
 			this.importAllContents(contentElement);
 		}
+		this.getImportRegistry().setContext(null);
 	}
 	
 	default void importAllContents (EObject element) {
+		if (element == null) {
+			return;
+		}
 		this.importContents(element);
 		Iterator<EObject> it = element.eContents().iterator();
 		int i = 0;
@@ -108,6 +116,10 @@ public interface IModelImporter {
 		return this.getImportRegistry().getImportedElement(node);
 	}
 	
+	default Set<EObject> getCreatedEObjects (Object node) {
+		return this.getImportRegistry().getImportedElements(node);
+	}
+	
 	default Object getOriginalNode (EObject eObject) {
 		return this.getImportRegistry().getOriginalElement(eObject);
 	}
@@ -117,7 +129,11 @@ public interface IModelImporter {
 	}
 			
 	default void importContents(EObject eObject) {
-		for (EReference ref : this.getImportStrategy(eObject.eClass()).getEContainmentsForImport(this, this.getConnector(), eObject)) {
+		if (eObject == null) {
+			return;
+		}
+		IModelImportStrategy strategy = this.getImportStrategy(eObject.eClass());
+		for (EReference ref : strategy.getEContainmentsForImport(this, this.getConnector(), eObject)) {
 			this.importContent(eObject, ref);
 		}
 	}

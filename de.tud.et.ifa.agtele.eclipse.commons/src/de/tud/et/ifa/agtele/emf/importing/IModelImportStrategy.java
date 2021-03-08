@@ -6,7 +6,9 @@ import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.Locale;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.eclipse.emf.common.util.EList;
@@ -36,14 +38,17 @@ public interface IModelImportStrategy {
 			if (reference.isMany()) {
 				try {
 					((EList)eObject.eGet(reference)).addAll(createdElements);
+					((EList)eObject.eGet(reference)).removeIf(e -> e==null);
 				} catch (Exception e) {
-					//TODO log error
+					e.printStackTrace();
+					//TODO update a problem indication
 				}
 			} else {
 				try {
 					eObject.eSet(reference, createdElements.get(0));
 				} catch (Exception e) {
-					//TODO log error
+					e.printStackTrace();
+					//TODO update a problem indication
 				}
 			}				
 		}
@@ -52,18 +57,42 @@ public interface IModelImportStrategy {
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	default void restoreReference(IModelImporter adapter, IModelConnector connector, EObject eObject, EReference reference) {
 		ArrayList<EObject> referencedElements = new ArrayList<>();
+		RefEntryLoop:
 		for (Object node : connector.readReference(adapter.getOriginalNode(eObject), reference)) {
-			EObject referencedElement = adapter.getCreatedEObject(node);
-			if (referencedElement != null && reference.getEType().isInstance(referencedElements)) {
-				referencedElements.add(referencedElement);				
-			} else if (node != null && node instanceof EObject && (reference.getEType().isInstance(node) || (reference.getEType() == EcorePackage.Literals.EOBJECT))) {
-				referencedElements.add((EObject) node);	
+			if (node == null) {
+				continue;
 			}
+			//1st try to restore reference from the same context		
+			EObject ownerContext = adapter.getImportRegistry().getContextOfImported(eObject);
+			EObject withinContextTarget = adapter.getImportRegistry().getImportedElement(node, ownerContext);
+			if (withinContextTarget != null && reference.getEType().isInstance(referencedElements) || reference.getEType() == EcorePackage.Literals.EOBJECT) {
+				referencedElements.add(withinContextTarget);
+				continue;
+			}
+			
+			//2nd if the reference is typed with an aas element type, try the target node directly
+			if (node instanceof EObject && (reference.getEType().isInstance(node) || (reference.getEType() == EcorePackage.Literals.EOBJECT))) {
+				referencedElements.add((EObject) node);
+				continue;
+			}
+						
+			//3nd find a restored element of the target that matches the reference type
+			Set<EObject> restoredPossibleTargets = adapter.getCreatedEObjects(node);
+			if (restoredPossibleTargets != null) {
+				for (EObject possibleTarget : restoredPossibleTargets) {
+					if (reference.getEType().isInstance(possibleTarget)) {
+						referencedElements.add(possibleTarget);
+						continue RefEntryLoop;
+					}
+				}
+			}			
+			//TODO log this reconstruction error
 		}
 		if (!referencedElements.isEmpty()) {
 			try {
 				if (reference.isMany()) {
 					((EList)eObject.eGet(reference)).addAll(referencedElements);
+					((EList)eObject.eGet(reference)).removeIf(e -> e==null);
 				} else {
 					eObject.eSet(reference, referencedElements.get(0));
 				}
