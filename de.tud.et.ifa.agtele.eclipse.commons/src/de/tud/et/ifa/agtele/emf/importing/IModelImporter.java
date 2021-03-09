@@ -59,6 +59,7 @@ public interface IModelImporter {
 			EObject contentElement = this.createEObject(descriptor);
 			target.add(contentElement);
 			this.getImportRegistry().setContext(contentElement);
+			this.getImportRegistry().registerImportedElement(node, contentElement);
 			this.importAllContents(contentElement);
 		}
 		this.getImportRegistry().setContext(null);
