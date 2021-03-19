@@ -11,7 +11,9 @@ import org.eclipse.emf.ecore.resource.Resource;
 public interface IModelElementImportRegistry {
 	
 	void registerImportedElement (Object original, EObject imported);
+	void registerImportedElement (Object original, EObject imported, EObject context);
 	void registerImportedElementUnique (Object original, EObject imported);
+	void registerImportedElementUnique (Object original, EObject imported, EObject context);
 	EObject getImportedElement (Object original);
 	Set<EObject> getImportedElements(Object original);
 	EObject getImportedElement (Resource res, Object original);
@@ -28,4 +30,8 @@ public interface IModelElementImportRegistry {
 	Map<EObject, EObject> getImportedElementsByContext(Object original);
 	EObject getImportedElement(Object original, EObject context);
 	EObject getCurrentContext();
+	
+	boolean containsOriginal(Object original);
+	boolean containsImported(Object imported);
+	
 }

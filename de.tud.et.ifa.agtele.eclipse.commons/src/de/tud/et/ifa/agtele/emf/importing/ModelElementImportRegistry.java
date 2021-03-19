@@ -20,10 +20,9 @@ public class ModelElementImportRegistry implements IModelElementImportRegistry {
 	protected EObject creationContext;
 	
 	protected Map<EObject, Set<EObject>> contextMap = new HashMap<>();
-	
-	
+
 	@Override
-	public void registerImportedElement(Object original, EObject imported) {
+	public void registerImportedElement(Object original, EObject imported, EObject context) {	
 		LinkedHashSet<EObject> set = importedObjects.get(original);
 		if (set == null) {
 			set = new LinkedHashSet<>();
@@ -31,14 +30,25 @@ public class ModelElementImportRegistry implements IModelElementImportRegistry {
 		}
 		set.add(imported);
 		this.originalNodes.put(imported, original);
-		if (this.creationContext != null) {
-			this.contextMap.get(this.creationContext).add(imported);
+		if (context != null) {
+			if (!this.contextMap.containsKey(context)) {
+				this.contextMap.put(context, new HashSet<>());
+			}
+			this.contextMap.get(context).add(imported);
 		}
 	}
 	@Override
-	public void registerImportedElementUnique(Object original, EObject imported) {
+	public void registerImportedElement(Object original, EObject imported) {
+		this.registerImportedElement(original, imported, this.creationContext);
+	}
+	@Override
+	public void registerImportedElementUnique(Object original, EObject imported, EObject context) {		
 		this.deregister(original);
-		this.registerImportedElement(original, imported);
+		this.registerImportedElement(original, imported, context);
+	}
+	@Override
+	public void registerImportedElementUnique(Object original, EObject imported) {
+		this.registerImportedElementUnique(original, imported, this.creationContext);
 	}
 
 	@Override
@@ -225,5 +235,13 @@ public class ModelElementImportRegistry implements IModelElementImportRegistry {
 	@Override
 	public EObject getCurrentContext () {
 		return this.creationContext;
+	}
+	@Override
+	public boolean containsOriginal(Object original) {
+		return this.importedObjects.containsKey(original);
+	}
+	@Override
+	public boolean containsImported(Object imported) {
+		return this.originalNodes.containsKey(imported);
 	}
 }
