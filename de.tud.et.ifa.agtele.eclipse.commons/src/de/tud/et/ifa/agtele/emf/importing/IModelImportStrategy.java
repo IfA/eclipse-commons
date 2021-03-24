@@ -65,7 +65,7 @@ public interface IModelImportStrategy {
 			//1st try to restore reference from the same context		
 			EObject ownerContext = adapter.getImportRegistry().getContextOfImported(eObject);
 			EObject withinContextTarget = adapter.getImportRegistry().getImportedElement(node, ownerContext);
-			if (withinContextTarget != null && reference.getEType().isInstance(referencedElements) || reference.getEType() == EcorePackage.Literals.EOBJECT) {
+			if (withinContextTarget != null && reference.getEType().isInstance(withinContextTarget) || reference.getEType() == EcorePackage.Literals.EOBJECT) {
 				referencedElements.add(withinContextTarget);
 				continue;
 			}
