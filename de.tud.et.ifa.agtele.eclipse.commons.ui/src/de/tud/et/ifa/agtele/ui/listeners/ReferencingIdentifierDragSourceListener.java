@@ -13,6 +13,8 @@ import org.eclipse.emf.edit.provider.IEditingDomainItemProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.StructuredViewer;
 import org.eclipse.swt.dnd.DragSourceEvent;
+
+import de.tud.et.ifa.agtele.emf.AgteleEcoreUtil;
 import de.tud.et.ifa.agtele.emf.edit.IReferencingIdentificationStringProvider;
 import de.tud.et.ifa.agtele.ui.util.ReferencingIdentifierTransfer;
 
@@ -90,15 +92,7 @@ public class ReferencingIdentifierDragSourceListener extends CommonDragSourceLis
 	}
 		
 	public static String getEcoreIdentifier(ENamedElement element) {
-		String prefix = "uri";
-		if (element instanceof EPackage) {
-			return prefix + ":" + ((EPackage)element).getNsURI();
-		} else if (element.eContainer() instanceof EPackage) {
-			return ReferencingIdentifierDragSourceListener.getEcoreIdentifier((EPackage)element.eContainer()) + "#" + element.getName();
-		} else if (element instanceof EStructuralFeature) {
-			return ReferencingIdentifierDragSourceListener.getEcoreIdentifier(((EStructuralFeature)element).getEContainingClass()) + "/" + element.getName();
-		}
-		return null;
+		return AgteleEcoreUtil.getEcoreElementReferencingIdentifier(element);
 	}
 	
 }

@@ -1083,6 +1083,22 @@ public interface AgteleEcoreUtil {
 		return null;
 	}
 	
+	public static final String URI_PREFIX = "uri";
+	public static final String PREFIX_SEPARATOR = ":";
+	
+	/**
+	 * Returns a registerable URI for an ecore element;
+	 * @param eElement
+	 * @return
+	 */
+	static String getEcoreElementReferencingIdentifier (EObject eElement) {
+		String uri = AgteleEcoreUtil.getEcoreElementUri(eElement);
+		if (uri == null) {
+			return null;
+		}
+		return URI_PREFIX + PREFIX_SEPARATOR + uri;
+	}
+	
 	/**
 	 * Returns a unique string that corresponds to the ecore element.
 	 * @param eElement
@@ -1195,6 +1211,9 @@ public interface AgteleEcoreUtil {
 	
 	public static boolean isReferencable(EObject eObject) {
 		try {
+			if (AgteleEcoreUtil.getAllContainers(eObject, true).contains(EcorePackage.eINSTANCE)) {
+				return true;
+			}
 			Adapter a = AgteleEcoreUtil.getAdapter(eObject, ItemProviderAdapter.class);
 			if (a != null && a instanceof IReferencingIdentificationStringProvider) {
 				return true;
@@ -1206,6 +1225,11 @@ public interface AgteleEcoreUtil {
 	}
 	
 	public static List<String> getReferencableStrings(EObject eObject) {
+
+		if (AgteleEcoreUtil.getAllContainers(eObject, true).contains(EcorePackage.eINSTANCE)) {
+			return Collections.singletonList(AgteleEcoreUtil.getEcoreElementReferencingIdentifier(eObject));
+		}
+		
 		Adapter itemProviderAdapter = null;
 		try {
 			itemProviderAdapter = AgteleEcoreUtil.getAdapter(eObject, ItemProviderAdapter.class);
