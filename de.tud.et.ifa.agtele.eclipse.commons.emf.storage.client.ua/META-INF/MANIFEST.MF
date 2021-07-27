@@ -1,0 +1,23 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: EMF Model Storage UA Client
+Bundle-SymbolicName: de.tud.et.ifa.agtele.eclipse.commons.emf.storage.client.ua;singleton:=true
+Automatic-Module-Name: de.tud.et.ifa.agtele.eclipse.emf.storage.client.ua
+Bundle-Version: 1.0.0.qualifier
+Bundle-Vendor: AgTele
+Bundle-Localization: plugin
+Bundle-RequiredExecutionEnvironment: JavaSE-12
+Export-Package: de.tud.et.ifa.agtele.eclipse.commons.emf.modelStorage.uaModelStorageClient,
+ de.tud.et.ifa.agtele.eclipse.commons.emf.modelStorage.uaModelStorageClient.impl,
+ de.tud.et.ifa.agtele.eclipse.commons.emf.modelStorage.uaModelStorageClient.util
+Require-Bundle: org.eclipse.core.runtime,
+ org.eclipse.emf.ecore;visibility:=reexport,
+ org.eclipse.osgi,
+ org.eclipse.ui,
+ de.tud.et.ifa.agtele.eclipse.commons.emf.storage;visibility:=reexport,
+ de.tud.et.ifa.agtele.eclipse.commons,
+ de.tud.et.ifa.agtele.eclipse.commons.ua;bundle-version="1.0.0";visibility:=reexport
+Bundle-ActivationPolicy: lazy
+Bundle-Activator: de.tud.et.ifa.agtele.eclipse.commons.emf.modelStorage.uaModelStorageClient.EMFStorageUAClientActivator
+Eclipse-RegisterBuddy: de.tud.et.ifa.agtele.i40Component.ide.client
+Bundle-ClassPath: .

@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.0"?>
+
+<!--
+-->
+
+<plugin>
+   <extension-point id="extensionpoint.connector" name="Model Storage Connector Extension Point" schema="schema/AgTele_EMF_ModelStorage_Connector_ExtensionPoint.exsd"/>
+
+   <extension point="org.eclipse.emf.ecore.generated_package">
+      <!-- @generated modelStorage -->
+      <package
+            uri="http://et.tu-dresden.de/ifa/EMFModelStorage/model/v0.1"
+            class="de.tud.et.ifa.agtele.eclipse.commons.emf.modelStorage.ModelStoragePackage"
+            genModel="model/modelStorage.genmodel"/>
+   </extension>
+
+   <extension point="org.eclipse.emf.ecore.generated_package">
+      <!-- @generated modelStorage -->
+      <package
+            uri="http://et.tu-dresden.de/ifa/EMFModelStorage/model/v0.1/importAdapter"
+            class="de.tud.et.ifa.agtele.eclipse.commons.emf.modelStorage.importAdapter.ImportAdapterPackage"
+            genModel="model/modelStorage.genmodel"/>
+   </extension>
+
+   <extension point="org.eclipse.emf.edit.itemProviderAdapterFactories">
+      <!-- @generated modelStorage -->
+      <factory
+            uri="http://et.tu-dresden.de/ifa/EMFModelStorage/model/v0.1"
+            class="de.tud.et.ifa.agtele.eclipse.commons.emf.modelStorage.provider.ModelStorageItemProviderAdapterFactory"
+            supportedTypes=
+              "org.eclipse.emf.edit.provider.IEditingDomainItemProvider
+               org.eclipse.emf.edit.provider.IStructuredItemContentProvider
+               org.eclipse.emf.edit.provider.ITreeItemContentProvider
+               org.eclipse.emf.edit.provider.IItemLabelProvider
+               org.eclipse.emf.edit.provider.IItemPropertySource
+               org.eclipse.emf.edit.provider.IItemColorProvider
+               org.eclipse.emf.edit.provider.IItemStyledLabelProvider"/>
+   </extension>
+
+   <extension point="org.eclipse.emf.edit.itemProviderAdapterFactories">
+      <!-- @generated modelStorage -->
+      <factory
+            uri="http://et.tu-dresden.de/ifa/EMFModelStorage/model/v0.1/importAdapter"
+            class="de.tud.et.ifa.agtele.eclipse.commons.emf.modelStorage.importAdapter.provider.ImportAdapterItemProviderAdapterFactory"
+            supportedTypes=
+              "org.eclipse.emf.edit.provider.IEditingDomainItemProvider
+               org.eclipse.emf.edit.provider.IStructuredItemContentProvider
+               org.eclipse.emf.edit.provider.ITreeItemContentProvider
+               org.eclipse.emf.edit.provider.IItemLabelProvider
+               org.eclipse.emf.edit.provider.IItemPropertySource
+               org.eclipse.emf.edit.provider.IItemColorProvider
+               org.eclipse.emf.edit.provider.IItemStyledLabelProvider"/>
+   </extension>
+   <extension
+         point="de.tud.et.ifa.agtele.eclipse.commons.emf.storage.extensionpoint.connector">
+      <connector
+            className="FileSystemConnector"
+            packageUri="http://et.tu-dresden.de/ifa/EMFModelStorage/model/v0.1/importAdapter">
+         <schemaEntry
+               prefix="platform">
+         </schemaEntry>
+      </connector>
+   </extension>
+</plugin>

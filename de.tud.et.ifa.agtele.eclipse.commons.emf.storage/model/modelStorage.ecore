@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ecore:EPackage xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:ecore="http://www.eclipse.org/emf/2002/Ecore" name="modelStorage" nsURI="http://et.tu-dresden.de/ifa/EMFModelStorage/model/v0.1"
+    nsPrefix="ms">
+  <eClassifiers xsi:type="ecore:EClass" name="ModelStorage">
+    <eStructuralFeatures xsi:type="ecore:EReference" name="model" upperBound="-1"
+        eType="#//Model" containment="true">
+      <eAnnotations source="http://et.tu-dresden.de/ifa/emf/commons/2018/AgTeleGenModel">
+        <details key="get" value="&#xD;&#xA;if (model == null) {&#xD;&#xA;&#x9;model = new &lt;%org.eclipse.emf.ecore.util.EObjectContainmentEList%>.Resolving&lt;&lt;%de.tud.et.ifa.agtele.eclipse.emf.modelStorage.Model%>>(Model.class, this,&#xD;&#xA;&#x9;&#x9;&#x9;&lt;%de.tud.et.ifa.agtele.eclipse.emf.modelStorage.ModelStoragePackage%>.MODEL_STORAGE__MODEL);&#xD;&#xA;&#x9;this.eAdapters().add(new &lt;%org.eclipse.emf.ecore.util.EContentAdapter%>() {&#xD;&#xA;&#xD;&#xA;&#x9;&#x9;@SuppressWarnings(&quot;rawtypes&quot;)&#xD;&#xA;&#x9;&#x9;@Override&#xD;&#xA;&#x9;&#x9;public void notifyChanged(&lt;%org.eclipse.emf.common.notify.Notification%> notification) {&#xD;&#xA;&#x9;&#x9;&#x9;if (notification.getFeature() == ModelStoragePackage.Literals.MODEL_STORAGE__MODEL) {&#xD;&#xA;&#x9;&#x9;&#x9;&#x9;if (notification.getEventType() == Notification.ADD) {&#xD;&#xA;&#x9;&#x9;&#x9;&#x9;&#x9;if (notification.getNewValue() instanceof Model) {&#xD;&#xA;&#x9;&#x9;&#x9;&#x9;&#x9;&#x9;Model model = (Model) notification.getNewValue();&#xD;&#xA;&#x9;&#x9;&#x9;&#x9;&#x9;&#x9;if (model.getResourceSet() != null) {&#xD;&#xA;&#x9;&#x9;&#x9;&#x9;&#x9;&#x9;&#x9;ModelStorageImpl.this.registerResourceSet(model.getResourceSet(), model);&#xD;&#xA;&#x9;&#x9;&#x9;&#x9;&#x9;&#x9;}&#xD;&#xA;&#x9;&#x9;&#x9;&#x9;&#x9;}&#xD;&#xA;&#x9;&#x9;&#x9;&#x9;} else if (notification.getEventType() == Notification.ADD_MANY) {&#xD;&#xA;&#x9;&#x9;&#x9;&#x9;&#x9;if (notification.getNewValue() instanceof &lt;%java.util.Collection%>) {&#xD;&#xA;&#x9;&#x9;&#x9;&#x9;&#x9;&#x9;for (Object element : (Collection) notification.getNewValue()) {&#xD;&#xA;&#x9;&#x9;&#x9;&#x9;&#x9;&#x9;&#x9;if (element instanceof Model) {&#xD;&#xA;&#x9;&#x9;&#x9;&#x9;&#x9;&#x9;&#x9;&#x9;if (((Model) element).getResourceSet() != null) {&#xD;&#xA;&#x9;&#x9;&#x9;&#x9;&#x9;&#x9;&#x9;&#x9;&#x9;ModelStorageImpl.this.registerResourceSet(&#xD;&#xA;&#x9;&#x9;&#x9;&#x9;&#x9;&#x9;&#x9;&#x9;&#x9;&#x9;&#x9;((Model) element).getResourceSet(), ((Model) element));&#xD;&#xA;&#x9;&#x9;&#x9;&#x9;&#x9;&#x9;&#x9;&#x9;}&#xD;&#xA;&#x9;&#x9;&#x9;&#x9;&#x9;&#x9;&#x9;}&#xD;&#xA;&#x9;&#x9;&#x9;&#x9;&#x9;&#x9;}&#xD;&#xA;&#x9;&#x9;&#x9;&#x9;&#x9;}&#xD;&#xA;&#x9;&#x9;&#x9;&#x9;} else if (notification.getEventType() == Notification.REMOVE) {&#xD;&#xA;&#x9;&#x9;&#x9;&#x9;&#x9;if (notification.getOldValue() instanceof Model) {&#xD;&#xA;&#x9;&#x9;&#x9;&#x9;&#x9;&#x9;Model model = (Model) notification.getOldValue();&#xD;&#xA;&#x9;&#x9;&#x9;&#x9;&#x9;&#x9;if (model.getResourceSet() != null) {&#xD;&#xA;&#x9;&#x9;&#x9;&#x9;&#x9;&#x9;&#x9;ModelStorageImpl.this.registerResourceSet(model.getResourceSet(), null);&#xD;&#xA;&#x9;&#x9;&#x9;&#x9;&#x9;&#x9;}&#xD;&#xA;&#x9;&#x9;&#x9;&#x9;&#x9;}&#xD;&#xA;&#x9;&#x9;&#x9;&#x9;} else if (notification.getEventType() == Notification.REMOVE_MANY) {&#xD;&#xA;&#x9;&#x9;&#x9;&#x9;&#x9;if (notification.getOldValue() instanceof Collection) {&#xD;&#xA;&#x9;&#x9;&#x9;&#x9;&#x9;&#x9;for (Object element : (Collection) notification.getOldValue()) {&#xD;&#xA;&#x9;&#x9;&#x9;&#x9;&#x9;&#x9;&#x9;if (element instanceof Model) {&#xD;&#xA;&#x9;&#x9;&#x9;&#x9;&#x9;&#x9;&#x9;&#x9;if (((Model) element).getResourceSet() != null) {&#xD;&#xA;&#x9;&#x9;&#x9;&#x9;&#x9;&#x9;&#x9;&#x9;&#x9;ModelStorageImpl.this&#xD;&#xA;&#x9;&#x9;&#x9;&#x9;&#x9;&#x9;&#x9;&#x9;&#x9;&#x9;&#x9;.registerResourceSet(((Model) element).getResourceSet(), null);&#xD;&#xA;&#x9;&#x9;&#x9;&#x9;&#x9;&#x9;&#x9;&#x9;}&#xD;&#xA;&#x9;&#x9;&#x9;&#x9;&#x9;&#x9;&#x9;}&#xD;&#xA;&#x9;&#x9;&#x9;&#x9;&#x9;&#x9;}&#xD;&#xA;&#x9;&#x9;&#x9;&#x9;&#x9;}&#xD;&#xA;&#x9;&#x9;&#x9;&#x9;}&#xD;&#xA;&#x9;&#x9;&#x9;}&#xD;&#xA;&#x9;&#x9;}&#xD;&#xA;&#x9;});&#xD;&#xA;}&#xD;&#xA;return model;"/>
+      </eAnnotations>
+    </eStructuralFeatures>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="connector" upperBound="-1"
+        eType="#//importAdapter/Connector" containment="true"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="name" eType="ecore:EDataType ../../org.eclipse.emf.ecore/model/Ecore.ecore#//EString"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="PassiveModelStorage" eSuperTypes="#//ModelStorage"/>
+  <eClassifiers xsi:type="ecore:EClass" name="Model">
+    <eStructuralFeatures xsi:type="ecore:EReference" name="content" upperBound="-1"
+        eType="ecore:EClass ../../org.eclipse.emf.ecore/model/Ecore.ecore#//EObject"
+        derived="true">
+      <eAnnotations source="http://et.tu-dresden.de/ifa/emf/commons/2018/AgTeleGenModel">
+        <details key="get" value="&#xD;&#xA;if (content == null) {&#xD;&#xA;&#x9;content = new &lt;%org.eclipse.emf.ecore.util.EObjectResolvingEList%>&lt;&lt;%org.eclipse.emf.ecore.EObject%>>(EObject.class, this, &lt;%de.tud.et.ifa.agtele.eclipse.emf.modelStorage.ModelStoragePackage%>.MODEL__CONTENT);&#xD;&#xA;}&#xD;&#xA;&#xD;&#xA;&lt;%java.util.ArrayList%>&lt;EObject> currentContent = new ArrayList&lt;>();&#xD;&#xA;&lt;%java.util.List%>&lt;EObject> toAdd, toRemove;&#xD;&#xA;&#xD;&#xA;for (&lt;%org.eclipse.emf.ecore.resource.Resource%> res : this.resourceSet.getResources()) {&#xD;&#xA;&#x9;currentContent.addAll(res.getContents());&#xD;&#xA;}&#xD;&#xA;&#xD;&#xA;toRemove = content.stream().filter(o -> !currentContent.contains(o)).collect(&lt;%java.util.stream.Collectors%>.toList());&#xD;&#xA;toAdd = currentContent.stream().filter(o -> !content.contains(o)).collect(Collectors.toList());&#xD;&#xA;&#xD;&#xA;content.removeAll(toRemove);&#xD;&#xA;content.addAll(toAdd);&#xD;&#xA;&#xD;&#xA;return content;"/>
+      </eAnnotations>
+    </eStructuralFeatures>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="uri" lowerBound="1" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="importAdapter" eType="#//importAdapter/ImportAdapter"
+        containment="true" eOpposite="#//importAdapter/ImportAdapter/model"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="LinkedModel" eSuperTypes="#//Model"/>
+  <eClassifiers xsi:type="ecore:EClass" name="ModelAdapter" abstract="true" eSuperTypes="#//Model"/>
+  <eSubpackages name="importAdapter" nsURI="http://et.tu-dresden.de/ifa/EMFModelStorage/model/v0.1/importAdapter"
+      nsPrefix="msi">
+    <eClassifiers xsi:type="ecore:EClass" name="Connector" abstract="true">
+      <eStructuralFeatures xsi:type="ecore:EAttribute" name="connectionUri" lowerBound="1"
+          eType="ecore:EDataType ../../org.eclipse.emf.ecore/model/Ecore.ecore#//EString"/>
+    </eClassifiers>
+    <eClassifiers xsi:type="ecore:EClass" name="ImportAdapter">
+      <eStructuralFeatures xsi:type="ecore:EReference" name="connector" lowerBound="1"
+          eType="#//importAdapter/Connector"/>
+      <eStructuralFeatures xsi:type="ecore:EReference" name="model" lowerBound="1"
+          eType="#//Model" eOpposite="#//Model/importAdapter"/>
+    </eClassifiers>
+    <eClassifiers xsi:type="ecore:EClass" name="FileSystemConnector" eSuperTypes="#//importAdapter/Connector"/>
+  </eSubpackages>
+</ecore:EPackage>
