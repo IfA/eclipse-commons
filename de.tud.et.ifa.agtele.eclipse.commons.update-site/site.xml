@@ -6,6 +6,9 @@
    <feature url="features/de.tud.et.ifa.agtele.eclipse.commons.feature_1.3.0.qualifier.jar" id="de.tud.et.ifa.agtele.eclipse.commons.feature" version="1.3.0.qualifier">
       <category name="de.tud.et.ifa.agtele.eclipse.commons.category"/>
    </feature>
+   <feature url="features/de.tud.et.ifa.agtele.eclipse.commons.emf.storage.feature_0.1.0.qualifier.jar" id="de.tud.et.ifa.agtele.eclipse.commons.emf.storage.feature" version="0.1.0.qualifier">
+      <category name="de.tud.et.ifa.agtele.eclipse.commons.category"/>
+   </feature>
    <category-def name="de.tud.et.ifa.agtele.eclipse.commons.category" label="AG Tele Eclipse Commons">
       <description>
          This site contains the AGTele Eclipse Commons Tools that offers convience methods and tools for working with the Eclipse Modeling Framework.

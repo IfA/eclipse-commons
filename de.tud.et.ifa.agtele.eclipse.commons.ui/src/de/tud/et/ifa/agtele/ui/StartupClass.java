@@ -25,6 +25,9 @@ import de.tud.et.ifa.agtele.ui.listeners.GeneratedCodeChangedListener;
  */
 public class StartupClass implements IStartup {
 
+	public StartupClass() {
+	}
+	
 	@Override
 	public void earlyStartup() {
 

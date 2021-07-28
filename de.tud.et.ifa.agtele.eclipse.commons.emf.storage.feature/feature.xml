@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feature
+      id="de.tud.et.ifa.agtele.eclipse.commons.emf.storage.feature"
+      label="Eclipse Commons EMF Model Storage Feature"
+      version="0.1.0.qualifier"
+      provider-name="AG Tele">
+
+   <description>
+      This feature includes the AG Tele Eclipse Commons.
+   </description>
+
+   <copyright url="https://www.eclipse.org/org/documents/epl-v10.php">
+      Copyright (C) 2016-2018 Institute of Automation, TU Dresden.
+All rights reserved. This program and the accompanying materials
+are made available under the terms of the Eclipse Public License
+v1.0
+which accompanies this distribution, and is available at
+http://www.eclipse.org/legal/epl-v10.html
+Contributors:
+Institute of Automation, TU Dresden - initial API and implementation
+   </copyright>
+
+   <license url="%licenseURL">
+      %license
+   </license>
+
+   <url>
+      <update label="AG Tele Eclipse Commons Update Site" url="https://agtele.eats.et.tu-dresden.de/projects/eclipse-commons/updates"/>
+      <discovery label="Eclipse Neon Release" url="http://download.eclipse.org/eclipse/updates/4.6"/>
+      <discovery label="Eclipse Neon Release" url="http://download.eclipse.org/eclipse/updates/4.6/"/>
+      <discovery label="Eclipse Oxygen Release" url="http://download.eclipse.org/eclipse/updates/4.7"/>
+      <discovery label="Eclipse Oxygen Release" url="http://download.eclipse.org/eclipse/updates/4.7/"/>
+      <discovery label="Eclipse Updates 4.8" url="http://download.eclipse.org/eclipse/updates/4.8"/>
+      <discovery label="Eclipse Updates 4.8" url="http://download.eclipse.org/eclipse/updates/4.8/"/>
+      <discovery label="Eclipse Updates 4.9" url="http://download.eclipse.org/eclipse/updates/4.9"/>
+      <discovery label="Eclipse Updates 4.9" url="http://download.eclipse.org/eclipse/updates/4.9/"/>
+      <discovery label="Eclipse Updates 4.10" url="http://download.eclipse.org/eclipse/updates/4.10"/>
+      <discovery label="Eclipse Updates 4.10" url="http://download.eclipse.org/eclipse/updates/4.10/"/>
+   </url>
+
+   <includes
+         id="de.tud.et.ifa.agtele.eclipse.commons.feature"
+         version="0.0.0"/>
+
+   <requires>
+      <import plugin="org.eclipse.emf.common"/>
+      <import plugin="org.eclipse.emf.ecore"/>
+      <import plugin="org.eclipse.emf.edit"/>
+      <import plugin="org.eclipse.emf.common.ui"/>
+      <import plugin="org.eclipse.jface"/>
+      <import plugin="org.eclipse.ui"/>
+      <import plugin="org.eclipse.swt"/>
+      <import plugin="org.eclipse.emf.edit.ui"/>
+      <import plugin="org.eclipse.osgi"/>
+      <import plugin="org.eclipse.core.runtime" version="3.15.0" match="greaterOrEqual"/>
+      <import plugin="org.eclipse.emf.ecore.edit"/>
+      <import plugin="org.eclipse.core.resources" version="3.13.100" match="greaterOrEqual"/>
+      <import plugin="org.eclipse.emf.ecore.xmi" version="2.15.0" match="greaterOrEqual"/>
+      <import plugin="de.tud.et.ifa.agtele.eclipse.commons"/>
+      <import plugin="org.eclipse.equinox.registry"/>
+      <import plugin="org.eclipse.jdt.core"/>
+      <import plugin="javax.inject"/>
+      <import plugin="org.eclipse.e4.ui.model.workbench"/>
+      <import plugin="org.eclipse.e4.ui.di"/>
+      <import plugin="org.eclipse.e4.ui.services"/>
+      <import plugin="org.eclipse.e4.core.di.annotations"/>
+      <import plugin="org.eclipse.ui.workbench"/>
+      <import plugin="de.tud.et.ifa.agtele.eclipse.commons.ui"/>
+      <import plugin="org.eclipse.epsilon.dt.epackageregistryexplorer"/>
+      <import plugin="javax.annotation"/>
+      <import plugin="de.tud.et.ifa.agtele.eclipse.commons.ua" version="1.0.0" match="greaterOrEqual"/>
+   </requires>
+
+   <plugin
+         id="de.tud.et.ifa.agtele.eclipse.commons.emf.storage"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="de.tud.et.ifa.agtele.eclipse.commons.emf.storage.ui"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="de.tud.et.ifa.agtele.eclipse.commons.emf.storage.client.ua"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="de.tud.et.ifa.agtele.eclipse.commons.ua"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+</feature>

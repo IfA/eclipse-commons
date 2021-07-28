@@ -23,7 +23,8 @@ Require-Bundle: javax.inject,
  org.eclipse.ui.workbench,
  org.eclipse.emf.ecore.xmi,
  org.eclipse.emf.edit,
- de.tud.et.ifa.agtele.eclipse.commons.ui;visibility:=reexport
+ de.tud.et.ifa.agtele.eclipse.commons.ui;visibility:=reexport,
+ org.eclipse.epsilon.dt.epackageregistryexplorer
 Bundle-RequiredExecutionEnvironment: JavaSE-12
 Automatic-Module-Name: de.tud.et.ifa.agtele.eclipse.commons.emf.storage.ui
 Import-Package: de.tud.et.ifa.agtele.ui,

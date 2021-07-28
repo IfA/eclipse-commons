@@ -34,3 +34,4 @@ Export-Package: de.tud.et.ifa.agtele,
 Import-Package: org.eclipse.emf.ecore.xmi,
  org.eclipse.emf.ecore.xmi.impl
 Automatic-Module-Name: de.tud.et.ifa.agtele.eclipse.commons
+Bundle-ClassPath: .

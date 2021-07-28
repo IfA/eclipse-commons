@@ -1,4 +1,4 @@
-package de.tud.et.ifa.agtele.ui.views;
+package de.tud.et.ifa.agtele.eclipse.commons.emf.storage.ui.views;
 
 import java.util.ArrayList;
 import java.util.Collections;
