@@ -38,10 +38,6 @@ Institute of Automation, TU Dresden - initial API and implementation
       <discovery label="Eclipse Updates 4.10" url="http://download.eclipse.org/eclipse/updates/4.10/"/>
    </url>
 
-   <includes
-         id="de.tud.et.ifa.agtele.eclipse.commons.feature"
-         version="0.0.0"/>
-
    <requires>
       <import plugin="org.eclipse.emf.common"/>
       <import plugin="org.eclipse.emf.ecore"/>
@@ -69,6 +65,7 @@ Institute of Automation, TU Dresden - initial API and implementation
       <import plugin="org.eclipse.epsilon.dt.epackageregistryexplorer"/>
       <import plugin="javax.annotation"/>
       <import plugin="de.tud.et.ifa.agtele.eclipse.commons.ua" version="1.0.0" match="greaterOrEqual"/>
+      <import feature="de.tud.et.ifa.agtele.eclipse.commons.feature" match="greaterOrEqual"/>
    </requires>
 
    <plugin
