@@ -1,5 +1,61 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
+	<classpathentry exported="true" kind="lib" path="dependencies/annotations-13.0.jar"/>
+	<classpathentry exported="true" kind="lib" path="dependencies/annotations-13.0-sources.jar"/>
+	<classpathentry exported="true" kind="lib" path="dependencies/bcpkix-jdk15on-1.61.jar"/>
+	<classpathentry exported="true" kind="lib" path="dependencies/bcpkix-jdk15on-1.61-sources.jar"/>
+	<classpathentry exported="true" kind="lib" path="dependencies/bcprov-jdk15on-1.61.jar"/>
+	<classpathentry exported="true" kind="lib" path="dependencies/bcprov-jdk15on-1.61-sources.jar"/>
+	<classpathentry exported="true" kind="lib" path="dependencies/guava-26.0-jre.jar"/>
+	<classpathentry exported="true" kind="lib" path="dependencies/guava-26.0-jre-sources.jar"/>
+	<classpathentry exported="true" kind="lib" path="dependencies/istack-commons-runtime-3.0.11.jar"/>
+	<classpathentry exported="true" kind="lib" path="dependencies/istack-commons-runtime-3.0.11-sources.jar"/>
+	<classpathentry exported="true" kind="lib" path="dependencies/jakarta.activation-1.2.2.jar"/>
+	<classpathentry exported="true" kind="lib" path="dependencies/jakarta.activation-1.2.2-sources.jar"/>
+	<classpathentry exported="true" kind="lib" path="dependencies/jakarta.xml.bind-api-2.3.3.jar"/>
+	<classpathentry exported="true" kind="lib" path="dependencies/jakarta.xml.bind-api-2.3.3-sources.jar"/>
+	<classpathentry exported="true" kind="lib" path="dependencies/jaxb-runtime-2.3.3.jar"/>
+	<classpathentry exported="true" kind="lib" path="dependencies/jaxb-runtime-2.3.3-sources.jar"/>
+	<classpathentry exported="true" kind="lib" path="dependencies/kotlin-stdlib-1.4.30.jar"/>
+	<classpathentry exported="true" kind="lib" path="dependencies/kotlin-stdlib-1.4.30-sources.jar"/>
+	<classpathentry exported="true" kind="lib" path="dependencies/kotlin-stdlib-common-1.4.30.jar"/>
+	<classpathentry exported="true" kind="lib" path="dependencies/kotlin-stdlib-common-1.4.30-sources.jar"/>
+	<classpathentry exported="true" kind="lib" path="dependencies/kotlin-stdlib-jdk7-1.4.30.jar"/>
+	<classpathentry exported="true" kind="lib" path="dependencies/kotlin-stdlib-jdk7-1.4.30-sources.jar"/>
+	<classpathentry exported="true" kind="lib" path="dependencies/kotlin-stdlib-jdk8-1.4.30.jar"/>
+	<classpathentry exported="true" kind="lib" path="dependencies/kotlin-stdlib-jdk8-1.4.30-sources.jar"/>
+	<classpathentry exported="true" kind="lib" path="dependencies/netty-buffer-4.1.54.Final.jar"/>
+	<classpathentry exported="true" kind="lib" path="dependencies/netty-buffer-4.1.54.Final-sources.jar"/>
+	<classpathentry exported="true" kind="lib" path="dependencies/netty-channel-fsm-0.5.jar"/>
+	<classpathentry exported="true" kind="lib" path="dependencies/netty-channel-fsm-0.5-sources.jar"/>
+	<classpathentry exported="true" kind="lib" path="dependencies/netty-codec-4.1.54.Final.jar"/>
+	<classpathentry exported="true" kind="lib" path="dependencies/netty-codec-4.1.54.Final-sources.jar"/>
+	<classpathentry exported="true" kind="lib" path="dependencies/netty-codec-http-4.1.54.Final.jar"/>
+	<classpathentry exported="true" kind="lib" path="dependencies/netty-codec-http-4.1.54.Final-sources.jar"/>
+	<classpathentry exported="true" kind="lib" path="dependencies/netty-common-4.1.54.Final.jar"/>
+	<classpathentry exported="true" kind="lib" path="dependencies/netty-common-4.1.54.Final-sources.jar"/>
+	<classpathentry exported="true" kind="lib" path="dependencies/netty-handler-4.1.54.Final.jar"/>
+	<classpathentry exported="true" kind="lib" path="dependencies/netty-handler-4.1.54.Final-sources.jar"/>
+	<classpathentry exported="true" kind="lib" path="dependencies/netty-resolver-4.1.54.Final.jar"/>
+	<classpathentry exported="true" kind="lib" path="dependencies/netty-resolver-4.1.54.Final-sources.jar"/>
+	<classpathentry exported="true" kind="lib" path="dependencies/netty-transport-4.1.54.Final.jar"/>
+	<classpathentry exported="true" kind="lib" path="dependencies/netty-transport-4.1.54.Final-sources.jar"/>
+	<classpathentry exported="true" kind="lib" path="dependencies/sdk-client-0.6.1.jar" sourcepath="dependencies/sdk-client-0.6.1-sources.jar"/>
+	<classpathentry exported="true" kind="lib" path="dependencies/sdk-client-0.6.1-sources.jar"/>
+	<classpathentry exported="true" kind="lib" path="dependencies/sdk-core-0.6.1.jar"/>
+	<classpathentry exported="true" kind="lib" path="dependencies/sdk-core-0.6.1-sources.jar"/>
+	<classpathentry exported="true" kind="lib" path="dependencies/slf4j-api-1.7.21.jar"/>
+	<classpathentry exported="true" kind="lib" path="dependencies/slf4j-api-1.7.21-sources.jar"/>
+	<classpathentry exported="true" kind="lib" path="dependencies/slf4j-simple-1.7.21.jar"/>
+	<classpathentry exported="true" kind="lib" path="dependencies/slf4j-simple-1.7.21-sources.jar"/>
+	<classpathentry exported="true" kind="lib" path="dependencies/stack-client-0.6.1.jar"/>
+	<classpathentry exported="true" kind="lib" path="dependencies/stack-client-0.6.1-sources.jar"/>
+	<classpathentry exported="true" kind="lib" path="dependencies/stack-core-0.6.1.jar" sourcepath="dependencies/stack-core-0.6.1-sources.jar"/>
+	<classpathentry exported="true" kind="lib" path="dependencies/stack-core-0.6.1-sources.jar"/>
+	<classpathentry exported="true" kind="lib" path="dependencies/strict-machine-0.5.jar"/>
+	<classpathentry exported="true" kind="lib" path="dependencies/strict-machine-0.5-sources.jar"/>
+	<classpathentry exported="true" kind="lib" path="dependencies/txw2-2.3.3.jar"/>
+	<classpathentry exported="true" kind="lib" path="dependencies/txw2-2.3.3-sources.jar"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-12">
 		<attributes>
 			<attribute name="module" value="true"/>
@@ -13,23 +69,5 @@
 			<attribute name="maven.pomderived" value="true"/>
 		</attributes>
 	</classpathentry>
-	<classpathentry exported="true" kind="lib" path="dependencies/bsd-parser-core-0.2.4.jar"/>
-	<classpathentry exported="true" kind="lib" path="dependencies/gson-2.8.2.jar"/>
-	<classpathentry exported="true" kind="lib" path="dependencies/guava-19.0.jar"/>
-	<classpathentry exported="true" kind="lib" path="dependencies/jaxb-api-2.2.7.jar"/>
-	<classpathentry exported="true" kind="lib" path="dependencies/jool-0.9.10.jar"/>
-	<classpathentry exported="true" kind="lib" path="dependencies/jsr305-3.0.1.jar"/>
-	<classpathentry exported="true" kind="lib" path="dependencies/netty-buffer-4.0.36.Final.jar"/>
-	<classpathentry exported="true" kind="lib" path="dependencies/netty-codec-4.0.36.Final.jar"/>
-	<classpathentry exported="true" kind="lib" path="dependencies/netty-common-4.0.36.Final.jar"/>
-	<classpathentry exported="true" kind="lib" path="dependencies/netty-handler-4.0.36.Final.jar"/>
-	<classpathentry exported="true" kind="lib" path="dependencies/netty-transport-4.0.36.Final.jar"/>
-	<classpathentry exported="true" kind="lib" path="dependencies/protonpack-1.8.jar"/>
-	<classpathentry exported="true" kind="lib" path="dependencies/sdk-client-0.2.4.jar"/>
-	<classpathentry exported="true" kind="lib" path="dependencies/sdk-core-0.2.4.jar"/>
-	<classpathentry exported="true" kind="lib" path="dependencies/slf4j-api-1.7.21.jar"/>
-	<classpathentry exported="true" kind="lib" path="dependencies/stack-client-0.2.4.jar"/>
-	<classpathentry exported="true" kind="lib" path="dependencies/stack-core-0.2.4.jar"/>
-	<classpathentry exported="true" kind="lib" path="dependencies/slf4j-simple-1.7.21.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
