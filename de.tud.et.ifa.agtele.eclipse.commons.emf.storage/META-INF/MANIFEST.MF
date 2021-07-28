@@ -1,11 +1,11 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
-Bundle-Name: EMF Storage
+Bundle-Name: %pluginName
 Bundle-SymbolicName: de.tud.et.ifa.agtele.eclipse.commons.emf.storage;singleton:=true
 Automatic-Module-Name: de.tud.et.ifa.agtele.eclipse.commons.emf.storage
 Bundle-Version: 1.0.0.qualifier
 Bundle-ClassPath: .
-Bundle-Vendor: AgTele
+Bundle-Vendor: %providerName
 Bundle-Localization: plugin
 Bundle-RequiredExecutionEnvironment: JavaSE-12
 Export-Package: de.tud.et.ifa.agtele.eclipse.commons.emf.modelStorage;
@@ -23,7 +23,9 @@ Export-Package: de.tud.et.ifa.agtele.eclipse.commons.emf.modelStorage;
    de.tud.et.ifa.agtele.eclipse.emf.modelStorage.importAdapter,
    org.eclipse.emf.common.notify,
    org.eclipse.emf.ecore.resource",
- de.tud.et.ifa.agtele.eclipse.commons.emf.modelStorage.importAdapter;uses:="org.eclipse.emf.ecore,de.tud.et.ifa.agtele.eclipse.emf.modelStorage",
+ de.tud.et.ifa.agtele.eclipse.commons.emf.modelStorage.importAdapter;
+  uses:="org.eclipse.emf.ecore,
+   de.tud.et.ifa.agtele.eclipse.emf.modelStorage",
  de.tud.et.ifa.agtele.eclipse.commons.emf.modelStorage.importAdapter.impl;
   uses:="org.eclipse.emf.ecore,
    de.tud.et.ifa.agtele.eclipse.emf.modelStorage,

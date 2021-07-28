@@ -134,8 +134,8 @@ public class ModelStorageImpl extends MinimalEObjectImpl.Container implements Mo
 	
 		
 		if (model == null) {
-			model = new EObjectContainmentEList.Resolving<Model>(Model.class, this,
-					ModelStoragePackage.MODEL_STORAGE__MODEL);
+			model = new EObjectContainmentEList.Resolving<de.tud.et.ifa.agtele.eclipse.commons.emf.modelStorage.Model>(Model.class, this,
+					de.tud.et.ifa.agtele.eclipse.commons.emf.modelStorage.ModelStoragePackage.MODEL_STORAGE__MODEL);
 			this.eAdapters().add(new EContentAdapter() {
 		
 				@SuppressWarnings("rawtypes")
