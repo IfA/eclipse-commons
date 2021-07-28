@@ -116,7 +116,7 @@ public class ImportAdapterFactoryImpl extends EFactoryImpl implements ImportAdap
 	
 	protected boolean configured = false;
 	
-	public static final String CONNECTOR_EXTENSION_POINT_ID = "de.tud.et.ifa.agtele.eclipse.emf.storage.extensionpoint.connector";
+	public static final String CONNECTOR_EXTENSION_POINT_ID = "de.tud.et.ifa.agtele.eclipse.commons.emf.storage.connector";
 	
 	public synchronized void configure(){
 		if (configured) {

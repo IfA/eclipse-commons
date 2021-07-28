@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: EMF Storage
 Bundle-SymbolicName: de.tud.et.ifa.agtele.eclipse.commons.emf.storage;singleton:=true
-Automatic-Module-Name: de.tud.et.ifa.agtele.eclipse.emf.storage
+Automatic-Module-Name: de.tud.et.ifa.agtele.eclipse.commons.emf.storage
 Bundle-Version: 1.0.0.qualifier
 Bundle-ClassPath: .
 Bundle-Vendor: AgTele
