@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: EMF Model Storage UA Client
 Bundle-SymbolicName: de.tud.et.ifa.agtele.eclipse.commons.emf.storage.client.ua;singleton:=true
-Automatic-Module-Name: de.tud.et.ifa.agtele.eclipse.emf.storage.client.ua
+Automatic-Module-Name: de.tud.et.ifa.agtele.eclipse.commons.emf.storage.client.ua
 Bundle-Version: 1.0.0.qualifier
 Bundle-Vendor: AgTele
 Bundle-Localization: plugin

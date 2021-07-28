@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: OPC UA Utilities
 Bundle-SymbolicName: de.tud.et.ifa.agtele.eclipse.commons.ua;singleton:=true
-Automatic-Module-Name: de.tud.et.ifa.agtele.eclipse.emf.storage.client.ua
+Automatic-Module-Name: de.tud.et.ifa.agtele.eclipse.commons.ua
 Bundle-Version: 1.0.0.qualifier
 Bundle-ClassPath: .,
  dependencies/annotations-13.0.jar,

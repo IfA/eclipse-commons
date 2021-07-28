@@ -1,9 +1,9 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <!-- Schema file written by PDE -->
-<schema targetNamespace="de.tud.et.ifa.agtele.eclipse.emf.storage.ui" xmlns="http://www.w3.org/2001/XMLSchema">
+<schema targetNamespace="de.tud.et.ifa.agtele.eclipse.commons.emf.storage.ui" xmlns="http://www.w3.org/2001/XMLSchema">
 <annotation>
       <appinfo>
-         <meta.schema plugin="de.tud.et.ifa.agtele.eclipse.emf.storage.ui" id="de.tud.et.ifa.agtele.eclipse.emf.storage.ui.extensionpoint.ModelStorageViewPage" name="Model Storage View Page Registration"/>
+         <meta.schema plugin="de.tud.et.ifa.agtele.eclipse.commons.emf.storage.ui" id="de.tud.et.ifa.agtele.eclipse.commons.emf.storage.ui.ModelStorageViewPage" name="Model Storage View Page Registration"/>
       </appinfo>
       <documentation>
          [Enter description of this extension point.]
@@ -55,7 +55,7 @@
                   
                </documentation>
                <appinfo>
-                  <meta.attribute kind="java" basedOn=":de.tud.et.ifa.agtele.eclipse.emf.storage.ui.views.ModelStorageViewPage"/>
+                  <meta.attribute kind="java" basedOn=":de.tud.et.ifa.agtele.eclipse.commons.emf.storage.ui.views.ModelStorageViewPage"/>
                </appinfo>
             </annotation>
          </attribute>

@@ -25,7 +25,7 @@ Require-Bundle: javax.inject,
  org.eclipse.emf.edit,
  de.tud.et.ifa.agtele.eclipse.commons.ui;visibility:=reexport
 Bundle-RequiredExecutionEnvironment: JavaSE-12
-Automatic-Module-Name: de.tud.et.ifa.agtele.eclipse.emf.storage.ui
+Automatic-Module-Name: de.tud.et.ifa.agtele.eclipse.commons.emf.storage.ui
 Import-Package: de.tud.et.ifa.agtele.ui,
  javax.annotation;version="1.2.0"
 Bundle-ActivationPolicy: lazy

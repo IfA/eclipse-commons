@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?eclipse version="3.4"?>
 <plugin>
-   <extension-point id="de.tud.et.ifa.agtele.eclipse.emf.storage.ui.extensionpoint.ModelStorageViewPage" name="Model Storage View Part Registration" schema="schema/de.tud.et.ifa.agtele.eclipse.emf.storage.ui.extensionpoint.ModelStorageViewPage.exsd"/>
+   <extension-point id="de.tud.et.ifa.agtele.eclipse.commons.emf.storage.ui.ModelStorageViewPage" name="Model Storage View Page Registration" schema="schema/de.tud.et.ifa.agtele.eclipse.commons.emf.storage.ui.extensionpoint.ModelStorageViewPage.exsd"/>
 
    <extension
          point="org.eclipse.ui.preferencePages">
@@ -11,7 +11,7 @@
             name="AgTele EMF Model Storage">
       </page>
       <page
-            category="de.tud.et.ifa.agtele.eclipse.emf.storage.ui.preferences.ModelStoragePreferences"
+            category="de.tud.et.ifa.agtele.eclipse.commons.emf.storage.ui.preferences.ModelStoragePreferences"
             class="de.tud.et.ifa.agtele.eclipse.commons.emf.storage.ui.preferences.ModelStorageDefaultConnectorsPreferencePage"
             id="de.tud.et.ifa.agtele.eclipse.commons.emf.storage.ui.preferences.ModelStorageDefaultConnectorsPreferencePage"
             name="Model Storage Default Connectors">
@@ -28,7 +28,7 @@
       <perspectiveExtension
             targetID="org.eclipse.jdt.ui.JavaPerspective">
          <view
-               id="de.tud.et.ifa.agtele.eclipse.emf.storage.ui.views.ModelStorageView"
+               id="de.tud.et.ifa.agtele.eclipse.commons.emf.storage.ui.views.ModelStorageView"
                ratio="0.5"
                relationship="right"
                relative="org.eclipse.ui.views.ProblemView">
@@ -37,7 +37,7 @@
       <perspectiveExtension
             targetID="org.eclipse.wst.jsdt.ui.JavaPerspective">
          <view
-               id="de.tud.et.ifa.agtele.eclipse.emf.storage.ui.views.ModelStorageView"
+               id="de.tud.et.ifa.agtele.eclipse.commons.emf.storage.ui.views.ModelStorageView"
                ratio="0.5"
                relationship="right"
                relative="org.eclipse.ui.views.ProblemView">
@@ -46,18 +46,12 @@
       <perspectiveExtension
             targetID="org.eclipse.jdt.ui.JavaPerspective">
          <view
-               id="de.tud.et.ifa.agtele.eclipse.emf.storage.ui.views.SampleView"
+               id="de.tud.et.ifa.agtele.i40Component.ide.ui.views.EPackageBrowser"
                ratio="0.5"
                relationship="right"
                relative="org.eclipse.ui.views.ProblemView">
          </view>
       </perspectiveExtension>
-   </extension>
-   <extension
-         point="org.eclipse.help.contexts">
-      <contexts
-            file="contexts.xml">
-      </contexts>
    </extension>
    <extension
          point="org.eclipse.ui.views">
@@ -66,7 +60,7 @@
             category="de.tud.et.ifa.agtele.ui.views.category"
             class="de.tud.et.ifa.agtele.eclipse.commons.emf.storage.ui.views.ModelStorageView"
             icon="icons/repositories.gif"
-            id="de.tud.et.ifa.agtele.eclipse.emf.storage.ui.views.ModelStorageView"
+            id="de.tud.et.ifa.agtele.eclipse.commons.emf.storage.ui.views.ModelStorageView"
             inject="true"
             name="Model Storage View">
       </view>

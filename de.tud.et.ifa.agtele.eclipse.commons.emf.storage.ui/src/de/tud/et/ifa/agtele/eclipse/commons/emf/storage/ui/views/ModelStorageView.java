@@ -91,7 +91,7 @@ public class ModelStorageView extends MultiPageView implements IViewPart, IPersi
 	/**
 	 * The ID of the view as specified by the extension.
 	 */
-	public static final String ID = "de.tud.et.ifa.agtele.eclipse.emf.storage.ui.views.ModelStorageView";
+	public static final String ID = "de.tud.et.ifa.agtele.eclipse.commons.emf.storage.ui.views.ModelStorageView";
 
 	@Inject IWorkbench workbench;
 	@Inject UISynchronize sync;	
@@ -231,7 +231,7 @@ public class ModelStorageView extends MultiPageView implements IViewPart, IPersi
 	public void createPartControl(Composite parent) {
 		super.createPartControl(parent);
 				
-		workbench.getHelpSystem().setHelp(modelStoragesViewer.getControl(), "de.tud.et.ifa.agtele.eclipse.emf.storage.ui.viewer");
+		//workbench.getHelpSystem().setHelp(modelStoragesViewer.getControl(), "de.tud.et.ifa.agtele.eclipse.emf.storage.ui.viewer");
 		//getSite().setSelectionProvider(viewer);
 		
 		makeActions();
@@ -743,7 +743,7 @@ public class ModelStorageView extends MultiPageView implements IViewPart, IPersi
 	private void hookDoubleClickAction() {
 	}
 
-	public static final String MODEL_STORAGE_VIEW_PART_EXTENSION_POINT_ID = "de.tud.et.ifa.agtele.eclipse.emf.storage.ui.extensionpoint.ModelStorageViewPage";
+	public static final String MODEL_STORAGE_VIEW_PART_EXTENSION_POINT_ID = "de.tud.et.ifa.agtele.eclipse.commons.emf.storage.ui.ModelStorageViewPage";
 	
 	protected ArrayList<ModelStorageViewPage> getRegisteredPages () {
 		ArrayList<ModelStorageViewPage> result = new ArrayList<>();

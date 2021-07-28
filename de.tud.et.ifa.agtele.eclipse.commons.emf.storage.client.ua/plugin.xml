@@ -14,7 +14,7 @@
             genModel="model/uaStorageClient.genmodel"/>
    </extension>
    <extension
-         point="de.tud.et.ifa.agtele.eclipse.commons.emf.storage.extensionpoint.connector">
+         point="de.tud.et.ifa.agtele.eclipse.commons.emf.storage.connector">
       <connector
             className="AgteleEMFUAConnector"
             packageUri="http://et.tu-dresden.de/ifa/EMFModelStorage/UA/model/v0.1">
@@ -23,5 +23,4 @@
          </schemaEntry>
       </connector>
    </extension>
-
 </plugin>

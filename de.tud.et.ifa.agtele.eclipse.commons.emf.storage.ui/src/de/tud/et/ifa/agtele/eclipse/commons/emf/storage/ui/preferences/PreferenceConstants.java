@@ -5,6 +5,6 @@ package de.tud.et.ifa.agtele.eclipse.commons.emf.storage.ui.preferences;
  */
 public class PreferenceConstants {
 
-	public static final String P_MODEL_STORAGE_DEFAULT_CONNECTIONS = "de.tud.et.ifa.agtele.eclipse.emf.storage.modelStorageDefaultConn";
+	public static final String P_MODEL_STORAGE_DEFAULT_CONNECTIONS = "de.tud.et.ifa.agtele.eclipse.commons.emf.storage.modelStorageDefaultConn";
 	
 }

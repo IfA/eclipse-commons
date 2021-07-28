@@ -5,7 +5,7 @@
 -->
 
 <plugin>
-   <extension-point id="extensionpoint.connector" name="Model Storage Connector Extension Point" schema="schema/AgTele_EMF_ModelStorage_Connector_ExtensionPoint.exsd"/>
+   <extension-point id="connector" name="Model Storage Connector" schema="schema/AgTele_EMF_ModelStorage_Connector_ExtensionPoint.exsd"/>
 
    <extension point="org.eclipse.emf.ecore.generated_package">
       <!-- @generated modelStorage -->
@@ -53,7 +53,7 @@
                org.eclipse.emf.edit.provider.IItemStyledLabelProvider"/>
    </extension>
    <extension
-         point="de.tud.et.ifa.agtele.eclipse.commons.emf.storage.extensionpoint.connector">
+         point="de.tud.et.ifa.agtele.eclipse.commons.emf.storage.connector">
       <connector
             className="FileSystemConnector"
             packageUri="http://et.tu-dresden.de/ifa/EMFModelStorage/model/v0.1/importAdapter">

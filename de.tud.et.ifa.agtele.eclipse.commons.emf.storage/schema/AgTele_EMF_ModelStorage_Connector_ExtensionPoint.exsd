@@ -1,9 +1,9 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <!-- Schema file written by PDE -->
-<schema targetNamespace="de.tud.et.ifa.agtele.eclipse.emf.storage" xmlns="http://www.w3.org/2001/XMLSchema">
+<schema targetNamespace="de.tud.et.ifa.agtele.eclipse.commons.emf.storage" xmlns="http://www.w3.org/2001/XMLSchema">
 <annotation>
       <appInfo>
-         <meta.schema plugin="de.tud.et.ifa.agtele.eclipse.emf.storage" id="AgTele_EMF_ModelStorage_Connector_ExtensionPoint" name="de.tud.et.ifa.agtele.eclipse.emf.storage.ConnectorExtensionPoint"/>
+         <meta.schema plugin="de.tud.et.ifa.agtele.eclipse.commons.emf.storage" id="de.tud.et.ifa.agtele.eclipse.commons.emf.storage.connector" name="Model Storage Connector"/>
       </appInfo>
       <documentation>
          [Enter description of this extension point.]

@@ -16,7 +16,7 @@ public class EMFStorageUIPlugin extends EMFPlugin {
 	/**
 	 * The Plugin ID
 	 */
-	public static final String PLUGIN_ID = "de.tud.et.ifa.agtele.eclipse.emf.storage.ui";
+	public static final String PLUGIN_ID = "de.tud.et.ifa.agtele.eclipse.commons.emf.storage.ui";
 	
 	private static BundleContext context;
 	
