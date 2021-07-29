@@ -16,4 +16,8 @@ import de.tud.et.ifa.agtele.eclipse.commons.emf.modelStorage.importAdapter.Conne
  */
 public interface AgteleEMFUAConnector extends Connector {
 	public static final String[] CONNECTION_SCHEMES = {"emf.opc.tcp"};
+	public static final String INTERNAL_CONNECTION_SCHEMA = "opc.tcp";
+	public default String[] getConnectionSchemes () {
+		return AgteleEMFUAConnector.CONNECTION_SCHEMES;
+	}
 } // AgteleEMFUAConnector

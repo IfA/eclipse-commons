@@ -368,7 +368,9 @@ public class ModelStorageView extends MultiPageView implements IViewPart, IPersi
 			if (object instanceof Model) {
 				Object[] result = super.getChildren(object);
 				ArrayList<Object> list = new ArrayList<>(Arrays.asList(result));
-				list.addAll(((Model)object).getContent());
+				if (!((Model)object).getContent().isEmpty()) {
+					list.addAll(((Model)object).getContent());					
+				}
 				list.removeIf(o -> {return o instanceof ImportAdapter;});
 				return list.toArray();
 			}

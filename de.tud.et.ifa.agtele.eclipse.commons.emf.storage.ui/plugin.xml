@@ -69,9 +69,9 @@
          point="org.eclipse.ui.views">
       <view
             category="de.tud.et.ifa.agtele.ui.views.category"
-            class="de.tud.et.ifa.agtele.ui.views.EPackageBrowserView"
+            class="de.tud.et.ifa.agtele.eclipse.commons.emf.storage.ui.views.EPackageBrowserView"
             icon="platform:/plugin/org.eclipse.epsilon.dt.epackageregistryexplorer/icons/epackage.png"
-            id="de.tud.et.ifa.agtele.i40Component.ide.ui.views.EPackageBrowser"
+            id="de.tud.et.ifa.agtele.eclipse.commons.emf.storage.ui.views.EPackageBrowser"
             name="EPackage Browser"
             restorable="true">
       </view>

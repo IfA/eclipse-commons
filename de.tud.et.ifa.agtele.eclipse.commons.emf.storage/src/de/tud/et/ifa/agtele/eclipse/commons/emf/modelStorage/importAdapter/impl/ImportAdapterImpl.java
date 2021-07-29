@@ -289,6 +289,9 @@ public class ImportAdapterImpl extends MinimalEObjectImpl.Container implements I
 	
 	@Override
 	public void importModel() {
+		if (this.getModel() == null) {
+			return;
+		}
 		this.res = this.createResource();
 		this.getModel().getResourceSet().getResources().add(this.res);	
 		

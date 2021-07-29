@@ -41,6 +41,7 @@ import org.eclipse.milo.opcua.sdk.client.api.identity.AnonymousProvider;
 import org.eclipse.milo.opcua.sdk.client.api.identity.IdentityProvider;
 import org.eclipse.milo.opcua.sdk.client.nodes.UaNode;
 import org.eclipse.milo.opcua.sdk.client.nodes.UaVariableNode;
+import org.eclipse.milo.opcua.stack.client.DiscoveryClient;
 import org.eclipse.milo.opcua.stack.client.UaStackClient;
 import org.eclipse.milo.opcua.stack.core.AttributeId;
 import org.eclipse.milo.opcua.stack.core.Identifiers;
@@ -93,10 +94,21 @@ public class AgteleEMFUAConnectorImpl extends ConnectorImpl implements AgteleEMF
 	protected boolean connected = false;
 	
 	protected String getInternalConnectionUri () {
-		if (this.getConnectionUri() == null || this.getConnectionUri().isEmpty()) {
+		String uri = this.getConnectionUri();
+		if (uri == null || uri.isEmpty()) {
 			return null;
 		}
-		return this.getConnectionUri().replace(AgteleEMFUAConnector.CONNECTION_SCHEMES[0] + "://", "opc.tcp://");
+		
+		String [] schemes = this.getConnectionSchemes();
+		
+		for (int i = 0; i < schemes.length; i+= 1) {
+			if (uri.startsWith(schemes[i] + "://")) {
+				uri = uri.replace(schemes[i] + "://", AgteleEMFUAConnector.INTERNAL_CONNECTION_SCHEMA + "://");
+				break;
+			}
+		}
+		
+		return uri;
 	}
 
 	protected OpcUaClient client = null;
@@ -106,7 +118,7 @@ public class AgteleEMFUAConnectorImpl extends ConnectorImpl implements AgteleEMF
 	 */
 	protected CompletableFuture<UaClient> connFuture = null;
 	
-	protected final Logger logger = LoggerFactory.getLogger(getClass());
+	protected final Logger logger = null;
 	protected AddressSpace addressSpace;
 	protected UaNode rootNode;
 	protected String[] namespaces;
@@ -114,6 +126,9 @@ public class AgteleEMFUAConnectorImpl extends ConnectorImpl implements AgteleEMF
 	protected UaNode objectsNode;
 	
 	public void connect() {
+		if (logger == null) {
+			LoggerFactory.getLogger(getClass());
+		}
 		if (!connected && this.getInternalConnectionUri() != null) {
 			try {
 				this.client = this.createClient(this.getInternalConnectionUri());
@@ -558,44 +573,41 @@ public class AgteleEMFUAConnectorImpl extends ConnectorImpl implements AgteleEMF
         return new AnonymousProvider();
     }
     
-    public OpcUaClient createClient(String address) throws Exception {
+    public OpcUaClient createClient(String address) throws Exception {    	
         SecurityPolicy securityPolicy = this.getSecurityPolicy();
 
         IdentityProvider idProv = this.getIdentityProvider();
         
-        OpcUaClient result= OpcUaClient.create(
-        		address,
-        		endpoints -> endpoints.stream()
-        				.filter(
-        					e -> e.getSecurityPolicyUri().equals(securityPolicy.getUri()))
-        				.findFirst(),        				
-				configBuilder -> 
-					configBuilder
-    					.setApplicationName(LocalizedText.english("agtele emf ua connector"))
-                        .setApplicationUri("urn:de:tu-dresden:ifa:agtele:eclipse:commons")
-//                        .setKeyPair(loader.getClientKeyPair())
-//                        .setCertificate(loader.getClientCertificate())
-//                        .setCertificateChain(loader.getClientCertificateChain())
-//                        .setCertificateValidator(certificateValidator)
-                        .setIdentityProvider(idProv)
-                        .setSessionTimeout(UInteger.valueOf(1000l * 60l * 50l))
-                        .setRequestTimeout(uint(5000))
-                    .build()   		
-        		);
-        
-//        
-//        EndpointDescription newEp = new EndpointDescription(
-//        		address,
-//        		endpoint.getServer(),
-//        		endpoint.getServerCertificate(),
-//        		endpoint.getSecurityMode(),
-//        		endpoint.getSecurityPolicyUri(),
-//        		endpoint.getUserIdentityTokens(),
-//        		endpoint.getTransportProfileUri(),
-//        		endpoint.getSecurityLevel()
-//		);
-                
-        return result;
+        // get available endpoint
+        List<EndpointDescription> endpoints =
+                DiscoveryClient.getEndpoints(address).get();
+
+        EndpointDescription endpoint = endpoints.stream()
+    		  .filter(e -> e.getSecurityPolicyUri().equals(securityPolicy.getUri()))
+    		  .findFirst().orElseThrow(() -> new Exception("no desired endpoints returned"));
+      
+        EndpointDescription newEp = new EndpointDescription(
+      		address,
+      		endpoint.getServer(),
+      		endpoint.getServerCertificate(),
+      		endpoint.getSecurityMode(),
+      		endpoint.getSecurityPolicyUri(),
+      		endpoint.getUserIdentityTokens(),
+      		endpoint.getTransportProfileUri(),
+      		endpoint.getSecurityLevel()
+		);
+      
+        // create client config
+	    OpcUaClientConfig config = OpcUaClientConfig.builder()
+	            .setApplicationName(LocalizedText.english("agtele emf ua connector"))
+	            .setApplicationUri("urn:de:tu-dresden:ifa:agtele:eclipse:commons")
+	            .setEndpoint(newEp)
+	            .setIdentityProvider(idProv)
+	            .setRequestTimeout(uint(5000))
+                .setSessionTimeout(UInteger.valueOf(1000l * 60l * 50l))
+	            .build();
+      
+      	return OpcUaClient.create(config);
     }
 
 } //AgteleEMFUAConnectorImpl
