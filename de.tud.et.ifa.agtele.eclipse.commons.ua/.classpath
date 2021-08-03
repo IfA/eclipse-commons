@@ -40,14 +40,12 @@
 	<classpathentry exported="true" kind="lib" path="dependencies/netty-resolver-4.1.54.Final-sources.jar"/>
 	<classpathentry exported="true" kind="lib" path="dependencies/netty-transport-4.1.54.Final.jar"/>
 	<classpathentry exported="true" kind="lib" path="dependencies/netty-transport-4.1.54.Final-sources.jar"/>
-	<classpathentry exported="true" kind="lib" path="dependencies/sdk-client-0.6.1.jar" sourcepath="dependencies/sdk-client-0.6.1-sources.jar"/>
+	<classpathentry exported="true" kind="lib" path="dependencies/sdk-client-0.6.1.jar"/>
 	<classpathentry exported="true" kind="lib" path="dependencies/sdk-client-0.6.1-sources.jar"/>
 	<classpathentry exported="true" kind="lib" path="dependencies/sdk-core-0.6.1.jar"/>
 	<classpathentry exported="true" kind="lib" path="dependencies/sdk-core-0.6.1-sources.jar"/>
 	<classpathentry exported="true" kind="lib" path="dependencies/slf4j-api-1.7.0.jar"/>
 	<classpathentry exported="true" kind="lib" path="dependencies/slf4j-api-1.7.0-sources.jar"/>
-	<classpathentry exported="true" kind="lib" path="dependencies/slf4j-api-1.7.21.jar"/>
-	<classpathentry exported="true" kind="lib" path="dependencies/slf4j-api-1.7.21-sources.jar"/>
 	<classpathentry exported="true" kind="lib" path="dependencies/slf4j-simple-1.7.21.jar"/>
 	<classpathentry exported="true" kind="lib" path="dependencies/slf4j-simple-1.7.21-sources.jar"/>
 	<classpathentry exported="true" kind="lib" path="dependencies/stack-client-0.6.1.jar"/>

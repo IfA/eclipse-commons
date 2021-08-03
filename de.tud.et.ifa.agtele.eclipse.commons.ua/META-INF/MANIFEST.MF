@@ -4,8 +4,7 @@ Bundle-Name: OPC UA Utilities
 Bundle-SymbolicName: de.tud.et.ifa.agtele.eclipse.commons.ua;singleton:=true
 Automatic-Module-Name: de.tud.et.ifa.agtele.eclipse.commons.ua
 Bundle-Version: 1.0.0.qualifier
-Bundle-ClassPath: .,
- dependencies/annotations-13.0.jar,
+Bundle-ClassPath: dependencies/annotations-13.0.jar,
  dependencies/annotations-13.0-sources.jar,
  dependencies/bcpkix-jdk15on-1.61.jar,
  dependencies/bcpkix-jdk15on-1.61-sources.jar,
@@ -51,8 +50,6 @@ Bundle-ClassPath: .,
  dependencies/sdk-core-0.6.1-sources.jar,
  dependencies/slf4j-api-1.7.0.jar,
  dependencies/slf4j-api-1.7.0-sources.jar,
- dependencies/slf4j-api-1.7.21.jar,
- dependencies/slf4j-api-1.7.21-sources.jar,
  dependencies/slf4j-simple-1.7.21.jar,
  dependencies/slf4j-simple-1.7.21-sources.jar,
  dependencies/stack-client-0.6.1.jar,
