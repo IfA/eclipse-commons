@@ -259,4 +259,14 @@ public interface ModelStorage extends EObject {
 			this.removeModel(model);
 		}
 	}
+	
+
+	public default Model getModel(ResourceSet set) {
+		for (Model m : this.getModel()) {
+			if (m.getResourceSet() == set) {
+				return m;
+			}
+		}
+		return null;
+	}
 } // ModelStorage
