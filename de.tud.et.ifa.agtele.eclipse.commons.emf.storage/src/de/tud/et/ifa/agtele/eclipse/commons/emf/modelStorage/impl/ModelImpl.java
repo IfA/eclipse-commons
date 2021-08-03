@@ -345,7 +345,7 @@ public class ModelImpl extends MinimalEObjectImpl.Container implements Model {
 	}
 
 	@Override
-	public void resetContent() {
+	public synchronized void resetContent() {
 		for (Resource res : new ArrayList<>(this.getResourceSet().getResources())) {
 			try {
 				res.getContents().clear();
@@ -354,7 +354,14 @@ public class ModelImpl extends MinimalEObjectImpl.Container implements Model {
 			}
 		}
 		this.deregisterIdentifyableElement(this.getAllRegisteredElements());
-		this.getResourceSet().getResources().clear();
+		while( this.getResourceSet().getResources().size() > 0) {
+			try {
+				this.getResourceSet().getResources().remove(0);
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
+		
 		this.getContent().clear();
 		this.elementRegistry.clear();
 	}

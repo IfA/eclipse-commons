@@ -366,8 +366,10 @@ public class ModelStorageImpl extends MinimalEObjectImpl.Container implements Mo
 		return new IDelegatingModelImportStrategy[] {new IdentifierRegistrationDelegatingImportStrategy(),new IdRegistrationDelegatingImportStrategy()} ;
 	}
 	
+	protected boolean isUpdating = false;
+	
 	@Override
-	public void update(Collection<Model> models) {
+	public synchronized void update(Collection<Model> models) {
 		this.setInitialized();
 		ArrayList<Model> processingModels = new ArrayList<>();
 		for (Model model : models) {
@@ -375,7 +377,8 @@ public class ModelStorageImpl extends MinimalEObjectImpl.Container implements Mo
 				model.resetContent();
 				processingModels.add(model);
 			}
-		}		
+		}
+		this.isUpdating = true;
 		processingModels.parallelStream().forEach(model -> {	
 			if (model instanceof LinkedModel) {
 				((LinkedModel)model).initialize();
@@ -398,6 +401,7 @@ public class ModelStorageImpl extends MinimalEObjectImpl.Container implements Mo
 				}
 			}
 		});
+		this.isUpdating = false;
 	}
 	
 	
@@ -545,6 +549,11 @@ public class ModelStorageImpl extends MinimalEObjectImpl.Container implements Mo
 	@Override
 	public void removeModel(Model model) {
 		this.getModel().remove(model);
+	}
+
+	@Override
+	public boolean isUpdating() {
+		return this.isUpdating;
 	}
 
 } //ModelStorageImpl

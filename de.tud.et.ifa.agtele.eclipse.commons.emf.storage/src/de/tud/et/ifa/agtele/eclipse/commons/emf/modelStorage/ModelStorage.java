@@ -110,6 +110,8 @@ public interface ModelStorage extends EObject {
 		
 	void importFromUris(String[] uri);
 	
+	boolean isUpdating();
+	
 	void update();
 	
 	void update(Collection<Model> models);
