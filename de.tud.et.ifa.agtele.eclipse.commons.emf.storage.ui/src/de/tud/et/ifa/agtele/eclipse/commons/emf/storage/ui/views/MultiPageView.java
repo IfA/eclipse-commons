@@ -368,6 +368,7 @@ public abstract class MultiPageView extends ViewPart implements IViewPart, IPage
 	}
 
 	public ISelection getSelection() {
-		return viewSelection;
+		return this.currentViewer.getSelection();
+		//return viewSelection;
 	}
 }

@@ -481,7 +481,11 @@ public class ModelStorageView extends MultiPageView implements IViewPart, IPersi
 		this.handleUpdateModelStorageAction(false);
 	}
 	
-	protected void handleUpdateModelStorageAction(boolean all) {
+	protected synchronized void handleUpdateModelStorageAction(boolean all) {
+		if (!this.updateModelStorageAction.isEnabled()) {
+			return;
+		}
+		
 		ISelection selection = this.getSelection();
 		ViewerPane pane = this.controlToViewerPaneMap.get(this.getSelectedPage());
 		if (pane == null) {
@@ -546,6 +550,7 @@ public class ModelStorageView extends MultiPageView implements IViewPart, IPersi
 					this.addSelectedElementToJobCollection(obj);
 				}
 			}
+			this.generateJobs();
 		}
 		protected ModelStorage getModelStorageForModel(Model model) {
 			try {				
@@ -604,7 +609,6 @@ public class ModelStorageView extends MultiPageView implements IViewPart, IPersi
 					//Do nothing
 				}			
 			}
-			this.generateJobs();
 		}
 		
 		protected boolean isWorkToDo() {
@@ -617,8 +621,21 @@ public class ModelStorageView extends MultiPageView implements IViewPart, IPersi
 					this.modelsToUpdate.remove(storage);
 				}
 			}
+			
+//			ArrayList<Model> models = new ArrayList<>();
+//			this.modelsToUpdate.values().forEach(c -> models.addAll(c));
+			
+			//TODO remove model storages that are currently updating
+			this.modelStoragesToUpdate.removeIf(s -> s.isUpdating());
+			for (ModelStorage storage : this.modelsToUpdate.keySet()) {
+				if (storage.isUpdating()) {
+					this.modelsToUpdate.remove(storage);
+				}
+			}
+			
+			int counter = 1;
 			for (ModelStorage storage : this.modelStoragesToUpdate) {
-				Job job = new Job("Update Model Storage " + this.modelStoragesToUpdate.indexOf(storage) + " of " + (this.modelStoragesToUpdate.size() + this.modelsToUpdate.size())) {
+				Job job = new Job("Update Model Storage " + counter + " of " + (this.modelStoragesToUpdate.size() + this.modelsToUpdate.size())) {
 					@Override
 					protected IStatus run(IProgressMonitor monitor) {
 						storage.update();
@@ -626,11 +643,11 @@ public class ModelStorageView extends MultiPageView implements IViewPart, IPersi
 						return Status.OK_STATUS;
 					}
 				};
+				counter += 1;
 				this.jobs.add(job);
 			}
-			int counter = 1;
 			for (ModelStorage storage : this.modelsToUpdate.keySet()) {
-				Job job = new Job("Update selected Models of Model Storage " + (counter + this.modelStoragesToUpdate.size()) + " of " + (this.modelStoragesToUpdate.size() + this.modelsToUpdate.size())) {
+				Job job = new Job("Update selected Models of Model Storage " + counter + " of " + (this.modelStoragesToUpdate.size() + this.modelsToUpdate.size())) {
 					@Override
 					protected IStatus run(IProgressMonitor monitor) {
 						storage.update(UpdateModelActionExecutor.this.modelsToUpdate.get(storage));
