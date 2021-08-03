@@ -603,7 +603,7 @@ public class AgteleEMFUAConnectorImpl extends ConnectorImpl implements AgteleEMF
 	            .setApplicationUri("urn:de:tu-dresden:ifa:agtele:eclipse:commons")
 	            .setEndpoint(newEp)
 	            .setIdentityProvider(idProv)
-	            .setRequestTimeout(uint(5000))
+	            .setRequestTimeout(uint(20000))
                 .setSessionTimeout(UInteger.valueOf(1000l * 60l * 50l))
 	            .build();
       

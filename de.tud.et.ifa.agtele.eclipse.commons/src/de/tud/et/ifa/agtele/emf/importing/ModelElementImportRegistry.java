@@ -9,17 +9,18 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.resource.Resource;
 
 public class ModelElementImportRegistry implements IModelElementImportRegistry {
 
-	protected Map<Object,LinkedHashSet<EObject>> importedObjects = new HashMap<>(); //TODO there may be multiple imported objects per aas element
-	protected Map<EObject,Object> originalNodes = new HashMap<>();
+	protected Map<Object,LinkedHashSet<EObject>> importedObjects = new ConcurrentHashMap<>(); //TODO there may be multiple imported objects per aas element
+	protected Map<EObject,Object> originalNodes = new ConcurrentHashMap<>();
 	protected EObject creationContext;
 	
-	protected Map<EObject, Set<EObject>> contextMap = new HashMap<>();
+	protected Map<EObject, Set<EObject>> contextMap = new ConcurrentHashMap<>();
 
 	@Override
 	public void registerImportedElement(Object original, EObject imported, EObject context) {	

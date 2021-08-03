@@ -19,6 +19,8 @@ import org.eclipse.emf.ecore.EReference;
 import org.eclipse.emf.ecore.EStructuralFeature;
 import org.eclipse.emf.ecore.util.EcoreUtil;
 
+import de.tud.et.ifa.agtele.emf.AgteleEcoreUtil;
+
 public interface IModelImporter {
 
 	IModelConnector getConnector();
@@ -37,18 +39,29 @@ public interface IModelImporter {
 				this.importRootContentNode(node, target);
 			}	
 			
-			for (EObject obj : this.getCreatedEObjects()) {
-				this.restoreAttributes(obj);
+			if (this.isSuppressParallelization()) {
+				for (EObject obj : this.getCreatedEObjects()) {
+					this.restoreAttributes(obj);
+				}
+				
+				for (EObject obj : this.getCreatedEObjects()) {
+					this.restoreReferences(obj);
+				}
+			} else {
+				this.getCreatedEObjects().parallelStream().forEach(o -> this.restoreAttributes(o));
+				this.getCreatedEObjects().parallelStream().forEach(o -> this.restoreReferences(o));
 			}
-			for (EObject obj : this.getCreatedEObjects()) {
-				this.restoreReferences(obj);
-			}
+			
 			
 			for (EObject obj : this.getCreatedEObjects()) {
 				this.postImport(obj);
 			}			
 			this.getConnector().disconnect();
 		}
+	}
+	
+	default boolean isSuppressParallelization () {
+		return this.getConnector().isSuppressParallelization();
 	}
 
 	default void importRootContentNode (Object node, Collection<EObject> target) {
@@ -70,21 +83,32 @@ public interface IModelImporter {
 			return;
 		}
 		this.importContents(element);
+		List<EObject> contents = new ArrayList<>();
+		
 		Iterator<EObject> it = element.eContents().iterator();
-		int i = 0;
-		while (true) {
-			try {
-				if (it.hasNext()) {
-					this.importAllContents(it.next());
-				} else {
-					break;
+		while (it.hasNext()) {
+			contents.add(it.next());
+		}
+		if (this.isSuppressParallelization() || AgteleEcoreUtil.getAllContainers(element).size() > 3) {
+			for (int i = 0; i < contents.size(); i += 1) {
+				try {
+					this.importAllContents(contents.get(i));
+				} catch (Exception e) {
+					//Do something
+					System.err.println("Error on restoring the " + i + "th content element of element '" + element.toString() + "' with uri '" + EcoreUtil.getURI(element) + "'");
+					e.printStackTrace();
 				}
-			} catch (Exception e) {
-				//Do something
-				System.err.println("Error on restoring the " + i + "th content element of element '" + element.toString() + "' with uri '" + EcoreUtil.getURI(element) + "'");
-				e.printStackTrace();
-			}
-			i+=1;
+			}			
+		} else {
+			contents.parallelStream().forEach(o -> {
+				try {
+					this.importAllContents(o);
+				} catch (Exception e) {
+					//Do something
+					System.err.println("Error on restoring a content element of '" + element.toString() + "' with uri '" + EcoreUtil.getURI(element) + "', sry, don't know which element since the content is imported in a parallelized manner.");
+					e.printStackTrace();
+				}
+			});
 		}
 	}
 	
@@ -140,15 +164,29 @@ public interface IModelImporter {
 	}
 	
 	default void restoreReferences(EObject eObject) {
-		for (EReference ref : this.getImportStrategy(eObject.eClass()).getEReferencesForImport(this, this.getConnector(), eObject)) {
-			this.restoreReference(eObject, ref);
-		}
+		Collection<EReference> refs =  this.getImportStrategy(eObject.eClass()).getEReferencesForImport(this, this.getConnector(), eObject);
+//		if (this.isSuppressParallelization()) {
+			for (EReference ref : refs) {
+				this.restoreReference(eObject, ref);
+			}
+//		} else {
+//			refs.parallelStream().forEach(r -> {
+//				this.restoreReference(eObject, r);
+//			});
+//		}		
 	}
 	
 	default void restoreAttributes(EObject eObject) {
-		for (EAttribute attr : this.getImportStrategy(eObject.eClass()).getEAttributesForImport(this, this.getConnector(), eObject)) {
-			this.restoreAttribute(eObject, attr);
-		}
+		Collection<EAttribute> attrs = this.getImportStrategy(eObject.eClass()).getEAttributesForImport(this, this.getConnector(), eObject);
+//		if (this.isSuppressParallelization()) {
+			for (EAttribute attr : attrs) {
+				this.restoreAttribute(eObject, attr);
+			}
+//		} else {
+//			attrs.parallelStream().forEach(a -> {
+//				this.restoreAttribute(eObject, a);				
+//			});
+//		}
 	}
 	
 	default void importContent(EObject eObject, EReference reference) {

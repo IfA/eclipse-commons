@@ -38,4 +38,8 @@ public interface IModelConnector {
 	default IModelElementImportRegistry getImportRegistry () {
 		return this.getCurrentImportAdapter() != null ? this.getCurrentImportAdapter().getImportRegistry() : null;
 	}
+
+	default boolean isSuppressParallelization() {
+		return false;
+	}
 }
