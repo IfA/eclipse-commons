@@ -48,7 +48,7 @@
 	<classpathentry exported="true" kind="lib" path="dependencies/slf4j-api-1.7.0-sources.jar"/>
 	<classpathentry exported="true" kind="lib" path="dependencies/slf4j-simple-1.7.21.jar"/>
 	<classpathentry exported="true" kind="lib" path="dependencies/slf4j-simple-1.7.21-sources.jar"/>
-	<classpathentry exported="true" kind="lib" path="dependencies/stack-client-0.6.1.jar"/>
+	<classpathentry exported="true" kind="lib" path="dependencies/stack-client-0.6.1.jar" sourcepath="dependencies/stack-client-0.6.1-sources.jar"/>
 	<classpathentry exported="true" kind="lib" path="dependencies/stack-client-0.6.1-sources.jar"/>
 	<classpathentry exported="true" kind="lib" path="dependencies/stack-core-0.6.1.jar" sourcepath="dependencies/stack-core-0.6.1-sources.jar"/>
 	<classpathentry exported="true" kind="lib" path="dependencies/stack-core-0.6.1-sources.jar"/>
