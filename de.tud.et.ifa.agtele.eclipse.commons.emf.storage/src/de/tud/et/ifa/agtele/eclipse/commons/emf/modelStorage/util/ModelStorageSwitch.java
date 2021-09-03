@@ -69,6 +69,7 @@ public class ModelStorageSwitch<T> extends Switch<T> {
 			case ModelStoragePackage.MODEL_STORAGE: {
 				ModelStorage modelStorage = (ModelStorage)theEObject;
 				T result = caseModelStorage(modelStorage);
+				if (result == null) result = caseUpdateableElement(modelStorage);
 				if (result == null) result = defaultCase(theEObject);
 				return result;
 			}
@@ -76,12 +77,14 @@ public class ModelStorageSwitch<T> extends Switch<T> {
 				PassiveModelStorage passiveModelStorage = (PassiveModelStorage)theEObject;
 				T result = casePassiveModelStorage(passiveModelStorage);
 				if (result == null) result = caseModelStorage(passiveModelStorage);
+				if (result == null) result = caseUpdateableElement(passiveModelStorage);
 				if (result == null) result = defaultCase(theEObject);
 				return result;
 			}
 			case ModelStoragePackage.MODEL: {
 				Model model = (Model)theEObject;
 				T result = caseModel(model);
+				if (result == null) result = caseUpdateableElement(model);
 				if (result == null) result = defaultCase(theEObject);
 				return result;
 			}
@@ -89,6 +92,7 @@ public class ModelStorageSwitch<T> extends Switch<T> {
 				LinkedModel linkedModel = (LinkedModel)theEObject;
 				T result = caseLinkedModel(linkedModel);
 				if (result == null) result = caseModel(linkedModel);
+				if (result == null) result = caseUpdateableElement(linkedModel);
 				if (result == null) result = defaultCase(theEObject);
 				return result;
 			}
@@ -96,6 +100,13 @@ public class ModelStorageSwitch<T> extends Switch<T> {
 				ModelAdapter modelAdapter = (ModelAdapter)theEObject;
 				T result = caseModelAdapter(modelAdapter);
 				if (result == null) result = caseModel(modelAdapter);
+				if (result == null) result = caseUpdateableElement(modelAdapter);
+				if (result == null) result = defaultCase(theEObject);
+				return result;
+			}
+			case ModelStoragePackage.UPDATEABLE_ELEMENT: {
+				UpdateableElement updateableElement = (UpdateableElement)theEObject;
+				T result = caseUpdateableElement(updateableElement);
 				if (result == null) result = defaultCase(theEObject);
 				return result;
 			}
@@ -175,6 +186,21 @@ public class ModelStorageSwitch<T> extends Switch<T> {
 	 * @generated
 	 */
 	public T caseModelAdapter(ModelAdapter object) {
+		return null;
+	}
+
+	/**
+	 * Returns the result of interpreting the object as an instance of '<em>Updateable Element</em>'.
+	 * <!-- begin-user-doc -->
+	 * This implementation returns null;
+	 * returning a non-null result will terminate the switch.
+	 * <!-- end-user-doc -->
+	 * @param object the target of the switch.
+	 * @return the result of interpreting the object as an instance of '<em>Updateable Element</em>'.
+	 * @see #doSwitch(org.eclipse.emf.ecore.EObject) doSwitch(EObject)
+	 * @generated
+	 */
+	public T caseUpdateableElement(UpdateableElement object) {
 		return null;
 	}
 

@@ -16,7 +16,7 @@ import org.eclipse.emf.ecore.resource.Resource;
 
 public class ModelElementImportRegistry implements IModelElementImportRegistry {
 
-	protected Map<Object,LinkedHashSet<EObject>> importedObjects = new ConcurrentHashMap<>(); //TODO there may be multiple imported objects per aas element
+	protected Map<Object,LinkedHashSet<EObject>> importedObjects = new ConcurrentHashMap<>();
 	protected Map<EObject,Object> originalNodes = new ConcurrentHashMap<>();
 	protected EObject creationContext;
 	

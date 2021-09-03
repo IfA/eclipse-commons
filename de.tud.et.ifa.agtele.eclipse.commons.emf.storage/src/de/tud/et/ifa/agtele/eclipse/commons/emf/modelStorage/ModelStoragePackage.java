@@ -57,6 +57,43 @@ public interface ModelStoragePackage extends EPackage {
 	ModelStoragePackage eINSTANCE = de.tud.et.ifa.agtele.eclipse.commons.emf.modelStorage.impl.ModelStoragePackageImpl.init();
 
 	/**
+	 * The meta object id for the '{@link de.tud.et.ifa.agtele.eclipse.commons.emf.modelStorage.impl.UpdateableElementImpl <em>Updateable Element</em>}' class.
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @see de.tud.et.ifa.agtele.eclipse.commons.emf.modelStorage.impl.UpdateableElementImpl
+	 * @see de.tud.et.ifa.agtele.eclipse.commons.emf.modelStorage.impl.ModelStoragePackageImpl#getUpdateableElement()
+	 * @generated
+	 */
+	int UPDATEABLE_ELEMENT = 5;
+
+	/**
+	 * The feature id for the '<em><b>Updating</b></em>' attribute.
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 * @ordered
+	 */
+	int UPDATEABLE_ELEMENT__UPDATING = 0;
+
+	/**
+	 * The number of structural features of the '<em>Updateable Element</em>' class.
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 * @ordered
+	 */
+	int UPDATEABLE_ELEMENT_FEATURE_COUNT = 1;
+
+	/**
+	 * The number of operations of the '<em>Updateable Element</em>' class.
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 * @ordered
+	 */
+	int UPDATEABLE_ELEMENT_OPERATION_COUNT = 0;
+
+	/**
 	 * The meta object id for the '{@link de.tud.et.ifa.agtele.eclipse.commons.emf.modelStorage.impl.ModelStorageImpl <em>Model Storage</em>}' class.
 	 * <!-- begin-user-doc -->
 	 * <!-- end-user-doc -->
@@ -67,13 +104,22 @@ public interface ModelStoragePackage extends EPackage {
 	int MODEL_STORAGE = 0;
 
 	/**
+	 * The feature id for the '<em><b>Updating</b></em>' attribute.
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 * @ordered
+	 */
+	int MODEL_STORAGE__UPDATING = UPDATEABLE_ELEMENT__UPDATING;
+
+	/**
 	 * The feature id for the '<em><b>Model</b></em>' containment reference list.
 	 * <!-- begin-user-doc -->
 	 * <!-- end-user-doc -->
 	 * @generated
 	 * @ordered
 	 */
-	int MODEL_STORAGE__MODEL = 0;
+	int MODEL_STORAGE__MODEL = UPDATEABLE_ELEMENT_FEATURE_COUNT + 0;
 
 	/**
 	 * The feature id for the '<em><b>Connector</b></em>' containment reference list.
@@ -82,7 +128,7 @@ public interface ModelStoragePackage extends EPackage {
 	 * @generated
 	 * @ordered
 	 */
-	int MODEL_STORAGE__CONNECTOR = 1;
+	int MODEL_STORAGE__CONNECTOR = UPDATEABLE_ELEMENT_FEATURE_COUNT + 1;
 
 	/**
 	 * The feature id for the '<em><b>Name</b></em>' attribute.
@@ -91,7 +137,7 @@ public interface ModelStoragePackage extends EPackage {
 	 * @generated
 	 * @ordered
 	 */
-	int MODEL_STORAGE__NAME = 2;
+	int MODEL_STORAGE__NAME = UPDATEABLE_ELEMENT_FEATURE_COUNT + 2;
 
 	/**
 	 * The number of structural features of the '<em>Model Storage</em>' class.
@@ -100,7 +146,7 @@ public interface ModelStoragePackage extends EPackage {
 	 * @generated
 	 * @ordered
 	 */
-	int MODEL_STORAGE_FEATURE_COUNT = 3;
+	int MODEL_STORAGE_FEATURE_COUNT = UPDATEABLE_ELEMENT_FEATURE_COUNT + 3;
 
 	/**
 	 * The number of operations of the '<em>Model Storage</em>' class.
@@ -109,7 +155,7 @@ public interface ModelStoragePackage extends EPackage {
 	 * @generated
 	 * @ordered
 	 */
-	int MODEL_STORAGE_OPERATION_COUNT = 0;
+	int MODEL_STORAGE_OPERATION_COUNT = UPDATEABLE_ELEMENT_OPERATION_COUNT + 0;
 
 	/**
 	 * The meta object id for the '{@link de.tud.et.ifa.agtele.eclipse.commons.emf.modelStorage.impl.PassiveModelStorageImpl <em>Passive Model Storage</em>}' class.
@@ -120,6 +166,15 @@ public interface ModelStoragePackage extends EPackage {
 	 * @generated
 	 */
 	int PASSIVE_MODEL_STORAGE = 1;
+
+	/**
+	 * The feature id for the '<em><b>Updating</b></em>' attribute.
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 * @ordered
+	 */
+	int PASSIVE_MODEL_STORAGE__UPDATING = MODEL_STORAGE__UPDATING;
 
 	/**
 	 * The feature id for the '<em><b>Model</b></em>' containment reference list.
@@ -177,13 +232,22 @@ public interface ModelStoragePackage extends EPackage {
 	int MODEL = 2;
 
 	/**
+	 * The feature id for the '<em><b>Updating</b></em>' attribute.
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 * @ordered
+	 */
+	int MODEL__UPDATING = UPDATEABLE_ELEMENT__UPDATING;
+
+	/**
 	 * The feature id for the '<em><b>Content</b></em>' reference list.
 	 * <!-- begin-user-doc -->
 	 * <!-- end-user-doc -->
 	 * @generated
 	 * @ordered
 	 */
-	int MODEL__CONTENT = 0;
+	int MODEL__CONTENT = UPDATEABLE_ELEMENT_FEATURE_COUNT + 0;
 
 	/**
 	 * The feature id for the '<em><b>Uri</b></em>' attribute.
@@ -192,7 +256,7 @@ public interface ModelStoragePackage extends EPackage {
 	 * @generated
 	 * @ordered
 	 */
-	int MODEL__URI = 1;
+	int MODEL__URI = UPDATEABLE_ELEMENT_FEATURE_COUNT + 1;
 
 	/**
 	 * The feature id for the '<em><b>Import Adapter</b></em>' containment reference.
@@ -201,7 +265,7 @@ public interface ModelStoragePackage extends EPackage {
 	 * @generated
 	 * @ordered
 	 */
-	int MODEL__IMPORT_ADAPTER = 2;
+	int MODEL__IMPORT_ADAPTER = UPDATEABLE_ELEMENT_FEATURE_COUNT + 2;
 
 	/**
 	 * The number of structural features of the '<em>Model</em>' class.
@@ -210,7 +274,7 @@ public interface ModelStoragePackage extends EPackage {
 	 * @generated
 	 * @ordered
 	 */
-	int MODEL_FEATURE_COUNT = 3;
+	int MODEL_FEATURE_COUNT = UPDATEABLE_ELEMENT_FEATURE_COUNT + 3;
 
 	/**
 	 * The number of operations of the '<em>Model</em>' class.
@@ -219,7 +283,7 @@ public interface ModelStoragePackage extends EPackage {
 	 * @generated
 	 * @ordered
 	 */
-	int MODEL_OPERATION_COUNT = 0;
+	int MODEL_OPERATION_COUNT = UPDATEABLE_ELEMENT_OPERATION_COUNT + 0;
 
 	/**
 	 * The meta object id for the '{@link de.tud.et.ifa.agtele.eclipse.commons.emf.modelStorage.impl.LinkedModelImpl <em>Linked Model</em>}' class.
@@ -230,6 +294,15 @@ public interface ModelStoragePackage extends EPackage {
 	 * @generated
 	 */
 	int LINKED_MODEL = 3;
+
+	/**
+	 * The feature id for the '<em><b>Updating</b></em>' attribute.
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 * @ordered
+	 */
+	int LINKED_MODEL__UPDATING = MODEL__UPDATING;
 
 	/**
 	 * The feature id for the '<em><b>Content</b></em>' reference list.
@@ -285,6 +358,15 @@ public interface ModelStoragePackage extends EPackage {
 	 * @generated
 	 */
 	int MODEL_ADAPTER = 4;
+
+	/**
+	 * The feature id for the '<em><b>Updating</b></em>' attribute.
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 * @ordered
+	 */
+	int MODEL_ADAPTER__UPDATING = MODEL__UPDATING;
 
 	/**
 	 * The feature id for the '<em><b>Content</b></em>' reference list.
@@ -449,6 +531,27 @@ public interface ModelStoragePackage extends EPackage {
 	EClass getModelAdapter();
 
 	/**
+	 * Returns the meta object for class '{@link de.tud.et.ifa.agtele.eclipse.commons.emf.modelStorage.UpdateableElement <em>Updateable Element</em>}'.
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @return the meta object for class '<em>Updateable Element</em>'.
+	 * @see de.tud.et.ifa.agtele.eclipse.commons.emf.modelStorage.UpdateableElement
+	 * @generated
+	 */
+	EClass getUpdateableElement();
+
+	/**
+	 * Returns the meta object for the attribute '{@link de.tud.et.ifa.agtele.eclipse.commons.emf.modelStorage.UpdateableElement#isUpdating <em>Updating</em>}'.
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @return the meta object for the attribute '<em>Updating</em>'.
+	 * @see de.tud.et.ifa.agtele.eclipse.commons.emf.modelStorage.UpdateableElement#isUpdating()
+	 * @see #getUpdateableElement()
+	 * @generated
+	 */
+	EAttribute getUpdateableElement_Updating();
+
+	/**
 	 * Returns the factory that creates the instances of the model.
 	 * <!-- begin-user-doc -->
 	 * <!-- end-user-doc -->
@@ -568,6 +671,24 @@ public interface ModelStoragePackage extends EPackage {
 		 * @generated
 		 */
 		EClass MODEL_ADAPTER = eINSTANCE.getModelAdapter();
+
+		/**
+		 * The meta object literal for the '{@link de.tud.et.ifa.agtele.eclipse.commons.emf.modelStorage.impl.UpdateableElementImpl <em>Updateable Element</em>}' class.
+		 * <!-- begin-user-doc -->
+		 * <!-- end-user-doc -->
+		 * @see de.tud.et.ifa.agtele.eclipse.commons.emf.modelStorage.impl.UpdateableElementImpl
+		 * @see de.tud.et.ifa.agtele.eclipse.commons.emf.modelStorage.impl.ModelStoragePackageImpl#getUpdateableElement()
+		 * @generated
+		 */
+		EClass UPDATEABLE_ELEMENT = eINSTANCE.getUpdateableElement();
+
+		/**
+		 * The meta object literal for the '<em><b>Updating</b></em>' attribute feature.
+		 * <!-- begin-user-doc -->
+		 * <!-- end-user-doc -->
+		 * @generated
+		 */
+		EAttribute UPDATEABLE_ELEMENT__UPDATING = eINSTANCE.getUpdateableElement_Updating();
 
 	}
 

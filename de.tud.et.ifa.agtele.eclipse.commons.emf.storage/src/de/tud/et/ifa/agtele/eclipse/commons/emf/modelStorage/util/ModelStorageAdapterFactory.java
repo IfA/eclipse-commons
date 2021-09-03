@@ -88,6 +88,10 @@ public class ModelStorageAdapterFactory extends AdapterFactoryImpl {
 				return createModelAdapterAdapter();
 			}
 			@Override
+			public Adapter caseUpdateableElement(UpdateableElement object) {
+				return createUpdateableElementAdapter();
+			}
+			@Override
 			public Adapter defaultCase(EObject object) {
 				return createEObjectAdapter();
 			}
@@ -174,6 +178,20 @@ public class ModelStorageAdapterFactory extends AdapterFactoryImpl {
 	 * @generated
 	 */
 	public Adapter createModelAdapterAdapter() {
+		return null;
+	}
+
+	/**
+	 * Creates a new adapter for an object of class '{@link de.tud.et.ifa.agtele.eclipse.commons.emf.modelStorage.UpdateableElement <em>Updateable Element</em>}'.
+	 * <!-- begin-user-doc -->
+	 * This default implementation returns null so that we can easily ignore cases;
+	 * it's useful to ignore a case when inheritance will catch all the cases anyway.
+	 * <!-- end-user-doc -->
+	 * @return the new adapter.
+	 * @see de.tud.et.ifa.agtele.eclipse.commons.emf.modelStorage.UpdateableElement
+	 * @generated
+	 */
+	public Adapter createUpdateableElementAdapter() {
 		return null;
 	}
 

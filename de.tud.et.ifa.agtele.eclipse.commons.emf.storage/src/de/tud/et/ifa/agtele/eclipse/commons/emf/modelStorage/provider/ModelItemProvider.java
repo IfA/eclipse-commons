@@ -3,33 +3,31 @@
 package de.tud.et.ifa.agtele.eclipse.commons.emf.modelStorage.provider;
 
 
+import java.net.URISyntaxException;
+import java.net.URL;
 import java.util.Collection;
 import java.util.List;
 
+import javax.swing.ImageIcon;
+
 import org.eclipse.emf.common.notify.AdapterFactory;
 import org.eclipse.emf.common.notify.Notification;
-
-import org.eclipse.emf.common.util.ResourceLocator;
-
 import org.eclipse.emf.ecore.EStructuralFeature;
 
 import org.eclipse.emf.edit.provider.ComposeableAdapterFactory;
-import org.eclipse.emf.edit.provider.IEditingDomainItemProvider;
-import org.eclipse.emf.edit.provider.IItemColorProvider;
-import org.eclipse.emf.edit.provider.IItemLabelProvider;
 import org.eclipse.emf.edit.provider.IItemPropertyDescriptor;
-import org.eclipse.emf.edit.provider.IItemPropertySource;
-import org.eclipse.emf.edit.provider.IItemStyledLabelProvider;
-import org.eclipse.emf.edit.provider.IStructuredItemContentProvider;
-import org.eclipse.emf.edit.provider.ITreeItemContentProvider;
 import org.eclipse.emf.edit.provider.ItemPropertyDescriptor;
 import org.eclipse.emf.edit.provider.StyledString;
 import org.eclipse.emf.edit.provider.ViewerNotification;
+import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.widgets.Display;
 
+import de.tud.et.ifa.agtele.eclipse.commons.emf.modelStorage.EMFStoragePlugin;
 import de.tud.et.ifa.agtele.eclipse.commons.emf.modelStorage.Model;
 import de.tud.et.ifa.agtele.eclipse.commons.emf.modelStorage.ModelStoragePackage;
+import de.tud.et.ifa.agtele.eclipse.commons.emf.modelStorage.UpdateableElement;
 import de.tud.et.ifa.agtele.eclipse.commons.emf.modelStorage.importAdapter.ImportAdapterFactory;
-import de.tud.et.ifa.agtele.eclipse.commons.emf.modelStorage.util.ModelStorageItemProviderAdapter;
+import de.tud.et.ifa.agtele.resources.BundleContentHelper;
 
 /**
  * This is the item provider adapter for a {@link de.tud.et.ifa.agtele.eclipse.commons.emf.modelStorage.Model} object.
@@ -38,15 +36,7 @@ import de.tud.et.ifa.agtele.eclipse.commons.emf.modelStorage.util.ModelStorageIt
  * @generated
  */
 public class ModelItemProvider 
-	extends ModelStorageItemProviderAdapter
-	implements
-		IEditingDomainItemProvider,
-		IStructuredItemContentProvider,
-		ITreeItemContentProvider,
-		IItemLabelProvider,
-		IItemPropertySource,
-		IItemColorProvider,
-		IItemStyledLabelProvider {
+	extends UpdateableElementItemProvider {
 	/**
 	 * This constructs an instance from a factory and a notifier.
 	 * <!-- begin-user-doc -->
@@ -152,10 +142,13 @@ public class ModelItemProvider
 	 * This returns Model.gif.
 	 * <!-- begin-user-doc -->
 	 * <!-- end-user-doc -->
-	 * @generated
+	 * @generated NOT adds spinner in case of updating state
 	 */
 	@Override
 	public Object getImage(Object object) {
+		if (((UpdateableElement)object).isUpdating()) {
+			return ((URL)getResourceLocator().getImage("full/obj16/spinner"));
+		}
 		return overlayImage(object, getResourceLocator().getImage("full/obj16/Model"));
 	}
 
@@ -174,17 +167,23 @@ public class ModelItemProvider
 	 * This returns the label styled text for the adapted class.
 	 * <!-- begin-user-doc -->
 	 * <!-- end-user-doc -->
-	 * @generated
+	 * @generated NOT adds pending state
 	 */
 	@Override
 	public Object getStyledText(Object object) {
+		Model model = (Model)object;
+		StyledString styledLabel = new StyledString();
+
+    	if (((UpdateableElement)object).isUpdating()) {
+    		styledLabel.append("[pending...] ", StyledString.Style.COUNTER_STYLER);
+    	}
 		String label = ((Model)object).getUri();
-    	StyledString styledLabel = new StyledString();
 		if (label == null || label.length() == 0) {
 			styledLabel.append(getString("_UI_Model_type"), StyledString.Style.QUALIFIER_STYLER); 
 		} else {
 			styledLabel.append(getString("_UI_Model_type"), StyledString.Style.QUALIFIER_STYLER).append(" " + label);
 		}
+		
 		return styledLabel;
 	}
 
@@ -225,17 +224,6 @@ public class ModelItemProvider
 			(createChildParameter
 				(ModelStoragePackage.Literals.MODEL__IMPORT_ADAPTER,
 				 ImportAdapterFactory.eINSTANCE.createImportAdapter()));
-	}
-
-	/**
-	 * Return the resource locator for this item provider's resources.
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
-	 * @generated
-	 */
-	@Override
-	public ResourceLocator getResourceLocator() {
-		return ModelStorageEditPlugin.INSTANCE;
 	}
 
 }

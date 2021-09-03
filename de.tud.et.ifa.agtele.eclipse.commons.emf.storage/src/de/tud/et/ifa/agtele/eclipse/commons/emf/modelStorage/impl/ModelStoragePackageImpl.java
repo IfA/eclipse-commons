@@ -17,6 +17,7 @@ import de.tud.et.ifa.agtele.eclipse.commons.emf.modelStorage.ModelStorage;
 import de.tud.et.ifa.agtele.eclipse.commons.emf.modelStorage.ModelStorageFactory;
 import de.tud.et.ifa.agtele.eclipse.commons.emf.modelStorage.ModelStoragePackage;
 import de.tud.et.ifa.agtele.eclipse.commons.emf.modelStorage.PassiveModelStorage;
+import de.tud.et.ifa.agtele.eclipse.commons.emf.modelStorage.UpdateableElement;
 import de.tud.et.ifa.agtele.eclipse.commons.emf.modelStorage.importAdapter.ImportAdapterPackage;
 import de.tud.et.ifa.agtele.eclipse.commons.emf.modelStorage.importAdapter.impl.ImportAdapterPackageImpl;
 
@@ -61,6 +62,13 @@ public class ModelStoragePackageImpl extends EPackageImpl implements ModelStorag
 	 * @generated
 	 */
 	private EClass modelAdapterEClass = null;
+
+	/**
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 */
+	private EClass updateableElementEClass = null;
 
 	/**
 	 * Creates an instance of the model <b>Package</b>, registered with
@@ -248,6 +256,26 @@ public class ModelStoragePackageImpl extends EPackageImpl implements ModelStorag
 	 * @generated
 	 */
 	@Override
+	public EClass getUpdateableElement() {
+		return updateableElementEClass;
+	}
+
+	/**
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 */
+	@Override
+	public EAttribute getUpdateableElement_Updating() {
+		return (EAttribute)updateableElementEClass.getEStructuralFeatures().get(0);
+	}
+
+	/**
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 */
+	@Override
 	public ModelStorageFactory getModelStorageFactory() {
 		return (ModelStorageFactory)getEFactoryInstance();
 	}
@@ -286,6 +314,9 @@ public class ModelStoragePackageImpl extends EPackageImpl implements ModelStorag
 		linkedModelEClass = createEClass(LINKED_MODEL);
 
 		modelAdapterEClass = createEClass(MODEL_ADAPTER);
+
+		updateableElementEClass = createEClass(UPDATEABLE_ELEMENT);
+		createEAttribute(updateableElementEClass, UPDATEABLE_ELEMENT__UPDATING);
 	}
 
 	/**
@@ -323,7 +354,9 @@ public class ModelStoragePackageImpl extends EPackageImpl implements ModelStorag
 		// Set bounds for type parameters
 
 		// Add supertypes to classes
+		modelStorageEClass.getESuperTypes().add(this.getUpdateableElement());
 		passiveModelStorageEClass.getESuperTypes().add(this.getModelStorage());
+		modelEClass.getESuperTypes().add(this.getUpdateableElement());
 		linkedModelEClass.getESuperTypes().add(this.getModel());
 		modelAdapterEClass.getESuperTypes().add(this.getModel());
 
@@ -343,6 +376,9 @@ public class ModelStoragePackageImpl extends EPackageImpl implements ModelStorag
 		initEClass(linkedModelEClass, LinkedModel.class, "LinkedModel", !IS_ABSTRACT, !IS_INTERFACE, IS_GENERATED_INSTANCE_CLASS);
 
 		initEClass(modelAdapterEClass, ModelAdapter.class, "ModelAdapter", IS_ABSTRACT, !IS_INTERFACE, IS_GENERATED_INSTANCE_CLASS);
+
+		initEClass(updateableElementEClass, UpdateableElement.class, "UpdateableElement", IS_ABSTRACT, !IS_INTERFACE, IS_GENERATED_INSTANCE_CLASS);
+		initEAttribute(getUpdateableElement_Updating(), ecorePackage.getEBoolean(), "updating", "false", 0, 1, UpdateableElement.class, IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, !IS_UNSETTABLE, !IS_ID, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
 
 		// Create resource
 		createResource(eNS_URI);
@@ -364,7 +400,7 @@ public class ModelStoragePackageImpl extends EPackageImpl implements ModelStorag
 		  (getModelStorage_Model(),
 		   source,
 		   new String[] {
-			   "get", "\r\nif (model == null) {\r\n\tmodel = new <%org.eclipse.emf.ecore.util.EObjectContainmentEList%>.Resolving<<%de.tud.et.ifa.agtele.eclipse.emf.modelStorage.Model%>>(Model.class, this,\r\n\t\t\t<%de.tud.et.ifa.agtele.eclipse.emf.modelStorage.ModelStoragePackage%>.MODEL_STORAGE__MODEL);\r\n\tthis.eAdapters().add(new <%org.eclipse.emf.ecore.util.EContentAdapter%>() {\r\n\r\n\t\t@SuppressWarnings(\"rawtypes\")\r\n\t\t@Override\r\n\t\tpublic void notifyChanged(<%org.eclipse.emf.common.notify.Notification%> notification) {\r\n\t\t\tif (notification.getFeature() == ModelStoragePackage.Literals.MODEL_STORAGE__MODEL) {\r\n\t\t\t\tif (notification.getEventType() == Notification.ADD) {\r\n\t\t\t\t\tif (notification.getNewValue() instanceof Model) {\r\n\t\t\t\t\t\tModel model = (Model) notification.getNewValue();\r\n\t\t\t\t\t\tif (model.getResourceSet() != null) {\r\n\t\t\t\t\t\t\tModelStorageImpl.this.registerResourceSet(model.getResourceSet(), model);\r\n\t\t\t\t\t\t}\r\n\t\t\t\t\t}\r\n\t\t\t\t} else if (notification.getEventType() == Notification.ADD_MANY) {\r\n\t\t\t\t\tif (notification.getNewValue() instanceof <%java.util.Collection%>) {\r\n\t\t\t\t\t\tfor (Object element : (Collection) notification.getNewValue()) {\r\n\t\t\t\t\t\t\tif (element instanceof Model) {\r\n\t\t\t\t\t\t\t\tif (((Model) element).getResourceSet() != null) {\r\n\t\t\t\t\t\t\t\t\tModelStorageImpl.this.registerResourceSet(\r\n\t\t\t\t\t\t\t\t\t\t\t((Model) element).getResourceSet(), ((Model) element));\r\n\t\t\t\t\t\t\t\t}\r\n\t\t\t\t\t\t\t}\r\n\t\t\t\t\t\t}\r\n\t\t\t\t\t}\r\n\t\t\t\t} else if (notification.getEventType() == Notification.REMOVE) {\r\n\t\t\t\t\tif (notification.getOldValue() instanceof Model) {\r\n\t\t\t\t\t\tModel model = (Model) notification.getOldValue();\r\n\t\t\t\t\t\tif (model.getResourceSet() != null) {\r\n\t\t\t\t\t\t\tModelStorageImpl.this.registerResourceSet(model.getResourceSet(), null);\r\n\t\t\t\t\t\t}\r\n\t\t\t\t\t}\r\n\t\t\t\t} else if (notification.getEventType() == Notification.REMOVE_MANY) {\r\n\t\t\t\t\tif (notification.getOldValue() instanceof Collection) {\r\n\t\t\t\t\t\tfor (Object element : (Collection) notification.getOldValue()) {\r\n\t\t\t\t\t\t\tif (element instanceof Model) {\r\n\t\t\t\t\t\t\t\tif (((Model) element).getResourceSet() != null) {\r\n\t\t\t\t\t\t\t\t\tModelStorageImpl.this\r\n\t\t\t\t\t\t\t\t\t\t\t.registerResourceSet(((Model) element).getResourceSet(), null);\r\n\t\t\t\t\t\t\t\t}\r\n\t\t\t\t\t\t\t}\r\n\t\t\t\t\t\t}\r\n\t\t\t\t\t}\r\n\t\t\t\t}\r\n\t\t\t}\r\n\t\t}\r\n\t});\r\n}\r\nreturn model;"
+			   "get", "\r\nif (model == null) {\r\n\tmodel = new <%org.eclipse.emf.ecore.util.EObjectContainmentEList%>.Resolving<de.tud.et.ifa.agtele.eclipse.commons.emf.modelStorage.Model>(\r\n\t\t\t<%de.tud.et.ifa.agtele.eclipse.commons.emf.modelStorage.Model%>.class, this,\r\n\t\t\tde.tud.et.ifa.agtele.eclipse.commons.emf.modelStorage.ModelStoragePackage.MODEL_STORAGE__MODEL);\r\n\tthis.eAdapters().add(new <%org.eclipse.emf.ecore.util.EContentAdapter%>() {\r\n\r\n\t\t@SuppressWarnings(\"rawtypes\")\r\n\t\t@Override\r\n\t\tpublic void notifyChanged(<%org.eclipse.emf.common.notify.Notification%> notification) {\r\n\t\t\tif (notification.getFeature() == <%de.tud.et.ifa.agtele.eclipse.commons.emf.modelStorage.ModelStoragePackage%>.Literals.MODEL_STORAGE__MODEL) {\r\n\t\t\t\tif (notification.getEventType() == Notification.ADD) {\r\n\t\t\t\t\tif (notification.getNewValue() instanceof Model) {\r\n\t\t\t\t\t\tModel model = (Model) notification.getNewValue();\r\n\t\t\t\t\t\tif (model.getResourceSet() != null) {\r\n\t\t\t\t\t\t\tModelStorageImpl.this.registerResourceSet(model.getResourceSet(), model);\r\n\t\t\t\t\t\t}\r\n\t\t\t\t\t}\r\n\t\t\t\t} else if (notification.getEventType() == Notification.ADD_MANY) {\r\n\t\t\t\t\tif (notification.getNewValue() instanceof <%java.util.Collection%>) {\r\n\t\t\t\t\t\tfor (Object element : (Collection) notification.getNewValue()) {\r\n\t\t\t\t\t\t\tif (element instanceof Model) {\r\n\t\t\t\t\t\t\t\tif (((Model) element).getResourceSet() != null) {\r\n\t\t\t\t\t\t\t\t\tModelStorageImpl.this.registerResourceSet(\r\n\t\t\t\t\t\t\t\t\t\t\t((Model) element).getResourceSet(), ((Model) element));\r\n\t\t\t\t\t\t\t\t}\r\n\t\t\t\t\t\t\t}\r\n\t\t\t\t\t\t}\r\n\t\t\t\t\t}\r\n\t\t\t\t} else if (notification.getEventType() == Notification.REMOVE) {\r\n\t\t\t\t\tif (notification.getOldValue() instanceof Model) {\r\n\t\t\t\t\t\tModel model = (Model) notification.getOldValue();\r\n\t\t\t\t\t\tif (model.getResourceSet() != null) {\r\n\t\t\t\t\t\t\tModelStorageImpl.this.registerResourceSet(model.getResourceSet(), null);\r\n\t\t\t\t\t\t}\r\n\t\t\t\t\t}\r\n\t\t\t\t} else if (notification.getEventType() == Notification.REMOVE_MANY) {\r\n\t\t\t\t\tif (notification.getOldValue() instanceof Collection) {\r\n\t\t\t\t\t\tfor (Object element : (Collection) notification.getOldValue()) {\r\n\t\t\t\t\t\t\tif (element instanceof Model) {\r\n\t\t\t\t\t\t\t\tif (((Model) element).getResourceSet() != null) {\r\n\t\t\t\t\t\t\t\t\tModelStorageImpl.this\r\n\t\t\t\t\t\t\t\t\t\t\t.registerResourceSet(((Model) element).getResourceSet(), null);\r\n\t\t\t\t\t\t\t\t}\r\n\t\t\t\t\t\t\t}\r\n\t\t\t\t\t\t}\r\n\t\t\t\t\t}\r\n\t\t\t\t}\r\n\t\t\t}\r\n\t\t}\r\n\t});\r\n}\r\nreturn model;"
 		   });
 		addAnnotation
 		  (getModel_Content(),

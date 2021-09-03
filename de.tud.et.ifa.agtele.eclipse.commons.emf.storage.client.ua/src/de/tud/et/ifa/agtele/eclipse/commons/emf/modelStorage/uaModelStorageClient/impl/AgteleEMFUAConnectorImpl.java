@@ -118,7 +118,7 @@ public class AgteleEMFUAConnectorImpl extends ConnectorImpl implements AgteleEMF
 	 */
 	protected CompletableFuture<UaClient> connFuture = null;
 	
-	protected final Logger logger = null;
+	protected Logger logger = null;
 	protected AddressSpace addressSpace;
 	protected UaNode rootNode;
 	protected String[] namespaces;
@@ -127,7 +127,7 @@ public class AgteleEMFUAConnectorImpl extends ConnectorImpl implements AgteleEMF
 	
 	public void connect() {
 		if (logger == null) {
-			LoggerFactory.getLogger(getClass());
+			this.logger = LoggerFactory.getLogger(getClass());
 		}
 		if (!connected && this.getInternalConnectionUri() != null) {
 			try {
@@ -426,7 +426,7 @@ public class AgteleEMFUAConnectorImpl extends ConnectorImpl implements AgteleEMF
 	protected Map<Object, Map<Object, DataValue>> variableDataCache = new HashMap<>();
 	
 	protected Map<Object, DataValue> readObjectAttributes (Object n) {
-		NodeId id = (NodeId) n;
+		NodeId id = this.getNodeId(n);
 		Map<Object, DataValue> attributeValues = new HashMap<>();
 		if (!this.connected) {
 			return attributeValues;

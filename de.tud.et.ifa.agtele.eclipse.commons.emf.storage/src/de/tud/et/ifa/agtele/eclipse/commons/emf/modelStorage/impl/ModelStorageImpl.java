@@ -35,7 +35,6 @@ import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.InternalEObject;
 
 import org.eclipse.emf.ecore.impl.ENotificationImpl;
-import org.eclipse.emf.ecore.impl.MinimalEObjectImpl;
 import org.eclipse.emf.ecore.resource.ResourceSet;
 import org.eclipse.emf.ecore.util.EContentAdapter;
 import org.eclipse.emf.ecore.util.EObjectContainmentEList;
@@ -56,7 +55,7 @@ import org.eclipse.emf.ecore.util.InternalEList;
  *
  * @generated
  */
-public class ModelStorageImpl extends MinimalEObjectImpl.Container implements ModelStorage {
+public class ModelStorageImpl extends UpdateableElementImpl implements ModelStorage {
 		
 	public static final WeakHashMap<ResourceSet, Model> resourceSetToModel = new WeakHashMap<>();
 	
@@ -134,7 +133,8 @@ public class ModelStorageImpl extends MinimalEObjectImpl.Container implements Mo
 	
 		
 		if (model == null) {
-			model = new EObjectContainmentEList.Resolving<de.tud.et.ifa.agtele.eclipse.commons.emf.modelStorage.Model>(Model.class, this,
+			model = new EObjectContainmentEList.Resolving<de.tud.et.ifa.agtele.eclipse.commons.emf.modelStorage.Model>(
+					Model.class, this,
 					de.tud.et.ifa.agtele.eclipse.commons.emf.modelStorage.ModelStoragePackage.MODEL_STORAGE__MODEL);
 			this.eAdapters().add(new EContentAdapter() {
 		
@@ -365,9 +365,7 @@ public class ModelStorageImpl extends MinimalEObjectImpl.Container implements Mo
 	public IDelegatingModelImportStrategy[] getDelegatingImportStrategies () {
 		return new IDelegatingModelImportStrategy[] {new IdentifierRegistrationDelegatingImportStrategy(),new IdRegistrationDelegatingImportStrategy()} ;
 	}
-	
-	protected boolean isUpdating = false;
-	
+		
 	@Override
 	public synchronized void update(Collection<Model> models) {
 		this.setInitialized();
@@ -378,13 +376,14 @@ public class ModelStorageImpl extends MinimalEObjectImpl.Container implements Mo
 				processingModels.add(model);
 			}
 		}
-		this.isUpdating = true;
+		this.setUpdating(true);
 		processingModels.parallelStream().forEach(model -> {	
 			if (model instanceof LinkedModel) {
 				((LinkedModel)model).initialize();
 				return;
 			}
 			try {
+				model.setUpdating(true);
 				Connector connector = ImportAdapterFactory.eINSTANCE.createConnector(model.getUri());
 				if (connector == null) {
 					System.err.println("Could not load model, because no import adapter has been found for uri '" + model.getUri() +"'");
@@ -400,8 +399,9 @@ public class ModelStorageImpl extends MinimalEObjectImpl.Container implements Mo
 					e.printStackTrace();
 				}
 			}
+			model.setUpdating(false);
 		});
-		this.isUpdating = false;
+		this.setUpdating(false);
 	}
 	
 	
@@ -549,11 +549,6 @@ public class ModelStorageImpl extends MinimalEObjectImpl.Container implements Mo
 	@Override
 	public void removeModel(Model model) {
 		this.getModel().remove(model);
-	}
-
-	@Override
-	public boolean isUpdating() {
-		return this.isUpdating;
 	}
 
 } //ModelStorageImpl

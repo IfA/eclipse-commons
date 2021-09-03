@@ -65,14 +65,8 @@ public class ModelAdapterItemProvider extends ModelItemProvider {
 	 */
 	@Override
 	public Object getStyledText(Object object) {
-		String label = ((ModelAdapter)object).getUri();
-    	StyledString styledLabel = new StyledString();
-		if (label == null || label.length() == 0) {
-			styledLabel.append(getString("_UI_ModelAdapter_type"), StyledString.Style.QUALIFIER_STYLER); 
-		} else {
-			styledLabel.append(getString("_UI_ModelAdapter_type"), StyledString.Style.QUALIFIER_STYLER).append(" " + label);
-		}
-		return styledLabel;
+		ModelAdapter modelAdapter = (ModelAdapter)object;
+		return new StyledString(getString("_UI_ModelAdapter_type"), StyledString.Style.QUALIFIER_STYLER).append(" ").append(Boolean.toString(modelAdapter.isUpdating()));
 	}
 
 	/**

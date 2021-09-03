@@ -76,14 +76,8 @@ public class LinkedModelItemProvider extends ModelItemProvider {
 	 */
 	@Override
 	public Object getStyledText(Object object) {
-		String label = ((LinkedModel)object).getUri();
-    	StyledString styledLabel = new StyledString();
-		if (label == null || label.length() == 0) {
-			styledLabel.append(getString("_UI_LinkedModel_type"), StyledString.Style.QUALIFIER_STYLER); 
-		} else {
-			styledLabel.append(getString("_UI_LinkedModel_type"), StyledString.Style.QUALIFIER_STYLER).append(" " + label);
-		}
-		return styledLabel;
+		LinkedModel linkedModel = (LinkedModel)object;
+		return new StyledString(getString("_UI_LinkedModel_type"), StyledString.Style.QUALIFIER_STYLER).append(" ").append(Boolean.toString(linkedModel.isUpdating()));
 	}
 
 	/**

@@ -29,6 +29,9 @@
     </genClasses>
     <genClasses ecoreClass="modelStorage.ecore#//LinkedModel"/>
     <genClasses image="false" ecoreClass="modelStorage.ecore#//ModelAdapter"/>
+    <genClasses image="false" ecoreClass="modelStorage.ecore#//UpdateableElement">
+      <genFeatures property="Readonly" createChild="false" ecoreFeature="ecore:EAttribute modelStorage.ecore#//UpdateableElement/updating"/>
+    </genClasses>
     <nestedGenPackages prefix="ImportAdapter" basePackage="de.tud.et.ifa.agtele.eclipse.commons.emf.modelStorage"
         disposableProviderFactory="true" ecorePackage="modelStorage.ecore#//importAdapter">
       <genClasses image="false" ecoreClass="modelStorage.ecore#//importAdapter/Connector">

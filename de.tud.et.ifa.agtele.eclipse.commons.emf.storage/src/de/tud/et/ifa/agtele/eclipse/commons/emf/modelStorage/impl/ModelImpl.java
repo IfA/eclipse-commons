@@ -22,7 +22,6 @@ import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.InternalEObject;
 
 import org.eclipse.emf.ecore.impl.ENotificationImpl;
-import org.eclipse.emf.ecore.impl.MinimalEObjectImpl;
 import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.ecore.resource.ResourceSet;
 import org.eclipse.emf.ecore.resource.impl.ResourceSetImpl;
@@ -50,7 +49,7 @@ import de.tud.et.ifa.agtele.eclipse.commons.emf.modelStorage.importAdapter.Impor
  *
  * @generated
  */
-public class ModelImpl extends MinimalEObjectImpl.Container implements Model {
+public class ModelImpl extends UpdateableElementImpl implements Model {
 	/**
 	 * The cached value of the '{@link #getContent() <em>Content</em>}' reference list.
 	 * <!-- begin-user-doc --> <!-- end-user-doc -->
@@ -474,4 +473,5 @@ public class ModelImpl extends MinimalEObjectImpl.Container implements Model {
 	public void setInitialized() {
 		this.isInitialized = true;
 	}
+
 } // ModelImpl

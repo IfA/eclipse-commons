@@ -8,6 +8,8 @@ import org.osgi.framework.BundleContext;
 
 public class EMFStoragePlugin extends EMFPlugin {
 
+	public static final String PLUGIN_ID = "de.tud.et.ifa.agtele.eclipse.commons.emf.storage";
+	
 	/**
 	 * Keep track of the singleton.
 	 */

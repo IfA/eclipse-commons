@@ -31,7 +31,7 @@ import de.tud.et.ifa.agtele.eclipse.commons.emf.modelStorage.importAdapter.Impor
  * @model
  * @generated
  */
-public interface Model extends EObject {
+public interface Model extends UpdateableElement {
 	/**
 	 * Returns the value of the '<em><b>Content</b></em>' reference list.
 	 * The list contents are of type {@link org.eclipse.emf.ecore.EObject}.
@@ -117,7 +117,7 @@ public interface Model extends EObject {
 		ArrayList<IResolveResult> result = new ArrayList<>();
 		
 		for (EObject resolved : resolvedObjects) {
-			ResourceSet set = resolved.eResource().getResourceSet();
+			//ResourceSet set = resolved.eResource().getResourceSet();
 			result.add(new IResolveResult() {
 				@Override
 				public EObject getElement() {
@@ -148,4 +148,5 @@ public interface Model extends EObject {
 	public void setInitialized();
 
 	public void dispose();
+
 } // Model

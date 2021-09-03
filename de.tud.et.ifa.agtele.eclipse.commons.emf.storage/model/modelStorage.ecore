@@ -2,7 +2,7 @@
 <ecore:EPackage xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xmlns:ecore="http://www.eclipse.org/emf/2002/Ecore" name="modelStorage" nsURI="http://et.tu-dresden.de/ifa/EMFModelStorage/model/v0.1"
     nsPrefix="ms">
-  <eClassifiers xsi:type="ecore:EClass" name="ModelStorage">
+  <eClassifiers xsi:type="ecore:EClass" name="ModelStorage" eSuperTypes="#//UpdateableElement">
     <eStructuralFeatures xsi:type="ecore:EReference" name="model" upperBound="-1"
         eType="#//Model" containment="true">
       <eAnnotations source="http://et.tu-dresden.de/ifa/emf/commons/2018/AgTeleGenModel">
@@ -14,7 +14,7 @@
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="name" eType="ecore:EDataType ../../org.eclipse.emf.ecore/model/Ecore.ecore#//EString"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="PassiveModelStorage" eSuperTypes="#//ModelStorage"/>
-  <eClassifiers xsi:type="ecore:EClass" name="Model">
+  <eClassifiers xsi:type="ecore:EClass" name="Model" eSuperTypes="#//UpdateableElement">
     <eStructuralFeatures xsi:type="ecore:EReference" name="content" upperBound="-1"
         eType="ecore:EClass ../../org.eclipse.emf.ecore/model/Ecore.ecore#//EObject"
         derived="true">
@@ -28,6 +28,10 @@
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="LinkedModel" eSuperTypes="#//Model"/>
   <eClassifiers xsi:type="ecore:EClass" name="ModelAdapter" abstract="true" eSuperTypes="#//Model"/>
+  <eClassifiers xsi:type="ecore:EClass" name="UpdateableElement" abstract="true">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="updating" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"
+        transient="true" defaultValueLiteral="false"/>
+  </eClassifiers>
   <eSubpackages name="importAdapter" nsURI="http://et.tu-dresden.de/ifa/EMFModelStorage/model/v0.1/importAdapter"
       nsPrefix="msi">
     <eClassifiers xsi:type="ecore:EClass" name="Connector" abstract="true">

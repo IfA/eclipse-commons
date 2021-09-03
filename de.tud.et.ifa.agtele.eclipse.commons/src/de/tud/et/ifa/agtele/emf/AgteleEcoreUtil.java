@@ -39,7 +39,9 @@ import org.eclipse.emf.ecore.EAttribute;
 import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.EClassifier;
 import org.eclipse.emf.ecore.EObject;
+import org.eclipse.emf.ecore.EOperation;
 import org.eclipse.emf.ecore.EPackage;
+import org.eclipse.emf.ecore.EParameter;
 import org.eclipse.emf.ecore.EReference;
 import org.eclipse.emf.ecore.EStructuralFeature;
 import org.eclipse.emf.ecore.EStructuralFeature.Setting;
@@ -1111,6 +1113,10 @@ public interface AgteleEcoreUtil {
 			return AgteleEcoreUtil.getEcoreElementUri(((EClassifier)eElement).getEPackage()) + "#" + ((EClassifier)eElement).getName();
 		} else if (eElement instanceof EStructuralFeature) {
 			return AgteleEcoreUtil.getEcoreElementUri(((EStructuralFeature)eElement).getEContainingClass()) + "/" + ((EStructuralFeature)eElement).getName();
+		} else if (eElement instanceof EOperation) {
+			return AgteleEcoreUtil.getEcoreElementUri(((EOperation)eElement).getEContainingClass()) + "/" + ((EOperation)eElement).getName();
+		} else if (eElement instanceof EParameter) {
+			return AgteleEcoreUtil.getEcoreElementUri(((EParameter)eElement).getEOperation()) + "/" + ((EParameter)eElement).getName();
 		}
 		return null;		
 	}

@@ -20,6 +20,7 @@ import de.tud.et.ifa.agtele.emf.AgteleEcoreUtil;
 import de.tud.et.ifa.agtele.emf.edit.AgteleStyledLabelProvider;
 import de.tud.et.ifa.agtele.resources.BundleContentHelper;
 import org.eclipse.jface.viewers.*;
+import org.eclipse.jface.viewers.DelegatingStyledCellLabelProvider.IStyledLabelProvider;
 import org.eclipse.jface.action.*;
 import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.ui.*;
@@ -30,6 +31,7 @@ import org.eclipse.ui.views.properties.PropertySheet;
 import org.eclipse.ui.views.properties.PropertySheetPage;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.dnd.Transfer;
+import org.eclipse.swt.graphics.Image;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IExtensionRegistry;
@@ -42,6 +44,7 @@ import org.eclipse.core.runtime.jobs.IJobChangeListener;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.core.runtime.jobs.JobGroup;
 import org.eclipse.e4.ui.di.UISynchronize;
+import org.eclipse.emf.common.EMFPlugin;
 import org.eclipse.emf.common.command.BasicCommandStack;
 import org.eclipse.emf.common.command.Command;
 import org.eclipse.emf.common.command.UnexecutableCommand;
@@ -198,7 +201,7 @@ public class ModelStorageView extends MultiPageView implements IViewPart, IPersi
 		this.notifyUpdatedViewedModelStorages();
 	}
 	
-	protected void initializeViewedModelStorages () {
+	public void initializeViewedModelStorages () {
 		if (!this.viewedModelStorages.contains(ModelStorage.DEFAULT_INSTANCE)) {
 			this.viewedModelStorages.add(ModelStorage.DEFAULT_INSTANCE);			
 		}
@@ -249,7 +252,7 @@ public class ModelStorageView extends MultiPageView implements IViewPart, IPersi
 			
 			modelStoragesViewer = (TreeViewer)viewerPane.getViewer();
 			modelStoragesViewer.setContentProvider(new ModelStorageContentProvider(adapterFactory, this));
-			modelStoragesViewer.setLabelProvider(new AgteleStyledLabelProvider(new AdapterFactoryLabelProvider.StyledLabelProvider(this.adapterFactory,
+			modelStoragesViewer.setLabelProvider(new ModelStorageLabelProvider(new AdapterFactoryLabelProvider.StyledLabelProvider(this.adapterFactory,
 							this.modelStoragesViewer)));
 			
 			//new AdapterFactoryLabelProvider(adapterFactory));
@@ -338,6 +341,22 @@ public class ModelStorageView extends MultiPageView implements IViewPart, IPersi
     
 	public Viewer getViewer () {
 		return this.modelStoragesViewer;
+	}
+	
+	public static class ModelStorageLabelProvider extends AgteleStyledLabelProvider {
+
+		public ModelStorageLabelProvider(IStyledLabelProvider labelProvider, EMFPlugin emfPlugin) {
+			super(labelProvider, emfPlugin);
+		}
+		
+		public ModelStorageLabelProvider(IStyledLabelProvider labelProvider) {
+			super(labelProvider);
+		}
+		
+		@Override
+		public Image getImage(Object element) {
+			return super.getImage(element);
+		}
 	}
 	
 	public static class ModelStorageContentProvider extends AdapterFactoryContentProvider {
@@ -456,6 +475,7 @@ public class ModelStorageView extends MultiPageView implements IViewPart, IPersi
 		bars = getViewSite().getActionBars();
 		fillLocalPullDown(bars.getMenuManager());
 		fillLocalToolBar(bars.getToolBarManager());		
+		bars.updateActionBars();
 	}
 
 	
@@ -879,6 +899,7 @@ public class ModelStorageView extends MultiPageView implements IViewPart, IPersi
 			currentViewPage = this.getViewPageForViewerPane(this.currentViewerPane);
 			if (currentViewPage != null) {
 				currentViewPage.contributeToActionBars(bars);
+				bars.updateActionBars();
 			}
 		}
 	}

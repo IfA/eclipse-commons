@@ -67,12 +67,12 @@ public interface IModelImporter {
 	default void importRootContentNode (Object node, Collection<EObject> target) {
 		//set the context explicitly to null before importing determining the type of the next root node
 		this.getImportRegistry().setContext(null);
-		INodeDescriptor descriptor = this.getConnector().getTypeInfo(node);
+		INodeDescriptor descriptor = node instanceof INodeDescriptor ? (INodeDescriptor) node : this.getConnector().getTypeInfo(node);
 		if (descriptor != null) {
 			EObject contentElement = this.createEObject(descriptor);
 			target.add(contentElement);
 			this.getImportRegistry().setContext(contentElement);
-			this.getImportRegistry().registerImportedElement(node, contentElement);
+			this.getImportRegistry().registerImportedElement(node instanceof INodeDescriptor ? ((INodeDescriptor) node).getNode() : node, contentElement);
 			this.importAllContents(contentElement);
 		}
 		this.getImportRegistry().setContext(null);
@@ -195,11 +195,13 @@ public interface IModelImporter {
 	}
 
 	default void restoreReference(EObject eObject, EReference reference) {
-		this.getImportStrategy(eObject.eClass(), reference).restoreReference(this, this.getConnector(), eObject, reference);
+		this.getImportStrategy(eObject.eClass(), reference)
+			.restoreReference(this, this.getConnector(), eObject, reference);
 	}
 	
 	default void restoreAttribute(EObject eObject, EAttribute attribute) {
-		this.getImportStrategy(eObject.eClass(), attribute).restoreAttribute(this, this.getConnector(), eObject, attribute);
+		this.getImportStrategy(eObject.eClass(), attribute)
+			.restoreAttribute(this, this.getConnector(), eObject, attribute);
 	}
 	
 	default void postImport(EObject eObject) {
