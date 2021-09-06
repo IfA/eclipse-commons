@@ -20,4 +20,16 @@ public interface AgteleEMFUAConnector extends Connector {
 	public default String[] getConnectionSchemes () {
 		return AgteleEMFUAConnector.CONNECTION_SCHEMES;
 	}
+	public static interface GenericCallResult {
+		public boolean isSuccessful();
+		public long getErrorCode();
+		public Object[] getResults();
+		public Object[] getParams();
+		String getErrorText();
+		void copyTo(GenericCallResult target);
+		boolean isError();
+	}
+
+	GenericCallResult invokeGenericMethod(Object genericServiceInvocationNode,
+			Object genericServiceInvocationMethodNode, Object[] params);
 } // AgteleEMFUAConnector

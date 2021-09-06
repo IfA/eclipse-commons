@@ -11,9 +11,15 @@ import de.tud.et.ifa.agtele.eclipse.commons.emf.modelStorage.uaModelStorageClien
 import org.eclipse.milo.opcua.stack.core.UaException;
 import de.tud.et.ifa.agtele.emf.importing.INodeDescriptor;
 import de.tud.et.ifa.agtele.emf.importing.NodeDescriptorImpl;
+import de.tud.et.ifa.agtele.resources.FileUtils;
 
 import static org.eclipse.milo.opcua.stack.core.types.builtin.unsigned.Unsigned.uint;
 
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.StringBufferInputStream;
 import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -27,7 +33,13 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
-
+import org.eclipse.core.internal.resources.Workspace;
+import org.eclipse.core.resources.IContainer;
+import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IFolder;
+import org.eclipse.core.resources.IWorkspaceRoot;
+import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.runtime.Path;
 import org.eclipse.emf.ecore.EAttribute;
 import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.EPackage;
@@ -52,16 +64,22 @@ import org.eclipse.milo.opcua.stack.core.types.builtin.ExpandedNodeId;
 import org.eclipse.milo.opcua.stack.core.types.builtin.LocalizedText;
 import org.eclipse.milo.opcua.stack.core.types.builtin.NodeId;
 import org.eclipse.milo.opcua.stack.core.types.builtin.QualifiedName;
+import org.eclipse.milo.opcua.stack.core.types.builtin.StatusCode;
+import org.eclipse.milo.opcua.stack.core.types.builtin.Variant;
+import org.eclipse.milo.opcua.stack.core.types.builtin.unsigned.UByte;
 import org.eclipse.milo.opcua.stack.core.types.builtin.unsigned.UInteger;
+import org.eclipse.milo.opcua.stack.core.types.builtin.unsigned.ULong;
 import org.eclipse.milo.opcua.stack.core.types.enumerated.BrowseDirection;
 import org.eclipse.milo.opcua.stack.core.types.enumerated.NodeClass;
 import org.eclipse.milo.opcua.stack.core.types.enumerated.TimestampsToReturn;
 import org.eclipse.milo.opcua.stack.core.types.structured.BrowseDescription;
+import org.eclipse.milo.opcua.stack.core.types.structured.CallMethodRequest;
 import org.eclipse.milo.opcua.stack.core.types.structured.EndpointDescription;
 import org.eclipse.milo.opcua.stack.core.types.structured.Node;
 import org.eclipse.milo.opcua.stack.core.types.structured.ReferenceDescription;
 import org.eclipse.milo.opcua.stack.core.types.structured.ServiceFault;
 import org.eclipse.milo.opcua.stack.core.types.structured.VariableNode;
+import org.eclipse.ui.internal.Workbench;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 /**
@@ -229,6 +247,8 @@ public class AgteleEMFUAConnectorImpl extends ConnectorImpl implements AgteleEMF
 				return new NodeId(eId.getNamespaceIndex(), (String)eId.getIdentifier());
 			}
 			return new NodeId(((ExpandedNodeId)o).getNamespaceIndex(), ((ExpandedNodeId)o).getIdentifier().toString());
+		} else if (o instanceof String) {
+			return NodeId.parse((String)o);
 		}
 		return null;
 	}
@@ -251,6 +271,14 @@ public class AgteleEMFUAConnectorImpl extends ConnectorImpl implements AgteleEMF
 	
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public Collection<Object> browse(Object node) {
+		Collection<ReferenceDescription> result = this.browseRaw(node, 1); //Object nodes
+		if (result == null) {
+			return null;
+		}
+		return (Collection)getNodeIdsFromReferences(result);
+	}
+	
+	public Collection<ReferenceDescription> browseRaw(Object node, int classMask) {
 		if (!this.connected) {
 			return null;
 		}
@@ -264,7 +292,7 @@ public class AgteleEMFUAConnectorImpl extends ConnectorImpl implements AgteleEMF
 						BrowseDirection.Forward, 
 						Identifiers.HierarchicalReferences, 
 						true, 
-						UInteger.valueOf(1), 
+						UInteger.valueOf(classMask), 
 						UInteger.valueOf(63)
 					);	
 			} else {				
@@ -273,13 +301,12 @@ public class AgteleEMFUAConnectorImpl extends ConnectorImpl implements AgteleEMF
 						BrowseDirection.Forward, 
 						Identifiers.HierarchicalReferences, 
 						true, 
-						UInteger.valueOf(1), 
+						UInteger.valueOf(classMask), 
 						UInteger.valueOf(63)
 					);	
 			}
 			Collection<ReferenceDescription> references = toCollection(this.client.browse(browse).get().getReferences());
-			
-			return (Collection)getNodeIdsFromReferences(references);
+			return references;
 		} catch (InterruptedException | ExecutionException e) {
 			e.printStackTrace();
 			this.connected = false;
@@ -457,6 +484,40 @@ public class AgteleEMFUAConnectorImpl extends ConnectorImpl implements AgteleEMF
 		return attributeValues;
 	}
 	
+	protected Map<Object, DataValue> readVariableNodeRaw(Object n) {
+		NodeId id = this.getNodeId(n);
+		Map<Object, DataValue> attributeValues = new HashMap<>();
+
+		ArrayList<NodeId> ids = new ArrayList<>();
+		ids.add(id);
+		ids.add(id);
+		ids.add(id);
+		ids.add(id);
+		ids.add(id);
+		ids.add(id);
+		ArrayList<UInteger> aIds = new ArrayList<>();
+		aIds.add(UInteger.valueOf(AttributeId.BrowseName.id()));
+		aIds.add(UInteger.valueOf(AttributeId.Value.id()));
+		aIds.add(UInteger.valueOf(AttributeId.DataType.id()));
+		aIds.add(UInteger.valueOf(AttributeId.ValueRank.id()));
+		aIds.add(UInteger.valueOf(AttributeId.ArrayDimensions.id()));
+		aIds.add(UInteger.valueOf(AttributeId.Description.id()));
+
+		try {
+			List<DataValue> values = client.read(Integer.MAX_VALUE, TimestampsToReturn.Neither, ids, aIds).get();
+			attributeValues.put(AttributeId.BrowseName, values.get(0));
+			attributeValues.put(AttributeId.Value, values.get(1));
+			attributeValues.put(AttributeId.DataType, values.get(2));
+			attributeValues.put(AttributeId.ValueRank, values.get(3));
+			attributeValues.put(AttributeId.ArrayDimensions, values.get(4));
+			attributeValues.put(AttributeId.Description, values.get(5));
+		} catch (InterruptedException | ExecutionException e) {
+			e.printStackTrace();
+			return null;
+		}
+		return attributeValues;
+	}
+	
 	protected Map<Object, DataValue> readVariableNode (Object n) {
 		NodeId id = (NodeId) n;
 		Map<Object, DataValue> attributeValues = this.variableDataCache.get(id);
@@ -464,36 +525,10 @@ public class AgteleEMFUAConnectorImpl extends ConnectorImpl implements AgteleEMF
 			return attributeValues;
 		}
 		if (attributeValues == null) {
-			attributeValues = new HashMap<>();
-			variableDataCache.put(id, attributeValues);
-			
-			ArrayList<NodeId> ids = new ArrayList<>();
-			ids.add(id);
-			ids.add(id);
-			ids.add(id);
-			ids.add(id);
-			ids.add(id);
-			ids.add(id);
-			ArrayList<UInteger> aIds = new ArrayList<>();
-			aIds.add(UInteger.valueOf(AttributeId.BrowseName.id()));
-			aIds.add(UInteger.valueOf(AttributeId.Value.id()));
-			aIds.add(UInteger.valueOf(AttributeId.DataType.id()));
-			aIds.add(UInteger.valueOf(AttributeId.ValueRank.id()));
-			aIds.add(UInteger.valueOf(AttributeId.ArrayDimensions.id()));
-			aIds.add(UInteger.valueOf(AttributeId.Description.id()));
-
-			try {
-				List<DataValue> values = client.read(Integer.MAX_VALUE, TimestampsToReturn.Neither, ids, aIds).get();
-				attributeValues.put(AttributeId.BrowseName, values.get(0));
-				attributeValues.put(AttributeId.Value, values.get(1));
-				attributeValues.put(AttributeId.DataType, values.get(2));
-				attributeValues.put(AttributeId.ValueRank, values.get(3));
-				attributeValues.put(AttributeId.ArrayDimensions, values.get(4));
-				attributeValues.put(AttributeId.Description, values.get(5));
-			} catch (InterruptedException | ExecutionException e) {
-				e.printStackTrace();
-				this.connected = false;
-			}		
+			attributeValues = this.readVariableNodeRaw(n);
+			if (attributeValues != null) {
+				variableDataCache.put(id, attributeValues);				
+			}
 		}
 		return attributeValues;
 	}
@@ -610,4 +645,307 @@ public class AgteleEMFUAConnectorImpl extends ConnectorImpl implements AgteleEMF
       	return OpcUaClient.create(config);
     }
 
+
+	@Override
+	public GenericCallResult invokeGenericMethod(Object genericServiceInvocationNode, Object genericServiceInvocationMethodNode, Object[] params) {
+		
+		Variant[] vars = new Variant[params.length];
+		
+		for (int i = 0; i < params.length; i+=1) {
+			if (params[i] instanceof Variant) {
+				vars[i] = (Variant) params[i];
+			} else {
+				vars[i] = new Variant(params[i]);
+			}
+		}
+				
+		CallMethodRequest request = new CallMethodRequest(
+	            AgteleEMFUAConnectorImpl.getNodeId(genericServiceInvocationNode),
+	            AgteleEMFUAConnectorImpl.getNodeId(genericServiceInvocationMethodNode),
+	            vars
+	        );
+		
+		GenericCallResultImpl result = new GenericCallResultImpl(genericServiceInvocationNode, genericServiceInvocationMethodNode, params);
+		
+        try {
+			return this.client.call(request).thenCompose(r -> {
+			    StatusCode statusCode = r.getStatusCode();
+		    	List<Object> results = new ArrayList<>();
+
+			    if (statusCode.isGood()) {
+			    	for (Variant var : r.getOutputArguments()) {
+			    		results.add(var.getValue());
+			    	}
+			    	result.setResult(results.toArray());
+			        return CompletableFuture.completedFuture(result);
+			    } else {
+			        StatusCode[] inputArgumentResults = r.getInputArgumentResults();
+			        for (int i = 0; i < inputArgumentResults.length; i++) {
+			            logger.error("inputArgumentResults[{}]={}", i, inputArgumentResults[i]);
+			            results.add(inputArgumentResults[i].toString());
+			        }
+			        result.setErrorResult(results.toArray(), statusCode);
+			        return CompletableFuture.completedFuture(result);
+			    }
+			}).get();
+		} catch (InterruptedException | ExecutionException e) {
+			e.printStackTrace();
+			result.setError(e);
+			return result;
+		}		
+
+	}
+	public static class GenericCallResultImpl implements GenericCallResult {
+		protected Object methodNode = null;
+		protected Object methodObject = null;
+		protected Object[] params = null;
+		protected boolean isSuccessful = false;
+		protected long errorCode = 0L;
+		protected String errorText = null;
+		protected Object[] result;
+		protected Exception e = null;
+		protected boolean isError = false;
+		
+		GenericCallResultImpl(Object methodObject, Object methodNode, Object[] params) {
+			this.methodNode = methodNode;
+			this.methodObject = methodObject;
+			this.params = params;
+		}
+		
+		protected GenericCallResultImpl() {
+		}
+
+		void setError(StatusCode code) {
+			this.isSuccessful = false;
+			this.errorCode = code.getValue();
+			this.errorText = code.toString();
+			this.isError = true;
+		}
+		
+		void setErrorResult(Object[] values, StatusCode code) {
+			this.setError(code);
+			this.internalSetResult(values);	
+		}
+		
+		void setErrorResult(Object[] values, Exception code) {
+			this.setError(code);
+			this.internalSetResult(values);
+		}
+		
+		void setError(Exception e) {
+			this.isSuccessful = false;
+			this.errorCode = 1L;
+			this.errorText = e.toString();
+			this.isError = true;
+		}
+		protected void internalSetResult(Object[] values) {			
+			this.result = values;
+		}
+		void setResult(Object[] values) {
+			if (this.isError) {
+				throw new Error("already an error");
+			}
+			this.isSuccessful = true;
+			this.internalSetResult(values);
+		}
+		
+		@Override
+		public boolean isSuccessful() {
+			return this.isSuccessful;
+		}
+		
+		@Override
+		public boolean isError() {
+			return this.isError;
+		}
+		@Override
+		public long getErrorCode() {
+			return this.errorCode;
+		}
+		@Override
+		public String getErrorText() {
+			return this.errorText;
+		}
+		@Override
+		public Object[] getResults() {
+			return this.result;
+		}
+		@Override
+		public Object[] getParams() {
+			return this.params;
+		}
+		@Override
+		public void copyTo (GenericCallResult target) {
+			GenericCallResultImpl t = (GenericCallResultImpl)target;
+			t.errorCode = this.errorCode;
+			t.errorText = this.errorText;
+			t.isSuccessful = this.isSuccessful;
+			t.isError = this.isError;
+			t.methodNode = this.methodNode;
+			t.methodObject = this.methodObject;
+			t.params = this.params;
+			t.internalSetResult(this.result);
+		}
+	}
+	
+	public FileDownloader createDownloader (ExpandedNodeId fileObjectId, String targetPath) {
+		return new FileDownloader(fileObjectId, targetPath);
+	}
+    
+    public class FileDownloader {
+    	protected long maxBytesPerRequest = 0;    	
+    	protected OpcUaClient client;
+    	protected ExpandedNodeId fileObjectId;
+    	protected String targetPath;
+    	protected ExpandedNodeId sizeAttributeId = null;
+    	protected ExpandedNodeId closeMethodId = null;
+    	protected ExpandedNodeId getPositionMethodId = null;
+    	protected ExpandedNodeId openMethodId = null;
+    	protected ExpandedNodeId readMethodId = null;
+    	protected ExpandedNodeId setPositionMethodId = null;
+    	protected Map<Object, DataValue> sizeAttributeData = null;
+    	protected long size = 0;
+    	protected long bytesRead = 0;
+		protected IFile target;
+		protected FileOutputStream outStream;
+
+		private long uaFileHandle = 0;
+
+		public FileDownloader (ExpandedNodeId fileObjectId, String targetPath) {
+    		this.client = AgteleEMFUAConnectorImpl.this.client;
+    		if (this.client.getConfig().getMaxResponseMessageSize().longValue() != 0) {
+    			this.maxBytesPerRequest = this.client.getConfig().getMaxResponseMessageSize().longValue() - 500L;
+    		} else {
+    			this.maxBytesPerRequest = 2000000L;
+    		}
+    		this.fileObjectId = fileObjectId;
+    		this.targetPath = targetPath;
+    	}
+		
+		public void execute() throws Exception {
+    		Collection<ReferenceDescription> nodeContent = AgteleEMFUAConnectorImpl.this.browseRaw(fileObjectId, 2+4); //Variables, Methods
+    		if (!this.init(nodeContent)) {
+    			throw new RuntimeException("Could not initialize UA file downloader");
+    		}
+			this.readSize();
+			this.openUaFile();
+			try {
+				this.openTargetFile();
+				this.readFileWriteFile();				
+			} catch (Exception e) {
+				throw e;
+			} finally {
+				if (this.uaFileHandle != 0L) {
+					try {
+						this.closeUaFile();
+					} catch (Exception e) {
+						//Do nothing
+					}
+				}
+				if (this.outStream != null) {
+					try {
+						this.outStream.close();
+					} catch (Exception e2) {
+						//Do nothing
+					}
+				}
+			}
+		}
+		
+		public boolean init(Collection<ReferenceDescription> nodeContent) {
+			for (ReferenceDescription ref : nodeContent) {
+				if (ref.getReferenceTypeId().equals(Identifiers.HasProperty)) {
+					if (ref.getBrowseName().getName().equals("Size")) {
+						this.sizeAttributeId  = ref.getNodeId();
+					}
+				} else if (ref.getReferenceTypeId().equals(Identifiers.HasComponent) && ref.getNodeClass() == NodeClass.Method) {
+					if (ref.getBrowseName().getName().equals("Close")) {
+						this.closeMethodId = ref.getNodeId();
+					} else if (ref.getBrowseName().getName().equals("GetPosition")) {
+						this.getPositionMethodId = ref.getNodeId();
+					} else if (ref.getBrowseName().getName().equals("Open")) {
+						this.openMethodId = ref.getNodeId();
+					} else if (ref.getBrowseName().getName().equals("Read")) {
+						this.readMethodId = ref.getNodeId();
+					} else if (ref.getBrowseName().getName().equals("SetPosition")) {
+						this.setPositionMethodId = ref.getNodeId();
+					}
+				}
+			}
+			
+			return this.sizeAttributeId != null && 
+					this.closeMethodId != null && 
+					this.getPositionMethodId != null && 
+					this.openMethodId != null && 
+					this.readMethodId != null && 
+					this.setPositionMethodId != null;
+		}
+		
+		protected void readSize () {
+			this.sizeAttributeData = AgteleEMFUAConnectorImpl.this.readVariableNodeRaw(this.sizeAttributeId);
+			this.size = ((ULong)this.sizeAttributeData.get(AttributeId.Value).getValue().getValue()).longValue();
+		}
+    	
+		protected void openTargetFile () throws Exception {
+			IWorkspaceRoot root = ResourcesPlugin.getWorkspace().getRoot();
+			this.target = root.getFile(new Path(this.targetPath));
+			
+			IContainer folder = (IContainer) this.target.getParent();
+			
+			try {
+				if (folder instanceof IFolder) {
+					FileUtils.createDirectories(folder.getFullPath().toString(), null);
+				}
+			} catch (Exception e1) {
+				throw e1;
+			}
+			
+			if (this.target.exists()) {
+				this.target.delete(true, null);
+			}
+			
+			try {
+				this.outStream = new FileOutputStream(this.target.getRawLocation().toString());
+			} catch (FileNotFoundException e) {
+				throw e;
+			}
+		}
+		
+		protected void openUaFile () {
+			GenericCallResult result = AgteleEMFUAConnectorImpl.this.invokeGenericMethod(this.fileObjectId, this.openMethodId, new Object[] {
+					UByte.valueOf(1) //Mode read
+			});
+			if (result.isError()) {
+				throw new RuntimeException("Error opening UA file object for file");
+			}
+			this.uaFileHandle  = ((UInteger)result.getResults()[0]).longValue();
+		}
+		
+		protected void closeUaFile () {
+			GenericCallResult result = AgteleEMFUAConnectorImpl.this.invokeGenericMethod(this.fileObjectId, this.closeMethodId, new Object[] {
+					UInteger.valueOf(this.uaFileHandle)
+			});
+			if (result.isError()) {
+				throw new RuntimeException("Error opening UA file object for file");
+			}
+		}		
+		
+		protected void readFileWriteFile() throws IOException {
+			while (this.bytesRead < this.size) {
+				long toRead = (this.size - this.bytesRead) >= this.maxBytesPerRequest ? this.maxBytesPerRequest : (this.size - this.bytesRead);
+				
+				GenericCallResult result = AgteleEMFUAConnectorImpl.this.invokeGenericMethod(this.fileObjectId, this.readMethodId, new Object[] {
+						UInteger.valueOf(this.uaFileHandle),
+						(int)toRead
+					});
+				
+				if (result.isError()) {
+					throw new RuntimeException("Error reading from file");
+				}
+				this.bytesRead += toRead;
+				byte data[] = ((ByteString)result.getResults()[0]).bytes();
+				this.outStream.write(data);
+			}
+		}
+    }
 } //AgteleEMFUAConnectorImpl
