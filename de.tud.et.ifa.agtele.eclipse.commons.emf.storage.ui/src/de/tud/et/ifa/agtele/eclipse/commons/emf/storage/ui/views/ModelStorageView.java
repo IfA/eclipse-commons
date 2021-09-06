@@ -472,7 +472,9 @@ public class ModelStorageView extends MultiPageView implements IViewPart, IPersi
 	}
 
 	protected void contributeToActionBars() {
-		bars = getViewSite().getActionBars();
+		if (this.bars == null) {
+			bars = getViewSite().getActionBars();
+		}
 		fillLocalPullDown(bars.getMenuManager());
 		fillLocalToolBar(bars.getToolBarManager());		
 		bars.updateActionBars();
@@ -899,9 +901,9 @@ public class ModelStorageView extends MultiPageView implements IViewPart, IPersi
 			currentViewPage = this.getViewPageForViewerPane(this.currentViewerPane);
 			if (currentViewPage != null) {
 				currentViewPage.contributeToActionBars(bars);
-				bars.updateActionBars();
 			}
 		}
+		bars.updateActionBars();
 	}
 
 	protected class NewViewInstanceAction extends Action {
