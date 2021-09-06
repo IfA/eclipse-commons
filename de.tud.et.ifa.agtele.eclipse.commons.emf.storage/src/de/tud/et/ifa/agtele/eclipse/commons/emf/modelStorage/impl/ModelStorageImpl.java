@@ -384,6 +384,15 @@ public class ModelStorageImpl extends UpdateableElementImpl implements ModelStor
 			}
 			try {
 				model.setUpdating(true);
+				if (model.getImportAdapter() != null && model.getImportAdapter().getConnector() != null) {
+					if (model.getImportAdapter().getConnector().isConnected()) {
+						try {
+							model.getImportAdapter().getConnector().disconnect();
+						}catch (Exception e) {
+							e.printStackTrace();
+						}
+					}
+				}
 				Connector connector = ImportAdapterFactory.eINSTANCE.createConnector(model.getUri());
 				if (connector == null) {
 					System.err.println("Could not load model, because no import adapter has been found for uri '" + model.getUri() +"'");
