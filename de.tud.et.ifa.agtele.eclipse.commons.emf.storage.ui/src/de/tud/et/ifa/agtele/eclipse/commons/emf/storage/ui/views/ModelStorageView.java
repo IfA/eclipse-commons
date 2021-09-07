@@ -888,7 +888,7 @@ public class ModelStorageView extends MultiPageView implements IViewPart, IPersi
 	
 	@Override
 	protected void pageChange(int newPageIndex) {
-		super.pageChange(newPageIndex);		
+		super.pageChange(newPageIndex);
 		Object selectedPage = getSelectedPage();
 				
 		if (currentViewPage != null) {
@@ -903,7 +903,9 @@ public class ModelStorageView extends MultiPageView implements IViewPart, IPersi
 				currentViewPage.contributeToActionBars(bars);
 			}
 		}
-		bars.updateActionBars();
+		if (this.bars != null) {
+			this.bars.updateActionBars();
+		}
 	}
 
 	protected class NewViewInstanceAction extends Action {
