@@ -352,14 +352,16 @@ public class <%=genPackage.getActionBarContributorClassName()%>
 		else
 		{
 			selectionProvider = part.getSite().getSelectionProvider();
-			selectionProvider.addSelectionChangedListener(this);
-
-			// Fake a selection changed event to update the menus.
-			//
-			if (selectionProvider.getSelection() != null)
-			{
-				selectionChanged(new <%=genModel.getImportedName("org.eclipse.jface.viewers.SelectionChangedEvent")%>(selectionProvider, selectionProvider.getSelection()));
-			}
+			if (selectionProvider != null) {<%-edited in order to prevent null pointer exceptions-%>
+				selectionProvider.addSelectionChangedListener(this);
+	
+				// Fake a selection changed event to update the menus.
+				//
+				if (selectionProvider.getSelection() != null)
+				{
+					selectionChanged(new <%=genModel.getImportedName("org.eclipse.jface.viewers.SelectionChangedEvent")%>(selectionProvider, selectionProvider.getSelection()));
+				}
+			}<%-edit end-%>
 		}
 	}
 
