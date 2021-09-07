@@ -7,6 +7,8 @@ import java.util.Map;
 
 import org.eclipse.core.runtime.CoreException;
 
+import de.tud.et.ifa.agtele.ResultReporter;
+
 public class ExtendedStringSubstitutor extends DefaultStringSubstitutor {
 	public static final String VAR_PREFIX = "${";
 	public static final String VAR_SUFFIX = "}";

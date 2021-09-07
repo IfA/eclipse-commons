@@ -2,7 +2,6 @@ package de.tud.et.ifa.agtele.eclipse.webpage.generator.artifacts
 
 import de.tud.et.ifa.agtele.eclipse.webpage.generator.artifacts.AbstractPageGenerator
 import de.tud.et.ifa.agtele.eclipse.webpage.webpagemodel.AbstractHTML
-import de.tud.et.ifa.agtele.eclipse.webpage.util.ResultReporter
 import de.tud.et.ifa.agtele.eclipse.webpage.util.IStringSubstitutor
 import de.tud.et.ifa.agtele.eclipse.webpage.webpagemodel.WebPageModelPackage
 import de.tud.et.ifa.agtele.eclipse.webpage.webpagemodel.Page
@@ -12,6 +11,7 @@ import de.tud.et.ifa.agtele.eclipse.webpage.webpagemodel.WebPage
 import java.util.List
 import java.util.ArrayList
 import de.tud.et.ifa.agtele.eclipse.webpage.webpagemodel.AnnouncementLocationEnum
+import de.tud.et.ifa.agtele.ResultReporter
 
 class PageGenerator extends AbstractPageGenerator implements BootstrapHtmlGenerator{
 	

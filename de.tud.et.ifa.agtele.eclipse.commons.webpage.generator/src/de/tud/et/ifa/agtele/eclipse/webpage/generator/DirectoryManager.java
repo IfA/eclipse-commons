@@ -21,8 +21,8 @@ import org.eclipse.core.runtime.Path;
 import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.EObject;
 
+import de.tud.et.ifa.agtele.ResultReporter;
 import de.tud.et.ifa.agtele.eclipse.webpage.util.IStringSubstitutor;
-import de.tud.et.ifa.agtele.eclipse.webpage.util.ResultReporter;
 import de.tud.et.ifa.agtele.eclipse.webpage.webpagemodel.AbstractHTML;
 import de.tud.et.ifa.agtele.eclipse.webpage.webpagemodel.WebPage;
 import de.tud.et.ifa.agtele.eclipse.webpage.webpagemodel.util.WebPageModelUtils;

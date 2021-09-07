@@ -14,9 +14,9 @@ import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.Path;
 
+import de.tud.et.ifa.agtele.ResultReporter;
 import de.tud.et.ifa.agtele.eclipse.webpage.generator.DirectoryManager;
 import de.tud.et.ifa.agtele.eclipse.webpage.util.IStringSubstitutor;
-import de.tud.et.ifa.agtele.eclipse.webpage.util.ResultReporter;
 import de.tud.et.ifa.agtele.eclipse.webpage.webpagemodel.AbstractHTML;
 import de.tud.et.ifa.agtele.eclipse.webpage.webpagemodel.FileValue;
 import de.tud.et.ifa.agtele.eclipse.webpage.webpagemodel.StringValue;

@@ -1,4 +1,4 @@
-package de.tud.et.ifa.agtele.eclipse.webpage.util;
+package de.tud.et.ifa.agtele;
 
 import java.util.ArrayList;
 import java.util.List;

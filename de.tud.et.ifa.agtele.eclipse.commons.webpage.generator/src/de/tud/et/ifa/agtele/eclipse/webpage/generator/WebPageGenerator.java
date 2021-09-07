@@ -18,6 +18,7 @@ import org.eclipse.core.variables.IStringVariableManager;
 import org.eclipse.core.variables.IValueVariable;
 import org.eclipse.core.variables.IValueVariableListener;
 
+import de.tud.et.ifa.agtele.ResultReporter;
 import de.tud.et.ifa.agtele.eclipse.webpage.generator.artifacts.AbstractPageGenerator;
 import de.tud.et.ifa.agtele.eclipse.webpage.generator.artifacts.PageGenerator;
 import de.tud.et.ifa.agtele.eclipse.webpage.util.AbstractGenerator;
@@ -26,7 +27,6 @@ import de.tud.et.ifa.agtele.eclipse.webpage.util.ExtendedStringSubstitutor;
 import de.tud.et.ifa.agtele.eclipse.webpage.util.ExtendedStringSubstitutor.SubstitutionVariable;
 import de.tud.et.ifa.agtele.eclipse.webpage.util.GenerateJob;
 import de.tud.et.ifa.agtele.eclipse.webpage.util.IStringSubstitutor;
-import de.tud.et.ifa.agtele.eclipse.webpage.util.ResultReporter;
 import de.tud.et.ifa.agtele.eclipse.webpage.webpagemodel.AbstractHTML;
 import de.tud.et.ifa.agtele.eclipse.webpage.webpagemodel.Page;
 import de.tud.et.ifa.agtele.eclipse.webpage.webpagemodel.WebPage;
