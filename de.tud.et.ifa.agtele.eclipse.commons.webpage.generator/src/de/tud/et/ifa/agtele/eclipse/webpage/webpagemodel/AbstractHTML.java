@@ -11,7 +11,7 @@ import java.util.stream.Collectors;
 import org.eclipse.emf.common.util.EList;
 import org.eclipse.emf.common.util.URI;
 
-import de.tud.et.ifa.agtele.eclipse.webpage.util.IStringSubstitutor;
+import de.tud.et.ifa.agtele.IStringSubstitutor;
 import de.tud.et.ifa.agtele.eclipse.webpage.webpagemodel.util.WebPageModelUtils;
 import de.tud.et.ifa.agtele.emf.AgteleEcoreUtil;
 

@@ -4,6 +4,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.variables.IStringVariableManager;
 import org.eclipse.core.variables.VariablesPlugin;
 
+import de.tud.et.ifa.agtele.IStringSubstitutor;
 import de.tud.et.ifa.agtele.ResultReporter;
 
 public class DefaultStringSubstitutor implements IStringSubstitutor {

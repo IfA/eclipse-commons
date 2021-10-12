@@ -4,7 +4,7 @@ package de.tud.et.ifa.agtele.eclipse.webpage.webpagemodel;
 
 import org.eclipse.emf.common.util.URI;
 
-import de.tud.et.ifa.agtele.eclipse.webpage.util.IStringSubstitutor;
+import de.tud.et.ifa.agtele.IStringSubstitutor;
 
 /**
  * <!-- begin-user-doc -->

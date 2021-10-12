@@ -2,7 +2,7 @@ package de.tud.et.ifa.agtele.eclipse.webpage.generator.artifacts
 
 import de.tud.et.ifa.agtele.eclipse.webpage.generator.artifacts.AbstractPageGenerator
 import de.tud.et.ifa.agtele.eclipse.webpage.webpagemodel.AbstractHTML
-import de.tud.et.ifa.agtele.eclipse.webpage.util.IStringSubstitutor
+import de.tud.et.ifa.agtele.IStringSubstitutor
 import de.tud.et.ifa.agtele.eclipse.webpage.webpagemodel.WebPageModelPackage
 import de.tud.et.ifa.agtele.eclipse.webpage.webpagemodel.Page
 import de.tud.et.ifa.agtele.eclipse.webpage.webpagemodel.StringValue
