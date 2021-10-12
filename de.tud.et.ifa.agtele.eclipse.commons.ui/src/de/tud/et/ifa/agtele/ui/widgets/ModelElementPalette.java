@@ -214,11 +214,15 @@ public abstract class ModelElementPalette implements CreateActionChangeListener 
 	
 
 	public void update () {
-		if (this.filterOption != null) {
-			this.filterOption.updateSelection(this.getSelectedElement());
-		}		
+		//The update has to be postponed in order to let the editor and action bar contributor update before
+		Display.getCurrent().asyncExec(() -> {
+			if (this.filterOption != null) {
+				this.filterOption.updateSelection(this.getSelectedElement());
+			}		
+			
+			this.createButtons();
+		});
 		
-		this.createButtons();
 	}
 
 	public void createButtons () {
