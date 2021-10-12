@@ -207,9 +207,17 @@ public class ImportAdapterFactoryImpl extends EFactoryImpl implements ImportAdap
 	
 	public boolean matchesSchema(String uri, RegEntry entry) {
 		for (String scheme : entry.schema) {
-			if (uri.startsWith(scheme)) {
+			if (this.matchesSchema(uri, scheme)) {
 				return true;
 			}
+		}
+		return false;
+	}
+	
+	@Override
+	public boolean matchesSchema(String uri, String schema) {
+		if (uri.startsWith(schema)) {
+			return true;
 		}
 		return false;
 	}

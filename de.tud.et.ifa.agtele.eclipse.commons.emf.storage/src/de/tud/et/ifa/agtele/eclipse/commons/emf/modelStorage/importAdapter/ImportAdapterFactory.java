@@ -57,4 +57,6 @@ public interface ImportAdapterFactory extends EFactory {
 	
 	void registerConnectorClass(String[] schema, EClass cls);
 
+	boolean matchesSchema(String uri, String schema);
+
 } //ImportAdapterFactory
