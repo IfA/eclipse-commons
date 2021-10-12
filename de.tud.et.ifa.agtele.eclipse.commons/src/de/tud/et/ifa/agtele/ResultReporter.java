@@ -22,7 +22,7 @@ public abstract class ResultReporter {
 		return new ArrayList<>(this.reports);
 	}
 	
-	public void addError(Exception error) {
+	public synchronized void addError(Exception error) {
 		this.errors.add(error);
 		this.onError(error);
 	}

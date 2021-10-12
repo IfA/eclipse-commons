@@ -1,4 +1,4 @@
-package de.tud.et.ifa.agtele.eclipse.webpage.util;
+package de.tud.et.ifa.agtele;
 
 public interface IStringSubstitutor {
 	public String substitute(String original);
