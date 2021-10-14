@@ -4,10 +4,12 @@ import java.util.ArrayList;
 
 import org.eclipse.emf.common.notify.Adapter;
 import org.eclipse.emf.ecore.EObject;
+import org.eclipse.emf.edit.provider.IEditingDomainItemProvider;
 import org.eclipse.emf.edit.provider.ItemProviderAdapter;
 
 import de.tud.et.ifa.agtele.eclipse.commons.emf.modelStorage.importAdapter.ImportAdapter;
 import de.tud.et.ifa.agtele.eclipse.commons.emf.modelStorage.importAdapter.impl.DelegatingImportStrategyImpl;
+import de.tud.et.ifa.agtele.emf.AgteleEcoreUtil;
 import de.tud.et.ifa.agtele.emf.edit.IReferencingIdentificationStringProvider;
 import de.tud.et.ifa.agtele.emf.importing.IAdapterFactoryDelegatingModelImportStrategy;
 import de.tud.et.ifa.agtele.emf.importing.IDelegatingModelImportStrategy;
@@ -28,7 +30,10 @@ public class IdentifierRegistrationDelegatingImportStrategy extends DelegatingIm
 	public void postImport(IModelImporter adapter, IModelConnector connector, EObject eObject) {
 		Adapter itemProviderAdapter = null;
 		try {
-			itemProviderAdapter = this.getAdapter(eObject, ItemProviderAdapter.class);
+			itemProviderAdapter = AgteleEcoreUtil.getAdapter(eObject, IEditingDomainItemProvider.class);
+			if (itemProviderAdapter == null || !(itemProviderAdapter instanceof ItemProviderAdapter)) {
+				itemProviderAdapter = AgteleEcoreUtil.getAdapter(eObject, ItemProviderAdapter.class);
+			}
 		} catch (Exception e) {
 			//Do nothing
 		}

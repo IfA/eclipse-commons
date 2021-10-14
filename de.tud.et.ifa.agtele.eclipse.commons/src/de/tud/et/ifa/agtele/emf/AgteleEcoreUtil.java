@@ -15,10 +15,12 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -33,6 +35,7 @@ import org.eclipse.emf.codegen.ecore.genmodel.GenClassifier;
 import org.eclipse.emf.codegen.ecore.genmodel.GenPackage;
 import org.eclipse.emf.common.notify.Adapter;
 import org.eclipse.emf.common.notify.AdapterFactory;
+import org.eclipse.emf.common.util.TreeIterator;
 import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.EAnnotation;
 import org.eclipse.emf.ecore.EAttribute;
@@ -1040,15 +1043,19 @@ public interface AgteleEcoreUtil {
 			AdapterFactory factory = null;
 			if (eObject.eResource() != null && eObject.eResource().getResourceSet() != null) {
 				factory = EcoreUtil.getAdapterFactory(eObject.eResource().getResourceSet().getAdapterFactories(), type);
+				try {
+					adapter = factory.adapt(eObject, type);
+				} catch (Exception e) {
+					//Do nothing
+				}
 			}
 			
-			if (factory == null) {
+			if (factory == null || adapter == null) {
 				factory = AgteleEcoreUtil.createRegisteredAdapterFactory(eObject.eClass().getEPackage().getNsURI());
 				if (factory != null) {
 					adapter = factory.adapt(eObject, type);
-					if (adapter != null && eObject.eResource() != null && eObject.eResource().getResourceSet() != null) {
+					if (adapter != null && eObject.eResource() != null && eObject.eResource().getResourceSet() != null && !eObject.eResource().getResourceSet().getAdapterFactories().contains(factory)) {
 						eObject.eResource().getResourceSet().getAdapterFactories().add(factory);
-						//TODO store factory in a local static map in order not to query the extension point all the time
 					}
 				}				
 			}			
@@ -1058,12 +1065,29 @@ public interface AgteleEcoreUtil {
 	
 	public static final String ITEM_PROVIDER_ADAPTER_FACTORIES_EXTENSION_POINT_ID = "org.eclipse.emf.edit.itemProviderAdapterFactories";
 	
+	public static final Map<String, AdapterFactory> adapterFactoryCache = new HashMap<>();
+	
+	static public AdapterFactory getCachedAdapterFactory (String nameSpaceUri) {
+		return adapterFactoryCache.get(nameSpaceUri);
+	}
+	
+	static public AdapterFactory createRegisteredAdapterFactory (EObject obj) {
+		if (obj != null) {
+			return createRegisteredAdapterFactory(obj.eClass().getEPackage().getNsURI());
+		}
+		return null;
+	}
+	
 	/**
 	 * Fetches the Ecore Adapter Factory extension point and creates the registered adapter factory.
 	 * @param nameSpaceUri
 	 * @return
 	 */
 	static public AdapterFactory createRegisteredAdapterFactory (String nameSpaceUri) {
+		if (adapterFactoryCache.containsKey(nameSpaceUri)) {
+			return adapterFactoryCache.get(nameSpaceUri);
+		}
+		
 		IExtensionRegistry registry = Platform.getExtensionRegistry();
 		
 		IConfigurationElement[] elements
@@ -1075,6 +1099,9 @@ public interface AgteleEcoreUtil {
 					final Object o =
 							element.createExecutableExtension("class");
 					if (o instanceof AdapterFactory) {
+						synchronized (AgteleEcoreUtil.class) {
+							adapterFactoryCache.put(nameSpaceUri, (AdapterFactory) o);
+						}						
 						return (AdapterFactory)o;					
 					}
 				} catch (CoreException e) {
@@ -1220,8 +1247,12 @@ public interface AgteleEcoreUtil {
 			if (AgteleEcoreUtil.getAllContainers(eObject, true).contains(EcorePackage.eINSTANCE)) {
 				return true;
 			}
-			Adapter a = AgteleEcoreUtil.getAdapter(eObject, ItemProviderAdapter.class);
-			if (a != null && a instanceof IReferencingIdentificationStringProvider) {
+			Adapter provider = AgteleEcoreUtil.getAdapter(eObject, IEditingDomainItemProvider.class);
+			if (provider == null || !(provider instanceof ItemProviderAdapter)) {
+				provider = AgteleEcoreUtil.getAdapter(eObject, ItemProviderAdapter.class);
+			}
+		
+			if (provider != null && provider instanceof IReferencingIdentificationStringProvider) {
 				return true;
 			}
 		} catch (Exception e) {
@@ -1236,18 +1267,30 @@ public interface AgteleEcoreUtil {
 			return Collections.singletonList(AgteleEcoreUtil.getEcoreElementReferencingIdentifier(eObject));
 		}
 		
-		Adapter itemProviderAdapter = null;
+		Adapter provider = null;
 		try {
-			itemProviderAdapter = AgteleEcoreUtil.getAdapter(eObject, ItemProviderAdapter.class);
+			provider = AgteleEcoreUtil.getAdapter(eObject, IEditingDomainItemProvider.class);
+			if (provider == null || !(provider instanceof ItemProviderAdapter)) {
+				provider = AgteleEcoreUtil.getAdapter(eObject, ItemProviderAdapter.class);
+			}
 		} catch (Exception e) {
 			//Do nothing
 		}
 		
-		if (itemProviderAdapter != null && 
-				itemProviderAdapter instanceof IReferencingIdentificationStringProvider) {
-			ArrayList<String> identifiers = new ArrayList<>(((IReferencingIdentificationStringProvider)itemProviderAdapter).getReferencingIdentificationStrings(eObject));
+		if (provider != null && 
+				provider instanceof IReferencingIdentificationStringProvider) {
+			ArrayList<String> identifiers = new ArrayList<>(((IReferencingIdentificationStringProvider)provider).getReferencingIdentificationStrings(eObject));
 			return identifiers;
 		}
 		return Collections.emptyList();
+	}
+	
+	public static <T> Iterable<T> wrapTreeIterator(TreeIterator<T> it) {
+		return new Iterable<T>() {
+			@Override
+			public Iterator<T> iterator() {
+				return it;
+			}			
+		};
 	}
 } 

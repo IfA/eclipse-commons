@@ -6,8 +6,10 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.eclipse.emf.common.notify.Adapter;
 import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.EObject;
+import org.eclipse.emf.edit.provider.IEditingDomainItemProvider;
 import org.eclipse.emf.edit.provider.ItemProvider;
 import org.eclipse.emf.edit.provider.ItemProviderAdapter;
 import org.eclipse.jface.dialogs.IDialogSettings;
@@ -69,7 +71,12 @@ public class ItemProviderCreateActionFilter extends CompoundCreateActionFilter
 			return Collections.emptyList();
 		}
 		
-		ItemProviderAdapter provider = AgteleEcoreUtil.adapt(selection, ItemProviderAdapter.class);
+		Adapter adapter = AgteleEcoreUtil.getAdapter(selection, IEditingDomainItemProvider.class);
+		if (adapter == null || !(adapter instanceof ItemProviderAdapter)) {
+			adapter = AgteleEcoreUtil.getAdapter(selection, ItemProviderAdapter.class);
+		}
+		
+		ItemProviderAdapter provider = (ItemProviderAdapter) adapter;
 	
 		List<ICreateActionFilter> result = Collections.emptyList();
 		if (provider instanceof CreateActionFilterItemProvider) {
