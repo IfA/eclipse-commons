@@ -760,6 +760,20 @@ public interface AgteleEcoreUtil {
 		}
 		return null;
 	}
+	@SuppressWarnings("unchecked")
+	public static <T extends EObject> T getAncestorOfKind(EObject child, Class<T> ancestorType) {
+
+		EObject parent = child.eContainer();
+
+		while (parent != null) {
+
+			if (ancestorType.isInstance(parent)) {
+				return (T)parent;
+			}
+			parent = parent.eContainer();
+		}
+		return null;
+	}
 
 	/**
 	 * This moves upward in the containment hierarchy of the given {@link EObject} and returns the first ancestor that

@@ -150,7 +150,29 @@ public interface ModelStorage extends UpdateableElement {
 	}
 		
 	List<IResolveResult> resolve (String identifier);
-
+	
+	@SuppressWarnings("unchecked")
+	default <T> List<T> resolve(String identifier, Class<T> type) {
+		List<T> result = new ArrayList<>();
+		for (IResolveResult r : this.resolve(identifier)) {
+			if (type.isInstance(r.getElement())) {
+				result.add((T)r.getElement());
+			}
+		}	
+		return result;
+	}
+	@SuppressWarnings("unchecked")
+	default <T> List<T> resolve(List<String> identifier, Class<T> type) {
+		Set<T> result = new LinkedHashSet<>();
+		for (String id : identifier) {
+			for (IResolveResult r : this.resolve(id)) {
+				if (type.isInstance(r.getElement())) {
+					result.add((T)r.getElement());
+				}
+			}
+		}
+		return new ArrayList<>(result);
+	}
 	IDelegatingModelImportStrategy[] getDelegatingImportStrategies();
 	
 	default List<EObject> getAllContents () {
@@ -179,6 +201,16 @@ public interface ModelStorage extends UpdateableElement {
 			result.addAll(storage.resolve(id));
 		}
 		
+		return result;
+	}
+	@SuppressWarnings("unchecked")
+	static <T> List<T> resolveGlobal(String identifier, Class<T> type) {
+		List<T> result = new ArrayList<>();
+		for (IResolveResult r : ModelStorage.resolveGlobal(identifier)) {
+			if (type.isInstance(r.getElement())) {
+				result.add((T)r.getElement());
+			}
+		}	
 		return result;
 	}
 	
