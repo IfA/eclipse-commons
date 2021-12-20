@@ -484,6 +484,7 @@ public abstract class ModelElementPalette implements CreateActionChangeListener 
 				this.label.setForeground(this.display.getSystemColor(SWT.COLOR_WIDGET_DARK_SHADOW));
 				Image i = ResourceManager.getImage(action.getImageDescriptor());
 				Image grey = new Image(Display.getDefault(), i, SWT.IMAGE_GRAY);
+				this.greyImage = grey;
 				this.label.setImage(grey);
 //				this.label.setForeground(new Color(Display.getCurrent(), 0, 255, 0));
 			}

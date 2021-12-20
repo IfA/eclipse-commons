@@ -750,7 +750,7 @@ public class TreeViewerGroup extends SelectionRestoringFilteredTree implements I
 
 		@Override
 		public void dispose() {
-
+			this.item.getImage().dispose();
 			this.item.dispose();
 		}
 	}
@@ -796,7 +796,7 @@ public class TreeViewerGroup extends SelectionRestoringFilteredTree implements I
 
 		@Override
 		public void dispose() {
-
+			this.item.getImage().dispose();
 			this.item.dispose();
 		}
 	}
@@ -973,7 +973,7 @@ public class TreeViewerGroup extends SelectionRestoringFilteredTree implements I
 
 		@Override
 		public void dispose() {
-
+			this.item.getImage().dispose();
 			this.listener.dispose();
 			this.item.dispose();
 		}
@@ -1196,7 +1196,7 @@ public class TreeViewerGroup extends SelectionRestoringFilteredTree implements I
 			
 			@Override
 			public void dispose() {
-				
+				this.item.getImage().dispose();
 				this.item.removeSelectionListener(this.listener);
 				this.item.dispose();
 			}
@@ -1365,7 +1365,7 @@ public class TreeViewerGroup extends SelectionRestoringFilteredTree implements I
 
 			@Override
 			public void dispose() {
-
+				this.toolBarItem.getImage().dispose();
 				this.toolBarItem.removeSelectionListener(this.toolbarListener);
 				this.toolBarItem.dispose();
 				super.dispose();
