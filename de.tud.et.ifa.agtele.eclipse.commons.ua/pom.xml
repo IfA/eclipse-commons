@@ -4,6 +4,13 @@
   <artifactId>de.tud.et.ifa.agtele.eclipse.commons.ua</artifactId>
   <version>0.1.0</version>
   <name>de.tud.et.ifa.agtele.eclipse.commons.ua</name>
+	<licenses>
+        <license>
+            <name>Eclipse Public License - v 2.0</name>
+            <url>https://www.eclipse.org/org/documents/epl-2.0/EPL-2.0.html</url>
+            <distribution>repo</distribution>
+        </license>
+    </licenses>
   <dependencies>
   	<dependency>
   		<groupId>org.eclipse.milo</groupId>
