@@ -221,7 +221,7 @@ public interface IDragAndDropProvider {
 			return dragAndDropCommand;
 		} else if (possibleReferences.size() == 1) {
 			commands.add(this.createDragAndDropCommand(domain, (Collection<EObject>) collection, parent,
-					possibleReferences.keySet().iterator().next()));
+					possibleReferences.keySet().iterator().next(), operation));
 		} else {
 			for (Entry<EReference, Boolean> entry : possibleReferences.entrySet()) {
 
