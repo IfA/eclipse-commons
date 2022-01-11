@@ -31,19 +31,25 @@ import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.EReference;
 import org.eclipse.emf.ecore.EcorePackage;
+import org.eclipse.emf.ecore.util.EcoreUtil;
 import org.eclipse.emf.edit.command.AddCommand;
 import org.eclipse.emf.edit.command.CommandParameter;
+import org.eclipse.emf.edit.command.CopyCommand;
 import org.eclipse.emf.edit.command.DragAndDropCommand;
+import org.eclipse.emf.edit.command.SetCommand;
 import org.eclipse.emf.edit.domain.EditingDomain;
 import org.eclipse.emf.edit.provider.AdapterFactoryItemDelegator;
 import org.eclipse.emf.edit.provider.IItemPropertyDescriptor;
 import org.eclipse.emf.edit.provider.ItemProviderAdapter;
+import org.eclipse.swt.dnd.DND;
 
 import de.tud.et.ifa.agtele.emf.AgteleEcoreUtil;
 import de.tud.et.ifa.agtele.emf.edit.commands.AmbiguousDragAndDropCommandWrapper;
 import de.tud.et.ifa.agtele.emf.edit.commands.BasicDragAndDropAddCommand;
+import de.tud.et.ifa.agtele.emf.edit.commands.BasicDragAndDropAddCopyCommand;
 import de.tud.et.ifa.agtele.emf.edit.commands.BasicDragAndDropCompoundCommand;
 import de.tud.et.ifa.agtele.emf.edit.commands.BasicDragAndDropSetCommand;
+import de.tud.et.ifa.agtele.emf.edit.commands.BasicDragAndDropSetCopyCommand;
 import de.tud.et.ifa.agtele.emf.edit.commands.DragAndDropChangeContainingFeatureCommand;
 
 /**
@@ -54,7 +60,7 @@ import de.tud.et.ifa.agtele.emf.edit.commands.DragAndDropChangeContainingFeature
  * @author mfreund
  */
 public interface IDragAndDropProvider {
-
+	
 	/**
 	 * Create a custom {@link DragAndDropCommand}. The given '<em>strategy</em>'
 	 * can be used to select one of multiple possible commands to execute.
@@ -169,9 +175,29 @@ public interface IDragAndDropProvider {
 						}
 
 						if (!eClasses.isEmpty() && eClasses.containsAll(eClassSet)) {
-							possibleReferences.put(ref, domain
-									.createCommand(AddCommand.class, new CommandParameter(parent, ref, collection))
-									.canExecute());
+							Command cpy = CopyCommand.create(domain, collection);	
+							
+							if (this.isCopyOperation(operation) && ref.isContainment() && cpy.canExecute()) {
+								cpy.execute();
+								
+								if (ref.isMany()) {
+									possibleReferences.put(ref, domain
+											.createCommand(AddCommand.class, new CommandParameter(parent, ref, cpy.getResult()))
+											.canExecute());
+								} else {
+									possibleReferences.put(ref, domain
+											.createCommand(SetCommand.class, new CommandParameter(parent, ref, cpy.getResult()))
+											.canExecute());								
+								}								
+							} else if (ref.isMany()) {
+								possibleReferences.put(ref, domain
+										.createCommand(AddCommand.class, new CommandParameter(parent, ref, collection))
+										.canExecute());
+							} else {
+								possibleReferences.put(ref, domain
+										.createCommand(SetCommand.class, new CommandParameter(parent, ref, collection))
+										.canExecute());								
+							}
 						}
 
 					}
@@ -199,8 +225,9 @@ public interface IDragAndDropProvider {
 		} else {
 			for (Entry<EReference, Boolean> entry : possibleReferences.entrySet()) {
 
+				//TODO check operation, if it is a copy operation (Ctrl-Key is pressed) DND.DROP_MOVE | DND.DROP_COPY
 				AbstractCommand command = this.createDragAndDropCommand(domain, (Collection<EObject>) collection,
-						parent, entry.getKey());
+						parent, entry.getKey(), operation);
 
 				if (entry.getValue()) {
 					commands.add(command);
@@ -260,6 +287,24 @@ public interface IDragAndDropProvider {
 				return new BasicDragAndDropSetCommand(domain, parent, ref, collection.iterator().next(), 0);
 			}
 		}
+	}
+	
+	default public AbstractCommand createDragAndDropCommand(EditingDomain domain, Collection<EObject> collection,
+			EObject parent, EReference ref, int operation) {
+		Command cpy = CopyCommand.create(domain, collection);
+		if (this.isCopyOperation(operation) && ref.isContainment() && cpy.canExecute()) {
+			cpy.execute();
+			if (ref.isMany()) {
+				return new BasicDragAndDropAddCopyCommand(domain, parent, ref, cpy.getResult());
+			} else {
+				return new BasicDragAndDropSetCopyCommand(domain, parent, ref, cpy.getResult().iterator().next(), 0);
+			}
+		}
+		return this.createDragAndDropCommand(domain, collection, parent, ref);
+	}
+	
+	default public boolean isCopyOperation (int operation) {
+		return (operation & DND.DROP_COPY) > 0;
 	}
 
 	/**
