@@ -121,6 +121,8 @@ public interface IDragAndDropProvider {
 		//
 		Map<EReference, Boolean> possibleReferences = new HashMap<>();
 
+		//TODO in order to also enable DND moves (e.g. within a many-reference) and copy inserts into a many-reference, we also need to store the command in order to create appropriate dnd commands later
+		
 		if (delegator != null) {
 
 			// Determine all possible references that could be used to drop the
@@ -225,7 +227,7 @@ public interface IDragAndDropProvider {
 		} else {
 			for (Entry<EReference, Boolean> entry : possibleReferences.entrySet()) {
 
-				//TODO check operation, if it is a copy operation (Ctrl-Key is pressed) DND.DROP_MOVE | DND.DROP_COPY
+				// check operation, if it is a copy operation (Ctrl-Key is pressed) DND.DROP_MOVE | DND.DROP_COPY
 				AbstractCommand command = this.createDragAndDropCommand(domain, (Collection<EObject>) collection,
 						parent, entry.getKey(), operation);
 
