@@ -32,6 +32,7 @@ import org.eclipse.swt.dnd.DND;
 import org.eclipse.swt.dnd.DragSourceListener;
 import org.eclipse.swt.dnd.Transfer;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.TreeItem;
 import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.IWorkbenchPage;
@@ -320,9 +321,22 @@ public class EPackageBrowserView extends PackageRegistryExplorerView implements 
 	}
 
 	@Override
+	public void requestFocus() {
+		Display.getCurrent().asyncExec(new Runnable (){
+			@Override
+			public void run() {
+				EPackageBrowserView.this.getSite().getPage().activate(
+						EPackageBrowserView.this.getSite().getPart()); 
+				
+				EPackageBrowserView.this.filteredTree.getViewer().getControl().setFocus();
+			}	
+		});
+	}
+	
+	@Override
 	public void requestFocus(EObject element) {
-		this.setFocus();
 		this.requestSelect(element);
+		this.requestFocus();
 	}
 
 	@Override

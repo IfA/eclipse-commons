@@ -2581,11 +2581,12 @@ public class <%=genPackage.getEditorClassName()%>
 	public void setSelection(ISelection selection)
 	{
 		editorSelection = selection;
-
+<%/*fix of the Institute of Automation*/%>
 <%if (genModel.useGenerics()) {%>
-		for (ISelectionChangedListener listener : selectionChangedListeners)
+		for (ISelectionChangedListener listener : new <%java.util.ArrayList.ArrayList%><>(selectionChangedListeners))
 <%} else {%>
-		for (Iterator listeners = selectionChangedListeners.iterator(); listeners.hasNext(); )
+		for (Iterator listeners = new <%java.util.ArrayList.ArrayList%><>(selectionChangedListeners).iterator(); listeners.hasNext(); )
+<%/*fix end*/%>
 <%}%>
 		{
 <%if (!genModel.useGenerics()) {%>
