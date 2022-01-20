@@ -3,28 +3,34 @@ package de.tud.et.ifa.agtele.eclipse.commons.emf.storage.ui.views;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Display;
 
+import de.tud.et.ifa.agtele.eclipse.commons.emf.modelStorage.IModelContributor;
 import de.tud.et.ifa.agtele.eclipse.commons.emf.modelStorage.Model;
 import de.tud.et.ifa.agtele.eclipse.commons.emf.modelStorage.ModelStorage;
 import de.tud.et.ifa.agtele.eclipse.commons.emf.modelStorage.importAdapter.ImportAdapter;
 import de.tud.et.ifa.agtele.eclipse.commons.emf.modelStorage.importAdapter.util.ImportAdapterAdapterFactory;
 import de.tud.et.ifa.agtele.eclipse.commons.emf.modelStorage.util.ModelStorageAdapterFactory;
 import de.tud.et.ifa.agtele.eclipse.commons.emf.storage.ui.EMFStorageUIPlugin;
+import de.tud.et.ifa.agtele.eclipse.commons.emf.storage.ui.util.GenericReferenceResolvingLabelProvider;
+import de.tud.et.ifa.agtele.eclipse.commons.emf.storage.ui.util.RefTargetClickHandler;
+import de.tud.et.ifa.agtele.eclipse.commons.emf.storage.ui.util.RefTargetResolveCache;
 import de.tud.et.ifa.agtele.emf.AgteleEcoreUtil;
-import de.tud.et.ifa.agtele.emf.edit.AgteleStyledLabelProvider;
 import de.tud.et.ifa.agtele.resources.BundleContentHelper;
 import org.eclipse.jface.viewers.*;
-import org.eclipse.jface.viewers.DelegatingStyledCellLabelProvider.IStyledLabelProvider;
 import org.eclipse.jface.action.*;
 import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.ui.*;
-import org.eclipse.ui.views.properties.IPropertyDescriptor;
 import org.eclipse.ui.views.properties.IPropertySheetPage;
 import org.eclipse.ui.views.properties.IPropertySource;
 import org.eclipse.ui.views.properties.PropertySheet;
@@ -50,19 +56,16 @@ import org.eclipse.emf.common.command.Command;
 import org.eclipse.emf.common.command.UnexecutableCommand;
 import org.eclipse.emf.common.notify.AdapterFactory;
 import org.eclipse.emf.common.ui.ViewerPane;
-import org.eclipse.emf.common.util.URI;
-import org.eclipse.emf.ecore.EDataType;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.resource.Resource;
+import org.eclipse.emf.ecore.resource.ResourceSet;
+import org.eclipse.emf.ecore.util.EContentAdapter;
 import org.eclipse.emf.edit.command.CommandParameter;
 import org.eclipse.emf.edit.domain.AdapterFactoryEditingDomain;
 import org.eclipse.emf.edit.provider.ComposedAdapterFactory;
-import org.eclipse.emf.edit.provider.IItemPropertyDescriptor;
 import org.eclipse.emf.edit.provider.ReflectiveItemProviderAdapterFactory;
-import org.eclipse.emf.edit.ui.EMFEditUIPlugin;
 import org.eclipse.emf.edit.ui.provider.AdapterFactoryContentProvider;
 import org.eclipse.emf.edit.ui.provider.AdapterFactoryLabelProvider;
-import org.eclipse.emf.edit.ui.provider.PropertyDescriptor;
 import org.eclipse.emf.edit.ui.provider.PropertySource;
 import org.eclipse.emf.edit.ui.view.ExtendedPropertySheetPage;
 
@@ -89,7 +92,7 @@ import javax.inject.Inject;
  * <p>
  */
 
-public class ModelStorageView extends MultiPageView implements IViewPart, IPersistable {
+public class ModelStorageView extends MultiPageView implements IViewPart, IPersistable, IModelContributor {
 
 	/**
 	 * The ID of the view as specified by the extension.
@@ -197,13 +200,17 @@ public class ModelStorageView extends MultiPageView implements IViewPart, IPersi
 	}
 	
 	public void addModelStorage(ModelStorage storage) {
-		this.viewedModelStorages.add(storage);
-		this.notifyUpdatedViewedModelStorages();
+		if (!this.viewedModelStorages.contains(storage)) {
+			this.viewedModelStorages.add(storage);
+			this.notifyUpdatedViewedModelStorages();
+			storage.addModelContributor(this);
+		}
 	}
 	
 	public void initializeViewedModelStorages () {
 		if (!this.viewedModelStorages.contains(ModelStorage.DEFAULT_INSTANCE)) {
-			this.viewedModelStorages.add(ModelStorage.DEFAULT_INSTANCE);			
+			this.viewedModelStorages.add(ModelStorage.DEFAULT_INSTANCE);
+			ModelStorage.DEFAULT_INSTANCE.addModelContributor(this);
 		}
 	
 		ArrayList<String> defaultUris = new ArrayList<>();
@@ -252,8 +259,11 @@ public class ModelStorageView extends MultiPageView implements IViewPart, IPersi
 			
 			modelStoragesViewer = (TreeViewer)viewerPane.getViewer();
 			modelStoragesViewer.setContentProvider(new ModelStorageContentProvider(adapterFactory, this));
-			modelStoragesViewer.setLabelProvider(new ModelStorageLabelProvider(new AdapterFactoryLabelProvider.StyledLabelProvider(this.adapterFactory,
-							this.modelStoragesViewer)));
+			
+			ModelStorageLabelProvider labelProvider = new ModelStorageLabelProvider(new AdapterFactoryLabelProvider.StyledLabelProvider(this.adapterFactory,
+							this.modelStoragesViewer), EMFStorageUIPlugin.INSTANCE, ModelStorage.DEFAULT_INSTANCE, RefTargetResolveCache.initializeInstance(null, null));
+			
+			modelStoragesViewer.setLabelProvider(labelProvider);
 			
 			//new AdapterFactoryLabelProvider(adapterFactory));
 			modelStoragesViewer.setInput(this.getViewedModelStorages());
@@ -261,6 +271,15 @@ public class ModelStorageView extends MultiPageView implements IViewPart, IPersi
 			
 			
 			this.controlToViewerPaneMap.put(viewerPane.getControl(), viewerPane);
+			
+
+			RefTargetClickHandler refTargetClickHandler = new RefTargetClickHandler(
+					modelStoragesViewer, 
+					null, 
+					Collections.emptyMap(), 
+					ModelStorage.DEFAULT_INSTANCE,
+					labelProvider);
+			modelStoragesViewer.getTree().addSelectionListener(refTargetClickHandler);
 			
 			int pageIndex = addPage(viewerPane.getControl());
 			setPageText(pageIndex, "Model Storages");
@@ -343,19 +362,32 @@ public class ModelStorageView extends MultiPageView implements IViewPart, IPersi
 		return this.modelStoragesViewer;
 	}
 	
-	public static class ModelStorageLabelProvider extends AgteleStyledLabelProvider {
+	public static class ModelStorageLabelProvider extends GenericReferenceResolvingLabelProvider {
 
-		public ModelStorageLabelProvider(IStyledLabelProvider labelProvider, EMFPlugin emfPlugin) {
-			super(labelProvider, emfPlugin);
-		}
+		protected TreeViewer selectionViewer;
 		
-		public ModelStorageLabelProvider(IStyledLabelProvider labelProvider) {
-			super(labelProvider);
+		public ModelStorageLabelProvider(IStyledLabelProvider labelProvider, EMFPlugin emfPlugin, ModelStorage modelStorage, RefTargetResolveCache cache) {
+			super(labelProvider, emfPlugin, modelStorage, cache);
+			//remove listener not required, not dynamic updates
 		}
-		
+				
 		@Override
 		public Image getImage(Object element) {
 			return super.getImage(element);
+		}
+
+		@Override
+		protected RefreshRunner getRefreshRunner() {
+			return null;
+		}
+		@Override
+		public EContentAdapter getReferenceTargetUpdateNotifier(Object element) {
+			return null;
+		}
+		
+		@Override
+		public EContentAdapter getTargetNameUpdateNotifier() {
+			return null;
 		}
 	}
 	
@@ -683,7 +715,6 @@ public class ModelStorageView extends MultiPageView implements IViewPart, IPersi
 		}
 		
 		protected int jobsDone = 0;
-		private Status status;
 		private IProgressMonitor monitor;
 		
 		protected synchronized void setJobDone() {
@@ -856,7 +887,7 @@ public class ModelStorageView extends MultiPageView implements IViewPart, IPersi
 				IDialogSettings mainPage = settingsToRestore.getSection("MAIN_PAGE");
 				if (mainPage != null) {
 					if (mainPage.getArray("EXPANDED_TREE_PATHS") != null) {
-						String[] paths = mainPage.getArray("EXPANDED_TREE_PATHS");
+						mainPage.getArray("EXPANDED_TREE_PATHS");
 						
 //						ModelStorageView.this.modelStoragesViewer.setExpandedTreePaths(paths);						
 					}
@@ -950,4 +981,63 @@ public class ModelStorageView extends MultiPageView implements IViewPart, IPersi
 		}
 		ModelStorageView.viewInstances.remove(this);
 	}
+
+	@Override
+	public Set<Model> getContributedModels() {
+		Set<Model> result = new LinkedHashSet<>();
+		
+		for (ModelStorage s : this.viewedModelStorages) {
+			result.addAll(s.getModel());
+		}
+		
+		return result;
+	}
+
+	@Override
+	public int getContributorPriority() {
+		return 5 + (this.getActivePage() == 0 ? 1 : -1);
+	}
+
+	@Override
+	public ModelStorage getModelStorage() {
+		return ModelStorage.DEFAULT_INSTANCE;
+	}
+
+	@Override
+	public boolean isWorkbenchPart() {
+		return true;
+	}
+	
+	@Override
+	public void requestFocus() {
+		Display.getCurrent().asyncExec(new Runnable (){
+			@Override
+			public void run() {
+				ModelStorageView.this.getSite().getPage().activate(
+						ModelStorageView.this.getSite().getPart()); 
+				
+				ModelStorageView.this.setActivePage(0);
+				ModelStorageView.this.getViewer().getControl().setFocus();
+			}	
+		});
+	}
+		
+	@Override
+	public void requestSelect(EObject element) {
+		this.getViewer()
+			.setSelection(
+				new StructuredSelection(element), true
+				);
+		ResourceSet set = element.eResource().getResourceSet();
+		Model m = this.getModelStorage().getModel(set);
+		if (m != null) {
+			((TreeViewer)this.getViewer()).setExpandedState(m, true);
+			List<EObject> ancestors = new ArrayList<>(AgteleEcoreUtil.getAllContainers(element));
+			for (int i = ancestors.size() -1 ; i>= 0; i-=1) {
+				((TreeViewer)this.getViewer()).setExpandedState(ancestors.get(i), true);
+				
+			}
+		}
+	}
+	
 }

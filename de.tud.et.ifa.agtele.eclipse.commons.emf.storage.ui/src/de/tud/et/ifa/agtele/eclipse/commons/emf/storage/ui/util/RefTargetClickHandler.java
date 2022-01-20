@@ -1,6 +1,8 @@
 package de.tud.et.ifa.agtele.eclipse.commons.emf.storage.ui.util;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
@@ -231,9 +233,20 @@ public class RefTargetClickHandler implements SelectionListener2 {
 		if (result.getContributors().isEmpty()) {
 			return null;
 		}
+		
+		List<IModelContributor> contributors = new ArrayList<>(result.getContributors());
+		contributors.sort(new Comparator<IModelContributor>() {
+
+			@Override
+			public int compare(IModelContributor o1, IModelContributor o2) {
+				return Integer.compare(o2.getContributorPriority(), o1.getContributorPriority()); //reverse
+			}
+			
+		});
+		
 		for (Class<?> cls : this.labelProvider.getPreferredContributorClasses()) {			
 			//pick contributor that is an i40 component editor
-			for (IModelContributor c : result.getContributors()) {
+			for (IModelContributor c : contributors) {
 				if (cls.isInstance(c)) {
 					return c;
 				}
@@ -241,7 +254,7 @@ public class RefTargetClickHandler implements SelectionListener2 {
 		}
 		
 		//pick an editor that is a workbench part
-		for (IModelContributor c : result.getContributors()) {
+		for (IModelContributor c : contributors) {
 			if (c.isWorkbenchPart()) {
 				return c;
 			}
@@ -264,7 +277,7 @@ public class RefTargetClickHandler implements SelectionListener2 {
 			for (String res : this.resourcesToRemove) {
 				this.cache.removeResource(res);
 			}
-			if (this.openInCurrentEditor) {
+			if (this.openInCurrentEditor && RefTargetClickHandler.this.resourceSet != null) {
 				Resource newRes = RefTargetClickHandler.this.resourceSet.createResource(URI.createURI(this.selectedResource));
 				try {
 					newRes.load(RefTargetClickHandler.this.loadOptions);

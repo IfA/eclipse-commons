@@ -105,6 +105,10 @@ public abstract class MultiPageView extends ViewPart implements IViewPart, IPage
 		}
 		return -1;
 	}
+	
+	public void setActivePage(ViewerPane viewerPane) {
+		this.setActivePage(this.pageSites.indexOf(viewerPane.getControl()));
+	}
 
 	public void setCurrentViewerPane(ViewerPane viewerPane) {
 		if (currentViewerPane != viewerPane) {
@@ -112,6 +116,7 @@ public abstract class MultiPageView extends ViewPart implements IViewPart, IPage
 				currentViewerPane.showFocus(false);
 			}
 			currentViewerPane = viewerPane;
+			this.setActivePage(viewerPane);
 		}
 		setCurrentViewer(currentViewerPane.getViewer());
 	}

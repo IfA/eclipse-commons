@@ -3,6 +3,7 @@ package de.tud.et.ifa.agtele.eclipse.commons.emf.storage.ui.util;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -12,14 +13,18 @@ import org.eclipse.emf.common.notify.Notification;
 import org.eclipse.emf.ecore.EAttribute;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.EReference;
+import org.eclipse.emf.ecore.EStructuralFeature;
 import org.eclipse.emf.ecore.EcorePackage;
 import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.ecore.resource.ResourceSet;
 import org.eclipse.emf.ecore.util.EContentAdapter;
+import org.eclipse.emf.edit.provider.ItemProviderAdapter;
+import org.eclipse.emf.edit.provider.ViewerNotification;
 import org.eclipse.jface.viewers.StyledString;
 import org.eclipse.jface.viewers.StyledString.Styler;
 import org.eclipse.swt.widgets.Display;
 
+import de.tud.et.ifa.agtele.eclipse.commons.emf.modelStorage.IModelContributor;
 import de.tud.et.ifa.agtele.eclipse.commons.emf.modelStorage.IRegistrationChangeListener;
 import de.tud.et.ifa.agtele.eclipse.commons.emf.modelStorage.IResolveResult;
 import de.tud.et.ifa.agtele.eclipse.commons.emf.modelStorage.ModelStorage;
@@ -71,9 +76,10 @@ public abstract class ReferenceResolvingLabelProvider extends AgteleStyledLabelP
 	}
 	
 	public abstract boolean isReferencingElement (Object element);
+	public abstract	boolean isRefTargetIdFeature (EObject element, EStructuralFeature feature);
+	public abstract List<EObject> getRefTargetUpdateNotificationReceivers(EObject element, EStructuralFeature feature);
 	public abstract List<String> getReferenceTargetIds (Object element);
 	public abstract boolean isCacheRelevantElement (Object element);
-	public abstract EContentAdapter getReferenceTargetUpdateNotifier (Object element);
 	
 	public StyledString applyVoidReferenceLabel(EObject element, StyledString originalLabel) {
 		return this.basicApplyLabelModification(element, originalLabel, null, refTargetSeparator + nonResolvedAppendix);
@@ -206,10 +212,43 @@ public abstract class ReferenceResolvingLabelProvider extends AgteleStyledLabelP
 		return Collections.emptyList();
 	}
 	
+	public IModelContributor getMaxPriorityContributor (List<IModelContributor> contributors) {
+		IModelContributor result = null;
+		if (contributors != null) {
+			for (IModelContributor c : contributors) {
+				if (c != null && (result == null || result.getContributorPriority() < c.getContributorPriority())) {
+					result = c;
+				}
+			}
+		}
+		
+		return result;
+	}
+	
 	public IResolveResult pickBestResolveResult (EObject element, List<IResolveResult> resolves, ResourceSet set) {
 		if (resolves == null || resolves.isEmpty()) {
 			return null;
 		}
+		
+		resolves.sort(new Comparator<IResolveResult>() {
+			
+			public int getMaxContributorPriority(IResolveResult res) {
+				if (res != null && res.getContributors() != null && !res.getContributors().isEmpty()) {
+					IModelContributor maxC = ReferenceResolvingLabelProvider.this.getMaxPriorityContributor(res.getContributors());
+					if (maxC != null) {
+						return maxC.getContributorPriority();
+					}							
+				}				
+				return -1;
+			}
+			
+			@Override
+			public int compare(IResolveResult o1, IResolveResult o2) {
+				int p1 = this.getMaxContributorPriority(o1), p2 = this.getMaxContributorPriority(o2); 
+				return Integer.compare(p2, p1); //reverse order
+			}
+			
+		});
 		
 		IResolveResult result = null;
 	
@@ -244,6 +283,7 @@ public abstract class ReferenceResolvingLabelProvider extends AgteleStyledLabelP
 		if (result != null) {
 			return result;
 		}
+		
 		return resolves.get(0);
 	}
 
@@ -337,7 +377,7 @@ public abstract class ReferenceResolvingLabelProvider extends AgteleStyledLabelP
 //		return new RefreshRunner ();
 //	}
 
-	protected class RefreshRunner implements Runnable {
+	public class RefreshRunner implements Runnable {
 		protected boolean refreshExecuting = false;
 		protected boolean meanTimeRequests = false;
 		
@@ -426,7 +466,7 @@ public abstract class ReferenceResolvingLabelProvider extends AgteleStyledLabelP
 	}
 	
 	protected class ElementRemoveListener extends EContentAdapter {
-		@SuppressWarnings({ "rawtypes", "unchecked" })
+		@SuppressWarnings({ "rawtypes" })
 		@Override
 		public void notifyChanged(Notification notification) {
 			ArrayList<EObject> removed = new ArrayList<>();
@@ -495,5 +535,41 @@ public abstract class ReferenceResolvingLabelProvider extends AgteleStyledLabelP
 	
 	public EContentAdapter getTargetNameUpdateNotifier () {
 		return this.labelTargetUpdater;
+	}
+		
+	protected class RefTargetIdLabelUpdateNotifier extends EContentAdapter {
+		public void notifyChanged(Notification notification) {
+			if (!(notification instanceof ViewerNotification) && notification.getNotifier() instanceof EObject && notification.getFeature() instanceof EStructuralFeature) {
+				EObject eNotifier = (EObject) notification.getNotifier();
+				EStructuralFeature eFeature = (EStructuralFeature) notification.getFeature();
+				
+				if (ReferenceResolvingLabelProvider.this.isReferencingElement(eNotifier) && 
+						ReferenceResolvingLabelProvider.this.isRefTargetIdFeature(eNotifier, eFeature)) {					
+					
+					eNotifier.eNotify(new ViewerNotification(notification, eNotifier, false, true));
+					
+					List<EObject> toNotify = ReferenceResolvingLabelProvider.this.getRefTargetUpdateNotificationReceivers(eNotifier, eFeature);
+					
+					if (toNotify != null && !toNotify.isEmpty()) {
+						for (EObject receiver : toNotify) {
+							ItemProviderAdapter adapter = AgteleEcoreUtil.getItemProviderAdapter(receiver);
+							if (adapter != null) {
+								adapter.fireNotifyChanged(new ViewerNotification(notification, receiver, false, true));
+							}							
+						}						
+					}					
+				}				
+			}
+			super.notifyChanged(notification);
+		};
+	}
+	
+	RefTargetIdLabelUpdateNotifier labelUpdater = new RefTargetIdLabelUpdateNotifier();
+	
+	public EContentAdapter getReferenceTargetUpdateNotifier (Object element) {
+		if (this.isReferencingElement(element)) {
+			return this.labelUpdater;
+		}
+		return null;
 	}
 }

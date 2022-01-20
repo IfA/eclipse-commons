@@ -1024,6 +1024,24 @@ public interface AgteleEcoreUtil {
 		return root != element && EcoreUtil.isAncestor(root, element);
 	}
 	
+	static public ItemProviderAdapter getItemProviderAdapter(EObject eObject) {
+		ItemProviderAdapter itemProviderAdapter = null;
+		try {
+			Adapter testAdapter = AgteleEcoreUtil.getAdapter(eObject, IEditingDomainItemProvider.class);
+			itemProviderAdapter = (ItemProviderAdapter) testAdapter;
+		} catch (Exception e) {
+			//Do nothing
+		}
+		if (itemProviderAdapter == null) {
+			try {
+				itemProviderAdapter = (ItemProviderAdapter) AgteleEcoreUtil.getAdapter(eObject, ItemProviderAdapter.class);
+			} catch (Exception e) {
+				//Do nothing
+			}
+		}
+		return itemProviderAdapter;
+	}
+	
 	/**
 	 * Returns an adapter of the specified type for the specified object. If none is registered in the resource set, 
 	 * the ecore adapter factory extension point is being queried for registered adapters.

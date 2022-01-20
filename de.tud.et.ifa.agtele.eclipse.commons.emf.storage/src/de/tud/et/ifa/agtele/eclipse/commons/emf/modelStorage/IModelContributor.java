@@ -21,11 +21,18 @@ public interface IModelContributor {
 	
 	public default void requestFocus() {}
 
-	public default void requestFocus(EObject element) {}
+	public default void requestFocus(EObject element) {
+		this.requestSelect(element);
+		this.requestFocus();
+	}
 	
 	public default void requestSelect(EObject element) {}
 	
-	public default void requestSelect(List<EObject> element) {}
+	public default void requestSelect(List<EObject> element) {
+		if (element != null && !element.isEmpty()) {
+			this.requestSelect(element.get(0));
+		}
+	}
 	
 	public boolean isWorkbenchPart();
 

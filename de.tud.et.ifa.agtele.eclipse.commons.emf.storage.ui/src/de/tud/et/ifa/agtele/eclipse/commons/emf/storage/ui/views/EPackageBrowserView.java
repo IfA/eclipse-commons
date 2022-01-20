@@ -11,7 +11,6 @@ import org.eclipse.emf.ecore.EClassifier;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.EPackage;
 import org.eclipse.emf.ecore.EStructuralFeature;
-import org.eclipse.emf.ecore.impl.EPackageRegistryImpl;
 import org.eclipse.emf.ecore.resource.ResourceSet;
 import org.eclipse.emf.ecore.resource.impl.ResourceSetImpl;
 import org.eclipse.epsilon.dt.epackageregistryexplorer.PackageRegistryContentProvider;
@@ -88,6 +87,7 @@ public class EPackageBrowserView extends PackageRegistryExplorerView implements 
 	}
 	
 
+	@SuppressWarnings("deprecation")
 	@Override
 	public void createPartControl(Composite parent) {
 		super.createPartControl(parent);
