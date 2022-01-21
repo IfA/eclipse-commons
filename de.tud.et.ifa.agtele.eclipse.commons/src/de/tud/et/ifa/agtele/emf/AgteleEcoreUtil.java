@@ -1299,15 +1299,7 @@ public interface AgteleEcoreUtil {
 			return Collections.singletonList(AgteleEcoreUtil.getEcoreElementReferencingIdentifier(eObject));
 		}
 		
-		Adapter provider = null;
-		try {
-			provider = AgteleEcoreUtil.getAdapter(eObject, IEditingDomainItemProvider.class);
-			if (provider == null || !(provider instanceof ItemProviderAdapter)) {
-				provider = AgteleEcoreUtil.getAdapter(eObject, ItemProviderAdapter.class);
-			}
-		} catch (Exception e) {
-			//Do nothing
-		}
+		Adapter provider = AgteleEcoreUtil.getItemProviderAdapter(eObject);
 		
 		if (provider != null && 
 				provider instanceof IReferencingIdentificationStringProvider) {
@@ -1324,5 +1316,42 @@ public interface AgteleEcoreUtil {
 				return it;
 			}			
 		};
+	}
+	
+
+	static <T> List<T> getIntersection(Collection<T> a, Collection<T> b) {
+		return a.stream().filter(b::contains).collect(Collectors.toList());
+	}
+	static <T> List<T> getToRemove(Collection<? extends T> oldValues, Collection<? extends T> newValues) {
+		return oldValues.stream().filter(e -> !newValues.contains(e)).collect(Collectors.toList());
+	}
+	static <T> List<T> getToAdd(Collection<? extends T> oldValues, Collection<? extends T> newValues) {
+		return newValues.stream().filter(e -> !oldValues.contains(e)).collect(Collectors.toList());
+	}
+	@SuppressWarnings("unchecked")
+	static <T extends EObject> List<T> filterList(List<? extends EObject> elements, List<? extends EObject> filter, Class<T> type) {
+		ArrayList<T> result = new ArrayList<>();		
+		for (EObject e : elements) {
+			if (type.isInstance(e) && !filter.contains(e)) {
+				result.add((T)e);
+			}
+		}		
+		return result;
+	}
+
+	static String getNameIdLabel(String name, String id) {
+		return (name != null ? name : "?") + " (" + (id != null && !id.isBlank() ? id : "?") + ")";
+	}
+	
+	static String getId(String nameIdLabel) {
+		if (nameIdLabel != null && !nameIdLabel.isBlank()) {
+			if (nameIdLabel.lastIndexOf(")") == nameIdLabel.length() -1 && nameIdLabel.lastIndexOf("(") > 0) {
+				String id = nameIdLabel.substring(nameIdLabel.lastIndexOf("(") +1, nameIdLabel.length() - 1);
+				if (!"?".equals(id)) {
+					return id;
+				}
+			}	
+		}
+		return null;
 	}
 } 
