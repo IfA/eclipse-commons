@@ -321,26 +321,15 @@ public class EPackageBrowserView extends PackageRegistryExplorerView implements 
 	}
 
 	@Override
-	public void requestFocus() {
-		Display.getCurrent().asyncExec(new Runnable (){
-			@Override
-			public void run() {
-				EPackageBrowserView.this.getSite().getPage().activate(
-						EPackageBrowserView.this.getSite().getPart()); 
-				
-				EPackageBrowserView.this.filteredTree.getViewer().getControl().setFocus();
-			}	
-		});
+	public void doRequestFocus() {
+		this.getSite().getPage().activate(
+				this.getSite().getPart()); 
+		
+		this.filteredTree.getViewer().getControl().setFocus();
 	}
 	
 	@Override
-	public void requestFocus(EObject element) {
-		this.requestSelect(element);
-		this.requestFocus();
-	}
-
-	@Override
-	public void requestSelect(EObject element) {
+	public void doRequestSelect(EObject element) {
 		if (element instanceof EPackage || element instanceof EClassifier) {
 			ArrayList<EObject> ancestors = new ArrayList<>(AgteleEcoreUtil.getAllContainers(element));
 			
@@ -350,7 +339,7 @@ public class EPackageBrowserView extends PackageRegistryExplorerView implements 
 			
 			this.classViewer.setSelection(new StructuredSelection(element), true);
 		} else if (element instanceof EStructuralFeature) {
-			this.requestSelect(element.eContainer());			
+			this.doRequestSelect(element.eContainer());			
 			this.featureViewer.setSelection(new StructuredSelection(element), true);
 		}
 	}

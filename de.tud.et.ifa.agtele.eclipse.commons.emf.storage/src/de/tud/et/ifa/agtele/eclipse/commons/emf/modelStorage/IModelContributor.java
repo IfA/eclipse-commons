@@ -9,6 +9,7 @@ import org.eclipse.emf.common.util.EList;
 
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.resource.Resource;
+import org.eclipse.swt.widgets.Display;
 
 
 public interface IModelContributor {
@@ -19,19 +20,56 @@ public interface IModelContributor {
 	
 	ModelStorage getModelStorage();
 	
-	public default void requestFocus() {}
-
-	public default void requestFocus(EObject element) {
-		this.requestSelect(element);
-		this.requestFocus();
+	public default void doRequestFocus() {}
+	
+	public default void requestFocus () {
+		Display.getCurrent().asyncExec(new Runnable (){
+			@Override
+			public void run() {
+				IModelContributor.this.doRequestFocus();
+			}
+		});
 	}
 	
-	public default void requestSelect(EObject element) {}
+	public default void doRequestFocus(EObject element) {
+		this.doRequestSelect(element);
+		this.doRequestFocus();		
+	}
+
+	public default void requestFocus(EObject element) {
+		Display.getCurrent().asyncExec(new Runnable (){
+			@Override
+			public void run() {
+				IModelContributor.this.doRequestFocus(element);
+			}
+		});
+	}
 	
-	public default void requestSelect(List<EObject> element) {
-		if (element != null && !element.isEmpty()) {
-			this.requestSelect(element.get(0));
+	public default void doRequestSelect(EObject element) {}
+	
+	public default void requestSelect(EObject element) {
+		Display.getCurrent().asyncExec(new Runnable (){
+			@Override
+			public void run() {
+				IModelContributor.this.doRequestSelect(element);
+			}
+		});
+	}
+	
+	public default void doRequestSelect(List<EObject> elements) {
+		if (elements != null && !elements.isEmpty()) {
+			this.doRequestSelect(elements.get(0));
 		}
+		
+	}
+	
+	public default void requestSelect(List<EObject> elements) {
+		Display.getCurrent().asyncExec(new Runnable (){
+			@Override
+			public void run() {
+				IModelContributor.this.doRequestSelect(elements);
+			}
+		});
 	}
 	
 	public boolean isWorkbenchPart();

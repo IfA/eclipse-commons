@@ -1009,21 +1009,16 @@ public class ModelStorageView extends MultiPageView implements IViewPart, IPersi
 	}
 	
 	@Override
-	public void requestFocus() {
-		Display.getCurrent().asyncExec(new Runnable (){
-			@Override
-			public void run() {
-				ModelStorageView.this.getSite().getPage().activate(
-						ModelStorageView.this.getSite().getPart()); 
-				
-				ModelStorageView.this.setActivePage(0);
-				ModelStorageView.this.getViewer().getControl().setFocus();
-			}	
-		});
+	public void doRequestFocus() {
+		this.getSite().getPage().activate(
+				this.getSite().getPart()); 
+		
+		this.setActivePage(0);
+		this.getViewer().getControl().setFocus();
 	}
 		
 	@Override
-	public void requestSelect(EObject element) {
+	public void doRequestSelect(EObject element) {
 		this.getViewer()
 			.setSelection(
 				new StructuredSelection(element), true
