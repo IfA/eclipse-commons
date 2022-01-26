@@ -218,7 +218,7 @@ public interface ModelStorage extends UpdateableElement {
 		ArrayList<IModelContributor> result = new ArrayList<>();
 		
 		result.addAll(this.getContributors().stream()
-				.filter(c -> c.getContributedModels().contains(model))
+				.filter(c -> c != null && c.getContributedModels().contains(model))
 				.collect(Collectors.toList()));
 		
 		result.sort((o1,o2) -> {
