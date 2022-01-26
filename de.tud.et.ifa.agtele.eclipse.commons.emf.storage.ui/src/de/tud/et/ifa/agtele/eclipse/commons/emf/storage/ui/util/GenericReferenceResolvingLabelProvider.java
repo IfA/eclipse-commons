@@ -41,6 +41,30 @@ public abstract class GenericReferenceResolvingLabelProvider extends ReferenceRe
 		}
 		return adapter.isReferencingElement(element);
 	}
+	
+	@Override
+	public boolean isMultiTargetReferenceElement (EObject element) {
+		if (!(element instanceof EObject)) {
+			return false;
+		}
+		ReferenceResolvingLabelItemProviderAdapter adapter = this.adapt((EObject)element);
+		if (adapter == null) {
+			return false;
+		}
+		return adapter.isMultiTargetReferenceElement(element);
+	}
+	
+	@Override
+	public EObject getRefTargetLabelElement(EObject element) {
+		if (!(element instanceof EObject)) {
+			return super.getRefTargetLabelElement(element);
+		}
+		ReferenceResolvingLabelItemProviderAdapter adapter = this.adapt((EObject)element);
+		if (adapter == null) {
+			return super.getRefTargetLabelElement(element);
+		}
+		return adapter.getRefTargetLabelElement(element);
+	}
 
 	@Override
 	public List<String> getReferenceTargetIds(Object element) {

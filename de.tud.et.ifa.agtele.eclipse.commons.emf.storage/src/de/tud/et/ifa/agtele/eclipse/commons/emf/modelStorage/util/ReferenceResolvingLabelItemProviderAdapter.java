@@ -47,4 +47,8 @@ public interface ReferenceResolvingLabelItemProviderAdapter {
 		return resolves;
 	}
 	
+	public default boolean isMultiTargetReferenceElement (EObject element) {
+		return false;
+	}
+	
 }

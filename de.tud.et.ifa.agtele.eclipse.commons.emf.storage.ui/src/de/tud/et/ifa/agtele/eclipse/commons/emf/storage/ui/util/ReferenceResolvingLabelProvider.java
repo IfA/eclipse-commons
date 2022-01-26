@@ -4,8 +4,10 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.eclipse.emf.common.EMFPlugin;
@@ -34,7 +36,8 @@ import de.tud.et.ifa.agtele.emf.edit.AgteleStyledLabelProvider;
 
 public abstract class ReferenceResolvingLabelProvider extends AgteleStyledLabelProvider {
 
-	protected static final String refTargetSeparator = " \u2192 "; 
+	protected static final String refTargetSeparator = " \u2192 ";
+	protected static final String refTargetListSeparator = ", ";
 	protected static final String nonResolvedAppendix = "?"; 
 
 	protected Set<String> requestedIds = new HashSet<>();
@@ -82,7 +85,11 @@ public abstract class ReferenceResolvingLabelProvider extends AgteleStyledLabelP
 	public abstract boolean isCacheRelevantElement (Object element);
 	
 	public StyledString applyVoidReferenceLabel(EObject element, StyledString originalLabel) {
-		return this.basicApplyLabelModification(element, originalLabel, null, refTargetSeparator + nonResolvedAppendix);
+		return this.basicApplyLabelModification(element, originalLabel, null, this.getVoidLabelAppendix(element));
+	}
+	
+	public String getVoidLabelAppendix (EObject element) {
+		return refTargetSeparator + nonResolvedAppendix;
 	}
 	
 	public String getReferenceTargetLabelAppendix(EObject element, EObject target) {
@@ -132,69 +139,161 @@ public abstract class ReferenceResolvingLabelProvider extends AgteleStyledLabelP
 			return this.applyVoidReferenceLabel(element, originalLabel);
 		}
 		
-		List<IResolveResult> resolvedTargets = ReferenceResolvingLabelProvider.resolve(idsToResolve); 
+		Map<String, List<IResolveResult>> idToResolveMap = new HashMap<>();
+		Map<IResolveResult, String> resolveToIdMap = new HashMap<>();
+		List<IResolveResult> resolvedTargets = new ArrayList<>();
 		
-		resolvedTargets = resolvedTargets != null ? this.filterResults(element, resolvedTargets) : null;
-		
-		if (resolvedTargets == null || resolvedTargets.isEmpty()) {
-			return this.applyCachedReferenceLabel(element, originalLabel, idsToResolve);
-		}
-		
-		IResolveResult picked = this.pickBestResolveResult(element, resolvedTargets, getElementResourceSet(element));
-		
-		if (picked == null) {
-			return this.applyCachedReferenceLabel(element, originalLabel, idsToResolve);
-		}
-		
-		EObject target = picked.getElement();
-		
-		target = this.getRefTargetLabelElement(target);
-
-		EContentAdapter targetUpdateNotifier = this.getTargetNameUpdateNotifier();
-		if (targetUpdateNotifier != null && !target.eAdapters().contains(targetUpdateNotifier)) {
-			target.eAdapters().add(targetUpdateNotifier);
-		}
-		
-		StyledString result = new StyledString();
-		result.append(originalLabel);
-		
-		String labelAppendix = this.getReferenceTargetLabelAppendix(element, target);
-		result = this.applyResolvedReferenceLabel(element, originalLabel, labelAppendix);
-		
-		if (this.isCacheRelevantElement(element)) {
-			for (String id : idsToResolve) {
-				if (ReferenceResolvingLabelProvider.getResourceId(target.eResource()) == null ) {
-					this.refTargetResolveCache.addCacheEntry(id, picked.getModel().getUri(), labelAppendix);
-				} else {
-					this.refTargetResolveCache.addCacheEntry(id, ReferenceResolvingLabelProvider.getResourceId(target.eResource()), labelAppendix);
+		for (String id : idsToResolve) {
+			List<IResolveResult> resolved = ReferenceResolvingLabelProvider.resolve(Collections.singletonList(id));
+			if (resolved != null) {
+				idToResolveMap.put(id, resolved);
+				resolvedTargets.addAll(resolved);
+				for (IResolveResult res : resolved) {
+					resolveToIdMap.put(res, id);
 				}
-				this.resolvedIds.add(id);
+			}
+		}		
+		
+		List<IResolveResult> filtered = this.filterResults(element, new ArrayList<>(resolvedTargets));
+		
+		if (filtered == null || filtered.isEmpty()) {
+			return this.applyCachedReferenceLabel(element, originalLabel, idsToResolve);
+		}
+		
+		//back map filtered resolve results to the id map
+		for (IResolveResult removed : AgteleEcoreUtil.getToRemove(resolvedTargets, filtered)) {
+			for (String id : new ArrayList<>(idToResolveMap.keySet())) {
+				List<IResolveResult> resolved = idToResolveMap.get(id);
+				if (resolved != null) {
+					resolved.remove(removed);
+					if (resolved.isEmpty()) {
+						idToResolveMap.remove(id);
+					}
+				}
 			}
 		}
-		return result;
-		
-	}
+				
+		if (!this.isMultiTargetReferenceElement(element)) {
+			IResolveResult picked = this.pickBestResolveResult(element, resolvedTargets, this.getElementResourceSet(element));
+			
+			if (picked == null) {
+				return this.applyCachedReferenceLabel(element, originalLabel, idsToResolve);
+			}
+								
+			EObject target = picked.getElement();
+			
+			target = this.getRefTargetLabelElement(target);
 	
-	protected StyledString applyCachedReferenceLabel(EObject element, StyledString originalLabel,
-			List<String> idsToResolve) {
+			EContentAdapter targetUpdateNotifier = this.getTargetNameUpdateNotifier();
+			if (targetUpdateNotifier != null && !target.eAdapters().contains(targetUpdateNotifier)) {
+				target.eAdapters().add(targetUpdateNotifier);
+			}
+			
+			StyledString result = new StyledString();
+			result.append(originalLabel);
+			
+			String labelAppendix = this.getReferenceTargetLabelAppendix(element, target);
+			result = this.applyResolvedReferenceLabel(element, originalLabel, labelAppendix);
+			
+			if (this.isCacheRelevantElement(element)) {
+				for (String id : idsToResolve) {
+					if (ReferenceResolvingLabelProvider.getResourceId(target.eResource()) == null ) {
+						this.refTargetResolveCache.addCacheEntry(id, picked.getModel().getUri(), labelAppendix);
+					} else {
+						this.refTargetResolveCache.addCacheEntry(id, ReferenceResolvingLabelProvider.getResourceId(target.eResource()), labelAppendix);
+					}
+					this.resolvedIds.add(id);
+				}
+			}
+			return result;
+		} 
+
 		StyledString result = new StyledString();
-		boolean appliedCachedString = false;
-		
 		result.append(originalLabel);
 		
+		List<String> appendices = new ArrayList<>();
+		
+		for (String id : idToResolveMap.keySet()) {
+			List<IResolveResult> idResolves = idToResolveMap.get(id);
+
+			IResolveResult picked = this.pickBestResolveResult(element, idResolves, this.getElementResourceSet(element));
+			
+			String appendix = null;
+			
+			if (picked == null) {
+				appendix = this.getCachedLabelAppendix(element, Collections.singletonList(id));
+				if (appendix == null) {
+					appendix = this.getVoidLabelAppendix(element);
+				}
+			} else {			
+				EObject target = picked.getElement();
+				
+				target = this.getRefTargetLabelElement(target);
+		
+				EContentAdapter targetUpdateNotifier = this.getTargetNameUpdateNotifier();
+				if (targetUpdateNotifier != null && !target.eAdapters().contains(targetUpdateNotifier)) {
+					target.eAdapters().add(targetUpdateNotifier);
+				}
+
+				appendix = this.getReferenceTargetLabelAppendix(element, target);
+				
+				if (this.isCacheRelevantElement(element)) {
+					if (ReferenceResolvingLabelProvider.getResourceId(target.eResource()) == null ) {
+						this.refTargetResolveCache.addCacheEntry(id, picked.getModel().getUri(), appendix);
+					} else {
+						this.refTargetResolveCache.addCacheEntry(id, ReferenceResolvingLabelProvider.getResourceId(target.eResource()), appendix);
+					}
+					this.resolvedIds.add(id);
+				}
+			}
+			appendices.add(appendix);
+		}
+		
+		String labelAppendix = this.concatLabelAppendices(element, appendices);
+		result = this.applyResolvedReferenceLabel(element, originalLabel, labelAppendix);
+		return result;		
+	}
+	
+	protected String concatLabelAppendices(EObject element, List<String> appendices) {
+		String result = "";
+		
+		for (String appendix : appendices) {
+			if (!result.isBlank() ) {
+				result += refTargetListSeparator;
+			}
+			result += appendix;
+		}
+		
+		return result;
+	}
+
+	protected String getCachedLabelAppendix (EObject element, List<String> idsToResolve) {
+		String result = null;
+
 		for (String id : idsToResolve) {
 			if (!requestedIds.contains(id) && this.isCacheRelevantElement(element)) {
 				this.requestedIds.add(id);		
 			}
-			if (this.refTargetResolveCache.hasCacheEntry(id) && !appliedCachedString) {
+			if (this.refTargetResolveCache.hasCacheEntry(id) && result == null) {
 				CacheEntry entry = this.getCachedEntry(id, true);
 				if (entry.getCachedLabel() != null) {
-					result = this.basicApplyLabelModification(element, originalLabel, null, refTargetSeparator + entry.getCachedLabel());		
-					appliedCachedString = true;
+					result = entry.getCachedLabel();
 				}
 			}
 		}
-		if (!appliedCachedString) {
+		
+		return result;
+	}
+	
+	protected StyledString applyCachedReferenceLabel(EObject element, StyledString originalLabel,
+			List<String> idsToResolve) {
+		StyledString result = new StyledString();		
+		result.append(originalLabel);
+		
+		String cachedAppendix = this.getCachedLabelAppendix(element, idsToResolve);
+		if (cachedAppendix != null) {
+			result = this.basicApplyLabelModification(element, originalLabel, null, refTargetSeparator + cachedAppendix);					
+		} else {
 			result = this.applyVoidReferenceLabel(element, originalLabel);
 		}
 		return result;
@@ -571,5 +670,9 @@ public abstract class ReferenceResolvingLabelProvider extends AgteleStyledLabelP
 			return this.labelUpdater;
 		}
 		return null;
+	}
+
+	public boolean isMultiTargetReferenceElement(EObject element) {
+		return false;
 	}
 }
