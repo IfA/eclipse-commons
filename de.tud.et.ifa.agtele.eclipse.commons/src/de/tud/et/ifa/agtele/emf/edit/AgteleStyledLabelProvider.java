@@ -40,6 +40,10 @@ public class AgteleStyledLabelProvider extends DelegatingStyledCellLabelProvider
 		return feature.getName();
 	}
 	
+	public boolean isEnabledQualifiedLabels(Object element) {
+		return true;
+	}
+	
 	@Override
 	protected StyledString getStyledText(Object element) {
 		StyledString typeString = super.getStyledText(element);
@@ -52,16 +56,20 @@ public class AgteleStyledLabelProvider extends DelegatingStyledCellLabelProvider
 			result = typeString;
 		} else if (element instanceof MinimalEObjectImpl || element instanceof DynamicEObjectImpl) {
 			EObject e = (EObject) element;
-			try {
-				result = new StyledString(
-						this.getFeatureLabel(e.eContainingFeature())
-						+ this.getReferenceNameSeparator(),
-					StyledString.QUALIFIER_STYLER).append(typeString);
-			} catch (Exception ex) {
-				result = new StyledString(
-						e.eContainingFeature().getName()
-						+ this.getReferenceNameSeparator(),
+			if (this.isEnabledQualifiedLabels(element)) {
+				try {
+					result = new StyledString(
+							this.getFeatureLabel(e.eContainingFeature())
+							+ this.getReferenceNameSeparator(),
 						StyledString.QUALIFIER_STYLER).append(typeString);
+				} catch (Exception ex) {
+					result = new StyledString(
+							e.eContainingFeature().getName()
+							+ this.getReferenceNameSeparator(),
+							StyledString.QUALIFIER_STYLER).append(typeString);
+				}
+			} else {
+				result = typeString;
 			}
 		} else {
 			return typeString;
