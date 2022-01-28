@@ -5,6 +5,8 @@ package de.tud.et.ifa.agtele.eclipse.commons.emf.modelStorage.importAdapter;
 import de.tud.et.ifa.agtele.eclipse.commons.emf.modelStorage.Model;
 import de.tud.et.ifa.agtele.emf.importing.IModelImporter;
 import org.eclipse.emf.ecore.EObject;
+import org.eclipse.emf.ecore.resource.Resource;
+import org.eclipse.emf.ecore.resource.ResourceSet;
 
 
 
@@ -82,4 +84,9 @@ public interface ImportAdapter extends EObject, IModelImporter {
 
 	void importModel();	
 
+	static void addToResourceSet(ResourceSet set, Resource res) {
+		synchronized (ImportAdapter.class) {
+			set.getResources().add(res);
+		}
+	}
 } // ImportAdapter

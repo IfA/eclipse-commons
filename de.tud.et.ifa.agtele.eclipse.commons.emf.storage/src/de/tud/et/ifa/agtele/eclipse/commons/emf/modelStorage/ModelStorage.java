@@ -237,12 +237,12 @@ public interface ModelStorage extends UpdateableElement {
 	
 	public default void notifyChanged(RegistrationChangeNotification notification) {
 		List<IRegistrationChangeListener> listeners = 
-				this.getRegistrationChangeListeners().parallelStream().filter(l -> 
+				(new ArrayList<>(this.getRegistrationChangeListeners())).parallelStream().filter(l -> 
 					(l.filterByChangeType() == null || l.filterByChangeType() == notification.getChangeType()) &&
 					(l.filterByElement() == null || l.filterByElement().contains(notification.getElement())) &&
 					(l.filterByModelStorage() == null || l.filterByModelStorage() == notification.getModelStorage()) &&
 					(l.filterByModel() == null || l.filterByModel() == notification.getModel()) &&
-					(l.filterById() == null || (new HashSet<>(notification.getIds()).removeAll(l.filterById())))
+					(l.filterById() == null || (new HashSet<>(notification.getIds()).removeAll(l.filterById()) ))
 						).collect(Collectors.toList());
 		for (IRegistrationChangeListener listener : listeners) {
 			listener.notifyChanged(notification);

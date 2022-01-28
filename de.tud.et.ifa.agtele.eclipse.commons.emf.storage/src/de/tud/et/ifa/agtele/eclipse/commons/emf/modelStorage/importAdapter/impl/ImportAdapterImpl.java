@@ -24,6 +24,7 @@ import org.eclipse.emf.ecore.InternalEObject;
 import org.eclipse.emf.ecore.impl.ENotificationImpl;
 import org.eclipse.emf.ecore.impl.MinimalEObjectImpl;
 import org.eclipse.emf.ecore.resource.Resource;
+import org.eclipse.emf.ecore.resource.ResourceSet;
 import org.eclipse.emf.ecore.util.EcoreUtil;
 import org.eclipse.emf.ecore.xmi.impl.XMIResourceImpl;
 
@@ -286,14 +287,14 @@ public class ImportAdapterImpl extends MinimalEObjectImpl.Container implements I
 	public Resource createResource () {
 		return new XMIResourceImpl();
 	}
-	
+		
 	@Override
 	public void importModel() {
 		if (this.getModel() == null) {
 			return;
 		}
 		this.res = this.createResource();
-		this.getModel().getResourceSet().getResources().add(this.res);	
+		ImportAdapter.addToResourceSet(this.getModel().getResourceSet(), res);
 		
 		this.importModel(this.res.getContents());
 	}
