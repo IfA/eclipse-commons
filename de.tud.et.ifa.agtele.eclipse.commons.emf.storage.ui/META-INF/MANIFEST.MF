@@ -33,5 +33,6 @@ Automatic-Module-Name: de.tud.et.ifa.agtele.eclipse.commons.emf.storage.ui
 Import-Package: de.tud.et.ifa.agtele.ui,
  javax.annotation;version="1.2.0"
 Bundle-ActivationPolicy: lazy
-Export-Package: de.tud.et.ifa.agtele.eclipse.commons.emf.storage.ui.util,
+Export-Package: de.tud.et.ifa.agtele.eclipse.commons.emf.storage.ui,
+ de.tud.et.ifa.agtele.eclipse.commons.emf.storage.ui.util,
  de.tud.et.ifa.agtele.eclipse.commons.emf.storage.ui.views

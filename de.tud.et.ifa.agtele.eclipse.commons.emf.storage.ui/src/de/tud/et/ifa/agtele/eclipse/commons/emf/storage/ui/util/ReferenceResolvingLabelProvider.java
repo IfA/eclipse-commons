@@ -9,6 +9,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.eclipse.emf.common.EMFPlugin;
 import org.eclipse.emf.common.notify.Notification;
@@ -40,9 +41,18 @@ public abstract class ReferenceResolvingLabelProvider extends AgteleStyledLabelP
 	protected static final String refTargetListSeparator = ", ";
 	protected static final String nonResolvedAppendix = "?"; 
 
-	protected Set<String> requestedIds = new HashSet<>();
-	protected Set<String> resolvedIds = new HashSet<>();
+	protected List<String> requestedIds = new CopyOnWriteArrayList<>();
+	protected List<String> resolvedIds = new CopyOnWriteArrayList<>();
 	
+	protected synchronized void manipulateList(List<String> list, String entry, boolean remove, boolean clear) {
+		if (clear) {
+			list.clear();
+		} else if (remove) {
+			list.remove(entry);
+		} else if (!list.contains(entry)) {
+			list.add(entry);
+		}
+	}
 
 	protected RefreshRunner refreshRunner = this.getRefreshRunner();
 	protected IRegistrationChangeListener registrationChangeListener = this.getRegistrationChangeListener();
@@ -50,9 +60,13 @@ public abstract class ReferenceResolvingLabelProvider extends AgteleStyledLabelP
 	
 	protected ModelStorage modelStorage;
 	protected RefTargetResolveCache refTargetResolveCache;
+	protected EMFPlugin plugin;
+	protected IStyledLabelProvider decoratedLabelProvider;
 	
 	public ReferenceResolvingLabelProvider(IStyledLabelProvider labelProvider, EMFPlugin emfPlugin) {
 		super(labelProvider, emfPlugin);
+		this.plugin = emfPlugin;
+		this.decoratedLabelProvider = labelProvider;
 	}
 
 	public ReferenceResolvingLabelProvider(IStyledLabelProvider labelProvider, EMFPlugin emfPlugin, ModelStorage storage, RefTargetResolveCache cache) {
@@ -272,7 +286,7 @@ public abstract class ReferenceResolvingLabelProvider extends AgteleStyledLabelP
 
 		for (String id : idsToResolve) {
 			if (!requestedIds.contains(id) && this.isCacheRelevantElement(element)) {
-				this.requestedIds.add(id);		
+				this.manipulateList(this.requestedIds, id, false, false);
 			}
 			if (this.refTargetResolveCache.hasCacheEntry(id) && result == null) {
 				CacheEntry entry = this.getCachedEntry(id, true);
@@ -500,8 +514,8 @@ public abstract class ReferenceResolvingLabelProvider extends AgteleStyledLabelP
 		@Override
 		public void run() {
 			this.meanTimeRequests(true,false);
-			ReferenceResolvingLabelProvider.this.requestedIds.clear();
-			ReferenceResolvingLabelProvider.this.resolvedIds.clear();
+			ReferenceResolvingLabelProvider.this.manipulateList(ReferenceResolvingLabelProvider.this.requestedIds, null, false, true);
+			ReferenceResolvingLabelProvider.this.manipulateList(ReferenceResolvingLabelProvider.this.resolvedIds, null, false, true);
 			this.performRefresh();
 			if (this.meanTimeRequests(false,false)) {
 				Display.getDefault().asyncExec(this);	
@@ -552,7 +566,7 @@ public abstract class ReferenceResolvingLabelProvider extends AgteleStyledLabelP
 	protected class CacheChangeListener implements ICacheChangeListener {
 		@Override
 		public Set<String> filterById() {
-			return ReferenceResolvingLabelProvider.this.resolvedIds;
+			return new HashSet<>(ReferenceResolvingLabelProvider.this.resolvedIds);
 		}
 		@Override
 		public ChangeType filterByChangeType() {
@@ -674,5 +688,21 @@ public abstract class ReferenceResolvingLabelProvider extends AgteleStyledLabelP
 
 	public boolean isMultiTargetReferenceElement(EObject element) {
 		return false;
+	}
+
+	public IStyledLabelProvider getStyledLabelProvider() {
+		return this.decoratedLabelProvider;
+	}
+
+	public EMFPlugin getEmfPlugin() {
+		return this.plugin;
+	}
+
+	public ModelStorage getModelStorage() {
+		return this.modelStorage;
+	}
+
+	public RefTargetResolveCache getRefTargetResolveCache() {
+		return this.refTargetResolveCache;
 	}
 }
