@@ -35,7 +35,22 @@ public class RefTargetPropertySheetPageContentProvider extends StateRestoringVie
 					@Override
 					public ILabelProvider getLabelProvider() {
 						if (RefTargetPropertySheetPageContentProvider.this.labelProvider != null) {
-							return new PropertySheetPageGenericReferenceResolvingLabelProvider (RefTargetPropertySheetPageContentProvider.this.labelProvider, itemPropertyDescriptor);							
+							final PropertySheetPageGenericReferenceResolvingLabelProvider labelProvider = 
+									new PropertySheetPageGenericReferenceResolvingLabelProvider (RefTargetPropertySheetPageContentProvider.this.labelProvider, itemPropertyDescriptor);
+							//For the property sheet page cell editors, no CellLabelProvider can be used since it allows one viewer only.
+							return 
+					    	      new LabelProvider() {
+						    	        @Override
+						    	        public String getText(Object object)
+						    	        {
+						    	          return labelProvider.getText(object);
+						    	        }
+						    	        @Override
+						    	        public Image getImage(Object object)
+						    	        {
+						    	          return ExtendedImageRegistry.getInstance().getImage(labelProvider.getImage(object));
+						    	        }
+				    	        };
 						}
 						
 						final IItemLabelProvider itemLabelProvider = itemPropertyDescriptor.getLabelProvider(object);
