@@ -132,7 +132,9 @@ public class CommonItemProviderAdapter extends ItemProviderAdapter {
 			//
 			if (this.ownerList == null || this.collection == null || this.collection.size() == 0
 					|| this.index != CommandParameter.NO_INDEX
-					&& (this.index < 0 || this.index > this.ownerList.size())) {
+					&& (this.index < 0 
+							//|| this.index > this.ownerList.size() //there may be commands executed in advance so that the list will be longer and index will be valid, when this command is being executed
+							)) {
 				return false;
 			}
 
