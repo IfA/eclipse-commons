@@ -58,10 +58,8 @@ _UI_Unknown_feature = Unspecified
 <%for (GenPackage genPackage : genModel.getAllGenAndUsedGenPackagesWithClassifiers()) {%>
   <%if (genPackage.getGenModel() == genModel || !genPackage.getGenModel().hasEditSupport()) {%>
     <%for (GenEnum genEnum : genPackage.getGenEnums()) {%>
-      <%for (GenEnumLiteral genEnumLiteral : genEnum.getGenEnumLiterals()) {%>
-<%// Start of modifications by Institute of Automation, TU Dresden (enum literals in upper case)%>      
-_UI_<%=genEnum.getName()%>_<%=genEnumLiteral.getName()%>_literal = <%=genEnumLiteral.getLiteral().toUpperCase()%>
-<%// End of modifications by Institute of Automation, TU Dresden%>
+      <%for (GenEnumLiteral genEnumLiteral : genEnum.getGenEnumLiterals()) {%><%// Start of modifications by Institute of Automation, TU Dresden (enum literals in upper case)%>
+_UI_<%=genEnum.getName()%>_<%=genEnumLiteral.getName()%>_literal = <%=genEnumLiteral.getLiteral().toUpperCase()%><%// End of modifications by Institute of Automation, TU Dresden%>
       <%}%>
     <%}%>
   <%}%>
