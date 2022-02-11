@@ -290,7 +290,7 @@ public class RefTargetResolveCache {
 	
 	public void notifyChanged(CacheChangeNotification notification) {
 		List<ICacheChangeListener> listeners = 
-				this.getCacheChangeListeners().parallelStream().filter(l -> 
+				this.getCacheChangeListeners().parallelStream().filter(l -> l != null && 
 					(l.filterByChangeType() == null || l.filterByChangeType() == notification.getChangeType()) &&
 					(l.filterById() == null || l.filterById().contains(notification.getId()))
 						).collect(Collectors.toList());
