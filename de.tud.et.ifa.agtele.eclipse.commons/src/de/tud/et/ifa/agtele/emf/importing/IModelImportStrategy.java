@@ -62,10 +62,11 @@ public interface IModelImportStrategy {
 			if (node == null) {
 				continue;
 			}
-			//1st try to restore reference from the same context		
+			//1st try to restore reference from the same context, ref target must be reconstructed
 			EObject ownerContext = adapter.getImportRegistry().getContextOfImported(eObject);
 			EObject withinContextTarget = adapter.getImportRegistry().getImportedElement(node, ownerContext);
-			if (withinContextTarget != null && reference.getEType().isInstance(withinContextTarget) || reference.getEType() == EcorePackage.Literals.EOBJECT) {
+			if (withinContextTarget != null && reference.getEType().isInstance(withinContextTarget) || 
+					reference.getEType() == EcorePackage.Literals.EOBJECT && withinContextTarget != null) { //TODO apply this to JS implementation
 				referencedElements.add(withinContextTarget);
 				continue;
 			}
