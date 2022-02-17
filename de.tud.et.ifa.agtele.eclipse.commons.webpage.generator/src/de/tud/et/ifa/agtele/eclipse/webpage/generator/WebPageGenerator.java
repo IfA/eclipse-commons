@@ -7,17 +7,9 @@ import java.util.List;
 import java.util.Map;
 
 import org.eclipse.core.commands.ExecutionEvent;
-import org.eclipse.core.internal.variables.StringVariableManager;
-import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.SubMonitor;
-import org.eclipse.core.variables.IDynamicVariable;
-import org.eclipse.core.variables.IStringVariable;
-import org.eclipse.core.variables.IStringVariableManager;
-import org.eclipse.core.variables.IValueVariable;
-import org.eclipse.core.variables.IValueVariableListener;
-
 import de.tud.et.ifa.agtele.IStringSubstitutor;
 import de.tud.et.ifa.agtele.ResultReporter;
 import de.tud.et.ifa.agtele.eclipse.webpage.generator.artifacts.AbstractPageGenerator;

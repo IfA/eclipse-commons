@@ -152,6 +152,7 @@ import org.eclipse.emf.common.EMFPlugin;
 
 import de.tud.et.ifa.agtele.emf.edit.AgteleStyledLabelProvider;
 import de.tud.et.ifa.agtele.emf.sanitizer.ModelSanitizer;
+
 import org.eclipse.emf.edit.ui.provider.DelegatingStyledCellLabelProvider;
 import org.eclipse.emf.edit.ui.provider.DiagnosticDecorator;
 
