@@ -27,6 +27,8 @@ import de.tud.et.ifa.agtele.eclipse.commons.emf.storage.ui.util.RefTargetClickHa
 import de.tud.et.ifa.agtele.eclipse.commons.emf.storage.ui.util.RefTargetResolveCache;
 import de.tud.et.ifa.agtele.emf.AgteleEcoreUtil;
 import de.tud.et.ifa.agtele.resources.BundleContentHelper;
+import de.tud.et.ifa.agtele.ui.interfaces.IPersistable;
+
 import org.eclipse.jface.viewers.*;
 import org.eclipse.jface.action.*;
 import org.eclipse.jface.dialogs.IDialogSettings;
@@ -68,8 +70,6 @@ import org.eclipse.emf.edit.ui.provider.AdapterFactoryContentProvider;
 import org.eclipse.emf.edit.ui.provider.AdapterFactoryLabelProvider;
 import org.eclipse.emf.edit.ui.provider.PropertySource;
 import org.eclipse.emf.edit.ui.view.ExtendedPropertySheetPage;
-
-import de.tud.et.ifa.agtele.ui.interfaces.IPersistable;
 
 import javax.inject.Inject;
 
