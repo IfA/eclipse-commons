@@ -556,7 +556,9 @@ public abstract class ReferenceResolvingLabelProvider extends AgteleStyledLabelP
 		
 		@Override
 		public void notifyChanged(RegistrationChangeNotification notification) {
-			ReferenceResolvingLabelProvider.this.refreshRunner.invoke();
+			if (ReferenceResolvingLabelProvider.this.refreshRunner != null) {
+				ReferenceResolvingLabelProvider.this.refreshRunner.invoke();
+			}
 		}		
 	}
 
@@ -574,7 +576,9 @@ public abstract class ReferenceResolvingLabelProvider extends AgteleStyledLabelP
 		}
 		@Override
 		public void notifyChanged(CacheChangeNotification notification) {
-			ReferenceResolvingLabelProvider.this.refreshRunner.invoke();
+			if (ReferenceResolvingLabelProvider.this.refreshRunner != null) {
+				ReferenceResolvingLabelProvider.this.refreshRunner.invoke();
+			}
 		}
 	}
 	
