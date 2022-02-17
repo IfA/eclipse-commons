@@ -5,16 +5,21 @@ Bundle-SymbolicName: de.tud.et.ifa.agtele.eclipse.commons.ui;singleton:=true
 Bundle-Version: 1.3.0.qualifier
 Bundle-Vendor: %providerName
 Bundle-Localization: plugin
-Require-Bundle: org.eclipse.ui,
+Require-Bundle: org.eclipse.emf.cdo.transfer.ui,
+ org.eclipse.emf.cdo.transfer,
+ org.eclipse.emf.edit.ui,
  org.eclipse.emf.common,
- org.eclipse.emf.common.ui,
+ org.eclipse.jface,
+ org.eclipse.swt,
  org.eclipse.core.runtime,
+ org.eclipse.ui,
+ org.eclipse.ui.ide,
+ org.eclipse.ui.workbench,
+ org.eclipse.jdt.ui,
+ org.eclipse.emf.common.ui,
  org.eclipse.emf.ecore,
  org.eclipse.emf.edit,
- org.eclipse.emf.edit.ui,
  de.tud.et.ifa.agtele.eclipse.commons,
- org.eclipse.ui.workbench,
- org.eclipse.ui.ide,
  org.eclipse.emf.ecore.editor,
  org.eclipse.core.commands,
  org.eclipse.emf.codegen,
@@ -23,11 +28,8 @@ Require-Bundle: org.eclipse.ui,
  org.eclipse.e4.core.commands,
  org.eclipse.e4.ui.css.swt.theme,
  org.eclipse.e4.ui.workbench,
- org.eclipse.swt,
- org.eclipse.jdt.ui,
  org.eclipse.jdt.core,
  org.eclipse.jface.text,
- org.eclipse.jface,
  org.eclipse.core.filebuffers
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ActivationPolicy: lazy
