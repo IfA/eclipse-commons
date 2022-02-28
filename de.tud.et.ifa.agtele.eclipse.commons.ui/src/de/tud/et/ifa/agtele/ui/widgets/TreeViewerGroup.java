@@ -16,9 +16,11 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -51,10 +53,12 @@ import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
+import org.eclipse.jface.viewers.IContentProvider;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.swt.SWT;
@@ -79,6 +83,7 @@ import org.eclipse.ui.dialogs.PatternFilter;
 import org.eclipse.ui.handlers.IHandlerService;
 import org.eclipse.ui.services.IServiceLocator;
 
+import de.tud.et.ifa.agtele.emf.AgteleEcoreUtil;
 import de.tud.et.ifa.agtele.resources.BundleContentHelper;
 import de.tud.et.ifa.agtele.ui.AgteleUIPlugin;
 import de.tud.et.ifa.agtele.ui.emf.edit.action.filter.CreateActionChangeListener;
@@ -503,7 +508,7 @@ public class TreeViewerGroup extends SelectionRestoringFilteredTree implements I
 
 		// Persist the expanded tree paths of the tree viewer
 		//
-		List<String> paths = new ArrayList<>();
+		Set<String> paths = new LinkedHashSet<>();
 
 		Arrays.asList(this.treeViewer.getExpandedTreePaths()).stream().forEach(path -> {
 
@@ -551,8 +556,9 @@ public class TreeViewerGroup extends SelectionRestoringFilteredTree implements I
 		//
 		if (settings.getArray("EXPANDED_TREE_PATHS") != null) {
 			String[] paths = settings.getArray("EXPANDED_TREE_PATHS");
+			List<Object> expandedList = new ArrayList<>();
 
-			for (String path : paths) {
+			for (String path : new LinkedHashSet<String>(Arrays.asList(paths))) {
 				Object expanded;
 				/*
 				 * as the URI of an eObject also reflects the containing resource, we can use this to uniquely identify
@@ -566,10 +572,35 @@ public class TreeViewerGroup extends SelectionRestoringFilteredTree implements I
 					expanded = this.editingDomain.getResourceSet().getResource(URI.createURI(path), true);
 				}
 				if (expanded != null) {
+					expandedList.add(expanded);
+				}
+			}
+			ITreeContentProvider provider = this.treeViewer.getContentProvider() instanceof ITreeContentProvider ? 
+					(ITreeContentProvider) this.treeViewer.getContentProvider() : null;
+			List<Object> treeContents = new ArrayList<>();
+			if (provider != null) {
+				this.initializeTreeContent(treeContents, provider);
+			}
+			
+			ExpandedLoop:
+			for (Object expanded : expandedList) {
+				//check if all containers of the expanded elements are expanded as well in order to prevent endless expansion of nodes (bug in underlying treeviewer class)
+				if (expanded instanceof Resource) {
+					this.treeViewer.setExpandedState(expanded, true);					
+				} else if (expanded instanceof EObject) {
+					EObject expandedObject = (EObject) expanded;
+					for (EObject container : AgteleEcoreUtil.getAllContainers(expandedObject)) {
+						if (provider != null && !treeContents.contains(container)) {
+							continue ExpandedLoop;
+						}
+					}
+					//do not check resource expanded state in order to  
 					this.treeViewer.setExpandedState(expanded, true);
 				}
 			}
+			
 		}
+		
 
 		// Restore the filter text
 		//
@@ -596,6 +627,31 @@ public class TreeViewerGroup extends SelectionRestoringFilteredTree implements I
 		for (TreeViewerGroupOption i : this.options) {
 			if (i instanceof TreeViewerGroupPersistableOption) {
 				((TreeViewerGroupPersistableOption) i).restore(settings);
+			}
+		}
+	}
+
+	@SuppressWarnings("unchecked")
+	protected void initializeTreeContent(List<Object> treeContents, ITreeContentProvider provider) {
+		if (this.treeViewer.getInput() instanceof Collection) {
+			treeContents.addAll((Collection<? extends Object>)this.treeViewer.getInput());			
+		} else if (this.treeViewer.getInput().getClass().isArray()) {
+			treeContents.addAll(Arrays.asList(this.treeViewer.getInput()));
+		} else {
+			treeContents.add(this.treeViewer.getInput());
+		}
+		
+		for (Object o : new ArrayList<>(treeContents)) {
+			this.addNodes(treeContents, provider, o);
+		}
+		
+	}
+	
+	protected void addNodes(List<Object> treeContents, ITreeContentProvider provider, Object obj) {
+		for (Object o : provider.getChildren(obj)) {
+			if (!treeContents.contains(o)) {
+				treeContents.add(o);
+				this.addNodes(treeContents, provider, o);
 			}
 		}
 	}
