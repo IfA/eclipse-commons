@@ -117,8 +117,8 @@ public class SelectionRestoringFilteredTree extends FilteredTree {
 					
 					if (initial || text.length() == 0) {
 						if (selection.length > 0
-								&& recursiveExpand(selection, monitor, stopTime, new int[] { numVisibleItems })) {
-							return Status.CANCEL_STATUS;
+								) {// && recursiveExpand(selection, monitor, stopTime, new int[] { numVisibleItems })) { //do not expand
+//							return Status.CANCEL_STATUS;
 						}
 						//treeViewer.setSelection(new StructuredSelection(selection), true);
 					}

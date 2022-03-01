@@ -581,6 +581,7 @@ public class TreeViewerGroup extends SelectionRestoringFilteredTree implements I
 			if (provider != null) {
 				this.initializeTreeContent(treeContents, provider);
 			}
+//			treeContents.forEach(o -> this.treeViewer.setExpandedState(o, false));
 			
 			ExpandedLoop:
 			for (Object expanded : expandedList) {
@@ -590,7 +591,7 @@ public class TreeViewerGroup extends SelectionRestoringFilteredTree implements I
 				} else if (expanded instanceof EObject) {
 					EObject expandedObject = (EObject) expanded;
 					for (EObject container : AgteleEcoreUtil.getAllContainers(expandedObject)) {
-						if (provider != null && !treeContents.contains(container)) {
+						if (provider != null && treeContents.contains(container) && !expandedList.contains(container)) {
 							continue ExpandedLoop;
 						}
 					}
