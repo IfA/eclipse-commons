@@ -24,6 +24,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Set;
 import java.util.WeakHashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.stream.Collectors;
 
 import org.eclipse.emf.common.notify.Notification;
@@ -520,12 +521,13 @@ public class ModelStorageImpl extends UpdateableElementImpl implements ModelStor
 		}
 	}
 
-	protected List<WeakReference<IRegistrationChangeListener>> listeners = new ArrayList<>();
+	protected List<WeakReference<IRegistrationChangeListener>> listeners = new CopyOnWriteArrayList<>();//;new ArrayList<>();
 	
 	@Override
 	public List<IRegistrationChangeListener> getRegistrationChangeListeners() {
-		this.listeners.removeAll(this.listeners.parallelStream().filter(r -> r.get() == null).collect(Collectors.toList()));
-		
+		//synchronized (this) {
+			this.listeners.removeAll(this.listeners.parallelStream().filter(r -> r.get() == null).collect(Collectors.toList()));
+		//}
 		return this.listeners.parallelStream().map(r -> r.get()).collect(Collectors.toList());
 	}
 
