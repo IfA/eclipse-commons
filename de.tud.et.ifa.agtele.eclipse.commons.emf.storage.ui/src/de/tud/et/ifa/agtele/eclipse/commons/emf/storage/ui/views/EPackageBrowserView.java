@@ -52,6 +52,8 @@ import de.tud.et.ifa.agtele.ui.util.ReferencingIdentifierTransfer;
 
 public class EPackageBrowserView extends PackageRegistryExplorerView implements IModelContributor {
 	
+	public static final String ID = "de.tud.et.ifa.agtele.eclipse.commons.emf.storage.ui.views.EPackageBrowser";
+	
 	protected FilteredTree filteredTree;
 	protected SashForm sashForm;
 	protected ClassViewerPatternFilter filter;
