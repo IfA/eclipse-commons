@@ -661,6 +661,18 @@ public interface AgteleEcoreUtil {
 		return result;
 	}
 	
+	public static <T extends EObject> List<T> cast(Collection<EObject> col, Class<T> type) {
+		List<T> result = new ArrayList<>();
+		
+		for (EObject o : col) {
+			if (o != null && type.isInstance(o)) {
+				result.add((T) o);
+			}
+		}
+		
+		return result;
+	}
+	
 	/**
 	 * Returns all instances of an eClass, that are contained in an eObject.
 	 *
