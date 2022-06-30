@@ -373,10 +373,12 @@ public abstract class ReferenceResolvingLabelProvider extends AgteleStyledLabelP
 			}
 		}
 		
-		//find result that is in the current resource set		
-		result = resolves.stream().filter(r -> set.getResources().contains(r.getElement().eResource())).findFirst().orElse(null);
-		if (result != null) {
-			return result;
+		//find result that is in the current resource set
+		if (set != null) {
+			result = resolves.stream().filter(r -> set.getResources().contains(r.getElement().eResource())).findFirst().orElse(null);
+			if (result != null) {
+				return result;
+			}
 		}
 
 		//find result, that is opened in one of the preferred contributors
