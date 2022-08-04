@@ -11,6 +11,7 @@
  ******************************************************************************/
 package de.tud.et.ifa.agtele.emf.edit;
 
+import java.util.Collection;
 import java.util.Map;
 
 import org.eclipse.emf.common.command.CommandStack;
@@ -35,6 +36,8 @@ import org.eclipse.emf.edit.domain.IEditingDomainProvider;
  */
 public class AgteleAdapterFactoryEditingDomain extends AdapterFactoryEditingDomain {
 
+	public static Collection<Object> globalClipboard = null;
+	
 	/**
 	 * Stores whether UUIDs shall be used to store resources.
 	 */
@@ -165,5 +168,15 @@ public class AgteleAdapterFactoryEditingDomain extends AdapterFactoryEditingDoma
 
 			return result;
 		}
+	}
+	
+	@Override
+	public Collection<Object> getClipboard() {
+		return AgteleAdapterFactoryEditingDomain.globalClipboard;
+	}
+	
+	@Override
+	public void setClipboard(Collection<Object> clipboard) {
+		AgteleAdapterFactoryEditingDomain.globalClipboard = clipboard;
 	}
 }
