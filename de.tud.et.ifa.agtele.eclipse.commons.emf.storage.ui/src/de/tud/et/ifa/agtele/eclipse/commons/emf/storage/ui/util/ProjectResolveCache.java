@@ -445,8 +445,8 @@ public class ProjectResolveCache {
 		
 		provider.getResourceSet().eAdapters().add(new EContentAdapter() {
 			@Override
-			public void notifyChanged(Notification notification) {
-				if (notification.getFeatureID(ResourceSet.class) == ResourceSet.RESOURCE_SET__RESOURCES && notification.getEventType() == Notification.ADD) {
+			public void notifyChanged(Notification notification) {				
+				if (notification.getNotifier() instanceof ResourceSet && notification.getFeatureID(ResourceSet.class) == ResourceSet.RESOURCE_SET__RESOURCES && notification.getEventType() == Notification.ADD) {
 					Resource newR = (Resource) notification.getNewValue();
 
 					ProjectResolveCache projectCache = ProjectResolveCache.getProjectCache(newR, provider.getRefTargetResolveCache());
