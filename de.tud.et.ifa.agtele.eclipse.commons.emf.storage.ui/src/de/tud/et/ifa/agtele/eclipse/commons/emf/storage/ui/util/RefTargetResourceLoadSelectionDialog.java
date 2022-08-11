@@ -29,6 +29,8 @@ import org.eclipse.swt.widgets.Listener;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.DelegatingStyledCellLabelProvider;
 import org.eclipse.jface.viewers.DelegatingStyledCellLabelProvider.IStyledLabelProvider;
+import org.eclipse.jface.viewers.DoubleClickEvent;
+import org.eclipse.jface.viewers.IDoubleClickListener;
 import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.LabelProvider;
@@ -184,6 +186,9 @@ public class RefTargetResourceLoadSelectionDialog extends Dialog {
 			public void keyPressed(KeyEvent e) {
 				if (e.keyCode == SWT.ESC) {
 					RefTargetResourceLoadSelectionDialog.this.close();
+				} else if (e.keyCode == SWT.TRAVERSE_RETURN )  {
+	        		RefTargetResourceLoadSelectionDialog.this.result.openInNewEditor = true;
+	        		RefTargetResourceLoadSelectionDialog.this.close();							
 				}
 			}
 		});
@@ -193,6 +198,13 @@ public class RefTargetResourceLoadSelectionDialog extends Dialog {
 				if (event.getStructuredSelection().toList().size() <= 1) {
 					RefTargetResourceLoadSelectionDialog.this.selectionChanged((IFile)event.getStructuredSelection().getFirstElement());
 				}
+			}        	
+        });
+        listViewer.addDoubleClickListener(new IDoubleClickListener () {
+			@Override
+			public void doubleClick(DoubleClickEvent event) {
+        		RefTargetResourceLoadSelectionDialog.this.result.openInNewEditor = true;
+        		RefTargetResourceLoadSelectionDialog.this.close();				
 			}        	
         });
         
