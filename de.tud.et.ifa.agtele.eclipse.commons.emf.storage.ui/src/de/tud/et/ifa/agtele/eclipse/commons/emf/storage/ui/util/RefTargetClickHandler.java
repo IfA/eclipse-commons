@@ -63,20 +63,11 @@ public class RefTargetClickHandler implements SelectionListener2 {
 		this.loadOptions = loadOptions;
 	}
 	
-	@Override
-	public void widgetSelected(SelectionEvent e) {
-		if (this.treeViewer == null || this.treeViewer.getTree().isDisposed()) {
-			return;
-		}
-
-		if ((e.stateMask & this.modifierMask) == 0 || !(e.item instanceof TreeItem)) {
-			return;
-		}
-
+	public EObject getSingleSelectedElement(SelectionEvent e) {
 		Object selectedElement = ((TreeItem) e.item).getData();
 
 		if (selectedElement == null) {
-			return;
+			return null;
 		}
 
 		ITreeSelection previousSelection = this.treeViewer.getStructuredSelection();
@@ -84,21 +75,43 @@ public class RefTargetClickHandler implements SelectionListener2 {
 		// Check if the user selected a single element
 		//
 		if (previousSelection.size() > 1) {
-			return;
+			return null;
 		}
 		if (!previousSelection.isEmpty() && !selectedElement.equals(previousSelection.getFirstElement())) {
+			return null;
+		}
+		
+		if (selectedElement instanceof EObject) {
+			return (EObject)selectedElement;
+		}
+		return null;
+	}
+	
+	public boolean isCtrlSelected(SelectionEvent e) {
+		return (e.stateMask & this.modifierMask) != 0 && (e.item instanceof TreeItem);
+	}
+	
+	@Override
+	public void widgetSelected(SelectionEvent e) {
+		if (this.treeViewer == null || this.treeViewer.getTree().isDisposed()) {
 			return;
 		}
-		
-		if (selectedElement instanceof EObject && this.labelProvider.isReferencingElement(selectedElement)) {
-			this.handleReferenceClick((EObject)selectedElement);
+
+		if (this.isCtrlSelected(e)) {
+			this.widgetCtrlSelected(e);
+		} else {
+			this.widgetSelectedNoModifier(e);
 		}
-		
-//		if (selectedElement instanceof Identifier && ((Identifier)selectedElement).isRefTarget()) {
-//			this.handleRefTargetIdentifier((Identifier)selectedElement);
-//		} else if (selectedElement instanceof Reference && !((Reference)selectedElement).getRefTarget().isEmpty()) {
-//			this.handleReference((Reference)selectedElement);
-//		}
+	}
+	
+	protected void widgetSelectedNoModifier(SelectionEvent e) {		
+	}
+
+	protected void widgetCtrlSelected(SelectionEvent e) {
+		EObject selected = this.getSingleSelectedElement(e);
+		if (selected != null && this.labelProvider.isReferencingElement(selected)) {
+			this.handleReferenceClick(selected);
+		}
 		
 	}
 	
