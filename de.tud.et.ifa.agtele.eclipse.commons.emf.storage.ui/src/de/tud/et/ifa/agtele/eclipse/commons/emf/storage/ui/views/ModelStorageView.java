@@ -367,7 +367,7 @@ public class ModelStorageView extends MultiPageView implements IViewPart, IPersi
 		protected TreeViewer selectionViewer;
 		
 		public ModelStorageLabelProvider(IStyledLabelProvider labelProvider, EMFPlugin emfPlugin, ModelStorage modelStorage, RefTargetResolveCache cache) {
-			super(labelProvider, emfPlugin, modelStorage, cache);
+			super(labelProvider, emfPlugin, modelStorage, cache, null);
 			//remove listener not required, not dynamic updates
 		}
 				

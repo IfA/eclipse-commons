@@ -6,6 +6,7 @@ import java.util.List;
 import org.eclipse.emf.common.EMFPlugin;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.EStructuralFeature;
+import org.eclipse.emf.ecore.resource.ResourceSet;
 import org.eclipse.emf.edit.provider.ItemProviderAdapter;
 import org.eclipse.jface.viewers.StyledString;
 import org.eclipse.jface.viewers.StyledString.Styler;
@@ -18,8 +19,8 @@ import de.tud.et.ifa.agtele.emf.AgteleEcoreUtil;
 public abstract class GenericReferenceResolvingLabelProvider extends ReferenceResolvingLabelProvider {
 
 	public GenericReferenceResolvingLabelProvider(IStyledLabelProvider labelProvider, EMFPlugin emfPlugin,
-			ModelStorage storage, RefTargetResolveCache cache) {
-		super(labelProvider, emfPlugin, storage, cache);
+			ModelStorage storage, RefTargetResolveCache cache, ResourceSet set) {
+		super(labelProvider, emfPlugin, storage, cache, set);
 	}
 
 	public ReferenceResolvingLabelItemProviderAdapter adapt(EObject element) {

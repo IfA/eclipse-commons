@@ -11,6 +11,9 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArrayList;
 
+import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.Path;
 import org.eclipse.emf.common.EMFPlugin;
 import org.eclipse.emf.common.notify.Notification;
 import org.eclipse.emf.ecore.EAttribute;
@@ -26,6 +29,8 @@ import org.eclipse.emf.edit.provider.ViewerNotification;
 import org.eclipse.jface.viewers.StyledString;
 import org.eclipse.jface.viewers.StyledString.Styler;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.ui.actions.WorkspaceAction;
+import org.eclipse.ui.internal.Workbench;
 
 import de.tud.et.ifa.agtele.eclipse.commons.emf.modelStorage.IModelContributor;
 import de.tud.et.ifa.agtele.eclipse.commons.emf.modelStorage.IRegistrationChangeListener;
@@ -53,6 +58,13 @@ public abstract class ReferenceResolvingLabelProvider extends AgteleStyledLabelP
 			list.add(entry);
 		}
 	}
+	
+	List<String> getRequestedIdList () {
+		return this.requestedIds;
+	}
+	List<String> getResolvedIdList () {
+		return this.resolvedIds;
+	}
 
 	protected RefreshRunner refreshRunner = this.getRefreshRunner();
 	protected IRegistrationChangeListener registrationChangeListener = this.getRegistrationChangeListener();
@@ -63,13 +75,16 @@ public abstract class ReferenceResolvingLabelProvider extends AgteleStyledLabelP
 	protected EMFPlugin plugin;
 	protected IStyledLabelProvider decoratedLabelProvider;
 	
+	protected ResourceSet set = null;
+	//protected ProjectResolveCache projectCache = null;
+	
 	public ReferenceResolvingLabelProvider(IStyledLabelProvider labelProvider, EMFPlugin emfPlugin) {
 		super(labelProvider, emfPlugin);
 		this.plugin = emfPlugin;
 		this.decoratedLabelProvider = labelProvider;
 	}
 
-	public ReferenceResolvingLabelProvider(IStyledLabelProvider labelProvider, EMFPlugin emfPlugin, ModelStorage storage, RefTargetResolveCache cache) {
+	public ReferenceResolvingLabelProvider(IStyledLabelProvider labelProvider, EMFPlugin emfPlugin, ModelStorage storage, RefTargetResolveCache cache, ResourceSet set) {
 		this(labelProvider, emfPlugin);
 
 		this.modelStorage = storage;
@@ -77,6 +92,20 @@ public abstract class ReferenceResolvingLabelProvider extends AgteleStyledLabelP
 
 		this.refTargetResolveCache = cache;		
 		this.refTargetResolveCache.registerCacheChangeListener(this.cacheChangeListener);
+		this.set = set;
+		
+		if (set != null) {
+			//enable project specific resolve cache
+			for (Resource res : set.getResources()) {
+				ProjectResolveCache projectCache = ProjectResolveCache.getProjectCache(res, cache);
+				projectCache.registerLabelProvider(this);
+			}
+		}
+		
+	}
+	
+	public ResourceSet getResourceSet () {
+		return this.set;
 	}
 
 	@Override
@@ -211,12 +240,12 @@ public abstract class ReferenceResolvingLabelProvider extends AgteleStyledLabelP
 			
 			if (this.isCacheRelevantElement(element)) {
 				for (String id : idsToResolve) {
+					this.resolvedIds.add(id);
 					if (ReferenceResolvingLabelProvider.getResourceId(target.eResource()) == null ) {
 						this.refTargetResolveCache.addCacheEntry(id, picked.getModel().getUri(), labelAppendix);
 					} else {
 						this.refTargetResolveCache.addCacheEntry(id, ReferenceResolvingLabelProvider.getResourceId(target.eResource()), labelAppendix);
 					}
-					this.resolvedIds.add(id);
 				}
 			}
 			return result;
@@ -252,12 +281,12 @@ public abstract class ReferenceResolvingLabelProvider extends AgteleStyledLabelP
 				appendix = this.getReferenceTargetLabelAppendix(element, target);
 				
 				if (this.isCacheRelevantElement(element)) {
+					this.resolvedIds.add(id);
 					if (ReferenceResolvingLabelProvider.getResourceId(target.eResource()) == null ) {
 						this.refTargetResolveCache.addCacheEntry(id, picked.getModel().getUri(), appendix);
 					} else {
 						this.refTargetResolveCache.addCacheEntry(id, ReferenceResolvingLabelProvider.getResourceId(target.eResource()), appendix);
 					}
-					this.resolvedIds.add(id);
 				}
 			}
 			appendices.add(appendix);

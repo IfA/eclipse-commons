@@ -2,6 +2,7 @@ package de.tud.et.ifa.agtele.eclipse.commons.emf.storage.ui.util;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
@@ -9,6 +10,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.stream.Collectors;
 
 import org.eclipse.jface.dialogs.IDialogSettings;
@@ -23,8 +25,8 @@ public class RefTargetResolveCache {
 	protected boolean isInitialized = false;
 	protected boolean isPersisted = false;
 	
-	protected Map<String, CacheEntryImpl> entries = new HashMap<>();
-	protected List<CacheEntryImpl> entriesToRemove = new ArrayList<>();
+	protected Map<String, CacheEntryImpl> entries = new ConcurrentHashMap<>();
+	protected List<CacheEntryImpl> entriesToRemove = new CopyOnWriteArrayList<>();
 	
 	protected Set<ModelStorage> filteredSourceModelStorages = new HashSet<>();
 	protected ModelStorage staticStorage;
@@ -37,11 +39,16 @@ public class RefTargetResolveCache {
 		}
 	};
 	
+	public ModelStorage getModelStorage () {
+		return this.staticStorage;
+	}
+	
 	public IDialogSettings getDefaultDialogSettings () {
 		return EMFStorageUIPlugin.getPlugin().getDialogSettings();
 	}
 	
-	public synchronized void persist(IDialogSettings settings) { //TODO call from the editors
+	public synchronized void persist(IDialogSettings settings) {
+		
 		if (this.isPersisted) {
 			return;
 		}
@@ -141,6 +148,13 @@ public class RefTargetResolveCache {
 
 	public CacheEntry addCacheEntry(String id, String resource, String label) {
 		return this.internalAddCacheEntry(id, resource, label);
+	}
+	public CacheEntry addCacheEntry(String id, Set<String> resources, String label) {
+		CacheEntry result = null;
+		for (String res : resources) {
+			result = this.internalAddCacheEntry(id, res, label);
+		}
+		return result;
 	}
 	
 	public void setLabel(String id, String label) {
@@ -244,6 +258,13 @@ public class RefTargetResolveCache {
 				this.resources.add(str);
 			}
 		}
+		protected CacheEntryImpl(String id, Collection<String> resources, String label) {
+			this.id = id;
+			this.cachedLabel = label;
+			for (String str : resources) {
+				this.resources.add(str);
+			}	
+		}
 		@Override
 		public Set<String> getResources() {
 			return new LinkedHashSet<>(this.resources);
@@ -298,27 +319,4 @@ public class RefTargetResolveCache {
 			listener.notifyChanged(notification);
 		}
 	}
-	
-//	
-//	@Override
-//	public Set<ModelStorage> filterByModelStorage() {
-//		return this.filteredSourceModelStorages;
-//	}
-//
-//	@Override
-//	public ChangeType filterByChangeType() {
-//		return ChangeType.REGISTERED;
-//	}
-//	
-//	@Override
-//	public void notifyChanged(RegistrationChangeNotification notification) {
-//		EObject obj = notification.getElement();
-//		
-//		if (obj instanceof Identifier || obj instanceof Entity) {			
-//			for (String id : notification.getIds()) {
-//				this.addCacheEntry(id, resource)
-//			}
-//		}
-//		
-//	}
 }

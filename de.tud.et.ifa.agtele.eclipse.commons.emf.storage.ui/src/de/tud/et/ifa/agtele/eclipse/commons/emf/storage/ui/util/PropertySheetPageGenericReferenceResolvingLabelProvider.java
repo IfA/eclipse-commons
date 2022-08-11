@@ -20,7 +20,7 @@ public class PropertySheetPageGenericReferenceResolvingLabelProvider extends Gen
 	
 	public PropertySheetPageGenericReferenceResolvingLabelProvider(
 			ReferenceResolvingLabelProvider refResolvingLabelProvider, IItemPropertyDescriptor propertyDescriptor) {
-		super(refResolvingLabelProvider.getStyledLabelProvider(), refResolvingLabelProvider.getEmfPlugin(), refResolvingLabelProvider.getModelStorage(), refResolvingLabelProvider.getRefTargetResolveCache());
+		super(refResolvingLabelProvider.getStyledLabelProvider(), refResolvingLabelProvider.getEmfPlugin(), refResolvingLabelProvider.getModelStorage(), refResolvingLabelProvider.getRefTargetResolveCache(), null);
 		
 		this.propertyDescriptor = propertyDescriptor;		
 	}
