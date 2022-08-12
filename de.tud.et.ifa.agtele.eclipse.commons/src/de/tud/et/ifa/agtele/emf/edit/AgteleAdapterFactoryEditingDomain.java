@@ -14,6 +14,7 @@ package de.tud.et.ifa.agtele.emf.edit;
 import java.util.Collection;
 import java.util.Map;
 
+import org.eclipse.emf.common.command.Command;
 import org.eclipse.emf.common.command.CommandStack;
 import org.eclipse.emf.common.notify.AdapterFactory;
 import org.eclipse.emf.common.util.URI;
@@ -22,6 +23,8 @@ import org.eclipse.emf.ecore.resource.ResourceSet;
 import org.eclipse.emf.ecore.resource.impl.ResourceSetImpl;
 import org.eclipse.emf.ecore.xmi.XMIResource;
 import org.eclipse.emf.ecore.xmi.impl.XMIResourceFactoryImpl;
+import org.eclipse.emf.edit.command.CommandParameter;
+import org.eclipse.emf.edit.command.CopyToClipboardCommand;
 import org.eclipse.emf.edit.domain.AdapterFactoryEditingDomain;
 import org.eclipse.emf.edit.domain.EditingDomain;
 import org.eclipse.emf.edit.domain.IEditingDomainProvider;
@@ -37,6 +40,8 @@ import org.eclipse.emf.edit.domain.IEditingDomainProvider;
 public class AgteleAdapterFactoryEditingDomain extends AdapterFactoryEditingDomain {
 
 	public static Collection<Object> globalClipboard = null;
+	@SuppressWarnings("rawtypes")
+	public static Collection clipboardOriginals = null;
 	
 	/**
 	 * Stores whether UUIDs shall be used to store resources.
@@ -178,5 +183,36 @@ public class AgteleAdapterFactoryEditingDomain extends AdapterFactoryEditingDoma
 	@Override
 	public void setClipboard(Collection<Object> clipboard) {
 		AgteleAdapterFactoryEditingDomain.globalClipboard = clipboard;
+	}
+	
+	@Override
+	public Command createCommand(Class<? extends Command> commandClass, CommandParameter commandParameter) {
+		if (commandClass == CopyToClipboardCommand.class) {
+			return new CopyToClipboardCommand(this, commandParameter.getCollection()) {
+				@SuppressWarnings("rawtypes")
+				Collection oldOriginals = null;
+	    	  
+				@Override
+				public void doExecute() {
+					super.doExecute();
+					oldOriginals = AgteleAdapterFactoryEditingDomain.clipboardOriginals;
+					AgteleAdapterFactoryEditingDomain.clipboardOriginals = this.sourceObjects;
+				}
+				@Override
+				public void doUndo() {	    		  
+					super.doUndo();
+					
+					AgteleAdapterFactoryEditingDomain.clipboardOriginals = oldOriginals;
+				}
+				
+				@Override
+				public void doRedo() {
+					super.doRedo();
+					oldOriginals = AgteleAdapterFactoryEditingDomain.clipboardOriginals;
+					AgteleAdapterFactoryEditingDomain.clipboardOriginals = this.sourceObjects;
+				}
+			};
+	    }
+		return super.createCommand(commandClass, commandParameter);
 	}
 }

@@ -381,11 +381,11 @@ public class CommonItemProviderAdapter extends ItemProviderAdapter {
 	 * done.
 	 */
 	@Override
-	public Command createCommand(Object object, EditingDomain domain, Class<? extends Command> commandClass,
-			CommandParameter commandParameter) {
-		Command result = super.createCommand(object, domain, commandClass, commandParameter);
-		return IRequireRelatedModelUpdateProvider.wrapOriginalCommand(this, result);
-	}
+		public Command createCommand(Object object, EditingDomain domain, Class<? extends Command> commandClass,
+				CommandParameter commandParameter) {
+			Command result = super.createCommand(object, domain, commandClass, commandParameter);
+			return IRequireRelatedModelUpdateProvider.wrapOriginalCommand(this, result);
+		}
 
 	@Override
 	protected Command createCreateChildCommand(EditingDomain domain, EObject owner, EStructuralFeature feature,

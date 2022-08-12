@@ -625,7 +625,7 @@ public interface AgteleEcoreUtil {
 	 * @param roots
 	 * @return All instances of the eClass
 	 */
-	public static Collection<EObject> getAllInstances(EClass eClass, Collection<EObject> roots) {
+	public static Collection<? extends EObject> getAllInstances(EClass eClass, Collection<? extends EObject> roots) {
 		return AgteleEcoreUtil.getAllInstances(eClass, roots, false);
 	}
 
@@ -637,7 +637,7 @@ public interface AgteleEcoreUtil {
 	 * @param includeRoots 
 	 * @return All instances of the eClass
 	 */
-	public static Collection<EObject> getAllInstances(EClass eClass, Collection<EObject> roots, boolean includeRoots) {
+	public static Collection<? extends EObject> getAllInstances(EClass eClass, Collection<? extends EObject> roots, boolean includeRoots) {
 		Collection<EObject> result = new ArrayList<>();
 
 		for (EObject root : roots) {
