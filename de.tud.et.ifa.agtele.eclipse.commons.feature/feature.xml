@@ -38,6 +38,8 @@ Institute of Automation, TU Dresden - initial API and implementation
       <discovery label="Eclipse Updates 4.10" url="http://download.eclipse.org/eclipse/updates/4.10/"/>
       <discovery label="Eclipse Updates 4.24" url="http://download.eclipse.org/eclipse/updates/4.24"/>
       <discovery label="Eclipse Updates 4.24" url="http://download.eclipse.org/eclipse/updates/4.24/"/>
+      <discovery label="Eclipse Updates 4.22" url="http://download.eclipse.org/eclipse/updates/4.22"/>
+      <discovery label="Eclipse Updates 4.22" url="http://download.eclipse.org/eclipse/updates/4.22/"/>
    </url>
 
    <includes
