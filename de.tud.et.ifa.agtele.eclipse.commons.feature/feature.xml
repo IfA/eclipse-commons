@@ -36,6 +36,8 @@ Institute of Automation, TU Dresden - initial API and implementation
       <discovery label="Eclipse Updates 4.9" url="http://download.eclipse.org/eclipse/updates/4.9/"/>
       <discovery label="Eclipse Updates 4.10" url="http://download.eclipse.org/eclipse/updates/4.10"/>
       <discovery label="Eclipse Updates 4.10" url="http://download.eclipse.org/eclipse/updates/4.10/"/>
+      <discovery label="Eclipse Updates 4.24" url="http://download.eclipse.org/eclipse/updates/4.24"/>
+      <discovery label="Eclipse Updates 4.24" url="http://download.eclipse.org/eclipse/updates/4.24/"/>
    </url>
 
    <includes
@@ -71,14 +73,16 @@ Institute of Automation, TU Dresden - initial API and implementation
       <import plugin="org.eclipse.xsd" version="2.11.0" match="greaterOrEqual"/>
       <import plugin="org.eclipse.emf.edit"/>
       <import plugin="org.eclipse.emf.common"/>
-      <import plugin="org.eclipse.ui"/>
-      <import plugin="org.eclipse.emf.common.ui"/>
-      <import plugin="org.eclipse.emf.edit.ui"/>
       <import plugin="org.eclipse.emf.compare"/>
       <import plugin="org.eclipse.emf.codegen.ecore"/>
       <import plugin="org.eclipse.emf.ecore.xmi"/>
-      <import plugin="org.eclipse.ui.workbench"/>
+      <import plugin="org.eclipse.emf.cdo.transfer.ui"/>
+      <import plugin="org.eclipse.emf.edit.ui"/>
+      <import plugin="org.eclipse.ui"/>
       <import plugin="org.eclipse.ui.ide" version="3.11.0" match="greaterOrEqual"/>
+      <import plugin="org.eclipse.ui.workbench"/>
+      <import plugin="org.eclipse.jdt.ui" version="3.12.1" match="greaterOrEqual"/>
+      <import plugin="org.eclipse.emf.common.ui"/>
       <import plugin="org.eclipse.emf.ecore.editor" version="2.12.0" match="greaterOrEqual"/>
       <import plugin="org.eclipse.core.commands"/>
       <import plugin="org.eclipse.emf.codegen" version="2.11.0" match="greaterOrEqual"/>
@@ -86,12 +90,16 @@ Institute of Automation, TU Dresden - initial API and implementation
       <import plugin="org.eclipse.e4.core.commands"/>
       <import plugin="org.eclipse.e4.ui.css.swt.theme"/>
       <import plugin="org.eclipse.e4.ui.workbench"/>
-      <import plugin="org.eclipse.jdt.ui" version="3.12.1" match="greaterOrEqual"/>
       <import plugin="org.eclipse.jdt.core" version="3.12.1" match="greaterOrEqual"/>
       <import plugin="org.eclipse.jface.text" version="3.11.1" match="greaterOrEqual"/>
       <import plugin="org.eclipse.core.filebuffers" version="3.6.0" match="greaterOrEqual"/>
       <import plugin="org.eclipse.e4.core.contexts"/>
-      <import plugin="org.eclipse.emf.cdo.transfer.ui"/>
+      <import plugin="org.eclipse.emf.cdo.transfer"/>
+      <import plugin="org.eclipse.core.variables"/>
+      <import plugin="com.google.guava"/>
+      <import plugin="org.eclipse.xtext.xbase.lib"/>
+      <import plugin="org.eclipse.xtend.lib"/>
+      <import plugin="org.eclipse.xtend.lib.macro"/>
    </requires>
 
    <plugin

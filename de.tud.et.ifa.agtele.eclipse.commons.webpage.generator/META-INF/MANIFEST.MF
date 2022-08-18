@@ -7,7 +7,11 @@ Bundle-ClassPath: .
 Bundle-Activator: de.tud.et.ifa.agtele.eclipse.webpage.webpagemodel.provider.WebpageEditPlugin$Implementation
 Bundle-Vendor: %providerName
 Bundle-Localization: plugin
-Export-Package: de.tud.et.ifa.agtele.eclipse.webpage.util,
+Export-Package: de.tud.et.ifa.agtele.eclipse.webpage.contributions,
+ de.tud.et.ifa.agtele.eclipse.webpage.generator,
+ de.tud.et.ifa.agtele.eclipse.webpage.generator.artifacts,
+ de.tud.et.ifa.agtele.eclipse.webpage.handlers,
+ de.tud.et.ifa.agtele.eclipse.webpage.util,
  de.tud.et.ifa.agtele.eclipse.webpage.webpagemodel,
  de.tud.et.ifa.agtele.eclipse.webpage.webpagemodel.impl,
  de.tud.et.ifa.agtele.eclipse.webpage.webpagemodel.presentation,

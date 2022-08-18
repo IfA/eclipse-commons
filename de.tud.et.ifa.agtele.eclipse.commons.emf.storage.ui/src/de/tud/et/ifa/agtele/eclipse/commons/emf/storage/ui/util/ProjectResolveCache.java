@@ -15,9 +15,8 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
@@ -267,14 +266,27 @@ public class ProjectResolveCache {
 	
 	protected JsonArray serializeCacheEntries(Set<CacheEntry> entries) {
 		JsonArray result = new JsonArray();		
-		for (CacheEntry entry : entries) {
+		
+		List<CacheEntry> sortedEntries = new ArrayList<>(entries);
+		
+		sortedEntries.sort(new Comparator<CacheEntry>() {
+			@Override
+			public int compare(CacheEntry o1, CacheEntry o2) {
+				return o1.getId().compareTo(o2.getId());
+			}
+		});
+		
+		for (CacheEntry entry : sortedEntries) {
 			JsonObject jEntry = new JsonObject();
 	
 			jEntry.addProperty(SERIALIZED_ID_PROPERTY, entry.getId());
 			jEntry.addProperty(SERIALIZED_LABEL_PROPERTY, entry.getCachedLabel());
 			
 			JsonArray jResources = new JsonArray();
-			for (String res : entry.getResources()) {
+			
+			List<String> resources = new ArrayList<>(entry.getResources());
+			resources.sort(null);
+			for (String res : resources) {
 				jResources.add(res);
 			}
 			jEntry.add(SERIALIZED_RESOURCES_PROPERTY, jResources);
@@ -292,7 +304,7 @@ public class ProjectResolveCache {
 		}
 		
 		Map<String, Set<CacheEntry>> entryMap = new HashMap<>(this.restoredEntries);
-		
+						
 		for (RefTargetResolveCache cache : this.entries.keySet()) {
 			if (cache.getModelStorage() == null || cache.getModelStorage().getName() == null || cache.getModelStorage().getName().isBlank()) {
 				for (CacheEntry e : this.entries.get(cache)) {
@@ -323,8 +335,10 @@ public class ProjectResolveCache {
 		JsonArray noIdResult = this.serializeCacheEntries(new LinkedHashSet<>(entriesNoId.values()));
 		JsonObject idResult = new JsonObject();
 		
+		List<String> ids = new ArrayList<>(entryMap.keySet());
+		ids.sort(null);
 		
-		for (String id : entryMap.keySet()) {
+		for (String id : ids) {
 			JsonArray oneIdResult = this.serializeCacheEntries(entryMap.get(id));
 			if (!oneIdResult.isEmpty()) {
 				idResult.add(id, oneIdResult);
