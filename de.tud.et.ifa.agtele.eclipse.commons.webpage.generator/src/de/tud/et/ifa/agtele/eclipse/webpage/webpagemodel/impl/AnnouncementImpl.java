@@ -306,7 +306,7 @@ public class AnnouncementImpl extends BaseImpl implements Announcement {
 	 * @generated
 	 */
 	@Override
-	public boolean isDisable() {
+	public boolean isDisable() {	
 	
 		return disable;
 	}

@@ -486,7 +486,7 @@ public abstract class AbstractHTMLImpl extends BaseImpl implements AbstractHTML 
 	 * @generated
 	 */
 	@Override
-	public String getNavName() {
+	public String getNavName() {	
 	
 		return navName;
 	}

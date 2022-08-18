@@ -232,12 +232,14 @@ public class WebPageModelActionBarContributor
 		}
 		else {
 			selectionProvider = part.getSite().getSelectionProvider();
-			selectionProvider.addSelectionChangedListener(this);
-
-			// Fake a selection changed event to update the menus.
-			//
-			if (selectionProvider.getSelection() != null) {
-				selectionChanged(new SelectionChangedEvent(selectionProvider, selectionProvider.getSelection()));
+			if (selectionProvider != null) {
+				selectionProvider.addSelectionChangedListener(this);
+	
+				// Fake a selection changed event to update the menus.
+				//
+				if (selectionProvider.getSelection() != null) {
+					selectionChanged(new SelectionChangedEvent(selectionProvider, selectionProvider.getSelection()));
+				}
 			}
 		}
 	}

@@ -221,7 +221,7 @@ public abstract class BaseImpl extends MinimalEObjectImpl.Container implements B
 	 * @generated
 	 */
 	@Override
-	public String getCreatedOn() {
+	public String getCreatedOn() {	
 	
 		return createdOn;
 	}
@@ -247,7 +247,7 @@ public abstract class BaseImpl extends MinimalEObjectImpl.Container implements B
 	 * @generated
 	 */
 	@Override
-	public String getCreatedBy() {
+	public String getCreatedBy() {	
 	
 		return createdBy;
 	}
@@ -273,7 +273,7 @@ public abstract class BaseImpl extends MinimalEObjectImpl.Container implements B
 	 * @generated
 	 */
 	@Override
-	public String getLastModified() {
+	public String getLastModified() {	
 	
 		return lastModified;
 	}
@@ -299,7 +299,7 @@ public abstract class BaseImpl extends MinimalEObjectImpl.Container implements B
 	 * @generated
 	 */
 	@Override
-	public String getLastModifiedBy() {
+	public String getLastModifiedBy() {	
 	
 		return lastModifiedBy;
 	}
