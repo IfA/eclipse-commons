@@ -35,5 +35,7 @@ Import-Package: de.tud.et.ifa.agtele.ui,
  javax.annotation;version="1.2.0"
 Bundle-ActivationPolicy: lazy
 Export-Package: de.tud.et.ifa.agtele.eclipse.commons.emf.storage.ui,
+ de.tud.et.ifa.agtele.eclipse.commons.emf.storage.ui.preferences,
  de.tud.et.ifa.agtele.eclipse.commons.emf.storage.ui.util,
- de.tud.et.ifa.agtele.eclipse.commons.emf.storage.ui.views
+ de.tud.et.ifa.agtele.eclipse.commons.emf.storage.ui.views,
+ org.eclipse.wb.swt

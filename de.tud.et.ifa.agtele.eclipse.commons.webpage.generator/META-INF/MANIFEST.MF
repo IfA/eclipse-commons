@@ -3,7 +3,8 @@ Bundle-ManifestVersion: 2
 Bundle-Name: %pluginName
 Bundle-SymbolicName: de.tud.et.ifa.agtele.eclipse.commons.webpage.generator;singleton:=true
 Bundle-Version: 1.0.0.qualifier
-Bundle-ClassPath: .
+Bundle-ClassPath: .,
+ bin/
 Bundle-Activator: de.tud.et.ifa.agtele.eclipse.webpage.webpagemodel.provider.WebpageEditPlugin$Implementation
 Bundle-Vendor: %providerName
 Bundle-Localization: plugin
@@ -38,4 +39,4 @@ Require-Bundle: org.eclipse.core.variables,
  org.eclipse.xtend.lib.macro
 Bundle-ActivationPolicy: lazy
 Automatic-Module-Name: de.tud.et.ifa.agtele.eclipse.commons.webpage.generator
-Bundle-RequiredExecutionEnvironment: JavaSE-12
+Bundle-RequiredExecutionEnvironment: JavaSE-11
